@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36414.22 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParkSpotTLV.Api", "ParkSpotTLV.Api\ParkSpotTLV.Api.csproj", "{3057BBB6-0E31-4136-AEB2-33185C2C3789}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BackEnd", "BackEnd", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MobileApp", "MobileApp", "{16FEEE6E-BD91-4B72-A4BC-14F03F3CE390}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParkSpotTLV.App", "ParkSpotTLV.App\ParkSpotTLV.App.csproj", "{2D5FD520-2B30-41D5-B9C8-C36E259F00B7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{017B6EF6-1CB3-4FD4-8C32-A1529DE88D30}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParkSpotTLV.Contracts", "ParkSpotTLV.Contracts\ParkSpotTLV.Contracts.csproj", "{7186A0E5-1FF2-4436-B3F9-30EA155BD2A2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3057BBB6-0E31-4136-AEB2-33185C2C3789}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3057BBB6-0E31-4136-AEB2-33185C2C3789}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3057BBB6-0E31-4136-AEB2-33185C2C3789}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3057BBB6-0E31-4136-AEB2-33185C2C3789}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D5FD520-2B30-41D5-B9C8-C36E259F00B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D5FD520-2B30-41D5-B9C8-C36E259F00B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D5FD520-2B30-41D5-B9C8-C36E259F00B7}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{2D5FD520-2B30-41D5-B9C8-C36E259F00B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D5FD520-2B30-41D5-B9C8-C36E259F00B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7186A0E5-1FF2-4436-B3F9-30EA155BD2A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7186A0E5-1FF2-4436-B3F9-30EA155BD2A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7186A0E5-1FF2-4436-B3F9-30EA155BD2A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7186A0E5-1FF2-4436-B3F9-30EA155BD2A2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3057BBB6-0E31-4136-AEB2-33185C2C3789} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{2D5FD520-2B30-41D5-B9C8-C36E259F00B7} = {16FEEE6E-BD91-4B72-A4BC-14F03F3CE390}
+		{7186A0E5-1FF2-4436-B3F9-30EA155BD2A2} = {017B6EF6-1CB3-4FD4-8C32-A1529DE88D30}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DFF4163E-99EE-4307-B34B-E239008579A6}
+	EndGlobalSection
+EndGlobal

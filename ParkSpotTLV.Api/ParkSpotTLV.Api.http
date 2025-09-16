@@ -1,0 +1,10 @@
+@ParkSpotTLV.Api_HostAddress = https://localhost:7164
+
+GET {{ParkSpotTLV.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+GET {{ParkSpotTLV.Api_HostAddress}}/weatherforecast
+
+###
