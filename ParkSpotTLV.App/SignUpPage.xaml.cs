@@ -20,5 +20,6 @@ public partial class SignUpPage : ContentPage
 
         await DisplayAlert("Success", $"Account created for: {username}", "OK");
         await Shell.Current.GoToAsync("..");
+        await Shell.Current.GoToAsync("ShowMapPage");
     }
 }

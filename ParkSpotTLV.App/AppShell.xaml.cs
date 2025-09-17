@@ -4,6 +4,7 @@
             InitializeComponent();
 
             Routing.RegisterRoute("SignUpPage", typeof(SignUpPage));
+            Routing.RegisterRoute("ShowMapPage", typeof(ShowMapPage));
         }
     }
 }

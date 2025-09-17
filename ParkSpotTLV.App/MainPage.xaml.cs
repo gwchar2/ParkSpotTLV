@@ -13,7 +13,8 @@
                 return;
             }
 
-            await DisplayAlert("Login", $"Logging in user: {username}", "OK");
+            //await DisplayAlert("Login", $"Logging in user: {username}", "OK");
+            await Shell.Current.GoToAsync("ShowMapPage");
         }
 
         private async void OnSignUpClicked(object? sender, EventArgs e) {
