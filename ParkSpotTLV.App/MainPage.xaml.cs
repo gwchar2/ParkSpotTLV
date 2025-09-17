@@ -4,12 +4,20 @@
             InitializeComponent();
         }
 
-        private void OnLoginClicked(object? sender, EventArgs e) {
+        private async void OnLoginClicked(object? sender, EventArgs e) {
+            string username = UsernameEntry.Text?.Trim() ?? "";
+            string password = PasswordEntry.Text?.Trim() ?? "";
 
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password)) {
+                await DisplayAlert("Error", "Please enter both username and password", "OK");
+                return;
+            }
+
+            await DisplayAlert("Login", $"Logging in user: {username}", "OK");
         }
 
-        private void OnSignUpClicked(object? sender, EventArgs e) {
-
+        private async void OnSignUpClicked(object? sender, EventArgs e) {
+            await Shell.Current.GoToAsync("SignUpPage");
         }
     }
 }

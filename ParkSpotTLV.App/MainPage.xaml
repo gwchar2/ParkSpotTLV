@@ -5,11 +5,11 @@
 
     <ScrollView>
         <VerticalStackLayout
-            Padding="40"
-            Spacing="30"
-            VerticalOptions="Center">
+        Padding="40"
+        Spacing="30"
+        VerticalOptions="Center">
 
-            <Label
+        <Label
                 Text="ParkSpot-TLV"
                 FontSize="32"
                 FontAttributes="Bold"
@@ -37,7 +37,8 @@
                     TextColor="White"
                     FontSize="16"
                     Clicked="OnLoginClicked"
-                    HorizontalOptions="Fill" />
+                    HorizontalOptions="Fill"
+                    HeightRequest="50" />
 
                 <Button
                     x:Name="SignUpBtn"
@@ -48,7 +49,8 @@
                     BorderWidth="2"
                     FontSize="16"
                     Clicked="OnSignUpClicked"
-                    HorizontalOptions="Fill" />
+                    HorizontalOptions="Fill"
+                    HeightRequest="50" />
             </VerticalStackLayout>
 
         </VerticalStackLayout>
