@@ -1,7 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ParkSpotTLV.App {
     public static class MauiProgram {
+
+        const string DevApiBaseUrl = "http://10.0.2.2:5293/";
+
         public static MauiApp CreateMauiApp() {
             var builder = MauiApp.CreateBuilder();
             builder
@@ -11,8 +15,12 @@ namespace ParkSpotTLV.App {
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
+            builder.Services.AddHttpClient("api", client => {
+                client.BaseAddress = new Uri(DevApiBaseUrl);
+            });
+
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();
