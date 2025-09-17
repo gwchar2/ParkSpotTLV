@@ -18,7 +18,7 @@ public partial class SignUpPage : ContentPage
             return;
         }
 
-        await DisplayAlert("Success", $"Account created for: {username}", "OK");
+        //await DisplayAlert("Success", $"Account created for: {username}", "OK");
         await Shell.Current.GoToAsync("..");
         await Shell.Current.GoToAsync("ShowMapPage");
     }

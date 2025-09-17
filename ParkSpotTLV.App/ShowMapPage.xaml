@@ -30,11 +30,13 @@
                                 BackgroundColor="Transparent"
                                 TextColor="Black"
                                 TitleColor="Gray"
-                                SelectedIndex="1">
+                                SelectedIndex="1"
+                                SelectedIndexChanged="OnCarPickerChanged">
                             <Picker.Items>
                                 <x:String>BMW</x:String>
                                 <x:String>Toyota</x:String>
                                 <x:String>Honda</x:String>
+                                <x:String>Add Car</x:String>
                             </Picker.Items>
                         </Picker>
                         <Label Text="▼"
@@ -101,6 +103,15 @@
                                InputTransparent="True" />
                     </Grid>
                 </Border>
+                <Button
+                            x:Name="ApplyBtn"
+                            Text="Apply Changes"
+                            BackgroundColor="#D4DEFB"
+                            TextColor="White"
+                            FontSize="16"
+                            Clicked="OnApplyClicked"
+                            HorizontalOptions="Fill"
+                            HeightRequest="20" /> 
             </VerticalStackLayout>
 
             <!-- Right Side - 4 CheckBoxes -->

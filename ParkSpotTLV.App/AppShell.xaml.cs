@@ -5,6 +5,8 @@
 
             Routing.RegisterRoute("SignUpPage", typeof(SignUpPage));
             Routing.RegisterRoute("ShowMapPage", typeof(ShowMapPage));
+            Routing.RegisterRoute("AddCarPage", typeof(AddCarPage));
+            Routing.RegisterRoute("MyCarsPage", typeof(MyCarsPage));
         }
     }
 }

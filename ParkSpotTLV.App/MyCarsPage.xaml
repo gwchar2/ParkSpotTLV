@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ParkSpotTLV.App.MyCarsPage"
+             Title="My Cars">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <VerticalStackLayout Grid.Row="0" Padding="20,10">
+            <Label
+                Text="My Cars"
+                FontSize="28"
+                FontAttributes="Bold"
+                HorizontalOptions="Center"
+                TextColor="#2E7D32" />
+        </VerticalStackLayout>
+
+        <!-- Cars List -->
+        <ScrollView Grid.Row="1" Padding="20,0">
+            <VerticalStackLayout x:Name="CarsContainer" Spacing="15">
+
+                <!-- Sample Cars (replace with dynamic data later) -->
+                <Frame BackgroundColor="White"
+                       BorderColor="LightGray"
+                       CornerRadius="10"
+                       Padding="15"
+                       HasShadow="True">
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="My Toyota"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="Black" />
+                        <Label Text="Type: Private"
+                               FontSize="14"
+                               TextColor="Gray" />
+                        <Label Text="Resident Permit - Zone: 12"
+                               FontSize="14"
+                               TextColor="Blue" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Frame BackgroundColor="White"
+                       BorderColor="LightGray"
+                       CornerRadius="10"
+                       Padding="15"
+                       HasShadow="True">
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Work Truck"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="Black" />
+                        <Label Text="Type: Truck"
+                               FontSize="14"
+                               TextColor="Gray" />
+                        <Label Text="Disabled Parking Permit"
+                               FontSize="14"
+                               TextColor="Green" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- No cars message (show when list is empty) -->
+                <VerticalStackLayout x:Name="NoCarsMessage"
+                                   IsVisible="False"
+                                   VerticalOptions="Center"
+                                   Spacing="20">
+                    <Label Text="No cars added yet"
+                           FontSize="18"
+                           TextColor="Gray"
+                           HorizontalOptions="Center" />
+                    <Label Text="Add your first car to get started!"
+                           FontSize="14"
+                           TextColor="Gray"
+                           HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Bottom Buttons -->
+        <VerticalStackLayout Grid.Row="2"
+                           Padding="20"
+                           Spacing="15">
+            <Button
+                x:Name="AddCarBtn"
+                Text="Add Car"
+                BackgroundColor="#2E7D32"
+                TextColor="White"
+                FontSize="16"
+                Clicked="OnAddCarClicked"
+                HorizontalOptions="Fill"
+                HeightRequest="50" />
+
+            <Button
+                x:Name="ShowMapBtn"
+                Text="Show Map"
+                BackgroundColor="Transparent"
+                TextColor="#2E7D32"
+                BorderColor="#2E7D32"
+                BorderWidth="2"
+                FontSize="16"
+                Clicked="OnShowMapClicked"
+                HorizontalOptions="Fill"
+                HeightRequest="50" />
+        </VerticalStackLayout>
+
+    </Grid>
+</ContentPage>
