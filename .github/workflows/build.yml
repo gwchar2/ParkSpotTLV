@@ -1,0 +1,31 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - run: dotnet restore
+      - run: dotnet build BackEnd/BackEnd.Api/BackEnd.Api.csproj -c Release --no-restore
+      - run: dotnet build Shared/BackEnd.Contracts/BackEnd.Contracts.csproj -c Release --no-restore
+      - run: dotnet test --no-build --verbosity normal
+
+  mobile:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - run: dotnet workload install maui --ignore-failed-sources
+      - run: dotnet restore
+      - run: dotnet build MobileApp/ParkSpotTLV.App/ParkSpotTLV.App.csproj -c Debug --no-restore

@@ -1,45 +1,36 @@
+using System.Diagnostics;
+using System.Reflection;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
-
-
 
 var app = builder.Build();
 
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+// App Health Status
+app.MapGet("/health", () => Results.Ok(new {
+    status = "Healthy"
+})).WithName("Health");
 
-app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+app.MapGet("/version", () => Results.Ok(new {
+    version = GetVersion()
+})).WithName("Version");
 
 app.Run();
 
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+
+// Get app current version 
+static string GetVersion() {
+    var asm = Assembly.GetExecutingAssembly();
+    var info = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+
+    if (!string.IsNullOrWhiteSpace(info)) return info;
+
+    var file = asm.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version;
+    if (!string.IsNullOrWhiteSpace(file)) return file;
+
+    var name = asm.GetName()?.Version?.ToString();
+    return string.IsNullOrWhiteSpace(name) ? "unknown" : name!;
 }
