@@ -27,12 +27,9 @@ git merge origin/main
 
 Open a PR (recommended)
 On GitHub: compare <branch_name> → into main.
-
-
-
-
-
 After review & merge, delete the branch (GitHub offers a button).
+
+
 Start the next task
 git switch main
 git pull --ff-only
