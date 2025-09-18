@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   automerge:
-    if: ${{ github.actor == 'release-please[bot]' }}
+    if: ${{ github.actor == 'github-actions[bot]' || github.actor == 'release-please[bot]' }}
     runs-on: ubuntu-latest
     steps:
       - name: Approve the PR (bot)
