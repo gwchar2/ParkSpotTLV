@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Grid xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+      xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+      x:Class="ParkSpotTLV.App.Controls.MenuOverlay"
+      x:Name="MenuOverlayGrid"
+      IsVisible="False"
+      BackgroundColor="#80000000">
+
+    <Grid.GestureRecognizers>
+        <TapGestureRecognizer Tapped="OnOverlayTapped" />
+    </Grid.GestureRecognizers>
+
+    <Border x:Name="MenuPanel"
+            BackgroundColor="White"
+            WidthRequest="250"
+            HorizontalOptions="End"
+            VerticalOptions="Fill"
+            TranslationX="250">
+        <VerticalStackLayout Padding="20" Spacing="20">
+            <Label Text="Menu"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   Margin="0,20,0,30" />
+
+            <Button Text="Account Details"
+                    BackgroundColor="Transparent"
+                    TextColor="Black"
+                    FontSize="16"
+                    HorizontalOptions="Start"
+                    Clicked="OnAccountDetailsClicked" />
+
+            <Button Text="Preferences"
+                    BackgroundColor="Transparent"
+                    TextColor="Black"
+                    FontSize="16"
+                    HorizontalOptions="Start"
+                    Clicked="OnPreferencesClicked" />
+
+            <Button Text="Logout"
+                    BackgroundColor="Transparent"
+                    TextColor="Red"
+                    FontSize="16"
+                    HorizontalOptions="Start"
+                    Clicked="OnLogoutClicked" />
+        </VerticalStackLayout>
+    </Border>
+</Grid>

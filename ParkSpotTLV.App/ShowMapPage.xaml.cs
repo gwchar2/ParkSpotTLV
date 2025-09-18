@@ -193,14 +193,15 @@ public partial class ShowMapPage : ContentPage
             else
                 message += "\nNotifications are disabled.";
 
-            await DisplayAlert("Parking Confirmed", message, "OK");
-
             // Update button state
             isParked = true;
             ParkHereBtn.Text = "End Parking";
             ParkHereBtn.BackgroundColor = Color.FromArgb("#D32F2F");
 
             await Navigation.PopModalAsync();
+
+            // Show parking confirmed popup with Pango option
+            await ShowParkingConfirmedPopup(message);
         };
 
         cancelButton.Clicked += async (s, e) =>
@@ -222,5 +223,93 @@ public partial class ShowMapPage : ContentPage
         // Show as modal
         await Navigation.PushModalAsync(popup);
     }
-    
+
+    private async Task ShowParkingConfirmedPopup(string message)
+    {
+        // Create the popup content
+        var popup = new ContentPage
+        {
+            Title = "Parking Confirmed"
+        };
+
+        var mainLayout = new VerticalStackLayout
+        {
+            Spacing = 20,
+            Padding = 30,
+            VerticalOptions = LayoutOptions.Center
+        };
+
+        // Title
+        var titleLabel = new Label
+        {
+            Text = "Parking Confirmed",
+            FontSize = 22,
+            FontAttributes = FontAttributes.Bold,
+            HorizontalOptions = LayoutOptions.Center,
+            TextColor = Color.FromArgb("#2E7D32")
+        };
+
+        // Message
+        var messageLabel = new Label
+        {
+            Text = message,
+            FontSize = 16,
+            HorizontalOptions = LayoutOptions.Center,
+            HorizontalTextAlignment = TextAlignment.Center,
+            TextColor = Colors.Black
+        };
+
+        // Buttons
+        var buttonLayout = new HorizontalStackLayout
+        {
+            Spacing = 15,
+            HorizontalOptions = LayoutOptions.Center
+        };
+
+        var okButton = new Button
+        {
+            Text = "OK",
+            BackgroundColor = Color.FromArgb("#2E7D32"),
+            TextColor = Colors.White,
+            WidthRequest = 100,
+            HeightRequest = 45,
+            CornerRadius = 5
+        };
+
+        var pangoButton = new Button
+        {
+            Text = "Pay with Pango",
+            BackgroundColor = Color.FromArgb("#FF6B35"),
+            TextColor = Colors.White,
+            WidthRequest = 140,
+            HeightRequest = 45,
+            CornerRadius = 5
+        };
+
+        okButton.Clicked += async (s, e) =>
+        {
+            await Navigation.PopModalAsync();
+        };
+
+        pangoButton.Clicked += async (s, e) =>
+        {
+            // TODO: Navigate to Pango app or show Pango integration
+            await DisplayAlert("Pango", "Pango integration coming soon!", "OK");
+            await Navigation.PopModalAsync();
+        };
+
+        buttonLayout.Children.Add(okButton);
+        buttonLayout.Children.Add(pangoButton);
+
+        // Add all elements to main layout
+        mainLayout.Children.Add(titleLabel);
+        mainLayout.Children.Add(messageLabel);
+        mainLayout.Children.Add(buttonLayout);
+
+        popup.Content = new ScrollView { Content = mainLayout };
+
+        // Show as modal
+        await Navigation.PushModalAsync(popup);
+    }
+
 }

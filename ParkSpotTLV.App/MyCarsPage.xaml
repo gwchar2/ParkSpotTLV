@@ -25,44 +25,76 @@
         <ScrollView Grid.Row="1" Padding="20,0">
             <VerticalStackLayout x:Name="CarsContainer" Spacing="15">
 
-                <!-- Sample Cars (replace with dynamic data later) -->
-                <Frame BackgroundColor="White"
-                       BorderColor="LightGray"
-                       CornerRadius="10"
-                       Padding="15"
-                       HasShadow="True">
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="My Toyota"
-                               FontSize="18"
-                               FontAttributes="Bold"
-                               TextColor="Black" />
-                        <Label Text="Type: Private"
-                               FontSize="14"
-                               TextColor="Gray" />
-                        <Label Text="Resident Permit - Zone: 12"
-                               FontSize="14"
-                               TextColor="Blue" />
-                    </VerticalStackLayout>
-                </Frame>
+                <!-- Sample Cars with Edit and Remove functionality -->
+                <Border BackgroundColor="White"
+                        Stroke="LightGray"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 10"
+                        Padding="0">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnCarTapped" />
+                    </Border.GestureRecognizers>
 
-                <Frame BackgroundColor="White"
-                       BorderColor="LightGray"
-                       CornerRadius="10"
-                       Padding="15"
-                       HasShadow="True">
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Work Truck"
-                               FontSize="18"
-                               FontAttributes="Bold"
-                               TextColor="Black" />
-                        <Label Text="Type: Truck"
-                               FontSize="14"
-                               TextColor="Gray" />
-                        <Label Text="Disabled Parking Permit"
-                               FontSize="14"
-                               TextColor="Green" />
-                    </VerticalStackLayout>
-                </Frame>
+                    <Grid ColumnDefinitions="*,Auto" Padding="15">
+                        <VerticalStackLayout Grid.Column="0" Spacing="5">
+                            <Label Text="My Toyota"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   TextColor="Black" />
+                            <Label Text="Type: Private"
+                                   FontSize="14"
+                                   TextColor="Gray" />
+                            <Label Text="Resident Permit - Zone: 12"
+                                   FontSize="14"
+                                   TextColor="Blue" />
+                        </VerticalStackLayout>
+
+                        <Button Grid.Column="1"
+                                Text="✕"
+                                FontSize="16"
+                                BackgroundColor="Transparent"
+                                TextColor="Red"
+                                WidthRequest="40"
+                                HeightRequest="40"
+                                Clicked="OnRemoveCarClicked"
+                                CommandParameter="My Toyota" />
+                    </Grid>
+                </Border>
+
+                <Border BackgroundColor="White"
+                        Stroke="LightGray"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 10"
+                        Padding="0">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnCarTapped" />
+                    </Border.GestureRecognizers>
+
+                    <Grid ColumnDefinitions="*,Auto" Padding="15">
+                        <VerticalStackLayout Grid.Column="0" Spacing="5">
+                            <Label Text="Work Truck"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   TextColor="Black" />
+                            <Label Text="Type: Truck"
+                                   FontSize="14"
+                                   TextColor="Gray" />
+                            <Label Text="Disabled Parking Permit"
+                                   FontSize="14"
+                                   TextColor="Green" />
+                        </VerticalStackLayout>
+
+                        <Button Grid.Column="1"
+                                Text="✕"
+                                FontSize="16"
+                                BackgroundColor="Transparent"
+                                TextColor="Red"
+                                WidthRequest="40"
+                                HeightRequest="40"
+                                Clicked="OnRemoveCarClicked"
+                                CommandParameter="Work Truck" />
+                    </Grid>
+                </Border>
 
                 <!-- No cars message (show when list is empty) -->
                 <VerticalStackLayout x:Name="NoCarsMessage"
