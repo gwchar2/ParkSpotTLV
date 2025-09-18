@@ -1,8 +1,10 @@
 name: Release (auto version from commits)
 
 on:
-  push:
-    branches: [ main ]  
+  pull_request:
+    branches: [ main ]
+    types: [closed]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -10,9 +12,10 @@ permissions:
 
 jobs:
   release:
+    if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
     steps:
-       - uses: googleapis/release-please-action@v4
-         with:
-            config-file: .release-please-config.json
-            manifest-file: .release-please-manifest.json
+      - uses: googleapis/release-please-action@v4
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
