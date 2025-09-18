@@ -1,0 +1,31 @@
+# - One product version for the whole repo (API + App)
+# - Pre-releases from commits on main as vX.Y.Z-alpha.N
+# - CHANGELOG.md updated automatically
+# - GitHub Release created automatically
+
+branches:
+  - name: main
+    prerelease: alpha  
+
+plugins:
+  - "@semantic-release/commit-analyzer"
+
+  - "@semantic-release/release-notes-generator"
+
+  - - "@semantic-release/changelog"
+    - changelogFile: CHANGELOG.md
+
+  - "@semantic-release/github"
+
+  - - "@semantic-release/git"
+    - assets:
+        - CHANGELOG.md
+      message: |
+        chore(release): ${nextRelease.version} [skip ci]
+
+        ${nextRelease.notes}
+        
+
+
+# When moving from alpha pre-releases to stable:
+# Remove `prerelease: alpha` 
