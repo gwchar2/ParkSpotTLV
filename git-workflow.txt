@@ -18,7 +18,7 @@ or you just want a safe remote backup.
 git add -A
 git commit -m "feat: draw colored segments on map"
 First push of a branch: 	git push -u origin <branch_name>
-Else: 				git push 
+Else: 						git push 
 
 Keep your branch in sync with latest main
 git fetch origin
