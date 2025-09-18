@@ -98,6 +98,49 @@ public class AuthenticationService
         return true;
     }
 
+    public async Task<bool> UpdateUsernameAsync(string newUsername)
+    {
+        // Simulate network delay
+        await Task.Delay(300);
+
+        if (!IsAuthenticated || CurrentUsername == null)
+            return false;
+
+        // Validate new username
+        if (!ValidateUsername(newUsername))
+            return false;
+
+        // Check if new username already exists (and it's not the current user)
+        if (_users.ContainsKey(newUsername) && newUsername != CurrentUsername)
+            return false;
+
+        // Update username
+        var currentPassword = _users[CurrentUsername];
+        _users.Remove(CurrentUsername);
+        _users[newUsername] = currentPassword;
+        CurrentUsername = newUsername;
+
+        return true;
+    }
+
+    public async Task<bool> UpdatePasswordAsync(string newPassword)
+    {
+        // Simulate network delay
+        await Task.Delay(300);
+
+        if (!IsAuthenticated || CurrentUsername == null)
+            return false;
+
+        // Validate new password
+        if (!ValidatePassword(newPassword))
+            return false;
+
+        // Update password
+        _users[CurrentUsername] = newPassword;
+
+        return true;
+    }
+
     // Test helper methods
     public void Reset()
     {

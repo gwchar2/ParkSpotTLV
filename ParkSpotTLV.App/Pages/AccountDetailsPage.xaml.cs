@@ -33,13 +33,54 @@ public partial class AccountDetailsPage : ContentPage
         }
         else
         {
-            // Save changes
-            UsernameEntry.IsReadOnly = true;
-            UsernameEntry.BackgroundColor = Colors.LightGray;
-            EditUsernameBtn.Text = "Edit";
-            EditUsernameBtn.BackgroundColor = Color.FromArgb("#2E7D32");
+            string newUsername = UsernameEntry.Text?.Trim() ?? "";
 
-            await DisplayAlert("Success", "Username updated successfully!", "OK");
+            // Validate username
+            if (!_authService.ValidateUsername(newUsername))
+            {
+                await DisplayAlert("Error", "Username must be at least 3 characters and contain only letters, numbers, and underscores.", "OK");
+                return;
+            }
+
+            // Disable button during update
+            EditUsernameBtn.IsEnabled = false;
+            EditUsernameBtn.Text = "Saving...";
+
+            try
+            {
+                bool success = await _authService.UpdateUsernameAsync(newUsername);
+
+                if (success)
+                {
+                    // Save changes
+                    UsernameEntry.IsReadOnly = true;
+                    UsernameEntry.BackgroundColor = Colors.LightGray;
+                    EditUsernameBtn.Text = "Edit";
+                    EditUsernameBtn.BackgroundColor = Color.FromArgb("#2E7D32");
+
+                    await DisplayAlert("Success", "Username updated successfully!", "OK");
+                }
+                else
+                {
+                    await DisplayAlert("Error", "Username already exists. Please choose a different username.", "OK");
+                    // Restore original username
+                    UsernameEntry.Text = _authService.CurrentUsername;
+                }
+            }
+            catch (Exception)
+            {
+                await DisplayAlert("Error", "Failed to update username. Please try again later.", "OK");
+                // Restore original username
+                UsernameEntry.Text = _authService.CurrentUsername;
+            }
+            finally
+            {
+                EditUsernameBtn.IsEnabled = true;
+                if (EditUsernameBtn.Text == "Saving...")
+                {
+                    EditUsernameBtn.Text = "Save";
+                }
+            }
         }
     }
 
@@ -56,21 +97,53 @@ public partial class AccountDetailsPage : ContentPage
         }
         else
         {
-            // Validate password
-            if (string.IsNullOrWhiteSpace(PasswordEntry.Text) || PasswordEntry.Text.Length < 6)
+            string newPassword = PasswordEntry.Text?.Trim() ?? "";
+
+            // Validate password using auth service
+            if (!_authService.ValidatePassword(newPassword))
             {
-                await DisplayAlert("Error", "Password must be at least 6 characters long.", "OK");
+                await DisplayAlert("Error", "Password must be at least 6 characters long and contain no whitespace characters.", "OK");
                 return;
             }
 
-            // Save changes
-            PasswordEntry.IsReadOnly = true;
-            PasswordEntry.BackgroundColor = Colors.LightGray;
-            PasswordEntry.Text = "••••••••"; // Hide password again
-            EditPasswordBtn.Text = "Edit";
-            EditPasswordBtn.BackgroundColor = Color.FromArgb("#2E7D32");
+            // Disable button during update
+            EditPasswordBtn.IsEnabled = false;
+            EditPasswordBtn.Text = "Saving...";
 
-            await DisplayAlert("Success", "Password updated successfully!", "OK");
+            try
+            {
+                bool success = await _authService.UpdatePasswordAsync(newPassword);
+
+                if (success)
+                {
+                    // Save changes
+                    PasswordEntry.IsReadOnly = true;
+                    PasswordEntry.BackgroundColor = Colors.LightGray;
+                    PasswordEntry.Text = "••••••••"; // Hide password again
+                    EditPasswordBtn.Text = "Edit";
+                    EditPasswordBtn.BackgroundColor = Color.FromArgb("#2E7D32");
+
+                    await DisplayAlert("Success", "Password updated successfully!", "OK");
+                }
+                else
+                {
+                    await DisplayAlert("Error", "Failed to update password. Please try again.", "OK");
+                    PasswordEntry.Text = "••••••••"; // Reset to hidden password
+                }
+            }
+            catch (Exception)
+            {
+                await DisplayAlert("Error", "Failed to update password. Please try again later.", "OK");
+                PasswordEntry.Text = "••••••••"; // Reset to hidden password
+            }
+            finally
+            {
+                EditPasswordBtn.IsEnabled = true;
+                if (EditPasswordBtn.Text == "Saving...")
+                {
+                    EditPasswordBtn.Text = "Save";
+                }
+            }
         }
     }
 
