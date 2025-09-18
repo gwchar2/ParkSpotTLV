@@ -23,7 +23,3 @@
 * releases ([e2ea69f](https://github.com/gwchar2/ParkSpotTLV/commit/e2ea69ff3b3bea04891a74c20b1b447c15764bf5))
 * releases ([90d2d00](https://github.com/gwchar2/ParkSpotTLV/commit/90d2d00a73449f53414861bf0aa1ba213c17678c))
 
-## Changelog
-
-
-## Changelog
