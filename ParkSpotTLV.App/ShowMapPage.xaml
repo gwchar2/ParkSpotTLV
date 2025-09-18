@@ -26,15 +26,15 @@
                 HeightRequest="35" />
 
         <!-- Collapsible Settings Panel -->
-        <Frame Grid.Row="1"
-               x:Name="SettingsPanel"
-               BackgroundColor="White"
-               BorderColor="Gray"
-               CornerRadius="10"
-               Padding="15"
-               Margin="10,0"
-               HasShadow="True"
-               IsVisible="False">
+        <Border Grid.Row="1"
+                x:Name="SettingsPanel"
+                BackgroundColor="White"
+                Stroke="Gray"
+                StrokeThickness="1"
+                Padding="15"
+                Margin="10,0"
+                IsVisible="False"
+                StrokeShape="RoundRectangle 10">
             <Grid Padding="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -197,19 +197,20 @@
                 </HorizontalStackLayout>
             </VerticalStackLayout>
         </Grid>
-        </Frame>
+        </Border>
 
         <!-- Map Image -->
-        <Frame Grid.Row="2"
-               Padding="20"
-               HasShadow="True"
-               CornerRadius="10"
-               Margin="20">
+        <Border Grid.Row="2"
+                Padding="20"
+                StrokeThickness="1"
+                Stroke="Gray"
+                StrokeShape="RoundRectangle 10"
+                Margin="20">
             <Image Source="map.png"
                    Aspect="AspectFill"
                    BackgroundColor="LightBlue">
             </Image>
-        </Frame>
+        </Border>
 
         <!-- "Park Here" button-->
         <Button Grid.Row="3"

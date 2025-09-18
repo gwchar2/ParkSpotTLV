@@ -2,6 +2,8 @@ namespace ParkSpotTLV.App;
 
 public partial class ShowMapPage : ContentPage
 {
+    private bool isParked = false;
+
     public ShowMapPage()
     {
         InitializeComponent();
@@ -55,7 +57,18 @@ public partial class ShowMapPage : ContentPage
 
     private async void OnParkHereClicked(object sender, EventArgs e)
     {
-        await ShowParkingNotificationPopup();
+        if (!isParked)
+        {
+            await ShowParkingNotificationPopup();
+        }
+        else
+        {
+            // End parking
+            isParked = false;
+            ParkHereBtn.Text = "Park Here";
+            ParkHereBtn.BackgroundColor = Color.FromArgb("#2E7D32");
+            await DisplayAlert("Parking Ended", "Your parking session has ended.", "OK");
+        }
     }
 
     private async Task ShowParkingNotificationPopup()
@@ -113,7 +126,7 @@ public partial class ShowMapPage : ContentPage
 
         var notifyLabel2 = new Label
         {
-            Text = "minutes before parking ends",
+            Text = "minutes before parking expires",
             FontSize = 16,
             VerticalOptions = LayoutOptions.Center
         };
@@ -181,6 +194,12 @@ public partial class ShowMapPage : ContentPage
                 message += "\nNotifications are disabled.";
 
             await DisplayAlert("Parking Confirmed", message, "OK");
+
+            // Update button state
+            isParked = true;
+            ParkHereBtn.Text = "End Parking";
+            ParkHereBtn.BackgroundColor = Color.FromArgb("#D32F2F");
+
             await Navigation.PopModalAsync();
         };
 
