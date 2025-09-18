@@ -1,9 +1,9 @@
 ﻿# ParkSpotTLV
 
 <!-- Status & releases -->
-![Build](https://img.shields.io/github/actions/workflow/status/gwchar2/ParkSpotTLV-Demo/ci.yml?branch=master&label=Build%20%2B%20Tests)
-![Latest release](https://img.shields.io/github/v/release/gwchar2/ParkSpotTLV-Demo?display_name=tag&sort=semver)
-![Release date](https://img.shields.io/github/release-date/gwchar2/ParkSpotTLV-Demo)
+![Build](https://img.shields.io/github/actions/workflow/status/gwchar2/ParkSpotTLV/ci.yml?branch=main&label=Build%20%2B%20Tests)
+![Latest release](https://img.shields.io/github/v/release/gwchar2/ParkSpotTLV?display_name=tag&sort=semver)
+![Release date](https://img.shields.io/github/release-date/gwchar2/ParkSpotTLV)
 
 [Changelog](./CHANGELOG.md)
 
