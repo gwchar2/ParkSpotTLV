@@ -1,6 +1,9 @@
-﻿## Releases
+﻿# ParkSpotTLV
 
-[![Latest release](https://img.shields.io/github/v/release/gwchar2/ParkSpotTLV?sort=semver)](https://github.com/gwchar2/ParkSpotTLV/releases/latest)
+<!-- Status & releases -->
+![Build](https://img.shields.io/github/actions/workflow/status/gwchar2/ParkSpotTLV/ci.yml?branch=main&label=Build)
+![Latest release](https://img.shields.io/github/v/release/gwchar2/ParkSpotTLV?display_name=tag&sort=semver)
+![Release date](https://img.shields.io/github/release-date/gwchar2/ParkSpotTLV)
 
 [Changelog](./CHANGELOG.md)
 
@@ -18,3 +21,7 @@
 ### fix: → patch fix
 
 ### feat! or BREAKING CHANGE: → major
+
+
+
+attempt for feat

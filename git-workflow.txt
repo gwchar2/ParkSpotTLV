@@ -6,6 +6,9 @@ Start a task (new branch)
 git switch -c <branch_name>
 # ...edit code…
 
+
+
+
 During the day: commit in small, meaningful chunks; push whenever:
 you reached a checkpoint,
 you want CI to run,
@@ -15,7 +18,7 @@ or you just want a safe remote backup.
 git add -A
 git commit -m "feat: draw colored segments on map"
 First push of a branch: 	git push -u origin <branch_name>
-Else: 				git push 
+Else: 						git push 
 
 Keep your branch in sync with latest main
 git fetch origin
@@ -24,11 +27,7 @@ git merge origin/main
 
 Open a PR (recommended)
 On GitHub: compare <branch_name> → into main.
-
-
 After review & merge, delete the branch (GitHub offers a button).
-
-
 
 
 Start the next task

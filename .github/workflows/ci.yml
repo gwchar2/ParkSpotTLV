@@ -1,0 +1,109 @@
+name: Build (API + MAUI Android) & Test
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened, ready_for_review, closed]
+  workflow_dispatch:
+  
+jobs:
+# For badge on README
+  badge-status:
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "ok"
+
+  # Light checks: run on PRs BEFORE merge
+  light-checks:
+    if: ${{ github.event_name == 'pull_request' && github.event.action != 'closed' }}
+    runs-on: windows-latest
+    env:
+      SOLUTION_PATH: ParkSpotTLV.sln
+      API_PROJECT: ParkSpotTLV.Api/ParkSpotTLV.Api.csproj
+      CONFIGURATION: Release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK 9.x
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.sln', '**/*.csproj', '**/packages.lock.json') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Restore solution
+        run: dotnet restore $env:SOLUTION_PATH
+
+      - name: Build API (fast)
+        run: dotnet build $env:API_PROJECT -c $env:CONFIGURATION --no-restore
+
+      - name: Test (all test projects)
+        run: dotnet test $env:SOLUTION_PATH -c $env:CONFIGURATION --no-build --logger "trx;LogFileName=test_results.trx"
+
+  # Full build: run only AFTER the PR is merged to main
+  full-build:
+    if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true }}
+    runs-on: windows-latest
+    env:
+      SOLUTION_PATH: ParkSpotTLV.sln
+      API_PROJECT: ParkSpotTLV.Api/ParkSpotTLV.Api.csproj
+      MAUI_PROJECT: ParkSpotTLV.App/ParkSpotTLV.App.csproj
+      CONFIGURATION: Release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK 9.x
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.sln', '**/*.csproj', '**/packages.lock.json') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install MAUI/Android workloads
+        run: |
+          dotnet --info
+          dotnet workload install maui-android android
+          dotnet workload list
+
+      - name: Accept Android SDK licenses
+        shell: cmd
+        run: |
+          if exist "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" (
+            echo y | "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --licenses
+          ) else (
+            echo ANDROID_HOME not found, skipping license acceptance
+          )
+
+      - name: Restore solution (incl. workloads)
+        run: |
+          dotnet workload restore $env:SOLUTION_PATH
+          dotnet restore $env:SOLUTION_PATH
+
+      - name: Build API
+        run: dotnet build $env:API_PROJECT -c $env:CONFIGURATION --no-restore
+
+      - name: Build MAUI Android
+        run: dotnet build $env:MAUI_PROJECT -c $env:CONFIGURATION -f net9.0-android --no-restore
+
+     

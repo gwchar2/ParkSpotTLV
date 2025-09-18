@@ -5,6 +5,8 @@ using ParkSpotTLV.Api.Errors;
 using ParkSpotTLV.Api.Http;
 using ParkSpotTLV.Api.Endpoints;
 
+
+
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
