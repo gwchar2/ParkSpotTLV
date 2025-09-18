@@ -35,7 +35,7 @@ jobs:
           restore-keys: |
             nuget-${{ runner.os }}-
 
-      # Needed for Android toolchain
+      # Setup Java for Android toolchain
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
@@ -62,11 +62,22 @@ jobs:
           dotnet workload restore $env:SOLUTION_PATH
           dotnet restore $env:SOLUTION_PATH
 
-      # --- Build API (ASP.NET Core) ---
+      # Build API (ASP.NET Core)
       - name: Build API
         run: dotnet build $env:API_PROJECT -c $env:CONFIGURATION --no-restore
 
-      # --- Build MAUI Android App (APK/AAB not signed) ---
-      # This compiles the Android target; no signing or packaging required yet.
+      # Build MAUI Android App
       - name: Build MAUI Android
         run: dotnet build $env:MAUI_PROJECT -c $env:CONFIGURATION -f net9.0-android --no-restore
+
+        
+      # Always try to upload logs
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-logs
+          path: |
+            **/TestResults/**/*.trx
+            BackEnd.Api/logs/**
+          if-no-files-found: ignore

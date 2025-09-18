@@ -1,9 +1,18 @@
 @ParkSpotTLV.Api_HostAddress = https://localhost:7164
 
+GET {{ParkSpotTLV.Api_HostAddress}}/health
+
+###
+
 GET {{ParkSpotTLV.Api_HostAddress}}/version
 
 ###
 
-GET {{ParkSpotTLV.Api_HostAddress}}/health
+GET {{ParkSpotTLV.Api_HostAddress}}/ready
+
+###
+
+
+GET {{ParkSpotTLV.Api_HostAddress}}/boom
 
 ###
