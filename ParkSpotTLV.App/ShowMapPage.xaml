@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ParkSpotTLV.App.ShowMapPage"
+             Title="Map">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Settings Toggle Button -->
+        <Button Grid.Row="0"
+                x:Name="SettingsToggleBtn"
+                Text="⚙️ ▼"
+                BackgroundColor="LightGray"
+                TextColor="Black"
+                FontSize="14"
+                Clicked="OnSettingsToggleClicked"
+                HorizontalOptions="Start"
+                Margin="20,10"
+                WidthRequest="80"
+                HeightRequest="35" />
+
+        <!-- Collapsible Settings Panel -->
+        <Border Grid.Row="1"
+                x:Name="SettingsPanel"
+                BackgroundColor="White"
+                Stroke="Gray"
+                StrokeThickness="1"
+                Padding="15"
+                Margin="10,0"
+                IsVisible="False"
+                StrokeShape="RoundRectangle 10">
+            <Grid Padding="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Side - 3 Dropdowns -->
+            <VerticalStackLayout Grid.Column="0" Spacing="10" HorizontalOptions="Start">
+                <Border BackgroundColor="White"
+                        Stroke="Gray"
+                        StrokeThickness="1"
+                        WidthRequest="150"
+                        HeightRequest="40">
+                    <Grid>
+                        <Picker x:Name="CarPicker"
+                                Title="Default Car"
+                                BackgroundColor="Transparent"
+                                TextColor="Black"
+                                TitleColor="Gray"
+                                SelectedIndex="1"
+                                SelectedIndexChanged="OnCarPickerChanged">
+                            <Picker.Items>
+                                <x:String>BMW</x:String>
+                                <x:String>Toyota</x:String>
+                                <x:String>Honda</x:String>
+                                <x:String>Add Car</x:String>
+                            </Picker.Items>
+                        </Picker>
+                        <Label Text="▼"
+                               FontSize="12"
+                               TextColor="Gray"
+                               HorizontalOptions="End"
+                               VerticalOptions="Center"
+                               Margin="0,0,10,0"
+                               InputTransparent="True" />
+                    </Grid>
+                </Border>
+
+                <Border BackgroundColor="White"
+                        Stroke="Gray"
+                        StrokeThickness="1"
+                        WidthRequest="150"
+                        HeightRequest="40">
+                    <Grid>
+                        <Picker x:Name="DatePicker"
+                                Title="Today"
+                                BackgroundColor="Transparent"
+                                TextColor="Black"
+                                TitleColor="Gray"
+                                SelectedIndex="1">
+                            <Picker.Items>
+                                <x:String>Tomorrow</x:String>
+                                <x:String>This Week</x:String>
+                            </Picker.Items>
+                        </Picker>
+                        <Label Text="▼"
+                               FontSize="12"
+                               TextColor="Gray"
+                               HorizontalOptions="End"
+                               VerticalOptions="Center"
+                               Margin="0,0,10,0"
+                               InputTransparent="True" />
+                    </Grid>
+                </Border>
+
+                <Border BackgroundColor="White"
+                        Stroke="Gray"
+                        StrokeThickness="1"
+                        WidthRequest="150"
+                        HeightRequest="40">
+                    <Grid>
+                        <Picker x:Name="TimePicker"
+                                Title="Now"
+                                BackgroundColor="Transparent"
+                                TextColor="Black"
+                                TitleColor="Gray"
+                                SelectedIndex="1">
+                            <Picker.Items>
+                                <x:String>1 Hour</x:String>
+                                <x:String>2 Hours</x:String>
+                                <x:String>Evening</x:String>
+                            </Picker.Items>
+                        </Picker>
+                        <Label Text="▼"
+                               FontSize="12"
+                               TextColor="Gray"
+                               HorizontalOptions="End"
+                               VerticalOptions="Center"
+                               Margin="0,0,10,0"
+                               InputTransparent="True" />
+                    </Grid>
+                </Border>
+            <!-- Apply Button -->
+                <Button
+                    x:Name="ApplyBtn"
+                    Text="Apply Changes"
+                    BackgroundColor="#D4DEFB"
+                    TextColor="White"
+                    FontSize="16"
+                    Clicked="OnApplyClicked"
+                    HorizontalOptions="Fill"
+                    HeightRequest="40"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Margin="0,10,0,0" />    
+            </VerticalStackLayout>
+
+            <!-- Right Side - 4 CheckBoxes -->
+            <VerticalStackLayout Grid.Column="1" Spacing="5" HorizontalOptions="End">
+                <HorizontalStackLayout Spacing="10">
+                    <CheckBox x:Name="NoParkingCheck"
+                              IsChecked="True"
+                              CheckedChanged="OnNoParkingTapped" />
+                    <Label Text="No parking"
+                           BackgroundColor="#f15151"
+                           TextColor="White"
+                           Padding="10,5"
+                           WidthRequest="120"
+                           HorizontalTextAlignment="Center"
+                           VerticalOptions="Center" />
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout Spacing="10">
+                    <CheckBox x:Name="PaidParkingCheck"
+                              IsChecked="True"
+                              CheckedChanged="OnPaidParkingTapped" />
+                    <Label Text="Paid parking"
+                           BackgroundColor="#4769b9"
+                           TextColor="White"
+                           Padding="10,5"
+                           WidthRequest="120"
+                           HorizontalTextAlignment="Center"
+                           VerticalOptions="Center" />
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout Spacing="10">
+                    <CheckBox x:Name="FreeParkingCheck"
+                              IsChecked="True"
+                              CheckedChanged="OnFreeParkingTapped" />
+                    <Label Text="Free parking"
+                           BackgroundColor="#40dd7c"
+                           TextColor="Black"
+                           Padding="10,5"
+                           WidthRequest="120"
+                           HorizontalTextAlignment="Center"
+                           VerticalOptions="Center" />
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout Spacing="10">
+                    <CheckBox x:Name="RestrictedCheck"
+                              IsChecked="True"
+                              CheckedChanged="OnRestrictedTapped" />
+                    <Label Text="Restricted"
+                           BackgroundColor="#f2d158"
+                           TextColor="Black"
+                           Padding="10,5"
+                           WidthRequest="120"
+                           HorizontalTextAlignment="Center"
+                           VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Grid>
+        </Border>
+
+        <!-- Map Image -->
+        <Border Grid.Row="2"
+                Padding="20"
+                StrokeThickness="1"
+                Stroke="Gray"
+                StrokeShape="RoundRectangle 10"
+                Margin="20">
+            <Image Source="map.png"
+                   Aspect="AspectFill"
+                   BackgroundColor="LightBlue">
+            </Image>
+        </Border>
+
+        <!-- "Park Here" button-->
+        <Button Grid.Row="3"
+                x:Name="ParkHereBtn"
+                Text="Park Here"
+                BackgroundColor="#2E7D32"
+                TextColor="White"
+                FontSize="16"
+                Clicked="OnParkHereClicked"
+                HorizontalOptions="Center"
+                Margin="20"
+                WidthRequest="150"
+                HeightRequest="50" />
+
+    </Grid>
+</ContentPage>

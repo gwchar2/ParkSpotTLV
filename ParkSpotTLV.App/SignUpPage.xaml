@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ParkSpotTLV.App.SignUpPage"
+             Title="Create Account">
+    <VerticalStackLayout
+        Padding="40"
+        Spacing="30"
+        VerticalOptions="Center">
+
+        <Label
+            Text="ParkSpot-TLV"
+            FontSize="32"
+            FontAttributes="Bold"
+            HorizontalOptions="Center"
+            TextColor="#D4DEFB" />
+
+            <VerticalStackLayout Spacing="20">
+                <Entry
+                    x:Name="UsernameEntry"
+                    Placeholder="Create Username"
+                    FontSize="16" />
+
+                <Entry
+                    x:Name="PasswordEntry"
+                    Placeholder="Create Password"
+                    IsPassword="True"
+                    FontSize="16" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="15">
+                <Button
+                    x:Name="CreateAccountBtn"
+                    Text="Create Account"
+                    BackgroundColor="#D4DEFB"
+                    TextColor="White"
+                    FontSize="16"
+                    Clicked="OnCreateAccountClicked"
+                    HorizontalOptions="Fill"
+                    HeightRequest="50" />
+            </VerticalStackLayout>
+
+    </VerticalStackLayout>
+</ContentPage>

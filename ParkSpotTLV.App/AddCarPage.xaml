@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ParkSpotTLV.App.AddCarPage"
+             Title="Add Car">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="40"
+            Spacing="30"
+            VerticalOptions="Center">
+
+            <Label
+                Text="Add New Car"
+                FontSize="28"
+                FontAttributes="Bold"
+                HorizontalOptions="Center"
+                TextColor="#2E7D32" />
+
+            <!-- Car Name -->
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Car Name"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="Black" />
+                <Entry
+                    x:Name="CarNameEntry"
+                    Placeholder="My Toyota"
+                    FontSize="16"
+                    BackgroundColor="White" />
+            </VerticalStackLayout>
+
+            <!-- Car Type -->
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Car Type"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="Black" />
+                <VerticalStackLayout Spacing="5">
+                    <HorizontalStackLayout Spacing="10">
+                        <RadioButton x:Name="PrivateRadio"
+                                     GroupName="CarType"
+                                     IsChecked="True" />
+                        <Label Text="Private"
+                               FontSize="16"
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="10">
+                        <RadioButton x:Name="TruckRadio"
+                                     GroupName="CarType" />
+                        <Label Text="Truck"
+                               FontSize="16"
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Parking Permit -->
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Parking Permit"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="Black" />
+
+                <HorizontalStackLayout Spacing="10">
+                    <CheckBox x:Name="ResidentPermitCheck"
+                              CheckedChanged="OnResidentPermitChanged" />
+                    <Label Text="I have a resident permit"
+                           FontSize="16"
+                           VerticalOptions="Center" />
+                </HorizontalStackLayout>
+
+                <Entry
+                    x:Name="ZoneNumberEntry"
+                    Placeholder="Zone number"
+                    FontSize="16"
+                    BackgroundColor="White"
+                    IsVisible="False" />
+
+                <HorizontalStackLayout Spacing="10">
+                    <CheckBox x:Name="DisabledPermitCheck" />
+                    <Label Text="I have a disabled parking permit"
+                           FontSize="16"
+                           VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Save Button -->
+            <Button
+                x:Name="SaveCarBtn"
+                Text="Save &amp; Continue"
+                BackgroundColor="LightGray"
+                TextColor="Gray"
+                FontSize="16"
+                Clicked="OnSaveCarClicked"
+                HorizontalOptions="Fill"
+                HeightRequest="50"
+                Margin="0,40,0,0" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -1,20 +1,24 @@
 ﻿namespace ParkSpotTLV.App {
     public partial class MainPage : ContentPage {
-        int count = 0;
-
         public MainPage() {
             InitializeComponent();
         }
 
-        private void OnCounterClicked(object? sender, EventArgs e) {
-            count++;
+        private async void OnLoginClicked(object? sender, EventArgs e) {
+            string username = UsernameEntry.Text?.Trim() ?? "";
+            string password = PasswordEntry.Text?.Trim() ?? "";
 
-            if (count == 1)
-                CounterBtn.Text = $"Clicked {count} time";
-            else
-                CounterBtn.Text = $"Clicked {count} times";
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password)) {
+                await DisplayAlert("Error", "Please enter both username and password", "OK");
+                return;
+            }
 
-            SemanticScreenReader.Announce(CounterBtn.Text);
+            //await DisplayAlert("Login", $"Logging in user: {username}", "OK");
+            await Shell.Current.GoToAsync("ShowMapPage");
+        }
+
+        private async void OnSignUpClicked(object? sender, EventArgs e) {
+            await Shell.Current.GoToAsync("SignUpPage");
         }
     }
 }
