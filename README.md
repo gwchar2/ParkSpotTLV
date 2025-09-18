@@ -1,6 +1,7 @@
 ﻿## Releases
 
 [![Latest release](https://img.shields.io/github/v/release/gwchar2/ParkSpotTLV?sort=semver)](https://github.com/gwchar2/ParkSpotTLV/releases/latest)
+
 [Changelog](./CHANGELOG.md)
 
 - Download latest Android app (APK):  
