@@ -2,21 +2,29 @@ name: Attach APK to Release
 
 on:
   release:
-    types: [published]   # runs after the Release object is created
+    types: [published, prereleased]   
+  workflow_dispatch:                  
+    inputs:
+      tag:
+        description: "Tag to attach APK to (e.g., v0.2.0-beta.0)"
+        required: true
+
+permissions:
+  contents: write
 
 jobs:
   build-and-upload-apk:
     runs-on: windows-latest
-
     env:
       MAUI_PROJECT: ParkSpotTLV.App/ParkSpotTLV.App.csproj
       CONFIGURATION: Release
+      TAG_NAME: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
 
     steps:
       - name: Checkout tag
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: ${{ env.TAG_NAME }}
 
       - name: Setup .NET SDK 9.x
         uses: actions/setup-dotnet@v4
@@ -40,12 +48,10 @@ jobs:
         shell: pwsh
         run: dotnet restore
 
-      # Build an unsigned APK suitable for testing. For Play upload use AAB and signing.
-      - name: Publish APK
+      - name: Publish APK (unsigned, for testing)
         shell: pwsh
         run: dotnet publish $env:MAUI_PROJECT -c $env:CONFIGURATION -f net9.0-android /p:AndroidPackageFormat=apk
 
-      # Find the produced APK
       - name: Find APK path
         id: findapk
         shell: pwsh
@@ -58,5 +64,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ steps.findapk.outputs.apk }}
+          tag_name: ${{ env.TAG_NAME }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

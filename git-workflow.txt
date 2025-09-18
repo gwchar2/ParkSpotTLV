@@ -6,9 +6,6 @@ Start a task (new branch)
 git switch -c <branch_name>
 # ...edit code…
 
-
-
-
 During the day: commit in small, meaningful chunks; push whenever:
 you reached a checkpoint,
 you want CI to run,
