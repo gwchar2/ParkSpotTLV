@@ -1,4 +1,4 @@
-name: Build (API + MAUI Android) & Test
+name: CI – Fast build (API + conditional MAUI)
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
     branches: [ "**" ]
 
 jobs:
-  build:
-    name: Build & Test on windows-latest
+  fast-build:
+    name: Build on windows-latest
     runs-on: windows-latest
 
     env:
@@ -20,6 +20,23 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Paths filter
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            app:
+              - 'ParkSpotTLV.App/**'
+            api:
+              - 'ParkSpotTLV.Api/**'
+              - 'Shared/**'
+              - 'Tests/**'
+              - '**/*.sln'
+              - '**/*.csproj'
+              - 'Directory.Build.*'
 
       - name: Setup .NET SDK 9.x
         uses: actions/setup-dotnet@v4
@@ -35,49 +52,45 @@ jobs:
           restore-keys: |
             nuget-${{ runner.os }}-
 
-      # Setup Java for Android toolchain
+      - name: Restore
+        run: dotnet restore $env:SOLUTION_PATH
+
+      - name: Build API
+        if: steps.changes.outputs.api == 'true' || github.event_name == 'pull_request'
+        run: dotnet build $env:API_PROJECT -c $env:CONFIGURATION --no-restore
+
+      - name: Run tests
+        if: steps.changes.outputs.api == 'true' || github.event_name == 'pull_request'
+        run: dotnet test $env:SOLUTION_PATH -c $env:CONFIGURATION --no-build --logger trx
+
+      # Optional: only compile MAUI Android when app files changed
       - name: Setup Java 17
+        if: steps.changes.outputs.app == 'true'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      - name: Install MAUI/Android workloads
+      - name: Install MAUI Android workloads
+        if: steps.changes.outputs.app == 'true'
         run: |
-          dotnet --info
           dotnet workload install maui-android android
           dotnet workload list
 
-      - name: Accept Android SDK licenses
-        shell: cmd
+      - name: Build MAUI Android (no emulator, no signing)
+        if: steps.changes.outputs.app == 'true'
         run: |
-          if exist "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" (
-            echo y | "%ANDROID_HOME%\cmdline-tools\latest\bin\sdkmanager.bat" --licenses
-          ) else (
-            echo ANDROID_HOME not found, skipping license acceptance
-          )
+          dotnet build $env:MAUI_PROJECT -c $env:CONFIGURATION -f net9.0-android --no-restore ^
+            /p:AndroidPackageFormat=apk ^
+            /p:RunAOTCompilation=false ^
+            /p:AndroidEnableProfiling=false
 
-      - name: Restore solution (incl. workloads)
-        run: |
-          dotnet workload restore $env:SOLUTION_PATH
-          dotnet restore $env:SOLUTION_PATH
-
-      # Build API (ASP.NET Core)
-      - name: Build API
-        run: dotnet build $env:API_PROJECT -c $env:CONFIGURATION --no-restore
-
-      # Build MAUI Android App
-      - name: Build MAUI Android
-        run: dotnet build $env:MAUI_PROJECT -c $env:CONFIGURATION -f net9.0-android --no-restore
-
-        
-      # Always try to upload logs
       - name: Upload logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: api-logs
+          name: build-logs
           path: |
             **/TestResults/**/*.trx
-            BackEnd.Api/logs/**
+            **/*.binlog
           if-no-files-found: ignore
