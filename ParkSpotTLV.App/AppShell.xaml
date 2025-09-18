@@ -4,7 +4,38 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:ParkSpotTLV.App"
-    Title="ParkSpotTLV.App">
+    Title="ParkSpotTLV.App"
+    FlyoutBehavior="Disabled">
+
+    <Shell.TitleView>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Title -->
+            <Label Grid.Column="0"
+                   Text="ParkSpotTLV"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Start"
+                   Margin="15,0,0,0" />
+
+            <!-- Menu Button -->
+            <Button Grid.Column="1"
+                    x:Name="MenuButton"
+                    Text="☰"
+                    FontSize="20"
+                    BackgroundColor="Transparent"
+                    TextColor="Black"
+                    WidthRequest="50"
+                    HeightRequest="40"
+                    Clicked="OnMenuButtonClicked"
+                    Margin="0,0,15,0" />
+        </Grid>
+    </Shell.TitleView>
 
     <ShellContent
         Title="Home"
@@ -15,6 +46,5 @@
         Title="Sign Up"
         ContentTemplate="{DataTemplate local:SignUpPage}"
         Route="SignUpPage" />
-            
 
 </Shell>
