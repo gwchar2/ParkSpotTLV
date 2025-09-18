@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.3.0-beta.0...v0.4.0-beta.0) (2025-09-18)
+
+
+### Features
+
+* adding proper release (I hope) ([3b4916f](https://github.com/gwchar2/ParkSpotTLV/commit/3b4916f5a3a799b205ad6af5637b5995a122ceb7))
+* adding proper release (I hope) ([d78ff87](https://github.com/gwchar2/ParkSpotTLV/commit/d78ff8722263a416b602a4b8bff3fe2135e05737))
+
 ## [0.3.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.2.0-beta.0...v0.3.0-beta.0) (2025-09-18)
 
 
