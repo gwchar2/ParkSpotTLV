@@ -5,18 +5,14 @@
 
 branches:
   - name: main
-    prerelease: alpha  
+    prerelease: alpha
 
 plugins:
   - "@semantic-release/commit-analyzer"
-
   - "@semantic-release/release-notes-generator"
-
   - - "@semantic-release/changelog"
     - changelogFile: CHANGELOG.md
-
   - "@semantic-release/github"
-
   - - "@semantic-release/git"
     - assets:
         - CHANGELOG.md
@@ -24,8 +20,6 @@ plugins:
         chore(release): ${nextRelease.version} [skip ci]
 
         ${nextRelease.notes}
-        
-
 
 # When moving from alpha pre-releases to stable:
-# Remove `prerelease: alpha` 
+# Remove `prerelease: alpha`
