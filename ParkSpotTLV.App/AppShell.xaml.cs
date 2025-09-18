@@ -14,6 +14,26 @@ namespace ParkSpotTLV.App {
             Routing.RegisterRoute("MyCarsPage", typeof(MyCarsPage));
             Routing.RegisterRoute("AccountDetailsPage", typeof(AccountDetailsPage));
             Routing.RegisterRoute("PreferencesPage", typeof(PreferencesPage));
+
+            // Subscribe to navigation events to show/hide menu button
+            Navigated += OnShellNavigated;
+        }
+
+        private void OnShellNavigated(object? sender, ShellNavigatedEventArgs e)
+        {
+            UpdateMenuButtonVisibility();
+        }
+
+        private void UpdateMenuButtonVisibility()
+        {
+            if (Current?.CurrentPage is ContentPage contentPage)
+            {
+                // Hide menu button on login/signup pages
+                bool shouldHideMenu = contentPage.GetType() == typeof(MainPage) ||
+                                     contentPage.GetType() == typeof(SignUpPage);
+
+                MenuButton.IsVisible = !shouldHideMenu;
+            }
         }
 
         private async void OnMenuButtonClicked(object sender, EventArgs e)
