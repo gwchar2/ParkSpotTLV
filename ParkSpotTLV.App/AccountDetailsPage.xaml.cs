@@ -1,10 +1,24 @@
+using ParkSpotTLV.Core.Services;
+
 namespace ParkSpotTLV.App;
 
 public partial class AccountDetailsPage : ContentPage
 {
+    private readonly AuthenticationService _authService = AuthenticationService.Instance;
+
     public AccountDetailsPage()
     {
         InitializeComponent();
+        LoadUserData();
+    }
+
+    private void LoadUserData()
+    {
+        // Load current user data
+        if (_authService.IsAuthenticated && !string.IsNullOrEmpty(_authService.CurrentUsername))
+        {
+            UsernameEntry.Text = _authService.CurrentUsername;
+        }
     }
 
     private async void OnEditUsernameClicked(object sender, EventArgs e)
