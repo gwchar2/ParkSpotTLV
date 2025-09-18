@@ -1,89 +1,18 @@
-name: Release (commit-driven)
+name: Release (auto version from commits)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]  
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   release:
-    runs-on: windows-latest
-    concurrency:
-      group: release-${{ github.ref }}
-      cancel-in-progress: false
-
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node (for semantic-release)
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Install semantic-release toolchain
-        run: |
-          npm i -g semantic-release @semantic-release/changelog @semantic-release/commit-analyzer @semantic-release/release-notes-generator @semantic-release/github @semantic-release/git
-
-      - name: Run semantic-release (creates/updates GitHub Release + tag)
-        id: semantic
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npx semantic-release
-
-      - name: Detect latest tag produced by this run
-        id: tag
-        shell: bash
-        run: |
-          set -e
-          git fetch --tags --force
-          TAG="$(git describe --tags --abbrev=0 || true)"
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-          if [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-alpha\.([0-9]+)$ ]]; then
-            echo "is_alpha=true" >> $GITHUB_OUTPUT
-            echo "alpha_n=${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
-          else
-            echo "is_alpha=false" >> $GITHUB_OUTPUT
-            echo "alpha_n=0" >> $GITHUB_OUTPUT
-          fi
-
-      - name: No new release (skip)
-        if: ${{ steps.tag.outputs.tag == '' }}
-        run: echo "No new release tag; nothing to build."
-
-      - name: Setup .NET
-        if: ${{ steps.tag.outputs.tag != '' && steps.tag.outputs.is_alpha == 'true' && fromJSON(steps.tag.outputs.alpha_n) >= 3 }}
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: |
-            9.0.x
-
-      - name: Restore & Build (Release)
-        if: ${{ steps.tag.outputs.tag != '' && steps.tag.outputs.is_alpha == 'true' && fromJSON(steps.tag.outputs.alpha_n) >= 3 }}
-        run: |
-          dotnet restore
-          dotnet build -c Release
-
-      - name: Publish API
-        if: ${{ steps.tag.outputs.tag != '' && steps.tag.outputs.is_alpha == 'true' && fromJSON(steps.tag.outputs.alpha_n) >= 3 }}
-        run: |
-          dotnet publish ParkSpotTLV.Api/ParkSpotTLV.Api.csproj -c Release -o out/api
-          powershell -Command "Compress-Archive -Path out/api/* -DestinationPath out/ParkSpotTLV.Api.zip -Force"
-
-      - name: Publish Android App (APK)
-        if: ${{ steps.tag.outputs.tag != '' && steps.tag.outputs.is_alpha == 'true' && fromJSON(steps.tag.outputs.alpha_n) >= 3 }}
-        run: |
-          dotnet publish ParkSpotTLV.App/ParkSpotTLV.App.csproj -c Release -f net9.0-android -o out/app
-          copy out/app\*.apk out\ParkSpotTLV.App.apk
-
-      - name: Attach artifacts to the same GitHub Release
-        if: ${{ steps.tag.outputs.tag != '' && steps.tag.outputs.is_alpha == 'true' && fromJSON(steps.tag.outputs.alpha_n) >= 3 }}
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.tag.outputs.tag }}
-          files: |
-            out/ParkSpotTLV.Api.zip
-            out/ParkSpotTLV.App.apk
-          prerelease: true
+       - uses: googleapis/release-please-action@v4
+         with:
+            config-file: release-please-config.json
+            manifest-file: .release-please-manifest.json
