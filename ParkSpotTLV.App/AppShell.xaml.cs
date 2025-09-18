@@ -1,4 +1,5 @@
 ﻿using ParkSpotTLV.App.Controls;
+using ParkSpotTLV.App.Pages;
 
 namespace ParkSpotTLV.App {
     public partial class AppShell : Shell {

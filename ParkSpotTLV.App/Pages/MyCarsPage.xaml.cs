@@ -1,4 +1,4 @@
-namespace ParkSpotTLV.App;
+namespace ParkSpotTLV.App.Pages;
 
 public partial class MyCarsPage : ContentPage
 {

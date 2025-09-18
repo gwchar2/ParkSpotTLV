@@ -1,6 +1,6 @@
 using ParkSpotTLV.Core.Services;
 
-namespace ParkSpotTLV.App {
+namespace ParkSpotTLV.App.Pages {
     public partial class MainPage : ContentPage {
         private readonly AuthenticationService _authService = AuthenticationService.Instance;
 

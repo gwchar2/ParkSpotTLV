@@ -1,6 +1,6 @@
 using ParkSpotTLV.Core.Services;
 
-namespace ParkSpotTLV.App;
+namespace ParkSpotTLV.App.Pages;
 
 public partial class AccountDetailsPage : ContentPage
 {

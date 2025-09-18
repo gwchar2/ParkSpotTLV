@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ParkSpotTLV.App.AddCarPage"
-             Title="Add Car">
+             x:Class="ParkSpotTLV.App.Pages.EditCarPage"
+             Title="Edit Car">
 
     <ScrollView>
         <VerticalStackLayout
@@ -11,7 +11,7 @@
             VerticalOptions="Center">
 
             <Label
-                Text="Add New Car"
+                Text="Edit Car"
                 FontSize="28"
                 FontAttributes="Bold"
                 HorizontalOptions="Center"
@@ -88,9 +88,9 @@
             <!-- Save Button -->
             <Button
                 x:Name="SaveCarBtn"
-                Text="Save &amp; Continue"
-                BackgroundColor="LightGray"
-                TextColor="Gray"
+                Text="Save Changes"
+                BackgroundColor="#2E7D32"
+                TextColor="White"
                 FontSize="16"
                 Clicked="OnSaveCarClicked"
                 HorizontalOptions="Fill"
