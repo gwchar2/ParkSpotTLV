@@ -1,3 +1,5 @@
+using ParkSpotTLV.Core.Services;
+
 namespace ParkSpotTLV.App.Controls;
 
 public partial class MenuOverlay : Grid
@@ -47,11 +49,23 @@ public partial class MenuOverlay : Grid
     private async void OnLogoutClicked(object sender, EventArgs e)
     {
         await CloseMenu();
+
+        var authService = AuthenticationService.Instance;
+        string username = authService.CurrentUsername ?? "User";
+
         if (Application.Current?.Windows.FirstOrDefault()?.Page is Page page)
         {
-            bool confirm = await page.DisplayAlert("Logout", "Are you sure you want to logout?", "Yes", "No");
+            bool confirm = await page.DisplayAlert(
+                "Logout",
+                $"Are you sure you want to logout, {username}?",
+                "Yes", "No");
+
             if (confirm)
             {
+                // Logout from authentication service
+                authService.Logout();
+
+                // Navigate back to login page
                 await Shell.Current.GoToAsync("//MainPage");
             }
         }

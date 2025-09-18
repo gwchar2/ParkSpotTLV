@@ -1,12 +1,46 @@
-namespace ParkSpotTLV.App;
+using ParkSpotTLV.Core.Services;
+using ParkSpotTLV.Core.Models;
+
+namespace ParkSpotTLV.App.Pages;
 
 public partial class ShowMapPage : ContentPage
 {
     private bool isParked = false;
+    private readonly CarService _carService = CarService.Instance;
 
     public ShowMapPage()
     {
         InitializeComponent();
+        LoadUserCars();
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        LoadUserCars();
+    }
+
+    private void LoadUserCars()
+    {
+        var userCars = _carService.GetUserCars();
+
+        // Clear existing items
+        CarPicker.Items.Clear();
+
+        // Add user's cars
+        foreach (var car in userCars)
+        {
+            CarPicker.Items.Add(car.Name);
+        }
+
+        // Add "Add Car" option
+        CarPicker.Items.Add("+ Add Car");
+
+        // Set default selection to first car if available
+        if (userCars.Count > 0)
+        {
+            CarPicker.SelectedIndex = 0;
+        }
     }
 
     private void OnNoParkingTapped(object sender, EventArgs e)
@@ -32,11 +66,17 @@ public partial class ShowMapPage : ContentPage
     private async void OnCarPickerChanged(object sender, EventArgs e)
     {
         var picker = (Picker)sender;
-        if (picker.SelectedIndex == 3) // "Add Car" is at index 3
+        var selectedItem = picker.SelectedItem?.ToString();
+
+        if (selectedItem == "+ Add Car")
         {
             await Shell.Current.GoToAsync("AddCarPage");
             // Reset to previous selection after navigation
-            picker.SelectedIndex = 1; // Back to "Toyota"
+            var userCars = _carService.GetUserCars();
+            if (userCars.Count > 0)
+            {
+                picker.SelectedIndex = 0; // Back to first car
+            }
         }
     }
 
