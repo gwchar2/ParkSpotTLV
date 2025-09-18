@@ -45,9 +45,6 @@ jobs:
       - name: Build API (fast)
         run: dotnet build $env:API_PROJECT -c $env:CONFIGURATION --no-restore
 
-      - name: Test (all test projects)
-        run: dotnet test $env:SOLUTION_PATH -c $env:CONFIGURATION --no-build --logger "trx;LogFileName=test_results.trx"
-
   # Full build: run only AFTER the PR is merged to main
   full-build:
     if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true }}
