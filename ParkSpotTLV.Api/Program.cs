@@ -1,36 +1,67 @@
-using System.Diagnostics;
 using System.Reflection;
+using Scalar.AspNetCore;
+using Serilog;
+using ParkSpotTLV.Api.Errors;
+using ParkSpotTLV.Api.Http;
+using ParkSpotTLV.Api.Endpoints;
 
-var builder = WebApplication.CreateBuilder(args);
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-builder.Services.AddOpenApi();
-builder.Services.AddEndpointsApiExplorer();
+try { 
+    Log.Information("Starting Up");
 
-var app = builder.Build();
+    var builder = WebApplication.CreateBuilder(args);
 
+    // Serilog host hook (reads appsettings)
+    builder.Host.UseSerilog((ctx, services, cfg) => {
+        cfg.ReadFrom.Configuration(ctx.Configuration)
+          .ReadFrom.Services(services)
+          .Enrich.FromLogContext()
+          .Enrich.WithEnvironmentName()
+          .Enrich.WithMachineName()
+          .Enrich.WithProcessId()
+          .Enrich.WithThreadId();
+    });
 
-// App Health Status
-app.MapGet("/health", () => Results.Ok(new {
-    status = "Healthy"
-})).WithName("Health");
+    /* Services */
+    builder.Services.AddOpenApi();
+    builder.Services.AddEndpointsApiExplorer();
 
-app.MapGet("/version", () => Results.Ok(new {
-    version = GetVersion()
-})).WithName("Version");
+    /* Runtime start */
+    builder.Services.AddSingleton<RuntimeHealth>();
 
-app.Run();
+    var app = builder.Build();
 
+    /* Pipeline */
+    app.UseGlobalProblemDetails();                          // problem+json for errors
+    app.UseMiddleware<TracingMiddleware>();                 // W3C trace + response headers
+    app.UseMiddleware<RequestLoggingMiddleware>();          // request logs (no bodies)
 
-// Get app current version 
-static string GetVersion() {
-    var asm = Assembly.GetExecutingAssembly();
-    var info = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+    /* OpenAPI / Scalar UI */
+    app.MapOpenApi();
+    app.MapScalarApiReference(options => {
+        options.Title = "ParkSpotTLV API";
+        options.Theme = ScalarTheme.BluePlanet;
+        options.DarkMode = true;
+    });
 
-    if (!string.IsNullOrWhiteSpace(info)) return info;
+    /* EndPoints */
+    app.MapHealth();
 
-    var file = asm.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version;
-    if (!string.IsNullOrWhiteSpace(file)) return file;
+    app.Run();
+}
+catch (Exception ex) {
+    Log.Fatal(ex, "Application failed to start-up");
+} finally {
+    Log.CloseAndFlush();
+}
 
-    var name = asm.GetName()?.Version?.ToString();
-    return string.IsNullOrWhiteSpace(name) ? "unknown" : name!;
+/* Helper class that returns starting time + version (from csproj) */
+public sealed class RuntimeHealth {
+    public DateTimeOffset StartedAtUtc { get; } = DateTimeOffset.UtcNow;
+    public string Version { get; } =
+        (Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly())
+        .GetName().Version?.ToString() ?? "0.0.0";
 }
