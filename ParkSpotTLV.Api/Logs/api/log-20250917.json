@@ -1,0 +1,335 @@
+2025-09-17 21:49:01.131 +03:00 [INF] Now listening on: https://localhost:7164
+2025-09-17 21:49:01.166 +03:00 [INF] Now listening on: http://localhost:5164
+2025-09-17 21:49:01.544 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-09-17 21:49:01.546 +03:00 [INF] Hosting environment: Development
+2025-09-17 21:49:01.546 +03:00 [INF] Content root path: C:\Users\hwath\Codes\VisualStudio\ParkSpotTLV\ParkSpotTLV.Api
+2025-09-17 21:57:30.142 +03:00 [INF] Now listening on: https://localhost:7164
+2025-09-17 21:57:30.167 +03:00 [INF] Now listening on: http://localhost:5164
+2025-09-17 21:57:30.411 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-09-17 21:57:30.413 +03:00 [INF] Hosting environment: Development
+2025-09-17 21:57:30.413 +03:00 [INF] Content root path: C:\Users\hwath\Codes\VisualStudio\ParkSpotTLV\ParkSpotTLV.Api
+2025-09-17 22:02:08.320 +03:00 [INF] Now listening on: https://localhost:7164
+2025-09-17 22:02:08.355 +03:00 [INF] Now listening on: http://localhost:5164
+2025-09-17 22:02:08.618 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-09-17 22:02:08.618 +03:00 [INF] Hosting environment: Development
+2025-09-17 22:02:08.619 +03:00 [INF] Content root path: C:\Users\hwath\Codes\VisualStudio\ParkSpotTLV\ParkSpotTLV.Api
+2025-09-17 22:02:09.418 +03:00 [INF] HTTP GET /scalar responded 302 in 15.4302 ms
+2025-09-17 22:02:09.589 +03:00 [INF] HTTP GET /scalar/ responded 200 in 146.9818 ms
+2025-09-17 22:02:09.618 +03:00 [INF] HTTP GET /scalar/scalar.js responded 304 in 12.7713 ms
+2025-09-17 22:02:09.618 +03:00 [INF] HTTP GET /scalar/scalar.aspnetcore.js responded 304 in 12.7712 ms
+2025-09-17 22:02:09.825 +03:00 [INF] HTTP GET /openapi/v1.json responded 200 in 62.9146 ms
+2025-09-17 22:02:09.828 +03:00 [INF] HTTP GET /openapi/v1.json responded 200 in 0.9709 ms
+2025-09-17 22:02:14.452 +03:00 [INF] HTTP GET /health responded 200 in 5.8892 ms
+2025-09-17 22:02:28.275 +03:00 [INF] HTTP GET /health responded 200 in 0.2842 ms
+2025-09-17 22:02:35.405 +03:00 [INF] HTTP GET /health responded 200 in 0.1099 ms
+2025-09-17 22:02:36.841 +03:00 [INF] HTTP GET /health responded 200 in 0.2758 ms
+2025-09-17 22:04:33.069 +03:00 [INF] Now listening on: https://localhost:7164
+2025-09-17 22:04:33.099 +03:00 [INF] Now listening on: http://localhost:5164
+2025-09-17 22:04:33.110 +03:00 [INF] No action descriptors found. This may indicate an incorrectly configured application or missing application parts. To learn more, visit https://aka.ms/aspnet/mvc/app-parts
+2025-09-17 22:04:33.301 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-09-17 22:04:33.301 +03:00 [INF] Hosting environment: Development
+2025-09-17 22:04:33.302 +03:00 [INF] Content root path: C:\Users\hwath\Codes\VisualStudio\ParkSpotTLV\ParkSpotTLV.Api
+2025-09-17 22:04:34.005 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar - null null
+2025-09-17 22:04:34.137 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/{documentName?}'
+2025-09-17 22:04:34.168 +03:00 [INF] Executing RedirectResult, redirecting to scalar/.
+2025-09-17 22:04:34.169 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/{documentName?}'
+2025-09-17 22:04:34.172 +03:00 [INF] HTTP GET /scalar responded 302 in 36.5200 ms
+2025-09-17 22:04:34.181 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar - 302 0 null 198.705ms
+2025-09-17 22:04:34.188 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar/ - null null
+2025-09-17 22:04:34.193 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/{documentName?}'
+2025-09-17 22:04:34.315 +03:00 [INF] Write content with HTTP Response ContentType of text/html
+2025-09-17 22:04:34.325 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/{documentName?}'
+2025-09-17 22:04:34.326 +03:00 [INF] HTTP GET /scalar/ responded 200 in 132.6091 ms
+2025-09-17 22:04:34.326 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar/ - 200 null text/html 138.3366ms
+2025-09-17 22:04:34.355 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/_framework/aspnetcore-browser-refresh.js - null null
+2025-09-17 22:04:34.355 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar/scalar.js - null null
+2025-09-17 22:04:34.355 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar/scalar.aspnetcore.js - null null
+2025-09-17 22:04:34.357 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/scalar.js'
+2025-09-17 22:04:34.357 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/scalar.aspnetcore.js'
+2025-09-17 22:04:34.358 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/_vs/browserLink - null null
+2025-09-17 22:04:34.414 +03:00 [INF] Setting HTTP status code 304.
+2025-09-17 22:04:34.414 +03:00 [INF] Setting HTTP status code 304.
+2025-09-17 22:04:34.424 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/scalar.js'
+2025-09-17 22:04:34.457 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/scalar.aspnetcore.js'
+2025-09-17 22:04:34.457 +03:00 [INF] HTTP GET /scalar/scalar.js responded 304 in 100.5821 ms
+2025-09-17 22:04:34.458 +03:00 [INF] HTTP GET /scalar/scalar.aspnetcore.js responded 304 in 101.0158 ms
+2025-09-17 22:04:34.458 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar/scalar.js - 304 null null 103.4971ms
+2025-09-17 22:04:34.458 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar/scalar.aspnetcore.js - 304 null null 103.3024ms
+2025-09-17 22:04:34.460 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/_framework/aspnetcore-browser-refresh.js - 200 16515 application/javascript; charset=utf-8 105.722ms
+2025-09-17 22:04:34.492 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/_vs/browserLink - 200 null text/javascript; charset=UTF-8 133.8213ms
+2025-09-17 22:04:34.596 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/openapi/v1.json - null null
+2025-09-17 22:04:34.597 +03:00 [INF] Executing endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:04:34.658 +03:00 [INF] Executed endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:04:34.658 +03:00 [INF] HTTP GET /openapi/v1.json responded 200 in 61.2784 ms
+2025-09-17 22:04:34.659 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/openapi/v1.json - null null
+2025-09-17 22:04:34.659 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/openapi/v1.json - 200 null application/json;charset=utf-8 62.645ms
+2025-09-17 22:04:34.659 +03:00 [INF] Executing endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:04:34.661 +03:00 [INF] Executed endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:04:34.661 +03:00 [INF] HTTP GET /openapi/v1.json responded 200 in 1.8468 ms
+2025-09-17 22:04:34.662 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/openapi/v1.json - 200 null application/json;charset=utf-8 2.9731ms
+2025-09-17 22:05:05.815 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/health - null null
+2025-09-17 22:05:05.815 +03:00 [INF] Executing endpoint 'HTTP: GET /health'
+2025-09-17 22:05:05.816 +03:00 [INF] Setting HTTP status code 200.
+2025-09-17 22:05:05.821 +03:00 [INF] Writing value of type '<>f__AnonymousType0`1' as Json.
+2025-09-17 22:05:05.823 +03:00 [INF] Executed endpoint 'HTTP: GET /health'
+2025-09-17 22:05:05.823 +03:00 [INF] HTTP GET /health responded 200 in 8.1963 ms
+2025-09-17 22:05:05.824 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/health - 200 null application/json; charset=utf-8 9.4346ms
+2025-09-17 22:05:11.108 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/health - null null
+2025-09-17 22:05:11.109 +03:00 [INF] Executing endpoint 'HTTP: GET /health'
+2025-09-17 22:05:11.109 +03:00 [INF] Setting HTTP status code 200.
+2025-09-17 22:05:11.110 +03:00 [INF] Writing value of type '<>f__AnonymousType0`1' as Json.
+2025-09-17 22:05:11.110 +03:00 [INF] Executed endpoint 'HTTP: GET /health'
+2025-09-17 22:05:11.111 +03:00 [INF] HTTP GET /health responded 200 in 2.1955 ms
+2025-09-17 22:05:11.111 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/health - 200 null application/json; charset=utf-8 3.3775ms
+2025-09-17 22:05:41.160 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/health - null null
+2025-09-17 22:05:41.165 +03:00 [INF] Executing endpoint 'HTTP: GET /health'
+2025-09-17 22:05:41.165 +03:00 [INF] Setting HTTP status code 200.
+2025-09-17 22:05:41.165 +03:00 [INF] Writing value of type '<>f__AnonymousType0`1' as Json.
+2025-09-17 22:05:41.165 +03:00 [INF] Executed endpoint 'HTTP: GET /health'
+2025-09-17 22:05:41.166 +03:00 [INF] HTTP GET /health responded 200 in 1.0624 ms
+2025-09-17 22:05:41.166 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/health - 200 null application/json; charset=utf-8 6.1752ms
+2025-09-17 22:05:49.521 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/version - null null
+2025-09-17 22:05:49.522 +03:00 [INF] Executing endpoint 'HTTP: GET /version'
+2025-09-17 22:05:49.523 +03:00 [INF] Setting HTTP status code 200.
+2025-09-17 22:05:49.524 +03:00 [INF] Writing value of type '<>f__AnonymousType1`1' as Json.
+2025-09-17 22:05:49.525 +03:00 [INF] Executed endpoint 'HTTP: GET /version'
+2025-09-17 22:05:49.526 +03:00 [INF] HTTP GET /version responded 200 in 3.6829 ms
+2025-09-17 22:05:49.526 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/version - 200 null application/json; charset=utf-8 4.9332ms
+2025-09-17 22:06:38.363 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/version - null null
+2025-09-17 22:06:38.367 +03:00 [INF] Executing endpoint 'HTTP: GET /version'
+2025-09-17 22:06:38.367 +03:00 [INF] Setting HTTP status code 200.
+2025-09-17 22:06:38.368 +03:00 [INF] Writing value of type '<>f__AnonymousType1`1' as Json.
+2025-09-17 22:06:38.368 +03:00 [INF] Executed endpoint 'HTTP: GET /version'
+2025-09-17 22:06:38.369 +03:00 [INF] HTTP GET /version responded 200 in 2.0127 ms
+2025-09-17 22:06:38.369 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/version - 200 null application/json; charset=utf-8 34.5615ms
+2025-09-17 22:07:52.303 +03:00 [INF] Application is shutting down...
+2025-09-17 22:14:08.165 +03:00 [INF] Now listening on: https://localhost:7164
+2025-09-17 22:14:08.195 +03:00 [INF] Now listening on: http://localhost:5164
+2025-09-17 22:14:08.203 +03:00 [INF] No action descriptors found. This may indicate an incorrectly configured application or missing application parts. To learn more, visit https://aka.ms/aspnet/mvc/app-parts
+2025-09-17 22:14:08.431 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-09-17 22:14:08.431 +03:00 [INF] Hosting environment: Development
+2025-09-17 22:14:08.432 +03:00 [INF] Content root path: C:\Users\hwath\Codes\VisualStudio\ParkSpotTLV\ParkSpotTLV.Api
+2025-09-17 22:14:08.611 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar - null null
+2025-09-17 22:14:08.675 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/{documentName?}'
+2025-09-17 22:14:08.688 +03:00 [INF] Executing RedirectResult, redirecting to scalar/.
+2025-09-17 22:14:08.689 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/{documentName?}'
+2025-09-17 22:14:08.696 +03:00 [INF] HTTP GET /scalar responded 302 in 20.8265 ms
+2025-09-17 22:14:08.707 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar - 302 0 null 102.3174ms
+2025-09-17 22:14:08.715 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar/ - null null
+2025-09-17 22:14:08.721 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/{documentName?}'
+2025-09-17 22:14:08.856 +03:00 [INF] Write content with HTTP Response ContentType of text/html
+2025-09-17 22:14:08.865 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/{documentName?}'
+2025-09-17 22:14:08.886 +03:00 [INF] HTTP GET /scalar/ responded 200 in 164.0296 ms
+2025-09-17 22:14:08.887 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar/ - 200 null text/html 172.213ms
+2025-09-17 22:14:08.911 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar/scalar.js - null null
+2025-09-17 22:14:08.911 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar/scalar.aspnetcore.js - null null
+2025-09-17 22:14:08.911 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/_framework/aspnetcore-browser-refresh.js - null null
+2025-09-17 22:14:08.911 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/scalar.js'
+2025-09-17 22:14:08.911 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/scalar.aspnetcore.js'
+2025-09-17 22:14:08.947 +03:00 [INF] Setting HTTP status code 304.
+2025-09-17 22:14:08.947 +03:00 [INF] Setting HTTP status code 304.
+2025-09-17 22:14:08.948 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/scalar.js'
+2025-09-17 22:14:08.948 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/_vs/browserLink - null null
+2025-09-17 22:14:08.948 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/scalar.aspnetcore.js'
+2025-09-17 22:14:08.948 +03:00 [INF] HTTP GET /scalar/scalar.js responded 304 in 36.5266 ms
+2025-09-17 22:14:08.948 +03:00 [INF] HTTP GET /scalar/scalar.aspnetcore.js responded 304 in 36.8884 ms
+2025-09-17 22:14:08.949 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar/scalar.js - 304 null null 37.9884ms
+2025-09-17 22:14:08.949 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar/scalar.aspnetcore.js - 304 null null 38.1156ms
+2025-09-17 22:14:08.949 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/_framework/aspnetcore-browser-refresh.js - 200 16515 application/javascript; charset=utf-8 38.7339ms
+2025-09-17 22:14:08.992 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/_vs/browserLink - 200 null text/javascript; charset=UTF-8 44.3559ms
+2025-09-17 22:14:09.084 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/openapi/v1.json - null null
+2025-09-17 22:14:09.085 +03:00 [INF] Executing endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:14:09.152 +03:00 [INF] Executed endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:14:09.153 +03:00 [INF] HTTP GET /openapi/v1.json responded 200 in 67.7828 ms
+2025-09-17 22:14:09.153 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/openapi/v1.json - 200 null application/json;charset=utf-8 69.2979ms
+2025-09-17 22:14:09.154 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/openapi/v1.json - null null
+2025-09-17 22:14:09.154 +03:00 [INF] Executing endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:14:09.155 +03:00 [INF] Executed endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:14:09.156 +03:00 [INF] HTTP GET /openapi/v1.json responded 200 in 1.6703 ms
+2025-09-17 22:14:09.156 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/openapi/v1.json - 200 null application/json;charset=utf-8 2.6234ms
+2025-09-17 22:15:17.058 +03:00 [INF] Now listening on: https://localhost:7164
+2025-09-17 22:15:17.099 +03:00 [INF] Now listening on: http://localhost:5164
+2025-09-17 22:15:17.108 +03:00 [INF] No action descriptors found. This may indicate an incorrectly configured application or missing application parts. To learn more, visit https://aka.ms/aspnet/mvc/app-parts
+2025-09-17 22:15:17.287 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-09-17 22:15:17.288 +03:00 [INF] Hosting environment: Development
+2025-09-17 22:15:17.288 +03:00 [INF] Content root path: C:\Users\hwath\Codes\VisualStudio\ParkSpotTLV\ParkSpotTLV.Api
+2025-09-17 22:15:17.974 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar - null null
+2025-09-17 22:15:18.051 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/{documentName?}'
+2025-09-17 22:15:18.094 +03:00 [INF] Executing RedirectResult, redirecting to scalar/.
+2025-09-17 22:15:18.095 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/{documentName?}'
+2025-09-17 22:15:18.098 +03:00 [INF] HTTP GET /scalar responded 302 in 47.5069 ms
+2025-09-17 22:15:18.107 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar - 302 0 null 139.0785ms
+2025-09-17 22:15:18.114 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar/ - null null
+2025-09-17 22:15:18.118 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/{documentName?}'
+2025-09-17 22:15:18.253 +03:00 [INF] Write content with HTTP Response ContentType of text/html
+2025-09-17 22:15:18.263 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/{documentName?}'
+2025-09-17 22:15:18.263 +03:00 [INF] HTTP GET /scalar/ responded 200 in 144.9894 ms
+2025-09-17 22:15:18.264 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar/ - 200 null text/html 150.4554ms
+2025-09-17 22:15:18.281 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar/scalar.js - null null
+2025-09-17 22:15:18.281 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/_framework/aspnetcore-browser-refresh.js - null null
+2025-09-17 22:15:18.281 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar/scalar.aspnetcore.js - null null
+2025-09-17 22:15:18.281 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/scalar.js'
+2025-09-17 22:15:18.282 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/scalar.aspnetcore.js'
+2025-09-17 22:15:18.303 +03:00 [INF] Setting HTTP status code 304.
+2025-09-17 22:15:18.303 +03:00 [INF] Setting HTTP status code 304.
+2025-09-17 22:15:18.303 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/scalar.aspnetcore.js'
+2025-09-17 22:15:18.303 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/scalar.js'
+2025-09-17 22:15:18.304 +03:00 [INF] HTTP GET /scalar/scalar.aspnetcore.js responded 304 in 22.0410 ms
+2025-09-17 22:15:18.304 +03:00 [INF] HTTP GET /scalar/scalar.js responded 304 in 22.3176 ms
+2025-09-17 22:15:18.304 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar/scalar.aspnetcore.js - 304 null null 23.2845ms
+2025-09-17 22:15:18.304 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar/scalar.js - 304 null null 23.5741ms
+2025-09-17 22:15:18.305 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/_framework/aspnetcore-browser-refresh.js - 200 16515 application/javascript; charset=utf-8 23.9067ms
+2025-09-17 22:15:18.310 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/_vs/browserLink - null null
+2025-09-17 22:15:18.346 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/_vs/browserLink - 200 null text/javascript; charset=UTF-8 35.9041ms
+2025-09-17 22:15:18.457 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/openapi/v1.json - null null
+2025-09-17 22:15:18.459 +03:00 [INF] Executing endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:15:18.533 +03:00 [INF] Executed endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:15:18.534 +03:00 [INF] HTTP GET /openapi/v1.json responded 200 in 74.8955 ms
+2025-09-17 22:15:18.534 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/openapi/v1.json - null null
+2025-09-17 22:15:18.534 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/openapi/v1.json - 200 null application/json;charset=utf-8 77.339ms
+2025-09-17 22:15:18.535 +03:00 [INF] Executing endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:15:18.536 +03:00 [INF] Executed endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:15:18.536 +03:00 [INF] HTTP GET /openapi/v1.json responded 200 in 1.9662 ms
+2025-09-17 22:15:18.537 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/openapi/v1.json - 200 null application/json;charset=utf-8 3.0776ms
+2025-09-17 22:16:55.473 +03:00 [INF] Now listening on: https://localhost:7164
+2025-09-17 22:16:55.517 +03:00 [INF] Now listening on: http://localhost:5164
+2025-09-17 22:16:55.524 +03:00 [INF] No action descriptors found. This may indicate an incorrectly configured application or missing application parts. To learn more, visit https://aka.ms/aspnet/mvc/app-parts
+2025-09-17 22:16:55.661 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-09-17 22:16:55.662 +03:00 [INF] Hosting environment: Development
+2025-09-17 22:16:55.662 +03:00 [INF] Content root path: C:\Users\hwath\Codes\VisualStudio\ParkSpotTLV\ParkSpotTLV.Api
+2025-09-17 22:16:56.287 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar - null null
+2025-09-17 22:16:56.363 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/{documentName?}'
+2025-09-17 22:16:56.371 +03:00 [INF] Executing RedirectResult, redirecting to scalar/.
+2025-09-17 22:16:56.374 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/{documentName?}'
+2025-09-17 22:16:56.386 +03:00 [INF] HTTP GET /scalar responded 302 in 23.5171 ms
+2025-09-17 22:16:56.413 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar - 302 0 null 129.4158ms
+2025-09-17 22:16:56.426 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar/ - null null
+2025-09-17 22:16:56.435 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/{documentName?}'
+2025-09-17 22:16:56.698 +03:00 [INF] Write content with HTTP Response ContentType of text/html
+2025-09-17 22:16:56.713 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/{documentName?}'
+2025-09-17 22:16:56.714 +03:00 [INF] HTTP GET /scalar/ responded 200 in 279.5137 ms
+2025-09-17 22:16:56.717 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar/ - 200 null text/html 291.3094ms
+2025-09-17 22:16:56.737 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar/scalar.aspnetcore.js - null null
+2025-09-17 22:16:56.737 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar/scalar.js - null null
+2025-09-17 22:16:56.737 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/_framework/aspnetcore-browser-refresh.js - null null
+2025-09-17 22:16:56.738 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/scalar.aspnetcore.js'
+2025-09-17 22:16:56.738 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/scalar.js'
+2025-09-17 22:16:56.745 +03:00 [INF] Setting HTTP status code 304.
+2025-09-17 22:16:56.745 +03:00 [INF] Setting HTTP status code 304.
+2025-09-17 22:16:56.745 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/scalar.aspnetcore.js'
+2025-09-17 22:16:56.745 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/scalar.js'
+2025-09-17 22:16:56.746 +03:00 [INF] HTTP GET /scalar/scalar.aspnetcore.js responded 304 in 7.9671 ms
+2025-09-17 22:16:56.746 +03:00 [INF] HTTP GET /scalar/scalar.js responded 304 in 8.0538 ms
+2025-09-17 22:16:56.746 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/_framework/aspnetcore-browser-refresh.js - 200 16515 application/javascript; charset=utf-8 8.4899ms
+2025-09-17 22:16:56.746 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar/scalar.aspnetcore.js - 304 null null 9.0115ms
+2025-09-17 22:16:56.746 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar/scalar.js - 304 null null 9.222ms
+2025-09-17 22:16:56.760 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/_vs/browserLink - null null
+2025-09-17 22:16:56.803 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/_vs/browserLink - 200 null text/javascript; charset=UTF-8 42.9062ms
+2025-09-17 22:16:56.907 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/openapi/v1.json - null null
+2025-09-17 22:16:56.907 +03:00 [INF] Executing endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:16:57.010 +03:00 [INF] Executed endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:16:57.011 +03:00 [INF] HTTP GET /openapi/v1.json responded 200 in 103.4954 ms
+2025-09-17 22:16:57.012 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/openapi/v1.json - 200 null application/json;charset=utf-8 104.9375ms
+2025-09-17 22:16:57.012 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/openapi/v1.json - null null
+2025-09-17 22:16:57.013 +03:00 [INF] Executing endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:16:57.016 +03:00 [INF] Executed endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:16:57.017 +03:00 [INF] HTTP GET /openapi/v1.json responded 200 in 3.2788 ms
+2025-09-17 22:16:57.017 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/openapi/v1.json - 200 null application/json;charset=utf-8 5.5115ms
+2025-09-17 22:17:24.314 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/openapi/v1.json - null null
+2025-09-17 22:17:24.315 +03:00 [INF] Executing endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:17:24.316 +03:00 [INF] Executed endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:17:24.317 +03:00 [INF] HTTP GET /openapi/v1.json responded 200 in 1.8066 ms
+2025-09-17 22:17:24.317 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/openapi/v1.json - 200 null application/json;charset=utf-8 3.4876ms
+2025-09-17 22:17:42.023 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/health - null null
+2025-09-17 22:17:42.024 +03:00 [INF] Executing endpoint 'HTTP: GET /health'
+2025-09-17 22:17:42.025 +03:00 [INF] Setting HTTP status code 200.
+2025-09-17 22:17:42.029 +03:00 [INF] Writing value of type '<>f__AnonymousType0`1' as Json.
+2025-09-17 22:17:42.030 +03:00 [INF] Executed endpoint 'HTTP: GET /health'
+2025-09-17 22:17:42.031 +03:00 [INF] HTTP GET /health responded 200 in 6.9861 ms
+2025-09-17 22:17:42.031 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/health - 200 null application/json; charset=utf-8 8.013ms
+2025-09-17 22:17:51.715 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/openapi/v1.json - null null
+2025-09-17 22:17:51.720 +03:00 [INF] Executing endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:17:51.746 +03:00 [INF] Executed endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:17:51.748 +03:00 [INF] HTTP GET /openapi/v1.json responded 200 in 28.1644 ms
+2025-09-17 22:17:51.749 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/openapi/v1.json - 200 null application/json;charset=utf-8 33.9978ms
+2025-09-17 22:18:36.453 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/openapi/v1.json - null null
+2025-09-17 22:18:36.454 +03:00 [INF] Executing endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:18:36.455 +03:00 [INF] Executed endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 22:18:36.456 +03:00 [INF] HTTP GET /openapi/v1.json responded 200 in 1.4996 ms
+2025-09-17 22:18:36.456 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/openapi/v1.json - 200 null application/json;charset=utf-8 3.5056ms
+2025-09-17 23:20:09.357 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar/ - null null
+2025-09-17 23:20:09.359 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/{documentName?}'
+2025-09-17 23:20:09.361 +03:00 [INF] Write content with HTTP Response ContentType of text/html
+2025-09-17 23:20:09.362 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/{documentName?}'
+2025-09-17 23:20:09.362 +03:00 [INF] HTTP GET /scalar/ responded 200 in 2.6996 ms
+2025-09-17 23:20:09.362 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar/ - 200 null text/html 5.3961ms
+2025-09-17 23:20:09.385 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar/scalar.js - null null
+2025-09-17 23:20:09.385 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar/scalar.aspnetcore.js - null null
+2025-09-17 23:20:09.385 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/_framework/aspnetcore-browser-refresh.js - null null
+2025-09-17 23:20:09.387 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/_framework/aspnetcore-browser-refresh.js - 200 16515 application/javascript; charset=utf-8 1.672ms
+2025-09-17 23:20:09.387 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/scalar.aspnetcore.js'
+2025-09-17 23:20:09.387 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/scalar.js'
+2025-09-17 23:20:09.388 +03:00 [INF] Setting HTTP status code 304.
+2025-09-17 23:20:09.388 +03:00 [INF] Setting HTTP status code 304.
+2025-09-17 23:20:09.388 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/scalar.aspnetcore.js'
+2025-09-17 23:20:09.388 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/scalar.js'
+2025-09-17 23:20:09.388 +03:00 [INF] HTTP GET /scalar/scalar.aspnetcore.js responded 304 in 1.2213 ms
+2025-09-17 23:20:09.388 +03:00 [INF] HTTP GET /scalar/scalar.js responded 304 in 1.3407 ms
+2025-09-17 23:20:09.389 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar/scalar.aspnetcore.js - 304 null null 3.9517ms
+2025-09-17 23:20:09.389 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar/scalar.js - 304 null null 4.1663ms
+2025-09-17 23:20:09.392 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/_vs/browserLink - null null
+2025-09-17 23:20:09.400 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/_vs/browserLink - 200 null text/javascript; charset=UTF-8 8.7421ms
+2025-09-17 23:20:09.523 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/openapi/v1.json - null null
+2025-09-17 23:20:09.523 +03:00 [INF] Executing endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 23:20:09.524 +03:00 [INF] Executed endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 23:20:09.524 +03:00 [INF] HTTP GET /openapi/v1.json responded 200 in 0.8693 ms
+2025-09-17 23:20:09.525 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/openapi/v1.json - 200 null application/json;charset=utf-8 1.629ms
+2025-09-17 23:20:09.525 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/openapi/v1.json - null null
+2025-09-17 23:20:09.525 +03:00 [INF] Executing endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 23:20:09.526 +03:00 [INF] Executed endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 23:20:09.526 +03:00 [INF] HTTP GET /openapi/v1.json responded 200 in 0.6242 ms
+2025-09-17 23:20:09.526 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/openapi/v1.json - 200 null application/json;charset=utf-8 1.2314ms
+2025-09-17 23:20:09.747 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar/favicon.svg - null null
+2025-09-17 23:20:09.748 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/favicon.svg'
+2025-09-17 23:20:09.748 +03:00 [INF] Setting HTTP status code 304.
+2025-09-17 23:20:09.748 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/favicon.svg'
+2025-09-17 23:20:09.748 +03:00 [INF] HTTP GET /scalar/favicon.svg responded 304 in 0.6289 ms
+2025-09-17 23:20:09.749 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar/favicon.svg - 304 null null 1.1272ms
+2025-09-17 23:20:17.933 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar/ - null null
+2025-09-17 23:20:17.935 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/{documentName?}'
+2025-09-17 23:20:17.936 +03:00 [INF] Write content with HTTP Response ContentType of text/html
+2025-09-17 23:20:17.936 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/{documentName?}'
+2025-09-17 23:20:17.936 +03:00 [INF] HTTP GET /scalar/ responded 200 in 1.6891 ms
+2025-09-17 23:20:17.937 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar/ - 200 null text/html 3.4988ms
+2025-09-17 23:20:17.956 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar/scalar.js - null null
+2025-09-17 23:20:17.957 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/scalar.js'
+2025-09-17 23:20:17.957 +03:00 [INF] Setting HTTP status code 304.
+2025-09-17 23:20:17.957 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/scalar.js'
+2025-09-17 23:20:17.957 +03:00 [INF] HTTP GET /scalar/scalar.js responded 304 in 0.7078 ms
+2025-09-17 23:20:17.958 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar/scalar.js - 304 null null 1.4978ms
+2025-09-17 23:20:17.959 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar/scalar.aspnetcore.js - null null
+2025-09-17 23:20:17.959 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/scalar.aspnetcore.js'
+2025-09-17 23:20:17.959 +03:00 [INF] Setting HTTP status code 304.
+2025-09-17 23:20:17.960 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/scalar.aspnetcore.js'
+2025-09-17 23:20:17.960 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/_framework/aspnetcore-browser-refresh.js - null null
+2025-09-17 23:20:17.960 +03:00 [INF] HTTP GET /scalar/scalar.aspnetcore.js responded 304 in 1.1630 ms
+2025-09-17 23:20:17.961 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar/scalar.aspnetcore.js - 304 null null 1.8709ms
+2025-09-17 23:20:17.961 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/_framework/aspnetcore-browser-refresh.js - 200 16515 application/javascript; charset=utf-8 0.7325ms
+2025-09-17 23:20:17.963 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/_vs/browserLink - null null
+2025-09-17 23:20:17.966 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/_vs/browserLink - 200 null text/javascript; charset=UTF-8 3.7157ms
+2025-09-17 23:20:18.041 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/openapi/v1.json - null null
+2025-09-17 23:20:18.042 +03:00 [INF] Executing endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 23:20:18.042 +03:00 [INF] Executed endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 23:20:18.042 +03:00 [INF] HTTP GET /openapi/v1.json responded 200 in 0.9162 ms
+2025-09-17 23:20:18.043 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/openapi/v1.json - 200 null application/json;charset=utf-8 1.4598ms
+2025-09-17 23:20:18.044 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/openapi/v1.json - null null
+2025-09-17 23:20:18.045 +03:00 [INF] Executing endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 23:20:18.045 +03:00 [INF] Executed endpoint 'HTTP: GET /openapi/{documentName}.json'
+2025-09-17 23:20:18.046 +03:00 [INF] HTTP GET /openapi/v1.json responded 200 in 0.9716 ms
+2025-09-17 23:20:18.046 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/openapi/v1.json - 200 null application/json;charset=utf-8 1.7539ms
+2025-09-17 23:20:18.231 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7164/scalar/favicon.svg - null null
+2025-09-17 23:20:18.231 +03:00 [INF] Executing endpoint 'HTTP: GET /scalar/favicon.svg'
+2025-09-17 23:20:18.231 +03:00 [INF] Setting HTTP status code 304.
+2025-09-17 23:20:18.231 +03:00 [INF] Executed endpoint 'HTTP: GET /scalar/favicon.svg'
+2025-09-17 23:20:18.232 +03:00 [INF] HTTP GET /scalar/favicon.svg responded 304 in 0.4911 ms
+2025-09-17 23:20:18.232 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/scalar/favicon.svg - 304 null null 0.9552ms
