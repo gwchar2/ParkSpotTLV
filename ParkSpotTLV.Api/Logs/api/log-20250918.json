@@ -932,3 +932,10 @@
 2025-09-18 13:22:24.929 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7164/favicon.ico - 404 null application/json; charset=utf-8 23.7153ms
 2025-09-18 13:22:24.931 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:7164/favicon.ico, Response status code: 404
 2025-09-18 13:32:04.683 +03:00 [INF] Application is shutting down...
+2025-09-18 15:11:06.515 +03:00 [INF] Now listening on: https://localhost:7164
+2025-09-18 15:11:06.546 +03:00 [INF] Now listening on: http://localhost:5164
+2025-09-18 15:11:06.554 +03:00 [INF] No action descriptors found. This may indicate an incorrectly configured application or missing application parts. To learn more, visit https://aka.ms/aspnet/mvc/app-parts
+2025-09-18 15:11:06.727 +03:00 [INF] Application is shutting down...
+2025-09-18 15:11:06.794 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-09-18 15:11:06.794 +03:00 [INF] Hosting environment: Development
+2025-09-18 15:11:06.795 +03:00 [INF] Content root path: C:\Users\hwath\Codes\VisualStudio\ParkSpotTLV\ParkSpotTLV.Api
