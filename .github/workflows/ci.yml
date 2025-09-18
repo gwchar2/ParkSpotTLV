@@ -1,9 +1,11 @@
-name: Build (API + MAUI Android) & Test
+name: Build (API + MAUI Android)
 
 on:
   pull_request:
     branches: [ main ]
     types: [opened, synchronize, reopened, ready_for_review, closed]
+  push:
+    branches: [ main ]        
   workflow_dispatch:
   
 jobs:
