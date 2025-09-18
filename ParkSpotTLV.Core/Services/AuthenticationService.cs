@@ -53,6 +53,11 @@ public class AuthenticationService
         _users[username] = password;
         IsAuthenticated = true;
         CurrentUsername = username;
+
+        // Create default car for new user
+        var carService = CarService.Instance;
+        carService.CreateDefaultCarForUser();
+
         return true;
     }
 
