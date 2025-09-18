@@ -35,19 +35,13 @@ public partial class MenuOverlay : Grid
     private async void OnAccountDetailsClicked(object sender, EventArgs e)
     {
         await CloseMenu();
-        if (Application.Current?.Windows.FirstOrDefault()?.Page is Page page)
-        {
-            await page.DisplayAlert("Account Details", "Account details feature coming soon!", "OK");
-        }
+        await Shell.Current.GoToAsync("AccountDetailsPage");
     }
 
     private async void OnPreferencesClicked(object sender, EventArgs e)
     {
         await CloseMenu();
-        if (Application.Current?.Windows.FirstOrDefault()?.Page is Page page)
-        {
-            await page.DisplayAlert("Preferences", "Preferences feature coming soon!", "OK");
-        }
+        await Shell.Current.GoToAsync("PreferencesPage");
     }
 
     private async void OnLogoutClicked(object sender, EventArgs e)

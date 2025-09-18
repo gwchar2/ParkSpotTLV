@@ -10,7 +10,10 @@ namespace ParkSpotTLV.App {
             Routing.RegisterRoute("SignUpPage", typeof(SignUpPage));
             Routing.RegisterRoute("ShowMapPage", typeof(ShowMapPage));
             Routing.RegisterRoute("AddCarPage", typeof(AddCarPage));
+            Routing.RegisterRoute("EditCarPage", typeof(EditCarPage));
             Routing.RegisterRoute("MyCarsPage", typeof(MyCarsPage));
+            Routing.RegisterRoute("AccountDetailsPage", typeof(AccountDetailsPage));
+            Routing.RegisterRoute("PreferencesPage", typeof(PreferencesPage));
         }
 
         private async void OnMenuButtonClicked(object sender, EventArgs e)
