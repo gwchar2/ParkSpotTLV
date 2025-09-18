@@ -21,11 +21,11 @@
 		<Nullable>enable</Nullable>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
-		<!-- Display name -->
-		<ApplicationTitle>ParkSpotTLV.App</ApplicationTitle>
-
-		<!-- App Identifier -->
-		<ApplicationId>com.companyname.parkspottlv.app</ApplicationId>
+		<ApplicationId>com.parkspot.tlv</ApplicationId>  <!-- internal ID -->
+  		<ApplicationDisplayName>ParkSpot TLV</ApplicationDisplayName> <!-- name shown on device -->
+  		<AndroidPackageFormat>apk</AndroidPackageFormat>
+  		<AndroidPackageName>ParkSpotTLV</AndroidPackageName> <!-- overrides APK filename -->
+  		<AndroidPackageFileName>ParkSpotTLV.apk</AndroidPackageFileName> <!-- custom output name -->
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>

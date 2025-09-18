@@ -1,9 +1,13 @@
-{
-  "$schema": "https://github.com/googleapis/release-please/raw/main/schemas/config.json",
-  "prerelease": true,
-  "packages": {
-    ".": {
-      "release-type": "simple"
-    }
-  }
+{ 
+  "$schema": "https://github.com/googleapis/release-please/raw/main/schemas/config.json", 
+  "prerelease": true, 
+  "include-v-in-tag": true, 
+  "packages": 
+  { 
+    ".": 
+    { 
+      "release-type": "simple",
+      "changelog-path": "CHANGELOG.md"
+    } 
+  } 
 }

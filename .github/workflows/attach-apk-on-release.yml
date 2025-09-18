@@ -2,8 +2,8 @@ name: Attach APK to Release
 
 on:
   release:
-    types: [published, prereleased]   
-  workflow_dispatch:                  
+    types: [published, prereleased]             # run for both releases and pre-releases
+  workflow_dispatch:                            # manual fallback to attach to an existing tag
     inputs:
       tag:
         description: "Tag to attach APK to (e.g., v0.2.0-beta.0)"
@@ -25,6 +25,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ env.TAG_NAME }}
+          fetch-depth: 0
 
       - name: Setup .NET SDK 9.x
         uses: actions/setup-dotnet@v4
@@ -48,9 +49,14 @@ jobs:
         shell: pwsh
         run: dotnet restore
 
-      - name: Publish APK (unsigned, for testing)
+      - name: Publish APK
         shell: pwsh
-        run: dotnet publish $env:MAUI_PROJECT -c $env:CONFIGURATION -f net9.0-android /p:AndroidPackageFormat=apk
+        run: >
+          dotnet publish $env:MAUI_PROJECT
+          -c $env:CONFIGURATION
+          -f net9.0-android
+          /p:AndroidPackageFormat=apk
+          /p:AndroidPackageFileName=ParkSpotTLV.apk
 
       - name: Find APK path
         id: findapk
