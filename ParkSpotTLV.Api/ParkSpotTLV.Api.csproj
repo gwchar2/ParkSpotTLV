@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <UserSecretsId>8d606e5d-6de0-46ab-917b-d0b0b49209a4</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ParkSpotTLV.Contracts\ParkSpotTLV.Contracts.csproj" />
+    <ProjectReference Include="..\ParkSpotTLV.Infrastructure\ParkSpotTLV.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

@@ -4,7 +4,8 @@ using Serilog;
 using ParkSpotTLV.Api.Errors;
 using ParkSpotTLV.Api.Http;
 using ParkSpotTLV.Api.Endpoints;
-
+using ParkSpotTLV.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 
 Log.Logger = new LoggerConfiguration()
@@ -15,6 +16,17 @@ try {
     Log.Information("Starting Up");
 
     var builder = WebApplication.CreateBuilder(args);
+
+    // DB Connection using secret data ("ConnectionStrings:DefaultConnection" "Host=localhost;Port=5432;Database=parkspot_dev;Username=admin;Password=admin")
+    var conn = builder.Configuration.GetConnectionString("DefaultConnection")
+           ?? throw new InvalidOperationException("Missing connection string.");
+    builder.Services.AddDbContext<AppDbContext>(opt =>
+        opt.UseNpgsql(conn, x => { 
+            x.UseNetTopologySuite(); 
+            x.MigrationsAssembly(typeof(AppDbContext).Assembly.GetName().Name); 
+        }));
+
+    
 
     // Serilog host hook (reads appsettings)
     builder.Host.UseSerilog((ctx, services, cfg) => {
