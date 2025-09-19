@@ -2,7 +2,7 @@
 
 Project uses 'secret data' to connect to database. Run in project root:
 ```bash
-echo $env:DB_CONNECTION 
+dotnet user-secrets list --project .\ParkSpotTLV.Api
 ```
 
 Creating migrations or updating the table through project:

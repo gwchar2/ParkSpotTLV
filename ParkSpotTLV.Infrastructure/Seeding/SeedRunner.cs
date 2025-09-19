@@ -96,7 +96,8 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             _log.LogInformation("Seeding StreetSegments from {Path}", _opts.Paths.StreetSegments);
 
             var zonesByCode = await db.Zones.AsNoTracking()
-                .ToDictionaryAsync(z => z.Code, z => z.Id, ct);
+                .Where(z => z.Code != null)
+                .ToDictionaryAsync(z => z.Code!.Value, z => z.Id, ct);
 
             foreach (var (geom, props) in GeoJsonLoader.LoadFeatures(_opts.Paths.StreetSegments)) {
                 var line = ToLineString(geom);
@@ -113,7 +114,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                 };
 
                 var zoneCode = GetInt(props, "zoneCode");
-                if (zoneCode is not null && zonesByCode.TryGetValue(zoneCode, out var zid))
+                if (zoneCode.HasValue && zonesByCode.TryGetValue(zoneCode.Value, out var zid))
                     segment.ZoneId = zid;
 
                 db.StreetSegments.Add(segment);
@@ -138,7 +139,8 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             _log.LogInformation("Seeding Users from {Path}", _opts.Paths.Users);
 
             var zonesByCode = await db.Zones.AsNoTracking()
-                .ToDictionaryAsync(z => z.Code, z => z.Id, ct);
+                .Where(z => z.Code != null)
+                .ToDictionaryAsync(z => z.Code!.Value, z => z.Id, ct);
 
             var json = await File.ReadAllTextAsync(_opts.Paths.Users, ct);
             var users = JsonSerializer.Deserialize<List<JsonObject>>(json) ?? new();
@@ -171,7 +173,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                         };
 
                         var zoneCode = GetInt(po, "zoneCode");
-                        if (zoneCode is not null && zonesByCode.TryGetValue(zoneCode, out var zid))
+                        if (zoneCode.HasValue && zonesByCode.TryGetValue(zoneCode.Value, out var zid))
                             permit.ZoneId = zid;
 
                         vehicle.Permits.Add(permit);

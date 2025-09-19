@@ -17,7 +17,7 @@ try {
 
     var builder = WebApplication.CreateBuilder(args);
 
-    // Connects to DB (secret connection)
+    /* Adds a DbContext & Connects to DB (secret connection) */
     var conn = builder.Configuration.GetConnectionString("DefaultConnection")
            ?? throw new InvalidOperationException("Missing connection string.");
     builder.Services.AddDbContext<AppDbContext>(opt =>
@@ -28,7 +28,7 @@ try {
 
     
 
-    // Serilog host hook (reads appsettings)
+    /* Serilog host hook (reads appsettings) */
     builder.Host.UseSerilog((ctx, services, cfg) => {
         cfg.ReadFrom.Configuration(ctx.Configuration)
           .ReadFrom.Services(services)
@@ -47,12 +47,12 @@ try {
         builder.Configuration.GetSection("Seeding"));
     builder.Services.AddHostedService<ParkSpotTLV.Infrastructure.Seeding.SeedRunner>();
 
-    /* Runtime start */
+    /* On Start (RunTime threads) */
     builder.Services.AddSingleton<RuntimeHealth>();
 
     var app = builder.Build();
 
-
+    
     /* Pipeline */
     app.UseGlobalProblemDetails();                          // problem+json for errors
     app.UseMiddleware<TracingMiddleware>();                 // W3C trace + response headers
