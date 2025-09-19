@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ParkSpotTLV.Infrastructure.Entities;
+using System.Reflection.Emit;
 
 namespace ParkSpotTLV.Infrastructure {
 
@@ -15,6 +16,9 @@ namespace ParkSpotTLV.Infrastructure {
         public DbSet<StreetSegment> StreetSegments => Set<StreetSegment>();
 
         protected override void OnModelCreating(ModelBuilder model) {
+
+
+            model.HasPostgresExtension("postgis");
             model.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }
 

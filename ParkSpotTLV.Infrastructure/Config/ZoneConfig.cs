@@ -12,7 +12,13 @@ namespace ParkSpotTLV.Infrastructure.Config {
                 .HasColumnType("geometry(MultiPolygon,4326)")
                 .IsRequired();
 
-            e.HasIndex(x => x.Geom).HasMethod("gist");
+            e.HasIndex(x => x.Geom)
+             .HasMethod("gist")
+             .HasDatabaseName("gist_zones_geometry");
+
+            e.HasIndex(x => x.ZonePermit)
+                .IsUnique()
+                .HasDatabaseName("ux_zones_zone_permit");
         }
     }
 }

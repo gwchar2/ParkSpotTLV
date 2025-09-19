@@ -1,4 +1,36 @@
-﻿# Entity Classes
+﻿# Connection to DB on docker
+
+Project uses 'secret data' to connect to database. Run in project root:
+```bash
+echo $env:DB_CONNECTION 
+```
+
+Creating migrations list or updating the table through project:
+```bash
+dotnet ef migrations add InitialCreate --project ParkSpotTLV.Infrastructure --startup-project ParkSpotTLV.Api
+dotnet ef migrations list --project ParkSpotTLV.Infrastructure --startup-project ParkSpotTLV.Api
+dotnet ef database update --project ParkSpotTLV.Infrastructure --startup-project ParkSpotTLV.Api
+```
+
+In docker terminal, load parkspot-db:
+```bash
+docker exec -it parkspot-db psql -U admin -d parkspot_dev
+```
+
+To list tables:
+```bash
+\dt
+```
+
+To inspect tables:
+```bash
+\d+ users
+\d+ vehicles
+\d+ zones
+\d+ street_segments
+```
+
+# Entity Classes
 They are your entity definitions. 
 EF Core uses them to generate the tables/columns/relations/indexes in Postgres.
 Each class → one table. Each property → one column. Nav properties → foreign keys.
@@ -7,7 +39,7 @@ Each class → one table. Each property → one column. Nav properties → forei
 ## Types
 
 ### User
-```
+```cs
 Guid Id
 string Username
 string PasswordHash
@@ -15,7 +47,7 @@ ICollection<Vehicle> Vehicles
 ```
 
 ### Vehicle
-```
+```cs
 Guid Id
 Guid OwnerID
 User Owner
@@ -25,7 +57,7 @@ int ZonePermit
 ```
 
 ### Street Segment
-```
+```cs
 Guid Id
 string? Name
 MultiLineString Geom
@@ -36,7 +68,7 @@ ParkingHours ParkingHours
 ```
 
 ### Zone
-```
+```cs
 Guid Id
 MultiPolygon Geom
 ```
@@ -69,3 +101,7 @@ On app start, your API’s WebApplicationBuilder composes the app:
 reads config & secrets → builds the DbContext options → registers DbContext in DI → app.Build() finishes the pipeline.
 
 The API is now ready to open DbContext instances on demand for requests.
+
+
+
+

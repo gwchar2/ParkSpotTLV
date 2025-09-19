@@ -1,4 +1,5 @@
 ﻿using NetTopologySuite.Geometries;
+using System.ComponentModel.DataAnnotations;
 
 /*
  * Zone definition for the database

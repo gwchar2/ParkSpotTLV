@@ -10,7 +10,7 @@ namespace ParkSpotTLV.Infrastructure.Config {
             e.HasKey(x => x.Id);
 
             e.Property(x => x.Username).IsRequired().HasMaxLength(64);
-            e.HasIndex(x => x.Username).IsUnique();
+            e.HasIndex(x => x.Username).IsUnique().HasDatabaseName("ux_users_username");
 
             e.Property(x => x.PasswordHash).IsRequired().HasMaxLength(256);
         }

@@ -17,7 +17,8 @@ try {
 
     var builder = WebApplication.CreateBuilder(args);
 
-    // DB Connection using secret data ("ConnectionStrings:DefaultConnection" "Host=localhost;Port=5432;Database=parkspot_dev;Username=admin;Password=admin")
+    
+
     var conn = builder.Configuration.GetConnectionString("DefaultConnection")
            ?? throw new InvalidOperationException("Missing connection string.");
     builder.Services.AddDbContext<AppDbContext>(opt =>

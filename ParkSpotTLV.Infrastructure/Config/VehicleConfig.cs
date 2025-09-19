@@ -24,6 +24,8 @@ namespace ParkSpotTLV.Infrastructure.Config {
              .WithMany(u => u.Vehicles)
              .HasForeignKey(x => x.OwnerId)
              .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasIndex(x => x.OwnerId).HasDatabaseName("ix_vehicles_owner_id");
         }
     }
 }
