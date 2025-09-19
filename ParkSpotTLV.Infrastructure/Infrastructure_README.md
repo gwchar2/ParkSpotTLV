@@ -5,14 +5,15 @@ Project uses 'secret data' to connect to database. Run in project root:
 echo $env:DB_CONNECTION 
 ```
 
-Creating migrations list or updating the table through project:
+Creating migrations or updating the table through project:
 ```bash
+dotnet build
 dotnet ef migrations add InitialCreate --project ParkSpotTLV.Infrastructure --startup-project ParkSpotTLV.Api
-dotnet ef migrations list --project ParkSpotTLV.Infrastructure --startup-project ParkSpotTLV.Api
 dotnet ef database update --project ParkSpotTLV.Infrastructure --startup-project ParkSpotTLV.Api
+dotnet ef migrations list --project ParkSpotTLV.Infrastructure --startup-project ParkSpotTLV.Api
 ```
 
-In docker terminal, load parkspot-db:
+In docker terminal, loading the database parkspot-db:
 ```bash
 docker exec -it parkspot-db psql -U admin -d parkspot_dev
 ```
@@ -28,6 +29,12 @@ To inspect tables:
 \d+ vehicles
 \d+ zones
 \d+ street_segments
+```
+
+Removing the entire table:
+```bash
+dotnet ef database drop --project ParkSpotTLV.Infrastructure --startup-project ParkSpotTLV.Api
+dotnet ef database update --project ParkSpotTLV.Infrastructure --startup-project ParkSpotTLV.Api
 ```
 
 # Entity Classes

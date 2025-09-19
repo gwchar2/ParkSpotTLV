@@ -1,0 +1,218 @@
+﻿// Seeding/SeedRunner.cs
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using ParkSpotTLV.Infrastructure.Entities;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+
+namespace ParkSpotTLV.Infrastructure.Seeding {
+    public sealed class SeedOptions {
+        public bool Enabled { get; set; } = true;
+        public SeedPaths Paths { get; set; } = new();
+    }
+
+    public sealed class SeedPaths {
+        public string Zones { get; set; } = "ParkSpotTLV.Infrastructure/db/Seed/zones.geojson";
+        public string StreetSegments { get; set; } = "ParkSpotTLV.Infrastructure/db/Seed/street_segments.geojson";
+        public string Users { get; set; } = "ParkSpotTLV.Infrastructure/db/Seed/users_seed.json";
+    }
+
+    public sealed class SeedRunner : IHostedService {
+        private readonly IServiceProvider _sp;
+        private readonly IHostEnvironment _env;
+        private readonly ILogger<SeedRunner> _log;
+        private readonly SeedOptions _opts;
+
+        public SeedRunner(
+            IServiceProvider sp,
+            IHostEnvironment env,
+            IOptions<SeedOptions> opts,
+            ILogger<SeedRunner> log) {
+            _sp = sp;
+            _env = env;
+            _opts = opts.Value;
+            _log = log;
+        }
+
+        public async Task StartAsync(CancellationToken ct) {
+            if (!_opts.Enabled) {
+                _log.LogInformation("Seeding disabled via configuration (env: {Env}).", _env.EnvironmentName);
+                return;
+            }
+
+            using var scope = _sp.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            // If migrations haven’t been applied yet, skip (so you see a clear warning)
+            if ((await db.Database.GetPendingMigrationsAsync(ct)).Any()) {
+                _log.LogWarning("Pending migrations detected. Apply migrations before seeding.");
+                return;
+            }
+
+            await SeedZonesAsync(db, ct);
+            await SeedStreetSegmentsAsync(db, ct);
+            await SeedUsersAsync(db, ct);
+
+            _log.LogInformation("Seeding completed.");
+        }
+
+        public Task StopAsync(CancellationToken ct) => Task.CompletedTask;
+
+        // ---------------------- Zones ----------------------
+
+        private async Task SeedZonesAsync(AppDbContext db, CancellationToken ct) {
+            if (await db.Zones.AsNoTracking().AnyAsync(ct)) {
+                _log.LogInformation("Zones already present. Skipping.");
+                return;
+            }
+
+            _log.LogInformation("Seeding Zones from {Path}", _opts.Paths.Zones);
+
+            foreach (var (geom, props) in GeoJsonLoader.LoadFeatures(_opts.Paths.Zones)) {
+                var zone = new Zone {
+                    Geom = ToMultiPolygon(geom),
+                    Code = GetInt(props, "code") ?? GetInt(props, "permit"),
+                    Name = GetString(props, "name"),
+                    LastUpdated = DateTimeOffset.UtcNow
+                };
+
+                db.Zones.Add(zone);
+            }
+
+            await db.SaveChangesAsync(ct);
+        }
+
+        // ---------------------- Street Segments ----------------------
+
+        private async Task SeedStreetSegmentsAsync(AppDbContext db, CancellationToken ct) {
+            if (await db.StreetSegments.AsNoTracking().AnyAsync(ct)) {
+                _log.LogInformation("StreetSegments already present. Skipping.");
+                return;
+            }
+
+            _log.LogInformation("Seeding StreetSegments from {Path}", _opts.Paths.StreetSegments);
+
+            var zonesByCode = await db.Zones.AsNoTracking()
+                .ToDictionaryAsync(z => z.Code, z => z.Id, ct);
+
+            foreach (var (geom, props) in GeoJsonLoader.LoadFeatures(_opts.Paths.StreetSegments)) {
+                var line = ToLineString(geom);
+
+                var segment = new StreetSegment {
+                    Name = GetString(props, "name"),
+                    Geom = line,
+                    CarsOnly = GetBool(props, "carsOnly") ?? false,
+                    ParkingType = ParseEnum<ParkingType>(GetString(props, "parkingType")) ?? ParkingType.Unknown,
+                    ParkingHours = ParseEnum<ParkingHours>(GetString(props, "parkingHours")) ?? ParkingHours.Unknown,
+                    Side = ParseEnum<SegmentSide>(GetString(props, "side")) ?? SegmentSide.Both,
+                    StylePriority = GetInt(props, "stylePriority") ?? 100,
+                    LastUpdated = DateTimeOffset.UtcNow
+                };
+
+                var zoneCode = GetInt(props, "zoneCode");
+                if (zoneCode is not null && zonesByCode.TryGetValue(zoneCode, out var zid))
+                    segment.ZoneId = zid;
+
+                db.StreetSegments.Add(segment);
+            }
+
+            await db.SaveChangesAsync(ct);
+        }
+
+        // ---------------------- Users / Vehicles / Permits ----------------------
+
+        private async Task SeedUsersAsync(AppDbContext db, CancellationToken ct) {
+            if (await db.Users.AsNoTracking().AnyAsync(ct)) {
+                _log.LogInformation("Users already present. Skipping.");
+                return;
+            }
+
+            if (!File.Exists(_opts.Paths.Users)) {
+                _log.LogWarning("Users seed file missing: {Path}. Skipping users.", _opts.Paths.Users);
+                return;
+            }
+
+            _log.LogInformation("Seeding Users from {Path}", _opts.Paths.Users);
+
+            var zonesByCode = await db.Zones.AsNoTracking()
+                .ToDictionaryAsync(z => z.Code, z => z.Id, ct);
+
+            var json = await File.ReadAllTextAsync(_opts.Paths.Users, ct);
+            var users = JsonSerializer.Deserialize<List<JsonObject>>(json) ?? new();
+
+            foreach (var u in users) {
+                var user = new User {
+                    Id = ParseGuid(GetString(u, "id")) ?? Guid.NewGuid(),
+                    Username = GetString(u, "username") ?? "user",
+                    PasswordHash = GetString(u, "passwordHash") ?? ""
+                };
+
+                // Vehicles + vehicle-scoped permits (no user-scoped permits in current model)
+                foreach (var v in u["vehicles"]?.AsArray() ?? new()) {
+                    var vo = v!.AsObject();
+                    var vehicle = new Vehicle {
+                        Id = ParseGuid(GetString(vo, "id")) ?? Guid.NewGuid(),
+                        Owner = user,
+                        PlateNumber = GetString(vo, "plateNumber"),
+                        Type = ParseEnum<VehicleType>(GetString(vo, "type")) ?? VehicleType.Car
+                    };
+
+                    foreach (var p in vo["permits"]?.AsArray() ?? new()) {
+                        var po = p!.AsObject();
+                        var permit = new Permit {
+                            Id = ParseGuid(GetString(po, "id")) ?? Guid.NewGuid(),
+                            Type = ParseEnum<PermitType>(GetString(po, "type")) ?? PermitType.Default,
+                            Vehicle = vehicle,
+                            ValidTo = ParseDateOnly(GetString(po, "validTo")),
+                            IsActive = GetBool(po, "isActive") ?? true
+                        };
+
+                        var zoneCode = GetInt(po, "zoneCode");
+                        if (zoneCode is not null && zonesByCode.TryGetValue(zoneCode, out var zid))
+                            permit.ZoneId = zid;
+
+                        vehicle.Permits.Add(permit);
+                    }
+
+                    user.Vehicles.Add(vehicle);
+                }
+
+                db.Users.Add(user);
+            }
+
+            await db.SaveChangesAsync(ct);
+        }
+
+        // ---------------------- Helpers ----------------------
+
+        private static Zone ToExistingOrNewZone() => new(); // placeholder if you extend logic later
+
+        private static NetTopologySuite.Geometries.MultiPolygon ToMultiPolygon(NetTopologySuite.Geometries.Geometry g)
+            => g switch {
+                NetTopologySuite.Geometries.MultiPolygon mp => mp,
+                NetTopologySuite.Geometries.Polygon p => new NetTopologySuite.Geometries.MultiPolygon(new[] { p }),
+                _ => throw new InvalidDataException($"Expected Polygon/MultiPolygon, got {g.GeometryType}.")
+            };
+
+        private static NetTopologySuite.Geometries.LineString ToLineString(NetTopologySuite.Geometries.Geometry g)
+            => g switch {
+                NetTopologySuite.Geometries.LineString ls => ls,
+                _ => throw new InvalidDataException($"Expected LineString, got {g.GeometryType}.")
+            };
+
+        // Json helpers
+        private static string? GetString(JsonObject o, string key) => o[key]?.GetValue<string>();
+        private static int? GetInt(JsonObject o, string key) => o[key] is null ? null : o[key]!.GetValue<int?>();
+        private static bool? GetBool(JsonObject o, string key) => o[key] is null ? null : o[key]!.GetValue<bool?>();
+        private static Guid? ParseGuid(string? s) => Guid.TryParse(s, out var g) ? g : null;
+        private static DateOnly? ParseDateOnly(string? s) => DateOnly.TryParse(s, out var d) ? d : null;
+
+        private static TEnum? ParseEnum<TEnum>(string? s) where TEnum : struct {
+            if (string.IsNullOrWhiteSpace(s)) return null;
+            return Enum.TryParse<TEnum>(s, ignoreCase: true, out var v) ? v : null;
+        }
+    }
+}

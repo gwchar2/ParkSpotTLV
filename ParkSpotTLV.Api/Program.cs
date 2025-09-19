@@ -17,8 +17,7 @@ try {
 
     var builder = WebApplication.CreateBuilder(args);
 
-    
-
+    // Connects to DB (secret connection)
     var conn = builder.Configuration.GetConnectionString("DefaultConnection")
            ?? throw new InvalidOperationException("Missing connection string.");
     builder.Services.AddDbContext<AppDbContext>(opt =>
@@ -43,11 +42,16 @@ try {
     /* Services */
     builder.Services.AddOpenApi();
     builder.Services.AddEndpointsApiExplorer();
+    /* Seeding Services (enabled in Development via appsettings.Development.json) */
+    builder.Services.Configure<ParkSpotTLV.Infrastructure.Seeding.SeedOptions>(
+        builder.Configuration.GetSection("Seeding"));
+    builder.Services.AddHostedService<ParkSpotTLV.Infrastructure.Seeding.SeedRunner>();
 
     /* Runtime start */
     builder.Services.AddSingleton<RuntimeHealth>();
 
     var app = builder.Build();
+
 
     /* Pipeline */
     app.UseGlobalProblemDetails();                          // problem+json for errors

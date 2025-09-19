@@ -4,16 +4,20 @@ using ParkSpotTLV.Infrastructure.Entities;
 
 namespace ParkSpotTLV.Infrastructure.Config {
     public class UserConfig : IEntityTypeConfiguration<User> {
-
         public void Configure(EntityTypeBuilder<User> e) {
             e.ToTable("users");
+
             e.HasKey(x => x.Id);
 
-            e.Property(x => x.Username).IsRequired().HasMaxLength(64);
-            e.HasIndex(x => x.Username).IsUnique().HasDatabaseName("ux_users_username");
+            e.Property(x => x.Username)
+             .IsRequired()
+             .HasMaxLength(64);
+            e.HasIndex(x => x.Username).IsUnique();
 
-            e.Property(x => x.PasswordHash).IsRequired().HasMaxLength(256);
+            e.Property(x => x.PasswordHash)
+             .IsRequired()
+             .HasMaxLength(256);
+
         }
-
     }
 }

@@ -1,0 +1,1255 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000000",
+        "name": "Sample St 0",
+        "zoneCode": 6,
+        "carsOnly": true,
+        "parkingType": "Free",
+        "side": "Both",
+        "stylePriority": 64
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.761500645313355,
+            32.066501759102145
+          ],
+          [
+            34.762558672158725,
+            32.067919818179504
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000001",
+        "name": "Sample St 1",
+        "zoneCode": 1,
+        "carsOnly": false,
+        "parkingType": "Paid",
+        "side": "Left",
+        "stylePriority": 61
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.79542955074694,
+            32.0519069607689
+          ],
+          [
+            34.794695312647285,
+            32.053190594481194
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000002",
+        "name": "Sample St 2",
+        "zoneCode": 6,
+        "carsOnly": false,
+        "parkingType": "Limited",
+        "side": "Right",
+        "stylePriority": 119
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.785171189257696,
+            32.07695254277703
+          ],
+          [
+            34.78636666602827,
+            32.07538668951619
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000003",
+        "name": "Sample St 3",
+        "zoneCode": 1,
+        "carsOnly": true,
+        "parkingType": "Free",
+        "side": "Both",
+        "stylePriority": 104
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.78041503099108,
+            32.0593287699887
+          ],
+          [
+            34.77752199831056,
+            32.05896182747062
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000004",
+        "name": "Sample St 4",
+        "zoneCode": 6,
+        "carsOnly": false,
+        "parkingType": "Paid",
+        "side": "Left",
+        "stylePriority": 94
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.796223561882016,
+            32.09842769639646
+          ],
+          [
+            34.79854789134875,
+            32.0964760880213
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000005",
+        "name": "Sample St 5",
+        "zoneCode": 1,
+        "carsOnly": false,
+        "parkingType": "Limited",
+        "side": "Right",
+        "stylePriority": 120
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.777590696884424,
+            32.087718387969666
+          ],
+          [
+            34.77487706751458,
+            32.0871722685072
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000006",
+        "name": "Sample St 6",
+        "zoneCode": 6,
+        "carsOnly": true,
+        "parkingType": "Free",
+        "side": "Both",
+        "stylePriority": 79
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.806384100447325,
+            32.109113291239645
+          ],
+          [
+            34.80902239474986,
+            32.108229064034575
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000007",
+        "name": "Sample St 7",
+        "zoneCode": 1,
+        "carsOnly": false,
+        "parkingType": "Paid",
+        "side": "Left",
+        "stylePriority": 96
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.76975924582936,
+            32.07131624201365
+          ],
+          [
+            34.77193468376531,
+            32.069885856215684
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000008",
+        "name": "Sample St 8",
+        "zoneCode": 6,
+        "carsOnly": false,
+        "parkingType": "Limited",
+        "side": "Right",
+        "stylePriority": 71
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.79204839262178,
+            32.06468865550908
+          ],
+          [
+            34.79039274209215,
+            32.0665543596324
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000009",
+        "name": "Sample St 9",
+        "zoneCode": 1,
+        "carsOnly": true,
+        "parkingType": "Free",
+        "side": "Both",
+        "stylePriority": 78
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.80107685505939,
+            32.10057111521139
+          ],
+          [
+            34.79863685528053,
+            32.10031333477236
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000010",
+        "name": "Sample St 0",
+        "zoneCode": 6,
+        "carsOnly": false,
+        "parkingType": "Paid",
+        "side": "Left",
+        "stylePriority": 84
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.76397131631269,
+            32.10478816745113
+          ],
+          [
+            34.765889266441384,
+            32.10420543967184
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000011",
+        "name": "Sample St 1",
+        "zoneCode": 1,
+        "carsOnly": false,
+        "parkingType": "Limited",
+        "side": "Right",
+        "stylePriority": 108
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.76857229542652,
+            32.058377819171525
+          ],
+          [
+            34.770934767881755,
+            32.05683319431055
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000012",
+        "name": "Sample St 2",
+        "zoneCode": 6,
+        "carsOnly": true,
+        "parkingType": "Free",
+        "side": "Both",
+        "stylePriority": 101
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.781719786622816,
+            32.109839546679346
+          ],
+          [
+            34.78087395726059,
+            32.11
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000013",
+        "name": "Sample St 3",
+        "zoneCode": 1,
+        "carsOnly": false,
+        "parkingType": "Paid",
+        "side": "Left",
+        "stylePriority": 69
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.79764676250218,
+            32.09752476186178
+          ],
+          [
+            34.79609136258518,
+            32.09841167657749
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000014",
+        "name": "Sample St 4",
+        "zoneCode": 6,
+        "carsOnly": false,
+        "parkingType": "Limited",
+        "side": "Right",
+        "stylePriority": 117
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.775084847198904,
+            32.083193553772915
+          ],
+          [
+            34.77794092435236,
+            32.08359974691029
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000015",
+        "name": "Sample St 5",
+        "zoneCode": 1,
+        "carsOnly": true,
+        "parkingType": "Free",
+        "side": "Both",
+        "stylePriority": 84
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.806115923959446,
+            32.07041052838186
+          ],
+          [
+            34.80488217363783,
+            32.07061636995085
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000016",
+        "name": "Sample St 6",
+        "zoneCode": 6,
+        "carsOnly": false,
+        "parkingType": "Paid",
+        "side": "Left",
+        "stylePriority": 83
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.818313285932206,
+            32.095717731943125
+          ],
+          [
+            34.8165440817457,
+            32.09704327229154
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000017",
+        "name": "Sample St 7",
+        "zoneCode": 1,
+        "carsOnly": false,
+        "parkingType": "Limited",
+        "side": "Right",
+        "stylePriority": 114
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.796538212686286,
+            32.05917035611298
+          ],
+          [
+            34.79894448968648,
+            32.060771883774514
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000018",
+        "name": "Sample St 8",
+        "zoneCode": 6,
+        "carsOnly": true,
+        "parkingType": "Free",
+        "side": "Both",
+        "stylePriority": 50
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.795936675067615,
+            32.07931634248173
+          ],
+          [
+            34.79515700575431,
+            32.08128992096383
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000019",
+        "name": "Sample St 9",
+        "zoneCode": 1,
+        "carsOnly": false,
+        "parkingType": "Paid",
+        "side": "Left",
+        "stylePriority": 80
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.76347550998965,
+            32.10268057595224
+          ],
+          [
+            34.760608136376405,
+            32.101605793118274
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000020",
+        "name": "Sample St 0",
+        "zoneCode": 6,
+        "carsOnly": false,
+        "parkingType": "Limited",
+        "side": "Right",
+        "stylePriority": 118
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.80595006575842,
+            32.057703487869986
+          ],
+          [
+            34.80763827170367,
+            32.05838058980208
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000021",
+        "name": "Sample St 1",
+        "zoneCode": 1,
+        "carsOnly": true,
+        "parkingType": "Free",
+        "side": "Both",
+        "stylePriority": 104
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.817861774360445,
+            32.10573480958013
+          ],
+          [
+            34.82,
+            32.104251501429054
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000022",
+        "name": "Sample St 2",
+        "zoneCode": 6,
+        "carsOnly": false,
+        "parkingType": "Paid",
+        "side": "Left",
+        "stylePriority": 97
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.78628600503487,
+            32.081054550462135
+          ],
+          [
+            34.7854834945452,
+            32.081863104474
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000023",
+        "name": "Sample St 3",
+        "zoneCode": 1,
+        "carsOnly": false,
+        "parkingType": "Limited",
+        "side": "Right",
+        "stylePriority": 79
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.79530640686462,
+            32.050431450339104
+          ],
+          [
+            34.79303680449825,
+            32.050110129748504
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000024",
+        "name": "Sample St 4",
+        "zoneCode": 6,
+        "carsOnly": true,
+        "parkingType": "Free",
+        "side": "Both",
+        "stylePriority": 92
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.76425144099332,
+            32.064280278062135
+          ],
+          [
+            34.76207899654758,
+            32.06471843938984
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000025",
+        "name": "Sample St 5",
+        "zoneCode": 1,
+        "carsOnly": false,
+        "parkingType": "Paid",
+        "side": "Left",
+        "stylePriority": 110
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.774579834543744,
+            32.07837837657667
+          ],
+          [
+            34.773062184640025,
+            32.07699220762755
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000026",
+        "name": "Sample St 6",
+        "zoneCode": 6,
+        "carsOnly": false,
+        "parkingType": "Limited",
+        "side": "Right",
+        "stylePriority": 102
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.7880214800822,
+            32.09374455096759
+          ],
+          [
+            34.790204891450436,
+            32.09336739879952
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000027",
+        "name": "Sample St 7",
+        "zoneCode": 1,
+        "carsOnly": true,
+        "parkingType": "Free",
+        "side": "Both",
+        "stylePriority": 93
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.8080355506517,
+            32.056556141934685
+          ],
+          [
+            34.809014525832055,
+            32.056103813799915
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000028",
+        "name": "Sample St 8",
+        "zoneCode": 6,
+        "carsOnly": false,
+        "parkingType": "Paid",
+        "side": "Left",
+        "stylePriority": 109
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.77498838687293,
+            32.10539593595656
+          ],
+          [
+            34.77659621373556,
+            32.104205350394146
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000029",
+        "name": "Sample St 9",
+        "zoneCode": 1,
+        "carsOnly": false,
+        "parkingType": "Limited",
+        "side": "Right",
+        "stylePriority": 119
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.8101616551048,
+            32.10813977543708
+          ],
+          [
+            34.81297757256232,
+            32.10764041543799
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000030",
+        "name": "Sample St 0",
+        "zoneCode": 6,
+        "carsOnly": true,
+        "parkingType": "Free",
+        "side": "Both",
+        "stylePriority": 77
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.811879023641815,
+            32.104146571930634
+          ],
+          [
+            34.81096743083831,
+            32.10504933109429
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000031",
+        "name": "Sample St 1",
+        "zoneCode": 1,
+        "carsOnly": false,
+        "parkingType": "Paid",
+        "side": "Left",
+        "stylePriority": 108
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.77711495373681,
+            32.09179549021601
+          ],
+          [
+            34.77944121703035,
+            32.0904041218545
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000032",
+        "name": "Sample St 2",
+        "zoneCode": 6,
+        "carsOnly": false,
+        "parkingType": "Limited",
+        "side": "Right",
+        "stylePriority": 74
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.777802469529675,
+            32.10812256189815
+          ],
+          [
+            34.77975042025672,
+            32.10657620588947
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000033",
+        "name": "Sample St 3",
+        "zoneCode": 1,
+        "carsOnly": true,
+        "parkingType": "Free",
+        "side": "Both",
+        "stylePriority": 111
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.79017102297517,
+            32.10116319352289
+          ],
+          [
+            34.79106460479502,
+            32.10081899288546
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000034",
+        "name": "Sample St 4",
+        "zoneCode": 6,
+        "carsOnly": false,
+        "parkingType": "Paid",
+        "side": "Left",
+        "stylePriority": 58
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.800512753216246,
+            32.06411223370005
+          ],
+          [
+            34.80131246975112,
+            32.06475542132607
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000035",
+        "name": "Sample St 5",
+        "zoneCode": 1,
+        "carsOnly": false,
+        "parkingType": "Limited",
+        "side": "Right",
+        "stylePriority": 60
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.78515349492015,
+            32.08502033735747
+          ],
+          [
+            34.786960451708985,
+            32.085588003916435
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000036",
+        "name": "Sample St 6",
+        "zoneCode": 6,
+        "carsOnly": true,
+        "parkingType": "Free",
+        "side": "Both",
+        "stylePriority": 80
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.77593687075188,
+            32.05785269692765
+          ],
+          [
+            34.77382311877978,
+            32.05972492992472
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000037",
+        "name": "Sample St 7",
+        "zoneCode": 1,
+        "carsOnly": false,
+        "parkingType": "Paid",
+        "side": "Left",
+        "stylePriority": 51
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.787497131357114,
+            32.109907266451266
+          ],
+          [
+            34.78450689023747,
+            32.109323588689186
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000038",
+        "name": "Sample St 8",
+        "zoneCode": 6,
+        "carsOnly": false,
+        "parkingType": "Limited",
+        "side": "Right",
+        "stylePriority": 94
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.81285185042119,
+            32.102756214549075
+          ],
+          [
+            34.81142803269934,
+            32.10445695546743
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000039",
+        "name": "Sample St 9",
+        "zoneCode": 1,
+        "carsOnly": true,
+        "parkingType": "Free",
+        "side": "Both",
+        "stylePriority": 117
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.76046938642913,
+            32.099026248106924
+          ],
+          [
+            34.76171783330963,
+            32.09713617409985
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000040",
+        "name": "Sample St 0",
+        "zoneCode": 6,
+        "carsOnly": false,
+        "parkingType": "Paid",
+        "side": "Left",
+        "stylePriority": 64
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.81338276242034,
+            32.09454500103886
+          ],
+          [
+            34.8124941426459,
+            32.09396586766021
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000041",
+        "name": "Sample St 1",
+        "zoneCode": 1,
+        "carsOnly": false,
+        "parkingType": "Limited",
+        "side": "Right",
+        "stylePriority": 83
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.79032454348588,
+            32.06506727512419
+          ],
+          [
+            34.78755414587033,
+            32.06640898712935
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000042",
+        "name": "Sample St 2",
+        "zoneCode": 6,
+        "carsOnly": true,
+        "parkingType": "Free",
+        "side": "Both",
+        "stylePriority": 55
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.76021274134526,
+            32.09626715338118
+          ],
+          [
+            34.76,
+            32.0978013690162
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000043",
+        "name": "Sample St 3",
+        "zoneCode": 1,
+        "carsOnly": false,
+        "parkingType": "Paid",
+        "side": "Left",
+        "stylePriority": 104
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.793654411886486,
+            32.056712432835354
+          ],
+          [
+            34.796517039234104,
+            32.056244135121496
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000044",
+        "name": "Sample St 4",
+        "zoneCode": 6,
+        "carsOnly": false,
+        "parkingType": "Limited",
+        "side": "Right",
+        "stylePriority": 97
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.79495057398939,
+            32.058885627134046
+          ],
+          [
+            34.79413196019119,
+            32.06070379381378
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000045",
+        "name": "Sample St 5",
+        "zoneCode": 1,
+        "carsOnly": true,
+        "parkingType": "Free",
+        "side": "Both",
+        "stylePriority": 55
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.81393547819159,
+            32.06260459230038
+          ],
+          [
+            34.81281165384353,
+            32.06420880153575
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000046",
+        "name": "Sample St 6",
+        "zoneCode": 6,
+        "carsOnly": false,
+        "parkingType": "Paid",
+        "side": "Left",
+        "stylePriority": 102
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.818430221358234,
+            32.09496865666861
+          ],
+          [
+            34.81561581180181,
+            32.09546115984939
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000047",
+        "name": "Sample St 7",
+        "zoneCode": 1,
+        "carsOnly": false,
+        "parkingType": "Limited",
+        "side": "Right",
+        "stylePriority": 72
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.8128849722798,
+            32.05148718171389
+          ],
+          [
+            34.81054356110041,
+            32.05336265030878
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000048",
+        "name": "Sample St 8",
+        "zoneCode": 6,
+        "carsOnly": true,
+        "parkingType": "Free",
+        "side": "Both",
+        "stylePriority": 81
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.776008342575665,
+            32.097242470548125
+          ],
+          [
+            34.77677858164167,
+            32.095497002695716
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000049",
+        "name": "Sample St 9",
+        "zoneCode": 1,
+        "carsOnly": false,
+        "parkingType": "Paid",
+        "side": "Left",
+        "stylePriority": 108
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            34.78097950546675,
+            32.099232182858294
+          ],
+          [
+            34.7783011978771,
+            32.09784412312935
+          ]
+        ]
+      }
+    }
+  ]
+}
