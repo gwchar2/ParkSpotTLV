@@ -30,8 +30,13 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=parkspot_dev;Username=admin;Password=admin
       DB_CONNECTION: Host=db;Port=5432;Database=parkspot_dev;Username=admin;Password=admin
+      Seeding__Paths__Zones: /app/db/Seed/zones.geojson
+      Seeding__Paths__StreetSegments: /app/db/Seed/street_segments.geojson
+      Seeding__Paths__Users: /app/db/Seed/users_seed.json
     ports:
       - "8080:8080"
+    volumes:
+      - ./ParkSpotTLV.Infrastructure/db/Seed:/app/db/Seed:ro
     depends_on:
       db:
         condition: service_healthy
