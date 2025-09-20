@@ -35,13 +35,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{40201D05-3E45-429A-97A5-5E452C5A8E12}"
 	ProjectSection(SolutionItems) = preProject
 		docs\api-reference.md = docs\api-reference.md
-		docs\architecture.md = docs\architecture.md
 		docs\CHANGELOG.md = docs\CHANGELOG.md
-		docs\ci-cd.md = docs\ci-cd.md
-		docs\data-model.md = docs\data-model.md
-		docs\running.md = docs\running.md
-		docs\seeding.md = docs\seeding.md
-		docs\troubleshooting.md = docs\troubleshooting.md
 		docs\לוז ומשימות.pdf = docs\לוז ומשימות.pdf
 	EndProjectSection
 EndProject
