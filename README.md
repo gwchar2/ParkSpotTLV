@@ -7,14 +7,28 @@
 
 
 [Changelog](./CHANGELOG.md)
-```
-Use semantic-release to read commit messages and decide the next version:
+Use special commit messages to properly decide the next version & store logs:
+```git
 feat: → minor feature
 fix: → patch fix
 feat! or BREAKING CHANGE: → major
 ```
 
----
+Workflow Example:
+```git
+git commit -m "feat(db): "Added feature X"
+git push
+git commit -m "fix(db): "Fixed bug in feature Y"
+git push
+```
+
+Final output on CHANGELOG.MD after Pull Request:
+```git
+Features:
+db: Added feature X (link_to_commit)
+Bug Fixes
+db: Fixed bug in feature Y (link_to_commit)
+```
 
 ## 📑 Table of Contents
 
