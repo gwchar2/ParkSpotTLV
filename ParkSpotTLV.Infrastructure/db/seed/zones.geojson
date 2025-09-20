@@ -1,0 +1,79 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000006",
+        "name": "Zone 6",
+        "code": 6,
+        "permit": 6,
+        "colorKey": "Central"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              34.77,
+              32.07
+            ],
+            [
+              34.793,
+              32.07
+            ],
+            [
+              34.793,
+              32.095
+            ],
+            [
+              34.77,
+              32.095
+            ],
+            [
+              34.77,
+              32.07
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "00000000-0000-0000-0000-000000000001",
+        "name": "Zone 1",
+        "code": 1,
+        "permit": 1,
+        "colorKey": "Citywide"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              34.79,
+              32.075
+            ],
+            [
+              34.815,
+              32.075
+            ],
+            [
+              34.815,
+              32.1
+            ],
+            [
+              34.79,
+              32.1
+            ],
+            [
+              34.79,
+              32.075
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -1,4 +1,7 @@
-﻿namespace ParkSpotTLV.Api.Endpoints;
+﻿using Microsoft.EntityFrameworkCore;
+using ParkSpotTLV.Infrastructure;
+
+namespace ParkSpotTLV.Api.Endpoints;
 
 public static class HealthEndpoints {
     public static IEndpointRouteBuilder MapHealth(this IEndpointRouteBuilder routes) {
@@ -23,13 +26,33 @@ public static class HealthEndpoints {
         .WithOpenApi();
 
         
-        group.MapGet("/ready", () => {
-            return Results.Ok(new { status = "ready" });
+        group.MapGet("/ready", async (HttpContext ctx, AppDbContext db) => {
+            try {
+                var ct = ctx.RequestAborted;
+
+                // DB reachable?
+                await db.Database.ExecuteSqlRawAsync("SELECT 1", ct);
+
+                // PostGIS present?  Alias the scalar column as "Value"
+                var hasPostGis = await db.Database
+                    .SqlQueryRaw<string>("SELECT extname FROM pg_extension WHERE extname = 'postgis'")
+                    .AnyAsync(ct);
+
+                var body = new { status = hasPostGis ? "green" : "red", database = true, postgis = hasPostGis };
+                return hasPostGis
+                    ? Results.Ok(body)
+                    : Results.Json(body, statusCode: StatusCodes.Status503ServiceUnavailable);
+            }
+            catch (Exception ex) {
+                var body = new { status = "red", database = false, postgis = false, error = ex.Message };
+                return Results.Json(body, statusCode: StatusCodes.Status503ServiceUnavailable);
+            }
         })
         .WithName("Ready")
-        .WithSummary("Readiness check")
-        .WithDescription("Currently always 200")
+        .WithSummary("Readiness check (DB + PostGIS)")
+        .WithDescription("Returns green only if DB is reachable and PostGIS extension is present.")
         .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status503ServiceUnavailable)
         .WithOpenApi();
 
         

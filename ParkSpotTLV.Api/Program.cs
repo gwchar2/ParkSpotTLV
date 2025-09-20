@@ -4,7 +4,8 @@ using Serilog;
 using ParkSpotTLV.Api.Errors;
 using ParkSpotTLV.Api.Http;
 using ParkSpotTLV.Api.Endpoints;
-
+using ParkSpotTLV.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 
 Log.Logger = new LoggerConfiguration()
@@ -16,7 +17,18 @@ try {
 
     var builder = WebApplication.CreateBuilder(args);
 
-    // Serilog host hook (reads appsettings)
+    /* Adds a DbContext & Connects to DB (secret connection) */
+    var conn = builder.Configuration.GetConnectionString("DefaultConnection")
+           ?? throw new InvalidOperationException("Missing connection string.");
+    builder.Services.AddDbContext<AppDbContext>(opt =>
+        opt.UseNpgsql(conn, x => { 
+            x.UseNetTopologySuite(); 
+            x.MigrationsAssembly(typeof(AppDbContext).Assembly.GetName().Name); 
+        }));
+
+    
+
+    /* Serilog host hook (reads appsettings) */
     builder.Host.UseSerilog((ctx, services, cfg) => {
         cfg.ReadFrom.Configuration(ctx.Configuration)
           .ReadFrom.Services(services)
@@ -30,12 +42,17 @@ try {
     /* Services */
     builder.Services.AddOpenApi();
     builder.Services.AddEndpointsApiExplorer();
+    /* Seeding Services (enabled in Development via appsettings.Development.json) */
+    builder.Services.Configure<ParkSpotTLV.Infrastructure.Seeding.SeedOptions>(
+        builder.Configuration.GetSection("Seeding"));
+    builder.Services.AddHostedService<ParkSpotTLV.Infrastructure.Seeding.SeedRunner>();
 
-    /* Runtime start */
+    /* On Start (RunTime threads) */
     builder.Services.AddSingleton<RuntimeHealth>();
 
     var app = builder.Build();
 
+    
     /* Pipeline */
     app.UseGlobalProblemDetails();                          // problem+json for errors
     app.UseMiddleware<TracingMiddleware>();                 // W3C trace + response headers

@@ -1,0 +1,44 @@
+#http://localhost:8080/scalar/
+version: "3.9"
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: parkspot_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: parkspot_dev
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d parkspot_dev -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  api:
+    build:
+      context: .
+      dockerfile: ParkSpotTLV.Api/Dockerfile
+    container_name: parkspot_api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=parkspot_dev;Username=admin;Password=admin
+      DB_CONNECTION: Host=db;Port=5432;Database=parkspot_dev;Username=admin;Password=admin
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+
+
+
+

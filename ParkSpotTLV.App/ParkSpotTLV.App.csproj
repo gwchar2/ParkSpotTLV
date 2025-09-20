@@ -61,6 +61,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Remove="logs\**" />
+	  <Compile Remove="Models\**" />
+	  <EmbeddedResource Remove="logs\**" />
+	  <EmbeddedResource Remove="Models\**" />
+	  <None Remove="logs\**" />
+	  <None Remove="Models\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="MetaOutput.Media" Version="1.0.4" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.9" />
@@ -75,13 +84,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\ParkSpotTLV.Contracts\ParkSpotTLV.Contracts.csproj" />
 	  <ProjectReference Include="..\ParkSpotTLV.Core\ParkSpotTLV.Core.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="logs\app\" />
-	  <Folder Include="Models\" />
 	</ItemGroup>
 
 	<ItemGroup>
