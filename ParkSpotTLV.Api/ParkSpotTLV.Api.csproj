@@ -33,5 +33,5 @@
   <ItemGroup>
     <ProjectReference Include="..\ParkSpotTLV.Infrastructure\ParkSpotTLV.Infrastructure.csproj" />
   </ItemGroup>
-
+	
 </Project>

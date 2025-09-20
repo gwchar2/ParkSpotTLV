@@ -1,11 +1,12 @@
-using System.Reflection;
-using Scalar.AspNetCore;
-using Serilog;
+using Microsoft.EntityFrameworkCore;
+using ParkSpotTLV.Api.Endpoints;
 using ParkSpotTLV.Api.Errors;
 using ParkSpotTLV.Api.Http;
-using ParkSpotTLV.Api.Endpoints;
 using ParkSpotTLV.Infrastructure;
-using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
+using Serilog;
+using System.Reflection;
+using System.Text.Json;
 
 
 Log.Logger = new LoggerConfiguration()
@@ -42,6 +43,7 @@ try {
     /* Services */
     builder.Services.AddOpenApi();
     builder.Services.AddEndpointsApiExplorer();
+
     /* Seeding Services (enabled in Development via appsettings.Development.json) */
     builder.Services.Configure<ParkSpotTLV.Infrastructure.Seeding.SeedOptions>(
         builder.Configuration.GetSection("Seeding"));
@@ -77,10 +79,17 @@ catch (Exception ex) {
     Log.CloseAndFlush();
 }
 
+
 /* Helper class that returns starting time + version (from csproj) */
 public sealed class RuntimeHealth {
     public DateTimeOffset StartedAtUtc { get; } = DateTimeOffset.UtcNow;
-    public string Version { get; } =
-        (Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly())
-        .GetName().Version?.ToString() ?? "0.0.0";
+    public string Version { get; }
+    public RuntimeHealth(IConfiguration cfg) {
+        Version = cfg["App:Version"]
+               ?? (Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly())
+                  .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+               ?? (Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly())
+                  .GetName().Version?.ToString()
+               ?? "0.0.0-dev";
+    }
 }

@@ -1,12 +1,23 @@
-{ 
-  "$schema": "https://github.com/googleapis/release-please/raw/main/schemas/config.json", 
-  "prerelease": true, 
-  "include-v-in-tag": true, 
-  "packages": 
-  {
+{
+  "$schema": "https://github.com/googleapis/release-please/raw/main/schemas/config.json",
+  "prerelease": true,
+  "include-v-in-tag": true,
+  "packages": {
     ".": {
       "changelog-path": "CHANGELOG.md",
-      "release-type": "simple"
-    } 
-  } 
+      "release-type": "simple",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "ParkSpotTLV.Api/appsettings.json",
+          "jsonpath": "$.App.Version"
+        },
+        {
+          "type": "json",
+          "path": "ParkSpotTLV.Api/appsettings.Development.json",
+          "jsonpath": "$.App.Version"
+        }
+      ]
+    }
+  }
 }

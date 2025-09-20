@@ -22,9 +22,10 @@ Commit in small, meaningful chunks; push whenever:
 ```git
 git add -A
 git commit -m "feat: draw colored segments on map"
-First push of a branch: 	git push -u origin <branch_name>
-Else: 						git push 
 ```
+First push of branch: `git push -u origin <branch_name>`
+Else: `git push`
+
 
 Keep your branch in sync with latest main
 ```git

@@ -1,21 +1,22 @@
 <Project Sdk="Microsoft.Docker.Sdk">
-	<PropertyGroup>
-		<!-- Must be present; 2.1 works with VS 2022 recent builds -->
-		<ProjectVersion>2.1</ProjectVersion>
-
-		<!-- Linux containers recommended -->
-		<DockerTargetOS>Linux</DockerTargetOS>
-
-		<!-- Optional: VS uses this to choose which service to open/debug -->
-		<DockerServiceName>api</DockerServiceName>
-		<DockerServiceUrl>http://localhost:8080/scalar</DockerServiceUrl>
-
-		<!-- Any GUID is fine -->
-		<ProjectGuid>{8F006BDE-5E3D-4F5B-B1F2-2A6F8F8B80B1}</ProjectGuid>
-	</PropertyGroup>
-
-	<ItemGroup>
-		<None Include="docker-compose.yml" />
-		<None Include="docker-compose.override.yml" />
-	</ItemGroup>
+  <PropertyGroup>
+    <!-- Must be present; 2.1 works with VS 2022 recent builds -->
+    <ProjectVersion>2.1</ProjectVersion>
+    <!-- Linux containers recommended -->
+    <DockerTargetOS>Linux</DockerTargetOS>
+    <!-- Optional: VS uses this to choose which service to open/debug -->
+    <DockerServiceName>api</DockerServiceName>
+    <DockerServiceUrl>http://localhost:8080/scalar</DockerServiceUrl>
+    <!-- Any GUID is fine -->
+    <ProjectGuid>{8F006BDE-5E3D-4F5B-B1F2-2A6F8F8B80B1}</ProjectGuid>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="docker-compose.yml" />
+    <None Include="docker-compose.override.yml" />
+  </ItemGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

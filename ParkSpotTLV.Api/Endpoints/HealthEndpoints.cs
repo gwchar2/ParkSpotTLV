@@ -33,7 +33,7 @@ public static class HealthEndpoints {
                 // DB reachable?
                 await db.Database.ExecuteSqlRawAsync("SELECT 1", ct);
 
-                // PostGIS present?  Alias the scalar column as "Value"
+                // PostGIS present?  Returns '0' or '1'
                 var hasPostGis = await db.Database
                     .SqlQueryRaw<string>("SELECT extname FROM pg_extension WHERE extname = 'postgis'")
                     .AnyAsync(ct);
