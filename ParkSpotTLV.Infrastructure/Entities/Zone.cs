@@ -25,7 +25,6 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         // Streets/segments associated to this zone (kept)
         public ICollection<StreetSegment> Segments { get; set; } = new List<StreetSegment>();
 
-        // Operational bookkeeping
         public DateTimeOffset? LastUpdated { get; set; }
     }
 }

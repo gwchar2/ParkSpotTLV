@@ -16,10 +16,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 		.release-please-config.json = .release-please-config.json
 		.release-please-manifest.json = .release-please-manifest.json
-		CHANGELOG.md = CHANGELOG.md
 		git-workflow.txt = git-workflow.txt
 		README.md = README.md
-		לוז ומשימות.pdf = לוז ומשימות.pdf
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParkSpotTLV.Tests", "ParkSpotTLV.Tests\ParkSpotTLV.Tests.csproj", "{CD360DB1-007E-42F6-9E18-807263E37E0C}"
@@ -31,6 +29,21 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{D4FFBE1E-9F04-4C6C-BC54-648F9D27E96A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParkSpotTLV.Infrastructure", "ParkSpotTLV.Infrastructure\ParkSpotTLV.Infrastructure.csproj", "{DE66CA50-0421-B6AD-7BF4-207968DFF3EF}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{40201D05-3E45-429A-97A5-5E452C5A8E12}"
+	ProjectSection(SolutionItems) = preProject
+		docs\api-reference.md = docs\api-reference.md
+		docs\architecture.md = docs\architecture.md
+		docs\CHANGELOG.md = docs\CHANGELOG.md
+		docs\ci-cd.md = docs\ci-cd.md
+		docs\data-model.md = docs\data-model.md
+		docs\running.md = docs\running.md
+		docs\seeding.md = docs\seeding.md
+		docs\troubleshooting.md = docs\troubleshooting.md
+		docs\לוז ומשימות.pdf = docs\לוז ומשימות.pdf
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -103,6 +116,18 @@ Global
 		{DE66CA50-0421-B6AD-7BF4-207968DFF3EF}.Release|x64.Build.0 = Release|Any CPU
 		{DE66CA50-0421-B6AD-7BF4-207968DFF3EF}.Release|x86.ActiveCfg = Release|Any CPU
 		{DE66CA50-0421-B6AD-7BF4-207968DFF3EF}.Release|x86.Build.0 = Release|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|x64.Build.0 = Debug|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|x86.Build.0 = Debug|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|x64.ActiveCfg = Release|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|x64.Build.0 = Release|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|x86.ActiveCfg = Release|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

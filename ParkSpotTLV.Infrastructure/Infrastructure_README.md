@@ -1,4 +1,4 @@
-﻿# Connection to DB on docker
+﻿# Connection to DB on docker (manually)
 
 Project uses 'secret data' to connect to database. Run in project root:
 ```bash

@@ -40,15 +40,15 @@ namespace ParkSpotTLV.Infrastructure.Entities {
     public class Permit {
         public Guid Id { get; set; } = Guid.NewGuid();
 
+        // Ownership 
+        public Guid? VehicleId { get; set; }
+        public Vehicle? Vehicle { get; set; }
+
         public PermitType Type { get; set; } = PermitType.Default;
 
         // Optional link to a Zone when Type == ZoneResident (or when relevant)
         public Guid? ZoneId { get; set; }
         public Zone? Zone { get; set; }
-
-        // Ownership 
-        public Guid? VehicleId { get; set; }
-        public Vehicle? Vehicle { get; set; }
 
         // Validity
         public DateOnly? ValidTo { get; set; }
