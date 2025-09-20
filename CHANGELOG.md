@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.2.0-beta.0...v0.2.1-beta.0) (2025-09-20)
+
+
+### Bug Fixes
+
+* **db:** docker ([d9b3614](https://github.com/gwchar2/ParkSpotTLV/commit/d9b3614297402715c349657f6c6e791433a9fc1f))
+* **db:** docker ([57ccf75](https://github.com/gwchar2/ParkSpotTLV/commit/57ccf758984c568dec39747b6fb2eaf916447f6d))
+
 ## [0.2.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.1.0-beta.0...v0.2.0-beta.0) (2025-09-20)
 
 
