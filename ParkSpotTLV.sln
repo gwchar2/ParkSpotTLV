@@ -32,13 +32,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParkSpotTLV.Infrastructure"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{40201D05-3E45-429A-97A5-5E452C5A8E12}"
-	ProjectSection(SolutionItems) = preProject
-		docs\api-reference.md = docs\api-reference.md
-		docs\CHANGELOG.md = docs\CHANGELOG.md
-		docs\לוז ומשימות.pdf = docs\לוז ומשימות.pdf
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
