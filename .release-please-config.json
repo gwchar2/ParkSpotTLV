@@ -5,7 +5,7 @@
   "packages": 
   {
     ".": {
-      "changelog-path": "docs\CHANGELOG.md",
+      "changelog-path": "CHANGELOG.md",
       "release-type": "simple"
     } 
   } 
