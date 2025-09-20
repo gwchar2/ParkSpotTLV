@@ -1,18 +1,23 @@
-﻿# Morning: 
-## update local main, rebase your branch (Every day when you start)
+﻿## Morning: 
+Update local main, rebase your branch (Every day when you start)
+```bash
 git fetch origin                 # get remote updates
 git switch main
 git pull --ff-only               # fast-forward your local main
+```
+
 Start a task (new branch)
+```
 git switch -c <branch_name>
+```
 ...edit code…
 
-# During the day: 
-## commit in small, meaningful chunks; push whenever:
-you reached a checkpoint,
-you want CI to run,
-you want your teammate to see progress,
-or you just want a safe remote backup.
+## During the day: 
+Commit in small, meaningful chunks; push whenever:
+> You reached a checkpoint,
+> You want CI to run,
+> You want your teammate to see progress,
+> You just want a safe remote backup.
 
 ```git
 git add -A
@@ -26,14 +31,13 @@ Keep your branch in sync with latest main
 git fetch origin
 git merge origin/main
 ```
-resolve any conflicts if needed
+Resolve any conflicts if needed.
 
-# Open a PR (recommended)
+## Open a PR (recommended)
 On GitHub: compare <branch_name> → into main.
 After review & merge, delete the branch (GitHub offers a button).
 
-
-# Start the next task
+## Start the next task
 ```git
 git switch main
 git pull --ff-only
