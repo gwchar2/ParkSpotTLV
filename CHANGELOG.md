@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.3.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.2.2-beta.0...v0.3.0-beta.0) (2025-09-21)
+
+
+### Features
+
+* **db:** Add local data models for SQLite storage ([ccab43e](https://github.com/gwchar2/ParkSpotTLV/commit/ccab43e0b377251e46a8caf6f3e52e31a42a3ae3))
+* **db:** Add SQLite database context with Entity Framework ([79bc236](https://github.com/gwchar2/ParkSpotTLV/commit/79bc2362191af603fc2dcee86b5fb6674e8dadd3))
+* **db:** Add SQLite Entity Framework packages for local data storage ([abb89f1](https://github.com/gwchar2/ParkSpotTLV/commit/abb89f1529b2df4fc4e657e87550c5d496584734))
+* **db:** Add SQLite preferences table to preferences page ([6dcbc1b](https://github.com/gwchar2/ParkSpotTLV/commit/6dcbc1bf45ae7045e1808fb7d1887b307f86994f))
+* **db:** Add sync service for PostgreSQL to SQLite synchronization ([3b414bf](https://github.com/gwchar2/ParkSpotTLV/commit/3b414bf89d9ee4376fc4384d70d7c329153d4cfd))
+* **db:** Implement local data access service ([a1d475b](https://github.com/gwchar2/ParkSpotTLV/commit/a1d475b6c264b1748977f85891f6de1ebe580e4e))
+
+
+### Bug Fixes
+
+* **db:** Fixed bug - save updated preferences ([389dd46](https://github.com/gwchar2/ParkSpotTLV/commit/389dd4693de8adf58a1c0411f313603d26f8afc2))
+
 ## [0.2.2-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.2.1-beta.0...v0.2.2-beta.0) (2025-09-21)
 
 
