@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.2-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.2.1-beta.0...v0.2.2-beta.0) (2025-09-21)
+
+
+### Bug Fixes
+
+* compose & server connection ([c9d0585](https://github.com/gwchar2/ParkSpotTLV/commit/c9d05857690114fa43b1fea161cd390cad3a1c2b))
+* compose & server connection ([e0a1b69](https://github.com/gwchar2/ParkSpotTLV/commit/e0a1b691f6aba8b5b0e83f7f483bae141c18b029))
+
 ## [0.2.1-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.2.0-beta.0...v0.2.1-beta.0) (2025-09-20)
 
 
