@@ -60,7 +60,7 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         public TimeOnly EndTime { get; set; }
 
         // When multiple rules overlap, higher priority wins (lower number = higher priority)
-        public int StylePriority { get; set; } = 100;
+        public int StylePriority { get; set; } = 2;
 
         // Resulting classification for this window
         public ParkingType ParkingType { get; set; } = ParkingType.Unknown;
