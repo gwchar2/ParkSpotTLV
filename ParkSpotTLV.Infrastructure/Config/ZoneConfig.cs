@@ -10,6 +10,8 @@ namespace ParkSpotTLV.Infrastructure.Config {
 
             e.HasKey(x => x.Id);
 
+            e.Property(x => x.Taarif).IsRequired();
+
             e.Property(x => x.Name).HasMaxLength(64);
 
             // Geometry: MultiPolygon with SRID 4326
