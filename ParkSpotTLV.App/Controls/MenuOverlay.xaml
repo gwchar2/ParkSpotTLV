@@ -42,6 +42,14 @@
                     FontSize="16"
                     HorizontalOptions="Start"
                     Clicked="OnLogoutClicked" />
+
+            <Label x:Name="VersionLabel"
+                   Text="Version: ..."
+                   TextColor="Blue"
+                   FontSize="16"
+                   HorizontalOptions="Start"/>  
+
+
         </VerticalStackLayout>
     </Border>
 </Grid>
