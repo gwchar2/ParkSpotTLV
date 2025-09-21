@@ -14,30 +14,43 @@ public class LocalDataService : ILocalDataService
 
         try
         {
+            System.Diagnostics.Debug.WriteLine("Attempting to create database...");
+
             // Try to create database/tables if they don't exist
-            await context.Database.EnsureCreatedAsync();
+            var created = await context.Database.EnsureCreatedAsync();
+            System.Diagnostics.Debug.WriteLine($"Database creation result: {created}");
 
             // Create default preferences if none exist
             var preferences = await context.UserPreferences.FirstOrDefaultAsync();
             if (preferences == null)
             {
+                System.Diagnostics.Debug.WriteLine("Creating default preferences...");
                 await context.UserPreferences.AddAsync(new UserPreferences());
                 await context.SaveChangesAsync();
+                System.Diagnostics.Debug.WriteLine("Default preferences created successfully");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"Found existing preferences with ID: {preferences.Id}");
             }
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Database initialization error: {ex}");
+            System.Diagnostics.Debug.WriteLine($"Full exception: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
 
             // If tables are missing or corrupted, recreate the database
             try
             {
+                System.Diagnostics.Debug.WriteLine("Attempting to recreate database...");
                 await context.Database.EnsureDeletedAsync();
                 await context.Database.EnsureCreatedAsync();
 
                 // Create default preferences
                 await context.UserPreferences.AddAsync(new UserPreferences());
                 await context.SaveChangesAsync();
+                System.Diagnostics.Debug.WriteLine("Database recreated successfully");
             }
             catch (Exception ex2)
             {
@@ -65,8 +78,13 @@ public class LocalDataService : ILocalDataService
         var existing = await context.UserPreferences.FirstOrDefaultAsync();
         if (existing != null)
         {
-            // Update existing preferences
-            context.Entry(existing).CurrentValues.SetValues(preferences);
+            // Update existing preferences properties individually
+            existing.ParkingThresholdMinutes = preferences.ParkingThresholdMinutes;
+            existing.NotificationsEnabled = preferences.NotificationsEnabled;
+            existing.NotificationMinutesBefore = preferences.NotificationMinutesBefore;
+            existing.AutoSyncEnabled = preferences.AutoSyncEnabled;
+            existing.LastUpdated = preferences.LastUpdated;
+            context.UserPreferences.Update(existing);
         }
         else
         {

@@ -11,18 +11,15 @@ namespace ParkSpotTLV.App {
         {
             try
             {
-                var localDataService = Handler?.MauiContext?.Services?.GetService<ILocalDataService>();
-                if (localDataService != null)
-                {
-                    await localDataService.InitializeAsync();
-                }
+                // Create the service directly instead of relying on DI during app construction
+                var localDataService = new LocalDataService();
+                await localDataService.InitializeAsync();
+                System.Diagnostics.Debug.WriteLine("Database initialized successfully");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Database initialization failed: {ex.Message}");
-                // Show error in UI for debugging
-                var mainPage = Application.Current?.Windows?[0]?.Page;
-                mainPage?.DisplayAlert("Database Error", $"Init failed: {ex.Message}", "OK");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
             }
         }
 
