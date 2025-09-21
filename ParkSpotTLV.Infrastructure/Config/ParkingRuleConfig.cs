@@ -17,7 +17,6 @@ namespace ParkSpotTLV.Infrastructure.Config {
             // Optional default for MaxDurationMinutes (-1 = no limit)
             e.Property(x => x.MaxDurationMinutes).HasDefaultValue(-1);
 
-            // FK → StreetSegment (required)
             e.HasOne(x => x.StreetSegment)
              .WithMany(s => s.ParkingRules)
              .HasForeignKey(x => x.StreetSegmentId)
@@ -25,6 +24,8 @@ namespace ParkSpotTLV.Infrastructure.Config {
 
             e.ToTable(t => t.HasCheckConstraint("ck_parkingrule_dayofweek_range", "\"DayOfWeek\" BETWEEN 0 AND 6"));
             e.ToTable(t => t.HasCheckConstraint("ck_parkingrule_time_order", "\"StartTime\" < \"EndTime\""));
+
+            e.HasIndex(x => x.StylePriority);
         }
     }
 }

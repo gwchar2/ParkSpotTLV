@@ -29,10 +29,6 @@ namespace ParkSpotTLV.Infrastructure.Entities {
 
         public VehicleType Type { get; set; } = VehicleType.Car;
 
-        // Optional but usually useful for identification
-        [MaxLength(20)]
-        public string? PlateNumber { get; set; } = "Default";
-
         // Permits that are tied specifically to this vehicle
         public ICollection<Permit> Permits { get; set; } = new List<Permit>();
     }
