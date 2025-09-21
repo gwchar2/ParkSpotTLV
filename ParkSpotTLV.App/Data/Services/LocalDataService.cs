@@ -11,15 +11,42 @@ public class LocalDataService : ILocalDataService
     public async Task InitializeAsync()
     {
         using var context = new LocalDbContext();
-        // Create database tables if they don't exist
-        await context.Database.EnsureCreatedAsync();
 
-        // Create default user preferences if none exist
-        var preferences = await context.UserPreferences.FirstOrDefaultAsync();
-        if (preferences == null)
+        try
         {
+            // Delete and recreate database to ensure tables exist
+            System.Diagnostics.Debug.WriteLine("Deleting existing database...");
+            await context.Database.EnsureDeletedAsync();
+
+            System.Diagnostics.Debug.WriteLine("Creating fresh database with tables...");
+            await context.Database.EnsureCreatedAsync();
+            System.Diagnostics.Debug.WriteLine("Database tables created successfully");
+
+            // Create default preferences
+            System.Diagnostics.Debug.WriteLine("Creating default preferences...");
             await context.UserPreferences.AddAsync(new UserPreferences());
             await context.SaveChangesAsync();
+            System.Diagnostics.Debug.WriteLine("Default preferences created");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Database initialization error: {ex}");
+
+            // If tables are missing, try to recreate the database
+            try
+            {
+                await context.Database.EnsureDeletedAsync();
+                await context.Database.EnsureCreatedAsync();
+
+                // Create default preferences
+                await context.UserPreferences.AddAsync(new UserPreferences());
+                await context.SaveChangesAsync();
+            }
+            catch (Exception ex2)
+            {
+                System.Diagnostics.Debug.WriteLine($"Database recreation failed: {ex2}");
+                throw;
+            }
         }
     }
 

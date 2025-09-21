@@ -102,9 +102,9 @@ public class SyncService : ISyncService
         return DateTime.UtcNow - lastSync.Value > maxAge;
     }
 
-    public async Task SyncInBackgroundAsync()
+    public Task SyncInBackgroundAsync()
     {
-        _ = Task.Run(async () =>
+        return Task.Run(async () =>
         {
             try
             {
@@ -157,7 +157,7 @@ public class SyncService : ISyncService
                 Code = z.Code,
                 Name = z.Name,
                 GeometryJson = JsonSerializer.Serialize(z.Geom),
-                LastUpdated = z.LastUpdated,
+                LastUpdated = z.LastUpdated?.DateTime,
                 CachedAt = DateTime.UtcNow,
                 IsActive = true
             }).ToList();
@@ -189,7 +189,7 @@ public class SyncService : ISyncService
                 Side = s.Side.ToString(),
                 LengthMeters = s.LengthMeters,
                 StylePriority = s.StylePriority,
-                LastUpdated = s.LastUpdated,
+                LastUpdated = s.LastUpdated?.DateTime,
                 CachedAt = DateTime.UtcNow,
                 IsActive = true
             }).ToList();
@@ -218,7 +218,6 @@ public class SyncService : ISyncService
                 Id = v.Id.ToString(),
                 UserId = userId,
                 Type = v.Type.ToString(),
-                PlateNumber = v.PlateNumber,
                 HasResidentPermit = v.Permits?.Any(p => p.Type.ToString() == "ZoneResident") == true,
                 HasDisabledPermit = v.Permits?.Any(p => p.Type.ToString() == "Disability") == true,
                 ResidentZoneId = v.Permits?.FirstOrDefault(p => p.Type.ToString() == "ZoneResident")?.ZoneId?.ToString(),
@@ -273,7 +272,6 @@ public class ServerVehicle
 {
     public Guid Id { get; set; }
     public VehicleType Type { get; set; }
-    public string? PlateNumber { get; set; }
     public List<ServerPermit>? Permits { get; set; }
 }
 

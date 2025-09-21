@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using ParkSpotTLV.App.Data.Services;
 
 namespace ParkSpotTLV.App {
     public static class MauiProgram {
@@ -18,6 +19,12 @@ namespace ParkSpotTLV.App {
             builder.Services.AddHttpClient("api", client => {
                 client.BaseAddress = new Uri(DevApiBaseUrl);
             });
+
+            builder.Services.AddSingleton<ILocalDataService, LocalDataService>();
+            builder.Services.AddTransient<ISyncService, SyncService>();
+            builder.Services.AddTransient<Pages.PreferencesPage>();
+
+            Routing.RegisterRoute("PreferencesPage", typeof(Pages.PreferencesPage));
 
 #if DEBUG
             builder.Logging.AddDebug();

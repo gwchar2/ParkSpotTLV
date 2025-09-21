@@ -14,7 +14,10 @@ public class LocalDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, "parkspot_local.db");
+        System.Diagnostics.Debug.WriteLine($"SQLite database path: {dbPath}");
         optionsBuilder.UseSqlite($"Data Source={dbPath}");
+        optionsBuilder.EnableSensitiveDataLogging();
+        optionsBuilder.LogTo(message => System.Diagnostics.Debug.WriteLine($"EF Core: {message}"));
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
