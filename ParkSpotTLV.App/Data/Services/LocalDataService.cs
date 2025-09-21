@@ -14,25 +14,22 @@ public class LocalDataService : ILocalDataService
 
         try
         {
-            // Delete and recreate database to ensure tables exist
-            System.Diagnostics.Debug.WriteLine("Deleting existing database...");
-            await context.Database.EnsureDeletedAsync();
-
-            System.Diagnostics.Debug.WriteLine("Creating fresh database with tables...");
+            // Try to create database/tables if they don't exist
             await context.Database.EnsureCreatedAsync();
-            System.Diagnostics.Debug.WriteLine("Database tables created successfully");
 
-            // Create default preferences
-            System.Diagnostics.Debug.WriteLine("Creating default preferences...");
-            await context.UserPreferences.AddAsync(new UserPreferences());
-            await context.SaveChangesAsync();
-            System.Diagnostics.Debug.WriteLine("Default preferences created");
+            // Create default preferences if none exist
+            var preferences = await context.UserPreferences.FirstOrDefaultAsync();
+            if (preferences == null)
+            {
+                await context.UserPreferences.AddAsync(new UserPreferences());
+                await context.SaveChangesAsync();
+            }
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Database initialization error: {ex}");
 
-            // If tables are missing, try to recreate the database
+            // If tables are missing or corrupted, recreate the database
             try
             {
                 await context.Database.EnsureDeletedAsync();
@@ -63,6 +60,8 @@ public class LocalDataService : ILocalDataService
     public async Task SaveUserPreferencesAsync(UserPreferences preferences)
     {
         using var context = new LocalDbContext();
+        preferences.LastUpdated = DateTime.UtcNow;
+
         var existing = await context.UserPreferences.FirstOrDefaultAsync();
         if (existing != null)
         {
@@ -76,6 +75,7 @@ public class LocalDataService : ILocalDataService
         }
         await context.SaveChangesAsync();
     }
+
     #endregion
 
     #region User Authentication

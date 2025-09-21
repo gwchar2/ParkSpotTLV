@@ -58,11 +58,12 @@ public partial class PreferencesPage : ContentPage
             var preferences = await _localDataService.GetUserPreferencesAsync();
 
             // Set parking threshold picker
-            var parkingIndex = GetPickerIndex(preferences.ParkingThresholdMinutes);
+            var parkingIndex = GetParkingPickerIndex(preferences.ParkingThresholdMinutes);
             MinutesPickerParking.SelectedIndex = parkingIndex;
 
             // Set notification picker
-            var notificationIndex = GetPickerIndex(preferences.NotificationMinutesBefore);
+            var notificationIndex = GetNotificationPickerIndex(preferences.NotificationMinutesBefore);
+            Console.WriteLine($"DEBUG: NotificationMinutesBefore = {preferences.NotificationMinutesBefore}, calculated index = {notificationIndex}");
             MinutesPickerNotification.SelectedIndex = notificationIndex;
 
             // Set notifications toggle
@@ -77,16 +78,34 @@ public partial class PreferencesPage : ContentPage
         }
     }
 
-    private int GetPickerIndex(int minutes)
+    private int GetParkingPickerIndex(int minutes)
     {
-        // Assuming picker has options: 15, 30, 45, 60 minutes
+        // Parking picker items: 10, 15, 30, 45, 60, 90, 120 minutes
         return minutes switch
         {
-            15 => 0,
-            30 => 1,
-            45 => 2,
-            60 => 3,
-            _ => 1 // Default to 30 minutes
+            10 => 0,
+            15 => 1,
+            30 => 2,
+            45 => 3,
+            60 => 4,
+            90 => 5,
+            120 => 6,
+            _ => 2 // Default to 30 minutes (index 2)
+        };
+    }
+
+    private int GetNotificationPickerIndex(int minutes)
+    {
+        // Notification picker items: 5, 10, 15, 30, 45, 60 minutes
+        return minutes switch
+        {
+            5 => 0,
+            10 => 1,
+            15 => 2,
+            30 => 3,
+            45 => 4,
+            60 => 5,
+            _ => 3 // Default to 30 minutes (index 3)
         };
     }
 
