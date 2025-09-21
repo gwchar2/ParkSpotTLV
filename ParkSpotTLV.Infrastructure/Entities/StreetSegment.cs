@@ -76,3 +76,5 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         public string? Note { get; set; }
     }
 }
+
+
