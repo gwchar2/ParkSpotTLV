@@ -14,7 +14,6 @@ namespace ParkSpotTLV.App {
             Routing.RegisterRoute("EditCarPage", typeof(EditCarPage));
             Routing.RegisterRoute("MyCarsPage", typeof(MyCarsPage));
             Routing.RegisterRoute("AccountDetailsPage", typeof(AccountDetailsPage));
-            Routing.RegisterRoute("PreferencesPage", typeof(PreferencesPage));
 
             // Subscribe to navigation events to show/hide menu button
             Navigated += OnShellNavigated;
