@@ -1,9 +1,11 @@
 using ParkSpotTLV.Core.Services;
+using System.Net.Http.Json;
 
 namespace ParkSpotTLV.App.Controls;
 
-public partial class MenuOverlay : Grid
-{
+public partial class MenuOverlay : Grid{
+
+    public record VersionResponse(string Version);
     public MenuOverlay()
     {
         InitializeComponent();
@@ -15,6 +17,17 @@ public partial class MenuOverlay : Grid
         MenuPanel.TranslationX = 250;
         IsVisible = true;
         await MenuPanel.TranslateTo(0, 0, 300, Easing.CubicOut);
+
+        /* Will fetch version */
+        using var client = new HttpClient();
+        try {
+            var response = await client.GetFromJsonAsync<VersionResponse>("http://10.0.2.2:8080/version");
+            VersionLabel.Text = $"Version: {response?.Version ?? "N/A"}";
+        }
+        catch (Exception ex) {
+            VersionLabel.Text = $"Error: {ex.Message}";
+        }
+
     }
 
     private async void OnOverlayTapped(object sender, EventArgs e)
@@ -70,4 +83,5 @@ public partial class MenuOverlay : Grid
             }
         }
     }
+
 }
