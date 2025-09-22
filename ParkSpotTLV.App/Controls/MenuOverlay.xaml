@@ -16,40 +16,58 @@
             HorizontalOptions="End"
             VerticalOptions="Fill"
             TranslationX="250">
-        <VerticalStackLayout Padding="20" Spacing="20">
-            <Label Text="Menu"
-                   FontSize="22"
-                   FontAttributes="Bold"
-                   Margin="0,20,0,30" />
+        <Grid Padding="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-            <Button Text="Account Details"
-                    BackgroundColor="Transparent"
-                    TextColor="Black"
-                    FontSize="16"
-                    HorizontalOptions="Start"
-                    Clicked="OnAccountDetailsClicked" />
+            <VerticalStackLayout Grid.Row="0" Spacing="20">
+                <Label Text="Menu"
+                       FontSize="22"
+                       FontAttributes="Bold"
+                       Margin="0,20,0,30" />
 
-            <Button Text="Preferences"
-                    BackgroundColor="Transparent"
-                    TextColor="Black"
-                    FontSize="16"
-                    HorizontalOptions="Start"
-                    Clicked="OnPreferencesClicked" />
+                <Button Text="Account Details"
+                        BackgroundColor="Transparent"
+                        TextColor="Black"
+                        FontSize="16"
+                        HorizontalOptions="Start"
+                        Clicked="OnAccountDetailsClicked" />
 
-            <Button Text="Logout"
-                    BackgroundColor="Transparent"
-                    TextColor="Red"
-                    FontSize="16"
-                    HorizontalOptions="Start"
-                    Clicked="OnLogoutClicked" />
+                <Button Text="Preferences"
+                        BackgroundColor="Transparent"
+                        TextColor="Black"
+                        FontSize="16"
+                        HorizontalOptions="Start"
+                        Clicked="OnPreferencesClicked" />
 
-            <Label x:Name="VersionLabel"
+                <Button Text="Logout"
+                        BackgroundColor="Transparent"
+                        TextColor="Red"
+                        FontSize="16"
+                        HorizontalOptions="Start"
+                        Clicked="OnLogoutClicked" />
+            </VerticalStackLayout>
+
+            <Label x:Name="Credits"
+                   Grid.Row="1"
+                   Text="ParkSpotTLV By Tomer T. and Michal R."
+                   TextColor="Blue"
+                   FontSize="16"
+                   HorizontalOptions="Start"
+                   VerticalOptions="End"
+                   Margin="0,20,0,0"/>
+
+           <Label x:Name="VersionLabel"
+                   Grid.Row="2"
                    Text="Version: ..."
                    TextColor="Blue"
                    FontSize="16"
-                   HorizontalOptions="Start"/>  
-
-
-        </VerticalStackLayout>
+                   HorizontalOptions="Start"
+                   VerticalOptions="End"
+                   Margin="0,20,0,0"/>
+        </Grid>
     </Border>
 </Grid>
