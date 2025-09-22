@@ -74,11 +74,12 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             foreach (var (geom, props) in GeoJsonLoader.LoadFeatures(_opts.Paths.Zones)) {
                 var zone = new Zone {
                     Geom = ToMultiPolygon(geom),
-                    Code = GetInt(props, "code") ?? GetInt(props, "permit"),
+                    Code = GetInt(props, "code"),
                     Name = GetString(props, "name"),
                     LastUpdated = DateTimeOffset.UtcNow
                 };
-
+                var temp = GetInt(props, "taarif");
+                zone.Taarif = temp.HasValue ? (Taarif)temp.Value : Taarif.City_Center;
                 db.Zones.Add(zone);
             }
 
@@ -109,7 +110,6 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                     ParkingType = ParseEnum<ParkingType>(GetString(props, "parkingType")) ?? ParkingType.Unknown,
                     ParkingHours = ParseEnum<ParkingHours>(GetString(props, "parkingHours")) ?? ParkingHours.Unknown,
                     Side = ParseEnum<SegmentSide>(GetString(props, "side")) ?? SegmentSide.Both,
-                    StylePriority = GetInt(props, "stylePriority") ?? 100,
                     LastUpdated = DateTimeOffset.UtcNow
                 };
 
@@ -158,7 +158,6 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                     var vehicle = new Vehicle {
                         Id = ParseGuid(GetString(vo, "id")) ?? Guid.NewGuid(),
                         Owner = user,
-                        PlateNumber = GetString(vo, "plateNumber"),
                         Type = ParseEnum<VehicleType>(GetString(vo, "type")) ?? VehicleType.Car
                     };
 
@@ -173,8 +172,11 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                         };
 
                         var zoneCode = GetInt(po, "zoneCode");
-                        if (zoneCode.HasValue && zonesByCode.TryGetValue(zoneCode.Value, out var zid))
-                            permit.ZoneId = zid;
+                        if (zoneCode is not null && zonesByCode.ContainsKey(zoneCode.Value))
+                            permit.ZoneCode = zoneCode.Value;
+
+
+
 
                         vehicle.Permits.Add(permit);
                     }
@@ -189,8 +191,6 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
         }
 
         // ---------------------- Helpers ----------------------
-
-        private static Zone ToExistingOrNewZone() => new(); // placeholder if you extend logic later
 
         private static NetTopologySuite.Geometries.MultiPolygon ToMultiPolygon(NetTopologySuite.Geometries.Geometry g)
             => g switch {

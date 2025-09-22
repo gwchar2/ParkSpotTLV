@@ -22,8 +22,8 @@ namespace ParkSpotTLV.Infrastructure.Config {
              .HasForeignKey(x => x.StreetSegmentId)
              .OnDelete(DeleteBehavior.Cascade);
 
-            e.ToTable(t => t.HasCheckConstraint("ck_parkingrule_dayofweek_range", "\"DayOfWeek\" BETWEEN 0 AND 6"));
-            e.ToTable(t => t.HasCheckConstraint("ck_parkingrule_time_order", "\"StartTime\" < \"EndTime\""));
+            e.ToTable(t => t.HasCheckConstraint("ck_parkingrule_dayofweek_range", "day_of_week BETWEEN 0 AND 6"));
+            e.ToTable(t => t.HasCheckConstraint("ck_parkingrule_time_order", "start_time < end_time"));
 
             e.HasIndex(x => x.StylePriority);
         }

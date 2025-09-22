@@ -9,22 +9,16 @@ namespace ParkSpotTLV.Infrastructure.Entities {
 
     public class User {
         public Guid Id { get; set; } = Guid.NewGuid();
-
-        [Required, MaxLength(64)]
-        public string Username { get; set; } = default!;
-
-        [Required, MaxLength(256)]
-        public string PasswordHash { get; set; } = default!;
-
+        [Required, MaxLength(64)] public string Username { get; set; } = default!;
+        [Required, MaxLength(256)] public string PasswordHash { get; set; } = default!;
         // A user can add multiple vehicles
         public ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
+        public ICollection<RefreshToken> RefreshToken { get; set; } = new List<RefreshToken>();
     }
 
     public class Vehicle {
         public Guid Id { get; set; } = Guid.NewGuid();
-
         // Owner
-        public Guid OwnerId { get; set; }
         public User Owner { get; set; } = default!;
 
         public VehicleType Type { get; set; } = VehicleType.Car;
@@ -35,17 +29,12 @@ namespace ParkSpotTLV.Infrastructure.Entities {
 
     public class Permit {
         public Guid Id { get; set; } = Guid.NewGuid();
-
         // Ownership 
-        public Guid? VehicleId { get; set; }
         public Vehicle? Vehicle { get; set; }
-
         public PermitType Type { get; set; } = PermitType.Default;
-
         // Optional link to a Zone when Type == ZoneResident (or when relevant)
-        public Guid? ZoneId { get; set; }
+        public int? ZoneCode { get; set; }
         public Zone? Zone { get; set; }
-
         // Validity
         public DateOnly? ValidTo { get; set; }
         public bool IsActive { get; set; } = true;

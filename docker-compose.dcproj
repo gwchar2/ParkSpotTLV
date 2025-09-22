@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.Docker.Sdk">
+﻿<Project Sdk="Microsoft.Docker.Sdk">
   <PropertyGroup>
     <!-- Must be present; 2.1 works with VS 2022 recent builds -->
     <ProjectVersion>2.1</ProjectVersion>
@@ -9,6 +9,7 @@
     <DockerServiceUrl>http://localhost:8080/scalar</DockerServiceUrl>
     <!-- Any GUID is fine -->
     <ProjectGuid>{8F006BDE-5E3D-4F5B-B1F2-2A6F8F8B80B1}</ProjectGuid>
+    <UserSecretsId>ea05ceb1-fb8f-4f92-8ad6-7bfd90d0fa25</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <None Include="docker-compose.yml" />

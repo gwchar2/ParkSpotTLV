@@ -9,21 +9,29 @@ namespace ParkSpotTLV.Infrastructure.Config {
 
             e.HasKey(x => x.Id);
 
+            e.Property(x => x.Type).IsRequired();
             e.Property(x => x.ValidTo);
-
             e.Property(x => x.IsActive).HasDefaultValue(true);
 
+
+            e.Property(x => x.ZoneCode).IsRequired(false);
+            e.HasIndex(x => x.ZoneCode);
+
+
             e.HasOne(x => x.Zone)
-             .WithMany()
-             .HasForeignKey(x => x.ZoneId)
-             .OnDelete(DeleteBehavior.SetNull);
+              .WithMany()
+              .HasForeignKey(p => p.ZoneCode)    
+              .HasPrincipalKey(z => z.Code)      
+              .OnDelete(DeleteBehavior.SetNull);
 
             e.HasOne(x => x.Vehicle)
              .WithMany(v => v.Permits)
-             .HasForeignKey(x => x.VehicleId)
+             .HasForeignKey("VehicleId")               
              .OnDelete(DeleteBehavior.Cascade);
 
-            e.HasIndex(x => new { x.VehicleId, x.ZoneId, x.Type });
+            e.HasOne(x => x.Vehicle)
+             .WithMany(v => v.Permits)
+             .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

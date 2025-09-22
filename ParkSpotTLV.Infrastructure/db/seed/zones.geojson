@@ -7,7 +7,7 @@
         "id": "00000000-0000-0000-0000-000000000001",
         "name": "Zone 1",
         "code": 1,
-        "Taarif": 2
+        "taarif": 2
       },
       "geometry": {
         "coordinates": [
@@ -115,7 +115,7 @@
         "id": "00000000-0000-0000-0000-000000000002",
         "name": "Zone 2",
         "code": 2,
-        "Taarif": 2
+        "taarif": 2
       },
       "geometry": {
         "coordinates": [
@@ -235,7 +235,7 @@
         "id": "00000000-0000-0000-0000-000000000004",
         "name": "Zone 4",
         "code": 4,
-        "Taarif": 2
+        "taarif": 2
       },
       "geometry": {
         "coordinates": [
@@ -415,7 +415,7 @@
         "id": "00000000-0000-0000-0000-000000000006",
         "name": "Zone 6",
         "code": 6,
-        "Taarif": 1
+        "taarif": 1
       },
       "geometry": {
         "coordinates": [
@@ -511,7 +511,7 @@
         "id": "00000000-0000-0000-0000-000000000007",
         "name": "Zone 7",
         "code": 7,
-        "Taarif": 1
+        "taarif": 1
       },
       "geometry": {
         "coordinates": [
@@ -607,7 +607,7 @@
         "id": "00000000-0000-0000-0000-000000000009",
         "name": "Zone 9",
         "code": 9,
-        "Taarif": 1
+        "taarif": 1
       },
       "geometry": {
         "coordinates": [
@@ -703,7 +703,7 @@
         "id": "00000000-0000-0000-0000-000000000010",
         "name": "Zone 10",
         "code": 10,
-        "Taarif": 1
+        "taarif": 1
       },
       "geometry": {
         "coordinates": [
@@ -787,7 +787,7 @@
         "id": "00000000-0000-0000-0000-000000000012",
         "name": "Zone 12",
         "code": 12,
-        "Taarif": 2
+        "taarif": 2
       },
       "geometry": {
         "coordinates": [
@@ -863,7 +863,7 @@
         "id": "00000000-0000-0000-0000-000000000013",
         "name": "Zone 13",
         "code": 13,
-        "Taarif": 2
+        "taarif": 2
       },
       "geometry": {
         "coordinates": [

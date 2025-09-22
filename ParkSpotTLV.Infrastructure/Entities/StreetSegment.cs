@@ -13,12 +13,10 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [MaxLength(128)]
-        public string? Name { get; set; }
+        [MaxLength(128)] public string? Name { get; set; }
 
         // Geometry of ONE segment between intersections.
-        [Required]
-        public LineString Geom { get; set; } = default!;
+        [Required] public LineString Geom { get; set; } = default!;
 
         // What zone does this street belong to? (kept)
         public Guid? ZoneId { get; set; }
@@ -29,11 +27,6 @@ namespace ParkSpotTLV.Infrastructure.Entities {
 
         public ParkingType ParkingType { get; set; } = ParkingType.Unknown;
         public ParkingHours ParkingHours { get; set; } = ParkingHours.Unknown;
-
-
-        // Segment graph endpoints (for clean splitting/merging and future routing)
-        public Guid? FromNodeId { get; set; }
-        public Guid? ToNodeId { get; set; }
 
         // Which curb side the parking info applies to (coloring often differs by side)
         public SegmentSide Side { get; set; } = SegmentSide.Both;

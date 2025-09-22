@@ -1,5 +1,3 @@
-#http://localhost:8080/scalar/
-version: "3.9"
 
 services:
   db:
@@ -16,7 +14,7 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./db/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d parkspot_dev -h localhost"]
+      test: ["CMD-SHELL","pg_isready -U admin -d postgres"]
       interval: 5s
       timeout: 5s
       retries: 30
@@ -28,11 +26,24 @@ services:
     container_name: parkspot_api
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=parkspot_dev;Username=admin;Password=admin
-      DB_CONNECTION: Host=db;Port=5432;Database=parkspot_dev;Username=admin;Password=admin
+
+      # DB connection for the API *inside Docker network* 
+      ConnectionStrings__DefaultConnection: Host=parkspot_db;Port=5432;Database=parkspot_dev;Username=admin;Password=admin
+
+      # Seeding paths
       Seeding__Paths__Zones: /app/db/Seed/zones.geojson
       Seeding__Paths__StreetSegments: /app/db/Seed/street_segments.geojson
       Seeding__Paths__Users: /app/db/Seed/users_seed.json
+
+      # Auth settings
+      Auth__Issuer: ParkSpotTLV
+      Auth__Audience: ParkSpotTLV.App
+      Auth__AccessTokenMinutes: 10
+      Auth__RefreshTokenDays: 14
+      Auth__ClockSkewMinutes: 1
+      Auth__Signing__Type: HMAC
+      Auth__Signing__HmacSecret: ea05ceb1-fb8f-4f92-8ad6-7bfd90d0fa25 
+
     ports:
       - "8080:8080"
     volumes:
@@ -43,7 +54,3 @@ services:
 
 volumes:
   pgdata:
-
-
-
-

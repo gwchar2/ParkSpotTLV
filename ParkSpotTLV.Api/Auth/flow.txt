@@ -1,0 +1,79 @@
+﻿Operational lifecycle
+
+Creation: on login/register we mint a new random token, store its hash with timestamps, return the raw token to the client once.
+
+Rotation: on /auth/refresh, we:
+
+Validate the presented token (by its hash), ensure active and unexpired.
+
+Create a new token, set ReplacedByTokenHash on the old row, set old.RevokedAt to now.
+
+Return new access + refresh tokens.
+
+Reuse detection: if a rotated (old) token is presented again:
+
+We detect it because it has ReplacedByTokenHash or RevokedAt set.
+
+We mark the chain revoked (old token + any descendants), log a security event, and return 401.
+
+Logout: set RevokedAt for the specific session; optionally “all devices” = revoke all active sessions by UserId.
+
+Cleanup: scheduled delete for Expired rows (e.g., nightly).
+
+How it threads through the codebase (flow, no code)
+
+
+
+Login flow
+
+AuthController → AuthService.VerifyPassword(user, password)
+
+AuthService (success) → RefreshTokenService.GenerateAndStore(userId, deviceName) → DbContext.SaveChanges
+
+AuthService → JwtService.CreateAccessToken(user) → returns { accessToken, refreshToken }
+
+Refresh flow (happy path)
+
+AuthController → RefreshTokenService.Validate(rawToken)
+
+RefreshTokenService → hashes rawToken → DbContext.RefreshTokens.FindByHash(hash)
+
+RefreshTokenService checks active/unexpired → creates new token row → sets old.ReplacedByTokenHash + old.RevokedAt → DbContext.SaveChanges (atomic)
+
+AuthService → JwtService.CreateAccessToken(user) → returns new pair
+
+Refresh flow (reuse detection)
+
+AuthController → RefreshTokenService.Validate(rawToken)
+
+Validate finds old token with RevokedAt set or ReplacedByTokenHash not null → RefreshTokenService.RevokeChain(startingFromThisToken) → DbContext.SaveChanges
+
+Return 401; Security logger records token-reuse event
+
+
+
+Logout flow
+
+AuthController (requires either the current refresh token or a session id) → RefreshTokenService.Revoke(tokenHash or id) → DbContext.SaveChanges
+
+Return 204
+
+
+
+TTL cleanup flow
+
+Background job (or manual maintenance) → Db query: ExpiresAt < now → delete in batches
+
+Logs count of purged rows for visibility
+
+Validation and invariants
+
+A TokenHash must be unique.
+
+A token can only be used to refresh once; after rotation it must be unusable.
+
+ReplacedByTokenHash is set exactly once (on rotation).
+
+RevokedAt is never cleared once set.
+
+Queries that “find active token” always include RevokedAt is null and now < ExpiresAt.
