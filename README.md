@@ -34,129 +34,122 @@ db: Fixed bug in feature Y (link_to_commit)
 
 - [Backend](#backend)
   - [Running the database](#running-the-database)
-    - [Option A — Docker (DB + API)](#option-a--docker-db--api)
-    - [Option B — Docker DB + API from source](#option-b--docker-db--api-from-source)
+    - [Option A - Quick start (DB + API in Docker)](#option-a--docker-db--api)
+    - [Option B — DB in Docker, API from source](#option-b--docker-db--api-from-source)
   - [Database management](#database-management)
-  - [API UI](#api-ui)
+  - [Port reference](#api-ui)
 - [Mobile App](#mobile-app)
 - [Docs](#docs)
 - [GitHub Actions](#github-actions)
 - [Project Structure](#project-structure)
 
 ---
-
-
 # Backend
 
-## Running the database
+Run all commands from the repository root unless noted otherwise.
 
-## Option A — Docker (DB + API)
+## Option A - Quick start (DB + API in Docker)
 
+- Start the stack
 ```bash
 docker compose up -d --build
-curl http://localhost:8080/ready     # expect: green
 ```
-
-Once the containers are up, check readiness at http://localhost:8080/ready
-You should see a green response.
-
-If readiness is not green after Docker finishes:
-
-1) Ensure EF Tools know how to reach the DB (host can reach the container on localhost:5432)
+- Check readiness
 ```bash
-$env:DB_CONNECTION = 'Host=localhost;Port=5432;Database=parkspot_dev;Username=admin;Password=admin'
+curl http://localhost:8080/ready
 ```
+- Expected: an OK/green response
 
-2) Apply migrations
+If readiness is not OK:
+- Make sure EF tools on your host point to the DB on port 5433
+```powershell
+# PowerShell (Windows)
+$env:ConnectionStrings__DefaultConnection = 'Host=localhost;Port=5433;Database=parkspot_dev;Username=admin;Password=admin'
+```
 ```bash
-dotnet ef database update --project .\ParkSpotTLV.Infrastructure --startup-project .\ParkSpotTLV.Api
+# Bash (macOS/Linux)
+export ConnectionStrings__DefaultConnection='Host=localhost;Port=5433;Database=parkspot_dev;Username=admin;Password=admin'
 ```
-
-3) Restart API to let the seeder run
+- Apply migrations
+```bash
+dotnet ef database update --project ./ParkSpotTLV.Infrastructure --startup-project ./ParkSpotTLV.Api
+```
+- Restart the API to run the seeder
 ```bash
 docker compose restart api
 ```
-
-4) Check readiness
+- Recheck readiness
 ```bash
 curl http://localhost:8080/ready
 ```
 
+Notes:
+- Inside Docker, the API connects to Postgres at `Host=parkspot_db;Port=5432`.
+- From your host, tools connect at `Host=localhost;Port=5433`.
 
-## Option B — Docker DB + API from source
+## Option B — DB in Docker, API from source
 
-Run only the database in Docker with 
+- Start only the database
 ```bash
 docker compose up -d db
 ```
-
-Set the connection string environment variable to:
-```bash
-Host=localhost;Port=5432;Database=parkspot_dev;Username=admin;Password=admin
+- Point your local run to the DB on host port 5433
+```powershell
+# Windows
+$env:ConnectionStrings__DefaultConnection = 'Host=localhost;Port=5433;Database=parkspot_dev;Username=admin;Password=admin'
 ```
-
-Apply migrations with:
+```bash
+# macOS/Linux
+export ConnectionStrings__DefaultConnection='Host=localhost;Port=5433;Database=parkspot_dev;Username=admin;Password=admin'
+```
+- Apply migrations
 ```bash
 dotnet ef database update --project ./ParkSpotTLV.Infrastructure --startup-project ./ParkSpotTLV.Api
 ```
-
-Finally, run the API directly from source with:
+- Run the API from source
 ```bash
 dotnet run --project ./ParkSpotTLV.Api
 ```
-
-The API will now be available at http://localhost:8080
-.
+- Browse http://localhost:8080
 
 ## Database management
 
-To view the current secrets used by the API to connect to the database, run:
+- See which secrets the API uses locally
 ```bash
-dotnet user-secrets list --project .\ParkSpotTLV.Api
+dotnet user-secrets list --project ./ParkSpotTLV.Api
 ```
 
-To create migrations or update tables, first build the project, then add & apply migrations. 
+- Common EF Core commands
 ```bash
 dotnet build
-dotnet ef migrations add InitialCreate --project ParkSpotTLV.Infrastructure --startup-project ParkSpotTLV.Api
-dotnet ef database update --project ParkSpotTLV.Infrastructure --startup-project ParkSpotTLV.Api
+dotnet ef migrations add <Name> --project ./ParkSpotTLV.Infrastructure --startup-project ./ParkSpotTLV.Api
+dotnet ef database update        --project ./ParkSpotTLV.Infrastructure --startup-project ./ParkSpotTLV.Api
+dotnet ef migrations list        --project ./ParkSpotTLV.Infrastructure --startup-project ./ParkSpotTLV.Api
 ```
 
-You can also list existing migrations with:
+- Inspect the DB inside the container
 ```bash
-dotnet ef migrations list --project ParkSpotTLV.Infrastructure --startup-project ParkSpotTLV.Api
+docker exec -it parkspot_db psql -U admin -d parkspot_dev
 ```
-
-To inspect the database directly inside the Docker container, open a psql session with:
-```bash
-docker exec -it parkspot-db psql -U admin -d parkspot_dev
-```
-
-Inside psql you can list all tables with:
-```bash
+Inside `psql`:
+```sql
 \dt
+SELECT code, name, taarif, ST_SRID(geom) FROM zones LIMIT 5;
 ```
 
-Inside psql you can inspect individual tables with:
+- Reset the database (development)
 ```bash
-\d+ users
-\d+ vehicles
-\d+ zones
-\d+ street_segments
+docker compose down -v
+docker compose up -d db
+dotnet ef database update --project ./ParkSpotTLV.Infrastructure --startup-project ./ParkSpotTLV.Api
+docker compose up -d --build api
 ```
 
-If you need to drop and rebuild the database, use:
-```bash
-dotnet ef database drop --project ParkSpotTLV.Infrastructure --startup-project ParkSpotTLV.Api
-dotnet ef database update --project ParkSpotTLV.Infrastructure --startup-project ParkSpotTLV.Api
-```
+## Port reference
 
-## API UI
-You can access the Scalar OpenAPI UI at http://localhost:8080/scalar
+- Host to DB: `localhost:5433`
+- API container to DB container: `parkspot_db:5432`
 
-To check service readiness (including database and PostGIS), use http://localhost:8080/ready
-
-For a simple liveness check, use http://localhost:8080/health
 
 
 # Mobile App

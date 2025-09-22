@@ -25,7 +25,6 @@ namespace ParkSpotTLV.Infrastructure.Config {
              .OnDelete(DeleteBehavior.SetNull);
 
             e.HasIndex(x => x.ZoneId);
-            e.HasIndex(x => x.StylePriority);
         }
     }
 }

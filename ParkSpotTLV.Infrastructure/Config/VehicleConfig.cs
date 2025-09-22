@@ -9,14 +9,9 @@ namespace ParkSpotTLV.Infrastructure.Config {
 
             e.HasKey(x => x.Id);
 
-            e.Property(x => x.PlateNumber).HasMaxLength(20);
-
             e.HasOne(v => v.Owner)
              .WithMany(u => u.Vehicles)
-             .HasForeignKey(v => v.OwnerId)
              .OnDelete(DeleteBehavior.Cascade);
-
-            e.HasIndex(x => x.PlateNumber).IsUnique();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using NetTopologySuite.Geometries;
+using ParkSpotTLV.Infrastructure.Entities;
 using System.ComponentModel.DataAnnotations;
 
 /*
@@ -7,6 +8,7 @@ using System.ComponentModel.DataAnnotations;
 
 
 namespace ParkSpotTLV.Infrastructure.Entities {
+    public enum Taarif { City_Center = 1, City_Outskirts = 2 }
 
     public class Zone {
         public Guid Id { get; set; } = Guid.NewGuid();
@@ -15,12 +17,11 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         public int? Code { get; set; }
 
         // Human label for maps/UX (e.g., "Zone 6")
-        [MaxLength(64)]
-        public string? Name { get; set; }
+        [MaxLength(64)] public string? Name { get; set; }
+        public Taarif Taarif { get; set; }
 
         // MultiPolygon boundary for the zone (use SRID 4326)
-        [Required]
-        public MultiPolygon Geom { get; set; } = default!;
+        [Required] public MultiPolygon Geom { get; set; } = default!;
 
         // Streets/segments associated to this zone (kept)
         public ICollection<StreetSegment> Segments { get; set; } = new List<StreetSegment>();

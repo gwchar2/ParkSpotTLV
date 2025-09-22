@@ -1,33 +1,38 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using ParkSpotTLV.Api.Endpoints;
 using ParkSpotTLV.Api.Errors;
 using ParkSpotTLV.Api.Http;
+using ParkSpotTLV.Api.Auth;
 using ParkSpotTLV.Infrastructure;
+using ParkSpotTLV.Infrastructure.Security;
 using Scalar.AspNetCore;
 using Serilog;
 using System.Reflection;
-using System.Text.Json;
+using System.Text;
 
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
 
-try { 
+try {
     Log.Information("Starting Up");
 
     var builder = WebApplication.CreateBuilder(args);
+
 
     /* Adds a DbContext & Connects to DB (secret connection) */
     var conn = builder.Configuration.GetConnectionString("DefaultConnection")
            ?? throw new InvalidOperationException("Missing connection string.");
     builder.Services.AddDbContext<AppDbContext>(opt =>
-        opt.UseNpgsql(conn, x => { 
-            x.UseNetTopologySuite(); 
-            x.MigrationsAssembly(typeof(AppDbContext).Assembly.GetName().Name); 
-        }));
-
-    
+        opt.UseNpgsql(conn, x => {
+            x.UseNetTopologySuite();
+            x.MigrationsAssembly(typeof(AppDbContext).Assembly.GetName().Name);
+        })
+        .UseSnakeCaseNamingConvention()
+        );
 
     /* Serilog host hook (reads appsettings) */
     builder.Host.UseSerilog((ctx, services, cfg) => {
@@ -41,6 +46,7 @@ try {
     });
 
     /* Services */
+    /* Logging Services */
     builder.Services.AddOpenApi();
     builder.Services.AddEndpointsApiExplorer();
 
@@ -52,7 +58,46 @@ try {
     /* On Start (RunTime threads) */
     builder.Services.AddSingleton<RuntimeHealth>();
 
+    /* API Authentication Service */
+    builder.Services.AddOptions<AuthOptions>()
+        .Bind(builder.Configuration.GetSection("Auth"))
+        .ValidateDataAnnotations()
+        .Validate(o => o.Signing.Type == "HMAC" ? !string.IsNullOrWhiteSpace(o.Signing.HmacSecret) : true,
+                                                    "HMAC Selected but Auth:Signing:HmacSecret is missing!");
+
+    var authOpts = builder.Configuration.GetSection("Auth").Get<AuthOptions>()!;
+    if (authOpts.Signing.Type.Equals("HMAC", StringComparison.OrdinalIgnoreCase)) {
+        var keyBytes = Encoding.UTF8.GetBytes(authOpts.Signing.HmacSecret!);            // Encodes the HMAC key
+        var signingKey = new SymmetricSecurityKey(keyBytes);                            // Creates a symmetric key from the encoded hmac
+
+        /* Registers the how of validating tokens (JWT bearer scheme). */
+        builder.Services
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options => {
+                options.RequireHttpsMetadata = false;
+                options.TokenValidationParameters = new TokenValidationParameters {
+                    ValidateIssuer = true,
+                    ValidIssuer = authOpts.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = authOpts.Audience,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = signingKey,
+                    RequireSignedTokens = true,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.FromMinutes(authOpts.ClockSkewMinutes)
+                };
+            });
+    } else {
+        throw new NotSupportedException("ONLY HMAC IS WIRED AT THE MOMENT");
+    }
+    builder.Services.AddAuthorization();                    // Registers the policies and [Authorize] system.
+    builder.Services.AddScoped<EfRefreshTokenStore>();      // Registers the entity framework for handling refresh tokens
+    builder.Services.AddSingleton(TimeProvider.System);     
+
+
     var app = builder.Build();
+    app.UseAuthentication();
+    app.UseAuthorization();
 
     
     /* Pipeline */

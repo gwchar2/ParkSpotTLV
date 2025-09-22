@@ -7,19 +7,24 @@ namespace ParkSpotTLV.Infrastructure.Config {
     public class ZoneConfig : IEntityTypeConfiguration<Zone> {
         public void Configure(EntityTypeBuilder<Zone> e) {
             e.ToTable("zones");
+            e.HasKey(z => z.Id);
 
-            e.HasKey(x => x.Id);
 
-            e.Property(x => x.Name).HasMaxLength(64);
+            e.Property(z => z.Name).HasMaxLength(64);
+
+            e.Property(z => z.Code).IsRequired();
+            e.HasAlternateKey(z => z.Code);
+            e.HasIndex(z => z.Code).IsUnique();
+
+            e.Property(z => z.Taarif).IsRequired();
 
             // Geometry: MultiPolygon with SRID 4326
-            e.Property(x => x.Geom)
+            e.Property(z => z.Geom)
              .IsRequired()
              .HasColumnType("geometry(MultiPolygon,4326)");
 
-            e.HasIndex(x => x.Geom).HasMethod("GIST");
+            e.HasIndex(z => z.Geom).HasMethod("GIST");
 
-            e.HasIndex(x => x.Code);
         }
     }
 }

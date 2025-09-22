@@ -13,12 +13,10 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [MaxLength(128)]
-        public string? Name { get; set; }
+        [MaxLength(128)] public string? Name { get; set; }
 
         // Geometry of ONE segment between intersections.
-        [Required]
-        public LineString Geom { get; set; } = default!;
+        [Required] public LineString Geom { get; set; } = default!;
 
         // What zone does this street belong to? (kept)
         public Guid? ZoneId { get; set; }
@@ -30,19 +28,8 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         public ParkingType ParkingType { get; set; } = ParkingType.Unknown;
         public ParkingHours ParkingHours { get; set; } = ParkingHours.Unknown;
 
-
-        // Segment graph endpoints (for clean splitting/merging and future routing)
-        public Guid? FromNodeId { get; set; }
-        public Guid? ToNodeId { get; set; }
-
         // Which curb side the parking info applies to (coloring often differs by side)
         public SegmentSide Side { get; set; } = SegmentSide.Both;
-
-        // Length in meters (computed from Geom); keep nullable to backfill lazily.
-        public double? LengthMeters { get; set; }
-
-        // When multiple rules overlap, higher priority wins (lower number = higher priority)
-        public int StylePriority { get; set; } = 100;
 
         // Time-based rules (optional; keep simple now, grow later)
         public ICollection<ParkingRule> ParkingRules { get; set; } = new List<ParkingRule>();
@@ -64,6 +51,9 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         // Local time window (no date). Use TimeOnly in .NET 6+/EF Core; string "HH:mm" if you prefer.
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
+
+        // When multiple rules overlap, higher priority wins (lower number = higher priority)
+        public int StylePriority { get; set; } = 2;
 
         // Resulting classification for this window
         public ParkingType ParkingType { get; set; } = ParkingType.Unknown;

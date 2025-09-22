@@ -2,57 +2,46 @@
   {
     "id": "11111111-1111-1111-1111-111111111111",
     "username": "alice",
-    "passwordHash": "$2a$11$examplehashalice",
+    "passwordHash": "$argon2id$v=19$m=65536,t=2,p=1$ZGV2LXNlZWQtc2FsdA$W2n8m2bZ6k4k3XH0wK5W7N5q2m8T7gN5Y8w8JY5bVfM",
     "vehicles": [
       {
-        "id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-        "plateNumber": "12-345-67",
+        "id": "22222222-2222-2222-2222-222222222222",
         "type": "Car",
         "permits": [
           {
-            "id": "aaaa0000-0000-0000-0000-000000000001",
+            "id": "33333333-3333-3333-3333-333333333333",
             "type": "ZoneResident",
-            "scope": "Vehicle",
             "zoneCode": 6,
-            "validFrom": "2025-09-19",
-            "validTo": "2026-09-19",
+            "validTo": "2026-12-31",
             "isActive": true
           }
         ]
       }
-    ],
-    "permits": [
-      {
-        "id": "userperm-0000-0000-0000-000000000001",
-        "type": "Disability",
-        "scope": "User",
-        "validFrom": "2025-09-19",
-        "validTo": "2026-09-19",
-        "isActive": true
-      }
     ]
   },
   {
-    "id": "22222222-2222-2222-2222-222222222222",
+    "id": "44444444-4444-4444-4444-444444444444",
     "username": "bob",
-    "passwordHash": "$2a$11$examplehashbob",
+    "passwordHash": "DEV-ONLY-PLACEHOLDER",
     "vehicles": [
       {
-        "id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
-        "plateNumber": "89-012-34",
+        "id": "55555555-5555-5555-5555-555555555555",
         "type": "Truck",
-        "permits": []
-      }
-    ],
-    "permits": [
-      {
-        "id": "userperm-0000-0000-0000-000000000002",
-        "type": "ZoneResident",
-        "scope": "User",
-        "zoneCode": 1,
-        "validFrom": "2025-09-19",
-        "validTo": "2026-03-18",
-        "isActive": true
+        "permits": [
+          {
+            "id": "66666666-6666-6666-6666-666666666666",
+            "type": "Disability",
+            "validTo": "2027-06-30",
+            "isActive": true
+          },
+          {
+            "id": "77777777-7777-7777-7777-777777777777",
+            "type": "ZoneResident",
+            "zoneCode": 9,
+            "validTo": "2026-05-01",
+            "isActive": true
+          }
+        ]
       }
     ]
   }

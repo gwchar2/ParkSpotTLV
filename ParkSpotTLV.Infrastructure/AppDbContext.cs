@@ -12,11 +12,11 @@ namespace ParkSpotTLV.Infrastructure {
         public DbSet<User> Users => Set<User>();
         public DbSet<Zone> Zones => Set<Zone>();    
         public DbSet<StreetSegment> StreetSegments => Set<StreetSegment>();
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
         protected override void OnModelCreating(ModelBuilder model) {
             model.HasPostgresExtension("postgis");
             model.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }
-
     }
 }
