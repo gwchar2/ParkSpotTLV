@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.3.1-beta.0...v0.4.0-beta.0) (2025-09-23)
+
+
+### Features
+
+* **db:** adding configs to local db to establish relationships ([3cc6e08](https://github.com/gwchar2/ParkSpotTLV/commit/3cc6e08713f4c549da046ba1e8e1274f8edd6d95))
+
+
+### Bug Fixes
+
+* **db:** update local entities to mirror global entities ([f83ea8b](https://github.com/gwchar2/ParkSpotTLV/commit/f83ea8bb72b044e9981b7f61f9bc191d964c7be2))
+* **db:** updates to SyncService and LocalDataService ([7798941](https://github.com/gwchar2/ParkSpotTLV/commit/77989416eb2308d285516dac898ad8b91c2c1662))
+
 ## [0.3.1-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.3.0-beta.0...v0.3.1-beta.0) (2025-09-22)
 
 
