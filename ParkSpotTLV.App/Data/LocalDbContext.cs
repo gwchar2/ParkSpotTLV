@@ -10,6 +10,9 @@ public class LocalDbContext : DbContext
     public DbSet<LocalZone> Zones => Set<LocalZone>();
     public DbSet<LocalStreetSegment> StreetSegments => Set<LocalStreetSegment>();
     public DbSet<LocalVehicle> Vehicles => Set<LocalVehicle>();
+    public DbSet<LocalPermit> Permits => Set<LocalPermit>();
+    public DbSet<LocalParkingRule> ParkingRules => Set<LocalParkingRule>();
+    public DbSet<LocalRefreshToken> RefreshTokens => Set<LocalRefreshToken>();
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -47,6 +50,25 @@ public class LocalDbContext : DbContext
         });
 
         modelBuilder.Entity<LocalVehicle>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId);
+        });
+
+        modelBuilder.Entity<LocalPermit>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.VehicleId);
+            entity.HasIndex(e => e.ZoneId);
+        });
+
+        modelBuilder.Entity<LocalParkingRule>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.StreetSegmentId);
+        });
+
+        modelBuilder.Entity<LocalRefreshToken>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.UserId);

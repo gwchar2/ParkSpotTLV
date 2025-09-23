@@ -10,19 +10,24 @@ public class LocalUser
     [Required, MaxLength(64)]
     public string Username { get; set; } = string.Empty;
 
-    [MaxLength(500)]
-    public string? AuthToken { get; set; }
+    [Required, MaxLength(256)]
+    public string PasswordHash { get; set; } = string.Empty;
 
-    [MaxLength(500)]
-    public string? RefreshToken { get; set; }
+    public ICollection<LocalVehicle> Vehicles { get; set; } = new List<LocalVehicle>();
 
-    public DateTime? TokenExpiry { get; set; }
+    public ICollection<LocalRefreshToken> RefreshTokens { get; set; } = new List<LocalRefreshToken>();
 
+    // Local-only properties for cache management
+    public DateTime CachedAt { get; set; } = DateTime.UtcNow;
+    
+    public bool IsActive { get; set; } = true;
+
+    // Essential local session properties
     public bool IsLoggedIn { get; set; } = false;
 
-    public DateTime LastLogin { get; set; } = DateTime.UtcNow;
-
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
     public DateTime LastSyncAt { get; set; } = DateTime.UtcNow;
+
+    // Local authentication token (not in global model)
+    [MaxLength(500)]
+    public string? AuthToken { get; set; }
 }

@@ -156,8 +156,9 @@ public class SyncService : ISyncService
                 Id = z.Id.ToString(),
                 Code = z.Code,
                 Name = z.Name,
+                Taarif = ParseTaarif(z.Taarif?.ToString()),
                 GeometryJson = JsonSerializer.Serialize(z.Geom),
-                LastUpdated = z.LastUpdated?.DateTime,
+                LastUpdated = z.LastUpdated,
                 CachedAt = DateTime.UtcNow,
                 IsActive = true
             }).ToList();
@@ -184,12 +185,13 @@ public class SyncService : ISyncService
                 Name = s.Name,
                 GeometryJson = JsonSerializer.Serialize(s.Geom),
                 ZoneId = s.ZoneId?.ToString(),
-                ParkingType = s.ParkingType.ToString(),
-                ParkingHours = s.ParkingHours.ToString(),
-                Side = s.Side.ToString(),
+                ParkingType = ParseParkingType(s.ParkingType?.ToString()),
+                ParkingHours = ParseParkingHours(s.ParkingHours?.ToString()),
+                Side = ParseSegmentSide(s.Side?.ToString()),
+                CarsOnly = s.CarsOnly,
                 LengthMeters = s.LengthMeters,
                 StylePriority = s.StylePriority,
-                LastUpdated = s.LastUpdated?.DateTime,
+                LastUpdated = s.LastUpdated,
                 CachedAt = DateTime.UtcNow,
                 IsActive = true
             }).ToList();
@@ -217,10 +219,7 @@ public class SyncService : ISyncService
             {
                 Id = v.Id.ToString(),
                 UserId = userId,
-                Type = v.Type.ToString(),
-                HasResidentPermit = v.Permits?.Any(p => p.Type.ToString() == "ZoneResident") == true,
-                HasDisabledPermit = v.Permits?.Any(p => p.Type.ToString() == "Disability") == true,
-                ResidentZoneId = v.Permits?.FirstOrDefault(p => p.Type.ToString() == "ZoneResident")?.ZoneId?.ToString(),
+                Type = ParseVehicleType(v.Type?.ToString()),
                 CachedAt = DateTime.UtcNow,
                 IsActive = true
             }).ToList();
@@ -229,6 +228,57 @@ public class SyncService : ISyncService
         {
             return null;
         }
+    }
+
+    private ParkingType ParseParkingType(string? value)
+    {
+        return value?.ToLower() switch
+        {
+            "free" => ParkingType.Free,
+            "paid" => ParkingType.Paid,
+            "limited" => ParkingType.Limited,
+            _ => ParkingType.Unknown
+        };
+    }
+
+    private ParkingHours ParseParkingHours(string? value)
+    {
+        return value?.ToLower() switch
+        {
+            "specifichours" => ParkingHours.SpecificHours,
+            _ => ParkingHours.Unknown
+        };
+    }
+
+    private SegmentSide ParseSegmentSide(string? value)
+    {
+        return value?.ToLower() switch
+        {
+            "left" => SegmentSide.Left,
+            "right" => SegmentSide.Right,
+            "both" => SegmentSide.Both,
+            _ => SegmentSide.Both
+        };
+    }
+
+    private VehicleType ParseVehicleType(string? value)
+    {
+        return value?.ToLower() switch
+        {
+            "truck" => VehicleType.Truck,
+            "car" => VehicleType.Car,
+            _ => VehicleType.Car
+        };
+    }
+
+    private Taarif ParseTaarif(string? value)
+    {
+        return value?.ToLower() switch
+        {
+            "city_center" or "1" => Taarif.City_Center,
+            "city_outskirts" or "2" => Taarif.City_Outskirts,
+            _ => Taarif.City_Center
+        };
     }
 
     private async Task<bool> CheckInternetConnectionAsync()
@@ -250,6 +300,7 @@ public class ServerZone
     public Guid Id { get; set; }
     public int? Code { get; set; }
     public string? Name { get; set; }
+    public object? Taarif { get; set; }
     public object Geom { get; set; } = default!;
     public DateTimeOffset? LastUpdated { get; set; }
 }
@@ -260,9 +311,10 @@ public class ServerStreetSegment
     public string? Name { get; set; }
     public object Geom { get; set; } = default!;
     public Guid? ZoneId { get; set; }
-    public ParkingType ParkingType { get; set; }
-    public ParkingHours ParkingHours { get; set; }
-    public SegmentSide Side { get; set; }
+    public bool CarsOnly { get; set; } = false;
+    public object? ParkingType { get; set; }
+    public object? ParkingHours { get; set; }
+    public object? Side { get; set; }
     public double? LengthMeters { get; set; }
     public int StylePriority { get; set; }
     public DateTimeOffset? LastUpdated { get; set; }
@@ -271,18 +323,12 @@ public class ServerStreetSegment
 public class ServerVehicle
 {
     public Guid Id { get; set; }
-    public VehicleType Type { get; set; }
+    public object? Type { get; set; }
     public List<ServerPermit>? Permits { get; set; }
 }
 
 public class ServerPermit
 {
-    public PermitType Type { get; set; }
+    public object? Type { get; set; }
     public Guid? ZoneId { get; set; }
 }
-
-public enum ParkingType { Unknown = 0, Free = 1, Paid = 2, Limited = 3 }
-public enum ParkingHours { Unknown = 0, SpecificHours = 1 }
-public enum SegmentSide { Both = 0, Left = 1, Right = 2 }
-public enum VehicleType { Car = 1, Truck = 2 }
-public enum PermitType { Default = 0, Disability = 1, ZoneResident = 2 }

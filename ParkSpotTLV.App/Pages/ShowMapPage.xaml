@@ -16,14 +16,14 @@
         <!-- Settings Toggle Button -->
         <Button Grid.Row="0"
                 x:Name="SettingsToggleBtn"
-                Text="⚙️ ▼"
+                Text="Default car - Park now ▼"
                 BackgroundColor="LightGray"
                 TextColor="Black"
                 FontSize="14"
                 Clicked="OnSettingsToggleClicked"
                 HorizontalOptions="Start"
                 Margin="20,10"
-                WidthRequest="80"
+                WidthRequest="200"
                 HeightRequest="35" />
 
         <!-- Collapsible Settings Panel -->

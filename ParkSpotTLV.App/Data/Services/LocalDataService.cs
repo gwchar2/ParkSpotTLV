@@ -138,7 +138,6 @@ public class LocalDataService : ILocalDataService
         {
             user.IsLoggedIn = false;
             user.AuthToken = null;
-            user.RefreshToken = null;
         }
         await context.SaveChangesAsync();
     }
