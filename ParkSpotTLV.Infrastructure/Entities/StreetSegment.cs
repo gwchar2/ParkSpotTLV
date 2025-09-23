@@ -48,7 +48,6 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         // Day-of-week window (0=Sunday .. 6=Saturday to match Israel defaults; adjust if you prefer ISO-8601)
         public int DayOfWeek { get; set; } // 0..6
 
-        // Local time window (no date). Use TimeOnly in .NET 6+/EF Core; string "HH:mm" if you prefer.
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
 

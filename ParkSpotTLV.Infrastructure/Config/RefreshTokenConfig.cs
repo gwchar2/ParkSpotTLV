@@ -24,7 +24,7 @@ namespace ParkSpotTLV.Infrastructure.Config {
             e.HasIndex(x => x.ReplacedByTokenHash);
 
             e.HasOne(x => x.User)
-                .WithMany(g => g.RefreshToken)
+                .WithMany(g => g.RefreshTokens)
                 .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
