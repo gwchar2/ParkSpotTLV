@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.14.36414.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParkSpotTLV.Api", "ParkSpotTLV.Api\ParkSpotTLV.Api.csproj", "{3057BBB6-0E31-4136-AEB2-33185C2C3789}"
+	ProjectSection(ProjectDependencies) = postProject
+		{88A0876B-091B-408C-AFB0-2E1A1AA094D9} = {88A0876B-091B-408C-AFB0-2E1A1AA094D9}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BackEnd", "BackEnd", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
@@ -36,6 +39,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{03795D4A-6
 		docs\git-workflow.md = docs\git-workflow.md
 		docs\לוז ומשימות.pdf = docs\לוז ומשימות.pdf
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParkSpotTLV.Contracts", "..\ParkSpotTLV.Contracts\ParkSpotTLV.Contracts.csproj", "{88A0876B-091B-408C-AFB0-2E1A1AA094D9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Contracts", "Contracts", "{CCE95D7E-67EA-410B-AE08-32553058F5BA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -120,6 +127,18 @@ Global
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|x64.Build.0 = Release|Any CPU
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|x86.ActiveCfg = Release|Any CPU
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|x86.Build.0 = Release|Any CPU
+		{88A0876B-091B-408C-AFB0-2E1A1AA094D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88A0876B-091B-408C-AFB0-2E1A1AA094D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88A0876B-091B-408C-AFB0-2E1A1AA094D9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{88A0876B-091B-408C-AFB0-2E1A1AA094D9}.Debug|x64.Build.0 = Debug|Any CPU
+		{88A0876B-091B-408C-AFB0-2E1A1AA094D9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{88A0876B-091B-408C-AFB0-2E1A1AA094D9}.Debug|x86.Build.0 = Debug|Any CPU
+		{88A0876B-091B-408C-AFB0-2E1A1AA094D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88A0876B-091B-408C-AFB0-2E1A1AA094D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88A0876B-091B-408C-AFB0-2E1A1AA094D9}.Release|x64.ActiveCfg = Release|Any CPU
+		{88A0876B-091B-408C-AFB0-2E1A1AA094D9}.Release|x64.Build.0 = Release|Any CPU
+		{88A0876B-091B-408C-AFB0-2E1A1AA094D9}.Release|x86.ActiveCfg = Release|Any CPU
+		{88A0876B-091B-408C-AFB0-2E1A1AA094D9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -130,6 +149,7 @@ Global
 		{CD360DB1-007E-42F6-9E18-807263E37E0C} = {D4FFBE1E-9F04-4C6C-BC54-648F9D27E96A}
 		{458005D5-1230-47D0-ADED-751EFCBFA823} = {AAD37699-F6E9-46CF-8033-C37E0E3F6522}
 		{DE66CA50-0421-B6AD-7BF4-207968DFF3EF} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{88A0876B-091B-408C-AFB0-2E1A1AA094D9} = {CCE95D7E-67EA-410B-AE08-32553058F5BA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DFF4163E-99EE-4307-B34B-E239008579A6}

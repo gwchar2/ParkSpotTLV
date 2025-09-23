@@ -3,8 +3,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ParkSpotTLV.Infrastructure.Entities;
 using ParkSpotTLV.Core.Auth;
+using Microsoft.EntityFrameworkCore.Update.Internal;
 
-namespace ParkSpotTLV.Infrastructure.Security {
+namespace ParkSpotTLV.Infrastructure.Auth {
     /* RefreshTokenService
      * Orchestrates refresh token lifecycle:
      *   Issue(userId) → new token (raw to client, hash to DB)
@@ -48,6 +49,7 @@ namespace ParkSpotTLV.Infrastructure.Security {
 
             var row = new RefreshToken {
                 Id = Guid.NewGuid(),
+                UserId = userId,
                 TokenHash = hash,
                 CreatedAtUtc = now,
                 ExpiresAtUtc = expires,
@@ -72,7 +74,6 @@ namespace ParkSpotTLV.Infrastructure.Security {
         public RefreshRotateResult ValidateAndRotate(string rawRefreshToken) {
             var now = DateTimeOffset.UtcNow;
             var hash = TokenHashing.HashToHex(rawRefreshToken, _opts.Signing.HmacSecret);
-
             // Look for matching active token in DB
             var row = _db.RefreshTokens
                 .AsTracking()

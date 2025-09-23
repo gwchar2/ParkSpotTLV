@@ -3,7 +3,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ParkSpotTLV.Api.Errors {
+namespace ParkSpotTLV.Api.Middleware {
 
     /* Adds a global ProblemDetails pipeline
      * All unhandled exceptions are returned in JSON format.

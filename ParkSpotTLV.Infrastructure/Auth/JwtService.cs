@@ -4,9 +4,9 @@ using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using ParkSpotTLV.Core.Auth;          // IJwtService, JwtIssueResult         
+using ParkSpotTLV.Core.Auth;
 
-namespace ParkSpotTLV.Infrastructure.Security {
+namespace ParkSpotTLV.Infrastructure.Auth {
     /* JwtService
      * Builds short-lived access tokens (JWT) signed with HMAC-SHA256.
      * Claims: sub (userId), name (username), iat, jti, exp, plus iss/aud.
