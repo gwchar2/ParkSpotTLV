@@ -1,4 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<!-- EF Core, entities, data access, implementations
+persistence and concrete adapters (EF Core, PostGIS, service impls). 
+-->
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -38,6 +41,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\..\ParkSpotTLV.Contracts\ParkSpotTLV.Contracts.csproj" />
 	  <ProjectReference Include="..\ParkSpotTLV.Core\ParkSpotTLV.Core.csproj" />
 	</ItemGroup>
 </Project>

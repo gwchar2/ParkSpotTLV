@@ -15,28 +15,4 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         public ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     }
-
-    public class Vehicle {
-        public Guid Id { get; set; } = Guid.NewGuid();
-        // Owner
-        public User Owner { get; set; } = default!;
-
-        public VehicleType Type { get; set; } = VehicleType.Car;
-
-        // Permits that are tied specifically to this vehicle
-        public ICollection<Permit> Permits { get; set; } = new List<Permit>();
-    }
-
-    public class Permit {
-        public Guid Id { get; set; } = Guid.NewGuid();
-        // Ownership 
-        public Vehicle? Vehicle { get; set; }
-        public PermitType Type { get; set; } = PermitType.Default;
-        // Optional link to a Zone when Type == ZoneResident (or when relevant)
-        public int? ZoneCode { get; set; }
-        public Zone? Zone { get; set; }
-        // Validity
-        public DateOnly? ValidTo { get; set; }
-        public bool IsActive { get; set; } = true;
-    }
 }

@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ParkSpotTLV.Infrastructure.Entities;
+using ParkSpotTLV.Core.Auth;
 
 namespace ParkSpotTLV.Infrastructure.Security {
-
-    public enum RefreshTokenStatus { Active, Expired, Revoked, NotFound, Reused }
 
     public class EfRefreshTokenStore {
 

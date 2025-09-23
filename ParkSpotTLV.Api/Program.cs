@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using ParkSpotTLV.Api.Endpoints;
-using ParkSpotTLV.Api.Errors;
+using ParkSpotTLV.Api.Middleware;
 using ParkSpotTLV.Api.Http;
 using ParkSpotTLV.Infrastructure;
 using ParkSpotTLV.Infrastructure.Security;      
@@ -11,6 +11,7 @@ using Scalar.AspNetCore;
 using Serilog;
 using System.Reflection;
 using System.Text;
+using ParkSpotTLV.Infrastructure.Auth;
 
 /* --------------------------------------------------------------------------
  * BOOTSTRAP LOGGING
@@ -150,7 +151,7 @@ try {
      * ENDPOINTS
      * ---------------------------------------------------------------------- */
     app.MapHealth();
-
+    app.MapAuthEndpoints();
     /* ----------------------------------------------------------------------
      * RUN
      * ---------------------------------------------------------------------- */

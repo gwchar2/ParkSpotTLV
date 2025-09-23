@@ -5,7 +5,7 @@ using ParkSpotTLV.Core.Auth;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace ParkSpotTLV.Infrastructure.Security {
+namespace ParkSpotTLV.Infrastructure.Auth {
     /* Argon2PasswordHasher
      * Argon2id hashing with per-user salt. Calibrated at boot for ~TargetHashMs.
      * Verify returns in constant-time to avoid timing leaks.
