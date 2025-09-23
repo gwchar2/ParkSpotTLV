@@ -5,8 +5,8 @@ using ParkSpotTLV.Api.Endpoints;
 using ParkSpotTLV.Api.Errors;
 using ParkSpotTLV.Api.Http;
 using ParkSpotTLV.Infrastructure;
-using ParkSpotTLV.Infrastructure.Security;      // Argon2PasswordHasher (your existing namespace)
-using ParkSpotTLV.Core.Auth;                   // IPasswordHasher, AuthOptions
+using ParkSpotTLV.Infrastructure.Security;      
+using ParkSpotTLV.Core.Auth;                   
 using Scalar.AspNetCore;
 using Serilog;
 using System.Reflection;
