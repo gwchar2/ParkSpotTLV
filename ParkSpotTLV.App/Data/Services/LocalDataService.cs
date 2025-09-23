@@ -3,11 +3,29 @@ using ParkSpotTLV.App.Data.Models;
 
 namespace ParkSpotTLV.App.Data.Services;
 
-// Service for managing local SQLite database operations
-// Handles user preferences, authentication, vehicles, and cached geographic data
+/*
+ * LocalDataService - Manages local SQLite database operations for offline-first app experience
+ *
+ * Responsibilities:
+ * - Database initialization and migration handling
+ * - User preferences management (parking settings, notifications)
+ * - User authentication and session management
+ * - Vehicle and permit CRUD operations
+ * - Geographic data cache (zones, street segments)
+ * - Sync timestamp tracking
+ *
+ * Design Patterns:
+ * - Repository pattern for data access
+ * - Unit of Work pattern with using statements
+ * - Soft deletes with IsActive flags
+ * - Individual property updates to avoid entity tracking issues
+ */
 public class LocalDataService : ILocalDataService
 {
-    // Initialize the local database and create default preferences if needed
+    /*
+     * Database initialization - ensures SQLite database exists with proper schema
+     * Recovery strategy: If corruption detected, recreate database from scratch
+     */
     public async Task InitializeAsync()
     {
         using var context = new LocalDbContext();
@@ -16,11 +34,11 @@ public class LocalDataService : ILocalDataService
         {
             System.Diagnostics.Debug.WriteLine("Attempting to create database...");
 
-            // Try to create database/tables if they don't exist
+            // Create database and tables if they don't exist (idempotent operation)
             var created = await context.Database.EnsureCreatedAsync();
             System.Diagnostics.Debug.WriteLine($"Database creation result: {created}");
 
-            // Create default preferences if none exist
+            // Ensure default preferences exist for app functionality
             var preferences = await context.UserPreferences.FirstOrDefaultAsync();
             if (preferences == null)
             {
@@ -40,14 +58,14 @@ public class LocalDataService : ILocalDataService
             System.Diagnostics.Debug.WriteLine($"Full exception: {ex.Message}");
             System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
 
-            // If tables are missing or corrupted, recreate the database
+            // Recovery strategy: Recreate corrupted database
             try
             {
                 System.Diagnostics.Debug.WriteLine("Attempting to recreate database...");
-                await context.Database.EnsureDeletedAsync();
+                await context.Database.EnsureDeletedAsync(); // Nuclear option
                 await context.Database.EnsureCreatedAsync();
 
-                // Create default preferences
+                // Restore essential data
                 await context.UserPreferences.AddAsync(new UserPreferences());
                 await context.SaveChangesAsync();
                 System.Diagnostics.Debug.WriteLine("Database recreated successfully");
@@ -55,21 +73,29 @@ public class LocalDataService : ILocalDataService
             catch (Exception ex2)
             {
                 System.Diagnostics.Debug.WriteLine($"Database recreation failed: {ex2}");
-                throw;
+                throw; // Can't recover - app will need to be reinstalled
             }
         }
     }
 
     #region User Preferences
-    // Get user preferences (parking thresholds, notifications, etc.)
+    /*
+     * User preferences management - app settings and parking configurations
+     * Always returns valid preferences object (creates default if none exist)
+     */
+
+    // Retrieves current user preferences, returns defaults if none exist
     public async Task<UserPreferences> GetUserPreferencesAsync()
     {
         using var context = new LocalDbContext();
         var preferences = await context.UserPreferences.FirstOrDefaultAsync();
-        return preferences ?? new UserPreferences();
+        return preferences ?? new UserPreferences(); // Fallback to defaults
     }
 
-    // Save user preferences to local database
+    /*
+     * Saves user preferences with individual property updates to avoid EF tracking issues
+     * Strategy: Update existing record or create new one if none exists
+     */
     public async Task SaveUserPreferencesAsync(UserPreferences preferences)
     {
         using var context = new LocalDbContext();
@@ -78,7 +104,7 @@ public class LocalDataService : ILocalDataService
         var existing = await context.UserPreferences.FirstOrDefaultAsync();
         if (existing != null)
         {
-            // Update existing preferences properties individually
+            // Update properties individually to avoid ID conflicts
             existing.ParkingThresholdMinutes = preferences.ParkingThresholdMinutes;
             existing.NotificationsEnabled = preferences.NotificationsEnabled;
             existing.NotificationMinutesBefore = preferences.NotificationMinutesBefore;
@@ -88,7 +114,7 @@ public class LocalDataService : ILocalDataService
         }
         else
         {
-            // Create new preferences record
+            // First-time preferences setup
             await context.UserPreferences.AddAsync(preferences);
         }
         await context.SaveChangesAsync();
@@ -97,39 +123,44 @@ public class LocalDataService : ILocalDataService
     #endregion
 
     #region User Authentication
-    // Get the currently logged-in user
+    /*
+     * User authentication and session management
+     * Supports single-user login with JWT token persistence
+     */
+
+    // Returns currently logged-in user or null if no active session
     public async Task<LocalUser?> GetCurrentUserAsync()
     {
         using var context = new LocalDbContext();
         return await context.Users.FirstOrDefaultAsync(u => u.IsLoggedIn);
     }
 
-    // Save or update user information and authentication tokens
+    // Saves user data including authentication tokens and session info
     public async Task SaveUserAsync(LocalUser user)
     {
         using var context = new LocalDbContext();
         var existing = await context.Users.FirstOrDefaultAsync(u => u.Id == user.Id);
         if (existing != null)
         {
-            // Update existing user
+            // Update existing user session
             context.Entry(existing).CurrentValues.SetValues(user);
         }
         else
         {
-            // Add new user
+            // New user registration/login
             await context.Users.AddAsync(user);
         }
         await context.SaveChangesAsync();
     }
 
-    // Check if any user is currently logged in
+    // Quick check for active user session
     public async Task<bool> IsUserLoggedInAsync()
     {
         using var context = new LocalDbContext();
         return await context.Users.AnyAsync(u => u.IsLoggedIn);
     }
 
-    // Log out all users and clear authentication tokens
+    // Clears all user sessions and auth tokens (supports multi-user cleanup)
     public async Task LogoutAsync()
     {
         using var context = new LocalDbContext();
@@ -137,15 +168,19 @@ public class LocalDataService : ILocalDataService
         foreach (var user in users)
         {
             user.IsLoggedIn = false;
-            user.AuthToken = null;
+            user.AuthToken = null; // Clear JWT token
         }
         await context.SaveChangesAsync();
     }
     #endregion
 
     #region Vehicle Management
+    /*
+     * Vehicle and permit management for parking compliance
+     * Uses soft deletes to maintain data integrity and sync history
+     */
 
-    // Get all active vehicles for a specific user
+    // Retrieves all active vehicles for user - excludes soft-deleted vehicles
     public async Task<List<LocalVehicle>> GetUserVehiclesAsync(string userId)
     {
         using var context = new LocalDbContext();
@@ -154,34 +189,91 @@ public class LocalDataService : ILocalDataService
             .ToListAsync();
     }
 
-    // Save or update a vehicle record
+    // Saves vehicle data - supports both new vehicles and updates from sync
     public async Task SaveVehicleAsync(LocalVehicle vehicle)
     {
         using var context = new LocalDbContext();
         var existing = await context.Vehicles.FirstOrDefaultAsync(v => v.Id == vehicle.Id);
         if (existing != null)
         {
-            // Update existing vehicle
+            // Update from sync or user modification
             context.Entry(existing).CurrentValues.SetValues(vehicle);
         }
         else
         {
-            // Add new vehicle
+            // New vehicle registration
             await context.Vehicles.AddAsync(vehicle);
         }
         await context.SaveChangesAsync();
     }
 
-    // Soft delete a vehicle (mark as inactive)
+    // Soft delete preserves data for sync and audit trail
     public async Task DeleteVehicleAsync(string vehicleId)
     {
         using var context = new LocalDbContext();
         var vehicle = await context.Vehicles.FirstOrDefaultAsync(v => v.Id == vehicleId);
         if (vehicle != null)
         {
-            vehicle.IsActive = false; // Soft delete
+            vehicle.IsActive = false; // Soft delete - preserves relationships
             await context.SaveChangesAsync();
         }
+    }
+    #endregion
+
+    #region Permit Management
+
+    // Get all active permits for a specific vehicle
+    public async Task<List<LocalPermit>> GetVehiclePermitsAsync(string vehicleId)
+    {
+        using var context = new LocalDbContext();
+        return await context.Permits
+            .Where(p => p.VehicleId == vehicleId && p.IsActive)
+            .ToListAsync();
+    }
+
+    // Save or update a permit record
+    public async Task SavePermitAsync(LocalPermit permit)
+    {
+        using var context = new LocalDbContext();
+        var existing = await context.Permits.FirstOrDefaultAsync(p => p.Id == permit.Id);
+        if (existing != null)
+        {
+            // Update existing permit properties individually
+            existing.Type = permit.Type;
+            existing.ZoneCode = permit.ZoneCode;
+            existing.ZoneId = permit.ZoneId;
+            existing.ValidTo = permit.ValidTo;
+            existing.IsActive = permit.IsActive;
+            existing.CachedAt = permit.CachedAt;
+            context.Permits.Update(existing);
+        }
+        else
+        {
+            // Add new permit
+            await context.Permits.AddAsync(permit);
+        }
+        await context.SaveChangesAsync();
+    }
+
+    // Soft delete a permit (mark as inactive)
+    public async Task DeletePermitAsync(string permitId)
+    {
+        using var context = new LocalDbContext();
+        var permit = await context.Permits.FirstOrDefaultAsync(p => p.Id == permitId);
+        if (permit != null)
+        {
+            permit.IsActive = false; // Soft delete
+            await context.SaveChangesAsync();
+        }
+    }
+
+    // Get all permits for a specific zone
+    public async Task<List<LocalPermit>> GetZonePermitsAsync(string zoneId)
+    {
+        using var context = new LocalDbContext();
+        return await context.Permits
+            .Where(p => p.ZoneId == zoneId && p.IsActive)
+            .ToListAsync();
     }
     #endregion
 
