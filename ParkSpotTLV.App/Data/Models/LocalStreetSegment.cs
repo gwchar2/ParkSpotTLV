@@ -2,6 +2,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ParkSpotTLV.App.Data.Models;
 
+public enum ParkingType { Unknown = 0, Free = 1, Paid = 2, Limited = 3 }
+public enum ParkingHours { Unknown = 0, SpecificHours = 1 }
+public enum SegmentSide { Both = 0, Left = 1, Right = 2 }
+
 public class LocalStreetSegment
 {
     [Key]
@@ -15,19 +19,25 @@ public class LocalStreetSegment
 
     public string? ZoneId { get; set; }
 
-    public string ParkingType { get; set; } = "Unknown";
+    public LocalZone? Zone { get; set; }
 
-    public string ParkingHours { get; set; } = "Unknown";
+    public bool CarsOnly { get; set; } = false;
 
-    public string Side { get; set; } = "Both";
+    public ParkingType ParkingType { get; set; } = ParkingType.Unknown;
+
+    public ParkingHours ParkingHours { get; set; } = ParkingHours.Unknown;
+
+    public SegmentSide Side { get; set; } = SegmentSide.Both;
 
     public double? LengthMeters { get; set; }
 
     public int StylePriority { get; set; } = 100;
 
-    public DateTime? LastUpdated { get; set; }
+    public ICollection<LocalParkingRule> ParkingRules { get; set; } = new List<LocalParkingRule>();
 
+    public DateTimeOffset? LastUpdated { get; set; }
+
+    // Local cache management properties
     public DateTime CachedAt { get; set; } = DateTime.UtcNow;
-
     public bool IsActive { get; set; } = true;
 }

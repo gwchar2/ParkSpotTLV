@@ -10,6 +10,9 @@ public class LocalDbContext : DbContext
     public DbSet<LocalZone> Zones => Set<LocalZone>();
     public DbSet<LocalStreetSegment> StreetSegments => Set<LocalStreetSegment>();
     public DbSet<LocalVehicle> Vehicles => Set<LocalVehicle>();
+    public DbSet<LocalPermit> Permits => Set<LocalPermit>();
+    public DbSet<LocalParkingRule> ParkingRules => Set<LocalParkingRule>();
+    public DbSet<LocalRefreshToken> RefreshTokens => Set<LocalRefreshToken>();
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -22,34 +25,21 @@ public class LocalDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Apply all local entity configurations
+        modelBuilder.ApplyConfiguration(new Config.LocalUserConfig());
+        modelBuilder.ApplyConfiguration(new Config.LocalZoneConfig());
+        modelBuilder.ApplyConfiguration(new Config.LocalStreetSegmentConfig());
+        modelBuilder.ApplyConfiguration(new Config.LocalVehicleConfig());
+        modelBuilder.ApplyConfiguration(new Config.LocalPermitConfig());
+        modelBuilder.ApplyConfiguration(new Config.LocalParkingRuleConfig());
+        modelBuilder.ApplyConfiguration(new Config.LocalRefreshTokenConfig());
+
+        // Simple configuration for UserPreferences (local-only entity)
         modelBuilder.Entity<UserPreferences>(entity =>
         {
+            entity.ToTable("user_preferences");
             entity.HasKey(e => e.Id);
-        });
-
-        modelBuilder.Entity<LocalUser>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.HasIndex(e => e.Username).IsUnique();
-        });
-        
-
-        modelBuilder.Entity<LocalZone>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.HasIndex(e => e.Code);
-        });
-
-        modelBuilder.Entity<LocalStreetSegment>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.HasIndex(e => e.ZoneId);
-        });
-
-        modelBuilder.Entity<LocalVehicle>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.HasIndex(e => e.UserId);
+            entity.Property(e => e.LastUpdated).IsRequired();
         });
 
         base.OnModelCreating(modelBuilder);
