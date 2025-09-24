@@ -1,18 +1,20 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.OpenApi.Models;
 using ParkSpotTLV.Api.Endpoints;
-using ParkSpotTLV.Api.Middleware;
 using ParkSpotTLV.Api.Http;
-using ParkSpotTLV.Infrastructure;
-using ParkSpotTLV.Infrastructure.Security;      
+using ParkSpotTLV.Api.Middleware;
 using ParkSpotTLV.Core.Auth;                   
+using ParkSpotTLV.Infrastructure;
+using ParkSpotTLV.Infrastructure.Auth;
+using ParkSpotTLV.Infrastructure.Security;      
 using Scalar.AspNetCore;
 using Serilog;
 using System.Reflection;
 using System.Text;
-using ParkSpotTLV.Infrastructure.Auth;
-
+using System.IdentityModel.Tokens.Jwt;
 /* --------------------------------------------------------------------------
  * BOOTSTRAP LOGGING
  * -------------------------------------------------------------------------- */
@@ -57,7 +59,7 @@ try {
     /* ----------------------------------------------------------------------
      * PLATFORM / HOSTED SERVICES / UTILITIES
      * ---------------------------------------------------------------------- */
-    builder.Services.AddOpenApi();
+    builder.Services.AddCustomOpenApi();
     builder.Services.AddEndpointsApiExplorer();
 
     // Seeding (enabled via appsettings.Development.json)
@@ -107,7 +109,8 @@ try {
                     IssuerSigningKey = signingKey,
                     RequireSignedTokens = true,
                     ValidateLifetime = true,
-                    ClockSkew = TimeSpan.FromMinutes(authOpts.ClockSkewMinutes)
+                    ClockSkew = TimeSpan.FromMinutes(authOpts.ClockSkewMinutes),
+                    NameClaimType = JwtRegisteredClaimNames.Sub             // "sub" claim inside the JWT is the string representation of the user’s Guid. This maps the JWT "sub" claim onto ClaimTypes.NameIdentifier
                 };
             });
     } else {
@@ -118,7 +121,7 @@ try {
     /* ----------------------------------------------------------------------
      * TOKEN SERVICES (JWT + Refresh) — use AuthOptions directly
      * ---------------------------------------------------------------------- */
-    builder.Services.AddScoped<EfRefreshTokenStore>(); // keep if used elsewhere
+    builder.Services.AddScoped<EfRefreshTokenStore>(); 
     builder.Services.AddSingleton<IJwtService, JwtService>();
     builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
@@ -146,12 +149,12 @@ try {
         options.Theme = ScalarTheme.BluePlanet;
         options.DarkMode = true;
     });
-
     /* ----------------------------------------------------------------------
      * ENDPOINTS
      * ---------------------------------------------------------------------- */
     app.MapHealth();
-    app.MapAuthEndpoints();
+    app.MapAuth();
+    app.MapVehicles();
     /* ----------------------------------------------------------------------
      * RUN
      * ---------------------------------------------------------------------- */
@@ -180,5 +183,61 @@ public sealed class RuntimeHealth {
                ?? "0.0.0-dev";
 
         StartedAtUtc = DateTimeOffset.UtcNow;
+    }
+}
+
+
+
+/* --------------------------------------------------------------------------
+ * OpenAPI Extensions
+ * -------------------------------------------------------------------------- */
+public static class OpenApiExtensions {
+    public static IServiceCollection AddCustomOpenApi(this IServiceCollection services) {
+        services.AddOpenApi(options => {
+            // Add a global Bearer security scheme
+            options.AddDocumentTransformer((document, context, cancellationToken) => {
+                document.Components ??= new();
+                document.Components.SecuritySchemes ??= new Dictionary<string, OpenApiSecurityScheme>();
+
+                document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter: Bearer {your JWT}"
+                };
+
+                return Task.CompletedTask;
+            });
+
+            // Auto-apply Bearer requirement for authorized endpoints
+            options.AddOperationTransformer((operation, context, cancellationToken) => {
+                var requiresAuth = context.Description?.ActionDescriptor?.EndpointMetadata?
+                    .OfType<IAuthorizeData>()?.Any() == true;
+
+                if (requiresAuth) {
+                    operation.Security ??= new List<OpenApiSecurityRequirement>();
+                    operation.Security.Add(new OpenApiSecurityRequirement
+                    {
+                        {
+                            new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "Bearer"
+                                }
+                            },
+                            Array.Empty<string>()
+                        }
+                    });
+                }
+
+                return Task.CompletedTask;
+            });
+        });
+
+        return services;
     }
 }

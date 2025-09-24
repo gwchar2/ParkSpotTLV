@@ -10,7 +10,9 @@ namespace ParkSpotTLV.Infrastructure {
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base (options) { }
         public DbSet<User> Users => Set<User>();
-        public DbSet<Zone> Zones => Set<Zone>();    
+        public DbSet<Vehicle> Vehicles => Set<Vehicle>();
+        public DbSet<Zone> Zones => Set<Zone>();
+        public DbSet<Permit> Permits => Set<Permit>();    
         public DbSet<StreetSegment> StreetSegments => Set<StreetSegment>();
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 

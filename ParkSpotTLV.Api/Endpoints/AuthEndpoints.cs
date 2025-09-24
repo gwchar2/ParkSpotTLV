@@ -9,7 +9,7 @@ using System.Security.Claims;
 namespace ParkSpotTLV.Api.Endpoints;
 
 public static class AuthEndpoints {
-    public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder routes) {
+    public static IEndpointRouteBuilder MapAuth(this IEndpointRouteBuilder routes) {
 
         var auth = routes.MapGroup("/auth").WithTags("Auth");
 
@@ -65,13 +65,13 @@ public static class AuthEndpoints {
                            "Bearer"
                        ));
                    })
-        .Accepts<RegisterRequest>("application/json")
-        .Produces<TokenPairResponse>(StatusCodes.Status201Created)
-        .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
-        .Produces<ProblemDetails>(StatusCodes.Status409Conflict)
-        .WithSummary("Create a new account")
-        .WithDescription("Validates username/password policy, creates the user, issues an access token and a refresh token.")
-        .WithOpenApi();
+            .Accepts<RegisterRequest>("application/json")
+            .Produces<TokenPairResponse>(StatusCodes.Status201Created)
+            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<ProblemDetails>(StatusCodes.Status409Conflict)
+            .WithSummary("Register new account")
+            .WithDescription("Validates username/password policy, creates the user, issues an access token and a refresh token.")
+            .WithOpenApi();
 
         /* LOGIN REQUEST
          * Accepts: username, password
@@ -124,13 +124,13 @@ public static class AuthEndpoints {
 
                        return Results.Ok(response);
                    })
-        .Accepts<LoginRequest>("application/json")
-        .Produces<TokenPairResponse>(StatusCodes.Status200OK)
-        .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
-        .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized)
-        .WithSummary("Sign in")
-        .WithDescription("Verifies credentials and returns a short-lived access token with a new refresh token.")
-        .WithOpenApi();
+            .Accepts<LoginRequest>("application/json")
+            .Produces<TokenPairResponse>(StatusCodes.Status200OK)
+            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized)
+            .WithSummary("Sign in")
+            .WithDescription("Verifies credentials and returns a short-lived access token with a new refresh token.")
+            .WithOpenApi();
 
 
         /* REFRESH REQUEST
@@ -178,13 +178,13 @@ public static class AuthEndpoints {
                                );
                        }
                    })
-        .Accepts<RefreshRequest>("application/json")
-        .Produces<TokenPairResponse>(StatusCodes.Status200OK)
-        .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
-        .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized)
-        .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError)
-        .WithSummary("Refresh tokens")
-        .WithDescription("Validates and rotates the refresh token, returning a new token pair.");
+            .Accepts<RefreshRequest>("application/json")
+            .Produces<TokenPairResponse>(StatusCodes.Status200OK)
+            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized)
+            .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError)
+            .WithSummary("Refresh tokens")
+            .WithDescription("Validates and rotates the refresh token, returning a new token pair.");
 
         /* LOGOUT REQUEST
          * Accepts: Access token (Bearer) to identify user; either
@@ -268,6 +268,44 @@ public static class AuthEndpoints {
             .WithSummary("Log out")
             .WithDescription("Revokes the current session's refresh token, or all refresh tokens for the authenticated user.");
 
+
+
+        /* GET ME — current authenticated user */
+        auth.MapGet("/me", async (
+            HttpContext ctx,
+            AppDbContext db,
+            CancellationToken ct) => {
+                var sub = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                          ?? ctx.User.FindFirstValue("sub");
+                if (!Guid.TryParse(sub, out var userId))
+                    return Results.Unauthorized();
+
+                // Load profile
+                var user = await db.Users
+                    .AsNoTracking()
+                    .Where(u => u.Id == userId)
+                    .Select(u => new { u.Id, u.Username })
+                    .SingleOrDefaultAsync(ct);
+
+                if (user is null) return Results.NotFound();
+
+                // Count how many vehicles user owns
+                var vehiclesCount = await db.Vehicles
+                    .AsNoTracking()
+                    .CountAsync(v => v.OwnerId == userId, ct);
+
+                return Results.Ok(new UserMeResponse(
+                    user.Id,
+                    user.Username,
+                    vehiclesCount
+                    ));
+            })
+            .RequireAuthorization()
+            .Produces<UserMeResponse>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .WithSummary("Current user")
+            .WithDescription("Returns the authenticated user's id, username, and a vehicles count.");
 
         return routes;
            

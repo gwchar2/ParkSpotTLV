@@ -41,7 +41,7 @@ persistence and concrete adapters (EF Core, PostGIS, service impls).
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\ParkSpotTLV.Contracts\ParkSpotTLV.Contracts.csproj" />
+	  <ProjectReference Include="..\ParkSpotTLV.Contracts\ParkSpotTLV.Contracts.csproj" />
 	  <ProjectReference Include="..\ParkSpotTLV.Core\ParkSpotTLV.Core.csproj" />
 	</ItemGroup>
 </Project>
