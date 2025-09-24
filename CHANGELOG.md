@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.4.0-beta.0...v0.5.0-beta.0) (2025-09-24)
+
+
+### Features
+
+* **API:** Added vehicle endpoints ([207c1f0](https://github.com/gwchar2/ParkSpotTLV/commit/207c1f04523914d2af8fb36cd5d738805f09669d))
+
 ## [0.4.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.3.1-beta.0...v0.4.0-beta.0) (2025-09-23)
 
 
