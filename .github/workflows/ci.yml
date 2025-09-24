@@ -102,7 +102,7 @@ jobs:
       - name: Build API
         run: dotnet build $env:API_PROJECT -c $env:CONFIGURATION --no-restore
 
-      - name: Build MAUI Android
-        run: dotnet build $env:MAUI_PROJECT -c $env:CONFIGURATION -f net9.0-android --no-restore
+      - name: Build MAUI Android (AOT disabled)
+        run: dotnet build $env:MAUI_PROJECT -c $env:CONFIGURATION -f net9.0-android --no-restore -p:RunAOTCompilation=false -p:AndroidEnableProfiledAot=false -p:PublishAot=false
 
      
