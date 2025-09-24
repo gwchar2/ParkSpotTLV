@@ -1,0 +1,79 @@
+﻿Argon2id (password hashing)
+What: 
+	One-way, slow hash (memory-hard) tuned with m (memory), t (iterations), p (parallelism). Includes a salt; output is a PHC string.
+Where:
+	/auth/register: hash the incoming password → store only the Argon2id hash.
+	/auth/login: verify the plaintext password against the stored Argon2id hash.
+	Why: Protects passwords at rest; even if DB leaks, hashes are expensive to crack.
+
+
+JWT (access token) signed with HMAC-SHA256
+What: 
+	JSON Web Token: base64url(header).base64url(payload).base64url(signature). We sign with your HMAC secret (HS256). Not encrypted—just signed.
+Where:
+	Issued on register and login.
+	Used on protected endpoints (e.g., GET /auth/me) via Authorization: Bearer <accessToken>.
+	Claims: sub (userId), name (username), jti, iat, exp, plus iss/aud.
+Why: 
+	Short-lived, stateless auth for every request.
+
+
+HMAC-SHA256 (refresh token hashing)
+What: 
+	Compute HMAC(secret, rawRefreshToken) and store the hex digest. Raw token stays client-side.
+Where:
+	Issue: generate raw token → HMAC it → store the hash in refresh_tokens.
+
+	/auth/refresh: client sends raw; server HMACs it and looks up the hash; rotate on success.
+
+	/auth/logout: revoke by raw (server hashes it to find the row) or “all devices” by userId.
+Why: 
+	If the refresh table leaks, attackers still need the server secret to forge a valid raw.
+
+
+SHA-256 (plain)
+What: 
+	Standard hash. You have a helper, but you’re using HMAC-SHA256 for refresh tokens (correct).
+Where: 
+	Not used for passwords (Argon2id is), not needed for tokens (HMAC is). Keep it as a utility if ever needed for non-secret fingerprints.
+	
+
+Base64URL (encoding, not encryption)
+What: 
+	URL-safe Base64. Pure encoding—no secrecy.
+Where:
+	Refresh tokens: raw token is 32 random bytes → Base64URL string (what the client stores/sends).
+	JWT: header & payload are Base64URL-encoded segments.
+Why: 
+	Compact, URL-safe transport of binary/random data.
+	
+
+TLS/HTTPS (transport security)
+What: 
+	Encrypts the HTTP channel.
+Where: 
+	All client ↔ server calls in real deployments.
+Why: 
+	Prevents sniffing/mitm even though JWT/refresh are bearer tokens.
+
+
+
+Where each thing appears in the steps
+Register: validate → Argon2id hash → create user → issue JWT + raw refresh (client gets both). Server stores HMAC hash of refresh.
+Login: verify Argon2id → issue new JWT + raw refresh; store HMAC hash.
+Refresh: client sends raw refresh → server HMACs & verifies row active → rotates (revokes old, creates new, links replacedBy) → returns new JWT + new raw refresh.
+Logout: either revoke the specific refresh (by raw) or all for the user (by userId). JWT just expires naturally.
+
+
+What to keep in the local SQLite (client) and how it’s used
+Store:
+	Refresh token (raw) + its expiresAt. Needed to call /auth/refresh and to resume sessions after app restarts.
+	Optionally: userId/username (from JWT claims) for UI; issuedAt/lastRotatedAt if you want telemetry.
+	Do NOT store: plaintext passwords; HMAC secrets; token hashes (they’re server-side only).
+Use in requests:
+	For normal API calls: read the in-memory access token and send Authorization: Bearer <accessToken>.
+	If the access token is expired/about to expire: use the stored refresh token (raw) to call POST /auth/refresh and update both tokens locally.
+	For logout: either call POST /auth/logout with {"refreshToken": "<raw>"} (single session) or with allDevices: true and a valid access token.
+Server-side DB recap (Postgres):
+	users: id, username (lowercased), password_hash (Argon2id).
+	refresh_tokens: user_id, token_hash (HMAC-SHA256 hex), created_at_utc, expires_at_utc, revoked_at_utc, replaced_by_token_hash.

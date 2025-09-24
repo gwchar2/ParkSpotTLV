@@ -1,10 +1,10 @@
-﻿// Seeding/SeedRunner.cs
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ParkSpotTLV.Infrastructure.Entities;
+using ParkSpotTLV.Core.Models;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 

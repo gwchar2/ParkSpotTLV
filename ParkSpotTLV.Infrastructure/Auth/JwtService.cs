@@ -34,8 +34,7 @@ namespace ParkSpotTLV.Infrastructure.Auth {
             var now = DateTimeOffset.UtcNow;
             var expires = now.AddMinutes(_opts.AccessTokenMinutes);
 
-            var claims = new[]
-            {
+            var claims = new[] {
                 new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
                 new Claim("name", username),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
