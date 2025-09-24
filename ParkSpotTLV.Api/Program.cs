@@ -205,7 +205,7 @@ public static class OpenApiExtensions {
                     Scheme = "bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
-                    Description = "Enter: Bearer {your JWT}"
+                    Description = "Enter: {your JWT}"
                 };
 
                 return Task.CompletedTask;

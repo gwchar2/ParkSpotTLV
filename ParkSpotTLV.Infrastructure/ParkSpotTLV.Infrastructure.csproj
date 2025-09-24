@@ -37,7 +37,6 @@ persistence and concrete adapters (EF Core, PostGIS, service impls).
 
 	<ItemGroup>
 	  <Folder Include="Migrations\" />
-	  <Folder Include="Migrations\" />
 	</ItemGroup>
 
 	<ItemGroup>
