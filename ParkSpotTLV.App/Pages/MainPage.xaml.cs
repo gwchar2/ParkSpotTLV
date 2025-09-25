@@ -22,30 +22,30 @@ namespace ParkSpotTLV.App.Pages {
             LoginBtn.IsEnabled = false;
             LoginBtn.Text = "Logging in...";
 
-            try
+            var response = await _authService.LoginAsync(username, password);
+            switch (response.StatusCode)
             {
-                bool success = await _authService.LoginAsync(username, password);
 
-                if (success)
+                case HttpStatusCode.OK:
                 {
-                    await DisplayAlert("Success", $"Welcome back, {username}!", "OK");
                     await Shell.Current.GoToAsync("ShowMapPage");
+                    break;
                 }
-                else
+                case HttpStatusCode.BadRequest:
                 {
-                    await DisplayAlert("Error", "Invalid username or password. Please try again.", "OK");
+                    await DisplayAlert("Error", "Missing username or password. Please try again.", "OK");
+                    break;
                 }
-            }
-            catch (Exception)
-            {
-                await DisplayAlert("Error", "Login failed. Please try again later.", "OK");
-            }
-            finally
-            {
+                case HttpStatusCode.Unauthorized:
+                {
+                await DisplayAlert("Error", "Invalid username or password. Please try again.", "OK");
+                break;
+                }
+        
                 // Re-enable login button
                 LoginBtn.IsEnabled = true;
                 LoginBtn.Text = "Log In";
-            }
+            
         }
 
         private async void OnSignUpClicked(object? sender, EventArgs e) {
