@@ -12,6 +12,8 @@ namespace ParkSpotTLV.Infrastructure.Config {
             e.Property(x => x.OwnerId).IsRequired();
             e.HasIndex(x => x.OwnerId);
 
+            e.Property(x => x.Name).IsRequired();
+
             e.HasOne(v => v.Owner)
              .WithMany(u => u.Vehicles)
              .HasForeignKey(x => x.OwnerId)

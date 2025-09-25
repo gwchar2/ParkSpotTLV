@@ -16,7 +16,8 @@ namespace ParkSpotTLV.Contracts.Vehicles {
     public sealed record VehicleUpdateRequest (
 
         string RowVersion,
-        VehicleType? Type,             
+        VehicleType? Type,
+        string? Name,
         int? ResidentZoneCode,         
         bool? DisabledPermit     
         

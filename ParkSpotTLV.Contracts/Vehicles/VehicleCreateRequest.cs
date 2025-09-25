@@ -10,6 +10,8 @@ namespace ParkSpotTLV.Contracts.Vehicles {
     public sealed record VehicleCreateRequest (
 
         [Required] VehicleType Type,
+
+        [Required] string Name,
         // Null => no residency permit. If provided, must match an existing Zone.Code.
         int? ResidentZoneCode,
         // If true => a Disability permit will be created. Defaults to false if omitted.

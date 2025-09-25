@@ -1,69 +1,50 @@
 ﻿using NetTopologySuite.Geometries;
 using System.ComponentModel.DataAnnotations;
+/* 
+*****Paid Street Types******
+There are effectively two categories of paid parking (your PaidA and PaidB):
+
+PaidA (Standard Paid Parking – most zones) Zones 1,2,4,12,13
+    Payment required Sunday–Thursday 08:00–19:00.
+    Fridays and holiday eves 08:00–17:00.
+    Price: 7 ₪ per hour if no permit at all for Tel-Aviv. If have SOME zone permit -> 4.90 ₪
+    Residents of the zone do not pay.
+    Applies to zones 1–7, except where special rules exist.
+
+PaidB (Extended Paid Parking – Central areas) - Zones 6,7,9,10
+    Payment required Sunday–Thursday 08:00–21:00.
+    Fridays and holiday eves 08:00–17:00.
+    Price: 12.40 ₪ per hour if no permit at all for Tel-Aviv. If have SOME zone permit -> 8.68 ₪
+    Residents of the zone do not pay.
+    Designed to discourage outsiders from parking long-term in busy districts.
+*/
+
 
 namespace ParkSpotTLV.Infrastructure.Entities {
-    // stays as-is
-    public enum ParkingType { Unknown = 0, Free = 1, Paid = 2, Limited = 3 }
-    public enum ParkingHours { Unknown = 0, SpecificHours = 1 }
+    public enum ParkingType {
+        Unknown = 0,
+        Free = 1,       // Always free
+        PaidA = 2,      // 08:00–17:00 (Mon–Thu), 08:00–17:00 (Fri) 7 ₪ / 4.90 ₪ per hour
+        PaidB = 3,      // 08:00–23:00 (Mon–Thu), 08:00–17:00 (Fri) 12.40 ₪ / 8.68 ₪ per hour
+        Limited = 4     // Time-restricted or other exceptions
+    }                
 
-    // new: which curb side the rule applies to
+    // Which curb side the rule applies to
     public enum SegmentSide { Both = 0, Left = 1, Right = 2 }
 
     public class StreetSegment {
         
         public Guid Id { get; set; } = Guid.NewGuid();
-
         [MaxLength(128)] public string? Name { get; set; }
-
-        // Geometry of ONE segment between intersections.
         [Required] public LineString Geom { get; set; } = default!;
-
-        // What zone does this street belong to? (kept)
         public Guid? ZoneId { get; set; }
-
         public Zone? Zone { get; set; }
-
         public bool CarsOnly { get; set; } = false;
-
         public ParkingType ParkingType { get; set; } = ParkingType.Unknown;
-        public ParkingHours ParkingHours { get; set; } = ParkingHours.Unknown;
-
-        // Which curb side the parking info applies to (coloring often differs by side)
         public SegmentSide Side { get; set; } = SegmentSide.Both;
-
-        // Time-based rules (optional; keep simple now, grow later)
-        public ICollection<ParkingRule> ParkingRules { get; set; } = new List<ParkingRule>();
-
-        // Last time any rule/status affecting this segment was updated
         public DateTimeOffset? LastUpdated { get; set; }
     }
 
-    // Minimal time-window rule so you can color “correctly right now” if you choose
-    public class ParkingRule {
-        public Guid Id { get; set; } = Guid.NewGuid();
-
-        public Guid StreetSegmentId { get; set; }
-        public StreetSegment StreetSegment { get; set; } = default!;
-
-        // Day-of-week window (0=Sunday .. 6=Saturday to match Israel defaults; adjust if you prefer ISO-8601)
-        public int DayOfWeek { get; set; } // 0..6
-
-        public TimeOnly StartTime { get; set; }
-        public TimeOnly EndTime { get; set; }
-
-        // When multiple rules overlap, higher priority wins (lower number = higher priority)
-        public int StylePriority { get; set; } = 2;
-
-        // Resulting classification for this window
-        public ParkingType ParkingType { get; set; } = ParkingType.Unknown;
-
-        // Optional constraints
-        public int? MaxDurationMinutes { get; set; } = (-1);
-
-        // Free-text note shown in UI/tooltips if needed
-        [MaxLength(256)]
-        public string? Note { get; set; }
-    }
 }
 
 

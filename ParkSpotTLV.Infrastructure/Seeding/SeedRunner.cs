@@ -108,7 +108,6 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                     Geom = line,
                     CarsOnly = GetBool(props, "carsOnly") ?? false,
                     ParkingType = ParseEnum<ParkingType>(GetString(props, "parkingType")) ?? ParkingType.Unknown,
-                    ParkingHours = ParseEnum<ParkingHours>(GetString(props, "parkingHours")) ?? ParkingHours.Unknown,
                     Side = ParseEnum<SegmentSide>(GetString(props, "side")) ?? SegmentSide.Both,
                     LastUpdated = DateTimeOffset.UtcNow
                 };
@@ -158,6 +157,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                     var vehicle = new Vehicle {
                         Id = ParseGuid(GetString(vo, "id")) ?? Guid.NewGuid(),
                         Owner = user,
+                        Name = GetString(vo, "name") ?? "Default Car Name",
                         Type = ParseEnum<VehicleType>(GetString(vo, "type")) ?? VehicleType.Car
                     };
 

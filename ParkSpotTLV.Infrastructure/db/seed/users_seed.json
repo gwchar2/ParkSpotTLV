@@ -5,6 +5,7 @@
     "passwordHash": "$argon2id$v=19$m=65536,t=2,p=1$ZGV2LXNlZWQtc2FsdA$W2n8m2bZ6k4k3XH0wK5W7N5q2m8T7gN5Y8w8JY5bVfM",
     "vehicles": [
       {
+        "name": "car1",
         "id": "22222222-2222-2222-2222-222222222222",
         "type": "Car",
         "permits": [
@@ -25,6 +26,7 @@
     "passwordHash": "DEV-ONLY-PLACEHOLDER",
     "vehicles": [
       {
+        "name": "car2",
         "id": "55555555-5555-5555-5555-555555555555",
         "type": "Truck",
         "permits": [
