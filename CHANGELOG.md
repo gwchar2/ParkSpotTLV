@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.5.0-beta.0...v0.6.0-beta.0) (2025-09-25)
+
+
+### Features
+
+* **App:** connetcing userCars ([3c10a87](https://github.com/gwchar2/ParkSpotTLV/commit/3c10a87438e8c36c37c91b036254e12c213532db))
+* **login feature:** frontend fixes ([50e099b](https://github.com/gwchar2/ParkSpotTLV/commit/50e099b1f0fcf33e3d4dd6f0c19c0c1f388fba15))
+
+
+### Bug Fixes
+
+* **app:** fixing http request ([a3ffbaf](https://github.com/gwchar2/ParkSpotTLV/commit/a3ffbaf6ceb802e76c629293ec0f50ae1ebe779b))
+
 ## [0.5.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.4.0-beta.0...v0.5.0-beta.0) (2025-09-24)
 
 
