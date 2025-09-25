@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.6.0-beta.0...v0.6.1-beta.0) (2025-09-25)
+
+
+### Bug Fixes
+
+* **db:** Fixed database entities ([a9ca629](https://github.com/gwchar2/ParkSpotTLV/commit/a9ca62923c867203a6a1bda52038b24c6ed5eb4b))
+
 ## [0.6.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.5.0-beta.0...v0.6.0-beta.0) (2025-09-25)
 
 
