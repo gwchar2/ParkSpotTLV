@@ -1,4 +1,5 @@
-using ParkSpotTLV.Core.Services;
+using ParkSpotTLV.App.Services;
+using System.Net;
 
 namespace ParkSpotTLV.App.Pages {
     public partial class MainPage : ContentPage {
@@ -14,7 +15,7 @@ namespace ParkSpotTLV.App.Pages {
 
             // Validate input
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password)) {
-                await DisplayAlert("Error", "Please enter both username and password", "OK");
+                await DisplayAlert("Error", "Missing username or password.", "OK");
                 return;
             }
 
@@ -24,21 +25,38 @@ namespace ParkSpotTLV.App.Pages {
 
             try
             {
-                bool success = await _authService.LoginAsync(username, password);
+                var response = await _authService.LoginAsync(username, password);
+                Console.WriteLine($"Response: {response.StatusCode}");
 
-                if (success)
+                switch (response.StatusCode)
+            {
+
+                case HttpStatusCode.OK:
                 {
-                    await DisplayAlert("Success", $"Welcome back, {username}!", "OK");
                     await Shell.Current.GoToAsync("ShowMapPage");
+                    break;
                 }
-                else
+                case HttpStatusCode.BadRequest:
+                {
+                    await DisplayAlert("Error", "Missing username or password. Please try again.", "OK");
+                    break;
+                }
+                case HttpStatusCode.Unauthorized:
                 {
                     await DisplayAlert("Error", "Invalid username or password. Please try again.", "OK");
+                    break;
+                }
+                default:
+                {
+                    await DisplayAlert("Error", "Login failed. Please try again.", "OK");
+                    break;
+                }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                await DisplayAlert("Error", "Login failed. Please try again later.", "OK");
+                Console.WriteLine($"Login error: {ex.Message}");
+                await DisplayAlert("Error", $"Login failed: {ex.Message}", "OK");
             }
             finally
             {
