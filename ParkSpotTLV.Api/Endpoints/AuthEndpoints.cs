@@ -8,6 +8,9 @@ using System.Security.Claims;
 
 namespace ParkSpotTLV.Api.Endpoints;
 
+// ADD CHANGE USERNAME CHANGE PASSWORD
+
+
 public static class AuthEndpoints {
     public static IEndpointRouteBuilder MapAuth(this IEndpointRouteBuilder routes) {
 
@@ -93,7 +96,7 @@ public static class AuthEndpoints {
                                 type: "https://httpstatuses.com/401"
                            );
                        var normalized = body.Username.Trim().ToLowerInvariant();
-
+                       
                        var user = await db.Users.AsNoTracking().SingleOrDefaultAsync(us => us.Username == normalized, ct);
                        if (user is null)
                            return Results.Problem(

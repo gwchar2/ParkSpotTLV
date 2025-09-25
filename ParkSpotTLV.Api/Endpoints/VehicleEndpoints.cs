@@ -13,7 +13,7 @@ namespace ParkSpotTLV.Api.Endpoints {
     public static class VehicleEndpoints {
 
         public static IEndpointRouteBuilder MapVehicles (this IEndpointRouteBuilder routes) {
-            var group = routes.MapGroup("/vehicles").WithTags("Vehicles").RequireAuthorization();
+            var group = routes.MapGroup("/vehicles").WithTags("Vehicle Requests").RequireAuthorization();
 
 
             /* GET /vehicles -> Returns only vehicles owned by the authenticated user (OwnerId == userId). */
@@ -33,6 +33,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         .Select(v => new VehicleResponse {
                             Id = v.Id,
                             Type = v.Type,
+                            Name = v.Name,
                             ResidentZoneCode = v.Permits
                                 .Where(p => p.IsActive && p.Type == PermitType.ZoneResident)
                                 .Select(p => p.ZoneCode)
@@ -74,6 +75,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         .Select(v => new VehicleResponse {
                             Id = v.Id,
                             Type = v.Type,
+                            Name = v.Name,
                             ResidentZoneCode = v.Permits
                                 .Where(p => p.IsActive && p.Type == PermitType.ZoneResident)
                                 .Select(p => p.ZoneCode)
@@ -125,6 +127,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                     var vehicle = new Vehicle {
                         OwnerId = userId,
                         Type = body.Type,
+                        Name = body.Name,
                         Permits = new List<Permit>()
                     };
 
@@ -159,6 +162,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         .Select(v => new VehicleResponse {
                             Id = v.Id,
                             Type = v.Type,
+                            Name = v.Name,
                             ResidentZoneCode = v.Permits
                                 .Where(p => p.IsActive && p.Type == PermitType.ZoneResident)
                                 .Select(p => p.ZoneCode)
@@ -228,6 +232,9 @@ namespace ParkSpotTLV.Api.Endpoints {
                     if (body.Type.HasValue)
                         vehicle.Type = body.Type.Value;
 
+                    if (body.Name is not null)
+                        vehicle.Name = body.Name;
+
                     // Residency permit handling for update
                     // - Not sent      -> no change
                     // - Sent = null   -> remove residency permit (if any); never leave a permit without a code
@@ -289,6 +296,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         .Select(v => new VehicleResponse {
                             Id = v.Id,
                             Type = v.Type,
+                            Name = v.Name,
                             ResidentZoneCode = v.Permits
                                 .Where(p => p.IsActive && p.Type == PermitType.ZoneResident)
                                 .Select(p => p.ZoneCode)
@@ -344,7 +352,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                     // We check there are no race conditions
                     if (vehicle.Xmin != expectedXmin)
                         return Results.Conflict(new {
-                            message = "The vehicle was modified by another request. Reload and try again."
+                            message = "The vehicle was modified already. Reload and try again."
                         });
 
                     // Delete 
@@ -366,12 +374,3 @@ namespace ParkSpotTLV.Api.Endpoints {
         }
     }
 }
-
-/*
- * {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZTZlZTQ1YS0yYmFlLTQ3MTctOTY5ZC0xOGFiZmUwMzJhY2MiLCJuYW1lIjoiYXR0ZW1wdDI0IiwianRpIjoiMWY4ZWQ0NjYtMzg3NC00ZDdhLWJmNzUtNjhhNGFmMWNmYTRhIiwiaWF0IjoxNzU4Njc2MzY3LCJuYmYiOjE3NTg2NzYzNjcsImV4cCI6MTc1ODY3Njk2NywiaXNzIjoiUGFya1Nwb3RUTFYiLCJhdWQiOiJQYXJrU3BvdFRMVi5BcHAifQ.jQ_W_fsj0zSA3IcL7-WaLwdxlBAjGD8JMrVT9fD5zeo",
-  "accessTokenExpiresAt": "2025-09-24T01:22:47.6842383+00:00",
-  "refreshToken": "kSCk8YKZJl22T2nByIJgf0XMw8se_8hUrmbe-mwuTQI",
-  "refreshTokenExpiresAt": "2025-10-08T01:12:47.6959366+00:00",
-  "tokenType": "Bearer"
-}*/

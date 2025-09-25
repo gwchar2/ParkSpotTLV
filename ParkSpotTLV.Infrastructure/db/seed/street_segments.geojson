@@ -8,7 +8,6 @@
         "name": "Sample St A",
         "carsOnly": true,
         "parkingType": "Paid",
-        "parkingHours": "SpecificHours",
         "side": "Right",
         "zoneCode": 6
       },
@@ -26,7 +25,6 @@
         "name": "Sample St B",
         "carsOnly": false,
         "parkingType": "Limited",
-        "parkingHours": "SpecificHours",
         "side": "Left",
         "zoneCode": 6
       },
@@ -44,7 +42,6 @@
         "name": "Sample St C",
         "carsOnly": false,
         "parkingType": "Free",
-        "parkingHours": "Unknown",
         "side": "Both",
         "zoneCode": 9
       },
@@ -62,7 +59,6 @@
         "name": "Sample St D",
         "carsOnly": true,
         "parkingType": "Paid",
-        "parkingHours": "SpecificHours",
         "side": "Right",
         "zoneCode": 9
       },
