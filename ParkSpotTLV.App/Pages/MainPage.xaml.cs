@@ -1,4 +1,5 @@
-using ParkSpotTLV.Core.Services;
+using ParkSpotTLV.App.Services;
+using System.Net;
 
 namespace ParkSpotTLV.App.Pages {
     public partial class MainPage : ContentPage {
@@ -14,7 +15,7 @@ namespace ParkSpotTLV.App.Pages {
 
             // Validate input
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password)) {
-                await DisplayAlert("Error", "Please enter both username and password", "OK");
+                await DisplayAlert("Error", "Missing username or password.", "OK");
                 return;
             }
 
@@ -22,8 +23,12 @@ namespace ParkSpotTLV.App.Pages {
             LoginBtn.IsEnabled = false;
             LoginBtn.Text = "Logging in...";
 
-            var response = await _authService.LoginAsync(username, password);
-            switch (response.StatusCode)
+            try
+            {
+                var response = await _authService.LoginAsync(username, password);
+                Console.WriteLine($"Response: {response.StatusCode}");
+
+                switch (response.StatusCode)
             {
 
                 case HttpStatusCode.OK:
@@ -38,14 +43,27 @@ namespace ParkSpotTLV.App.Pages {
                 }
                 case HttpStatusCode.Unauthorized:
                 {
-                await DisplayAlert("Error", "Invalid username or password. Please try again.", "OK");
-                break;
+                    await DisplayAlert("Error", "Invalid username or password. Please try again.", "OK");
+                    break;
                 }
-        
+                default:
+                {
+                    await DisplayAlert("Error", "Login failed. Please try again.", "OK");
+                    break;
+                }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Login error: {ex.Message}");
+                await DisplayAlert("Error", $"Login failed: {ex.Message}", "OK");
+            }
+            finally
+            {
                 // Re-enable login button
                 LoginBtn.IsEnabled = true;
                 LoginBtn.Text = "Log In";
-            
+            }
         }
 
         private async void OnSignUpClicked(object? sender, EventArgs e) {

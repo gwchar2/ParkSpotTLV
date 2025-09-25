@@ -1,3 +1,6 @@
+using System.Text.Json;
+using System.Net.Http.Json;
+
 namespace ParkSpotTLV.App.Services;
 
 public class AuthenticationService
@@ -8,6 +11,8 @@ public class AuthenticationService
     public bool IsAuthenticated { get; private set; }
     public string? CurrentUsername { get; private set; }
 
+    private readonly HttpClient _http = new() { BaseAddress = new Uri("http://10.0.2.2:8080/") };
+
     // Simple in-memory user storage (for demo purposes)
     private readonly Dictionary<string, string> _users = new()
     {
@@ -16,25 +21,29 @@ public class AuthenticationService
         { "john_doe", "mypassword" }
     };
 
+    private readonly JsonSerializerOptions _options = new() {
+        PropertyNameCaseInsensitive = true
+    };
+
     private AuthenticationService() { }
 
-    public async Task<bool> LoginAsync(string username, string password)
+    public async Task<HttpResponseMessage> LoginAsync(string username, string password)
     {
-        // Simulate network delay
-        await Task.Delay(500);
-
-        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
-            return false;
-
-        // Check if user exists and password is correct
-        if (_users.TryGetValue(username, out var storedPassword) && storedPassword == password)
+        try
         {
-            IsAuthenticated = true;
-            CurrentUsername = username;
-            return true;
-        }
+            var payload = new { username = username, password = password };
 
-        return false;
+            System.Diagnostics.Debug.WriteLine($"Attempting login for user: {username}");
+            var response = await _http.PostAsJsonAsync("auth/login", payload, _options);
+            System.Diagnostics.Debug.WriteLine($"Login response: {response.StatusCode}");
+
+            return response;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Login error: {ex.Message}");
+            throw;
+        }
     }
 
     public async Task<bool> SignUpAsync(string username, string password)
