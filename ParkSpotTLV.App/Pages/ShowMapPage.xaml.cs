@@ -1,5 +1,4 @@
-using ParkSpotTLV.Core.Services;
-using ParkSpotTLV.Core.Models;
+using ParkSpotTLV.App.Services;
 
 namespace ParkSpotTLV.App.Pages;
 
@@ -20,18 +19,22 @@ public partial class ShowMapPage : ContentPage
         LoadUserCars();
     }
 
-    private void LoadUserCars()
+    private async void LoadUserCars()
     {
-        var userCars = _carService.GetUserCars();
+        // get user's list of cars from server
+        var userCars = await _carService.GetUserCarsAsync();
 
-        // Clear existing items
+        // Clear existing items from UI
         CarPicker.Items.Clear();
 
-        // Add user's cars
-        foreach (var car in userCars)
-        {
-            CarPicker.Items.Add(car.Name);
-        }
+        // // Add user's cars to UI
+        // foreach (var car in userCars)
+        // {
+        //     CarPicker.Items.Add(car.Name);
+        // }
+
+        // temp
+        CarPicker.Items.Add("loaded users cars");
 
         // Add "Add Car" option
         CarPicker.Items.Add("+ Add Car");
@@ -72,7 +75,7 @@ public partial class ShowMapPage : ContentPage
         {
             await Shell.Current.GoToAsync("AddCarPage");
             // Reset to previous selection after navigation
-            var userCars = _carService.GetUserCars();
+            var userCars = await _carService.GetUserCarsAsync();
             if (userCars.Count > 0)
             {
                 picker.SelectedIndex = 0; // Back to first car

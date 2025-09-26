@@ -73,15 +73,101 @@ public class AuthenticationService
 
     public bool ValidatePassword(string password)
     {
-        // Simple password validation
-        return !string.IsNullOrWhiteSpace(password) && password.Length >= 6;
+        // Password validation: at least 6 characters, no whitespace characters
+        if (string.IsNullOrWhiteSpace(password))
+            return false;
+
+        if (password.Length < 6)
+            return false;
+
+        // Check for whitespace characters (space, tab, newline, etc.)
+        if (password.Any(char.IsWhiteSpace))
+            return false;
+
+        return true;
     }
 
     public bool ValidateUsername(string username)
     {
-        // Simple username validation
-        return !string.IsNullOrWhiteSpace(username) &&
-               username.Length >= 3 &&
-               username.All(c => char.IsLetterOrDigit(c) || c == '_');
+        // Username validation: at least 3 characters, alphanumeric + underscore only, must contain at least one alphanumeric
+        if (string.IsNullOrWhiteSpace(username))
+            return false;
+
+        if (username.Length < 3)
+            return false;
+
+        // Must contain only ASCII letters, digits, and underscores
+        if (!username.All(c => char.IsAsciiLetterOrDigit(c) || c == '_'))
+            return false;
+
+        // Must contain at least one alphanumeric character (not all underscores)
+        if (!username.Any(char.IsAsciiLetterOrDigit))
+            return false;
+
+        return true;
+    }
+
+    public async Task<bool> UpdateUsernameAsync(string newUsername)
+    {
+        // Simulate network delay
+        await Task.Delay(300);
+
+        if (!IsAuthenticated || CurrentUsername == null)
+            return false;
+
+        // Validate new username
+        if (!ValidateUsername(newUsername))
+            return false;
+
+        // Check if new username already exists (and it's not the current user)
+        if (_users.ContainsKey(newUsername) && newUsername != CurrentUsername)
+            return false;
+
+        // Update username
+        var currentPassword = _users[CurrentUsername];
+        _users.Remove(CurrentUsername);
+        _users[newUsername] = currentPassword;
+        CurrentUsername = newUsername;
+
+        return true;
+    }
+
+    public async Task<bool> UpdatePasswordAsync(string newPassword)
+    {
+        // Simulate network delay
+        await Task.Delay(300);
+
+        if (!IsAuthenticated || CurrentUsername == null)
+            return false;
+
+        // Validate new password
+        if (!ValidatePassword(newPassword))
+            return false;
+
+        // Update password
+        _users[CurrentUsername] = newPassword;
+
+        return true;
+    }
+
+    // Test helper methods
+    public void Reset()
+    {
+        IsAuthenticated = false;
+        CurrentUsername = null;
+        _users.Clear();
+        _users["admin"] = "password";
+        _users["test"] = "test123";
+        _users["john_doe"] = "mypassword";
+    }
+
+    public bool UserExists(string username)
+    {
+        return _users.ContainsKey(username);
+    }
+
+    public int GetUserCount()
+    {
+        return _users.Count;
     }
 }

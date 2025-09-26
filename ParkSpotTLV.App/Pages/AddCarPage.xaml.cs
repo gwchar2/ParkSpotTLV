@@ -1,5 +1,4 @@
-using ParkSpotTLV.Core.Services;
-using ParkSpotTLV.Core.Models;
+using ParkSpotTLV.App.Services;
 
 namespace ParkSpotTLV.App.Pages;
 
@@ -54,7 +53,7 @@ public partial class AddCarPage : ContentPage
         };
 
         // Save car using CarService
-        bool success = _carService.AddCar(newCar);
+        bool success = await _carService.AddCarAsync(newCar);
 
         if (success)
         {

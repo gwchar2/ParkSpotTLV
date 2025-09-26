@@ -1,5 +1,4 @@
-using ParkSpotTLV.Core.Services;
-using ParkSpotTLV.Core.Models;
+using ParkSpotTLV.App.Services;
 
 namespace ParkSpotTLV.App.Pages;
 
@@ -30,9 +29,9 @@ public partial class AccountDetailsPage : ContentPage
         LoadUserCars();
     }
 
-    private void LoadUserCars()
+    private async void LoadUserCars()
     {
-        var userCars = _carService.GetUserCars();
+        var userCars = await _carService.GetUserCarsAsync();
 
         // Clear existing cars from UI
         CarsContainer.Children.Clear();
@@ -279,7 +278,7 @@ public partial class AccountDetailsPage : ContentPage
 
         if (confirm)
         {
-            bool success = _carService.RemoveCar(car.Id);
+            bool success = await _carService.RemoveCarAsync(car.Id);
 
             if (success)
             {
