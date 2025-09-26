@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using NetTopologySuite.Geometries;
 using ParkSpotTLV.Infrastructure.Entities;
 
 namespace ParkSpotTLV.Infrastructure.Config {
@@ -9,8 +8,11 @@ namespace ParkSpotTLV.Infrastructure.Config {
             e.ToTable("street_segments");
 
             e.HasKey(x => x.Id);
+            e.HasIndex(x => x.OSMId);
 
-            e.Property(x => x.Name)
+            e.Property(x => x.NameEnglish)
+             .HasMaxLength(128);
+            e.Property(x => x.NameHebrew)
              .HasMaxLength(128);
 
             e.Property(x => x.Geom)
@@ -28,3 +30,4 @@ namespace ParkSpotTLV.Infrastructure.Config {
         }
     }
 }
+

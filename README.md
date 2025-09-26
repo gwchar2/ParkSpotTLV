@@ -119,30 +119,38 @@ dotnet run --project ./ParkSpotTLV.Api
 dotnet user-secrets list --project ./ParkSpotTLV.Api
 ```
 
-- Common EF Core commands
+- Loading brand new database from the terminal
 ```bash
-dotnet build
-dotnet ef migrations add <Name> --project ./ParkSpotTLV.Infrastructure --startup-project ./ParkSpotTLV.Api
-dotnet ef database update        --project ./ParkSpotTLV.Infrastructure --startup-project ./ParkSpotTLV.Api
-dotnet ef migrations list        --project ./ParkSpotTLV.Infrastructure --startup-project ./ParkSpotTLV.Api
+docker compose down -v --rmi all
+docker compose build --no-cache
+docker compose up -d
+dotnet ef migrations add InitialCreate --project ParkSpotTLV.Infrastructure --startup-project ParkSpotTLV.Api
+dotnet ef database update --project ParkSpotTLV.Infrastructure --startup-project ParkSpotTLV.Api
+
+
+dotnet run --project ParkSpotTLV.Api
+docker exec -it parkspot_db psql -U admin -d parkspot_dev
+SELECT * FROM "__EFMigrationsHistory";
+SELECT COUNT(*) AS zones FROM zones;
+SELECT COUNT(*) AS segments FROM street_segments;
+```
+
+- Clean reset (fastest, guarantees fresh import)
+```bash
+docker compose down -v --remove-orphans
+docker compose up -d db
+Press F5 on the docker-compose profile (API will auto-migrate and seed)
 ```
 
 - Inspect the DB inside the container
 ```bash
 docker exec -it parkspot_db psql -U admin -d parkspot_dev
 ```
+
 Inside `psql`:
 ```sql
 \dt
 SELECT code, name, taarif, ST_SRID(geom) FROM zones LIMIT 5;
-```
-
-- Reset the database (development)
-```bash
-docker compose down -v
-docker compose up -d db
-dotnet ef database update --project ./ParkSpotTLV.Infrastructure --startup-project ./ParkSpotTLV.Api
-docker compose up -d --build api
 ```
 
 ## Port reference
