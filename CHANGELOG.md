@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.2-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.6.1-beta.0...v0.6.2-beta.0) (2025-09-26)
+
+
+### Bug Fixes
+
+* **structure:** fix duplicate car and auth services ([fa515e7](https://github.com/gwchar2/ParkSpotTLV/commit/fa515e7cb57391d374a834b2e8de42f29e058f99))
+* **structure:** fix duplicate car and auth services ([fe16670](https://github.com/gwchar2/ParkSpotTLV/commit/fe166709f45c58f5c0b17087e131bc7d18548966))
+
 ## [0.6.1-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.6.0-beta.0...v0.6.1-beta.0) (2025-09-25)
 
 
