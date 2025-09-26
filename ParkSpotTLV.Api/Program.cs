@@ -63,9 +63,9 @@ try {
     builder.Services.AddEndpointsApiExplorer();
 
     // Seeding (enabled via appsettings.Development.json)
+    builder.Services.AddHostedService<ParkSpotTLV.Infrastructure.Seeding.SeedRunner>();
     builder.Services.Configure<ParkSpotTLV.Infrastructure.Seeding.SeedOptions>(
         builder.Configuration.GetSection("Seeding"));
-    builder.Services.AddHostedService<ParkSpotTLV.Infrastructure.Seeding.SeedRunner>();
 
     // Runtime helpers
     builder.Services.AddSingleton<RuntimeHealth>();
@@ -129,7 +129,6 @@ try {
      * BUILD APP
      * ---------------------------------------------------------------------- */
     var app = builder.Build();
-
     /* ----------------------------------------------------------------------
      * MIDDLEWARE PIPELINE
      * ---------------------------------------------------------------------- */

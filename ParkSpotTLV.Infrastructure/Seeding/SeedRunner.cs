@@ -14,10 +14,11 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
         public SeedPaths Paths { get; set; } = new();
     }
 
+    /* ALWAYS UPDATE PATHS IN DOCKERFILE AS WELL!!! */
     public sealed class SeedPaths {
         public string Zones { get; set; } = "ParkSpotTLV.Infrastructure/db/Seed/zones.geojson";
-        public string StreetSegments { get; set; } = "ParkSpotTLV.Infrastructure/db/Seed/street_segments.geojson";
         public string Users { get; set; } = "ParkSpotTLV.Infrastructure/db/Seed/users_seed.json";
+        public string StreetSegments { get; set; } = "ParkSpotTLV.Infrastructure/db/Seed/street_segments.geojson";
     }
 
     public sealed class SeedRunner : IHostedService {
@@ -35,7 +36,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             _env = env;
             _opts = opts.Value;
             _log = log;
-        }
+            }
 
         public async Task StartAsync(CancellationToken ct) {
             if (!_opts.Enabled) {
@@ -87,7 +88,6 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
         }
 
         // ---------------------- Street Segments ----------------------
-
         private async Task SeedStreetSegmentsAsync(AppDbContext db, CancellationToken ct) {
             if (await db.StreetSegments.AsNoTracking().AnyAsync(ct)) {
                 _log.LogInformation("StreetSegments already present. Skipping.");
@@ -102,17 +102,24 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
 
             foreach (var (geom, props) in GeoJsonLoader.LoadFeatures(_opts.Paths.StreetSegments)) {
                 var line = ToLineString(geom);
+                var (ptype, pside) = ParseParkingTags(props);
+                var osmID = GetString(props, "@id");
 
                 var segment = new StreetSegment {
-                    Name = GetString(props, "name"),
+                    OSMId = string.IsNullOrWhiteSpace(osmID) ? "" : osmID,
+                    NameEnglish = GetString(props, "name:en"),
+                    NameHebrew = GetString(props, "name"),
                     Geom = line,
-                    CarsOnly = GetBool(props, "carsOnly") ?? false,
-                    ParkingType = ParseEnum<ParkingType>(GetString(props, "parkingType")) ?? ParkingType.Unknown,
-                    Side = ParseEnum<SegmentSide>(GetString(props, "side")) ?? SegmentSide.Both,
+                    ParkingType = ptype,
+                    Side = pside,
                     LastUpdated = DateTimeOffset.UtcNow
                 };
 
-                var zoneCode = GetInt(props, "zoneCode");
+                int? zoneCode = null;
+                var rawZone = GetString(props, "parking_zone");
+                if (!string.IsNullOrWhiteSpace(rawZone) && int.TryParse(rawZone, out var parsed))
+                    zoneCode = parsed;
+
                 if (zoneCode.HasValue && zonesByCode.TryGetValue(zoneCode.Value, out var zid))
                     segment.ZoneId = zid;
 
@@ -215,6 +222,45 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
         private static TEnum? ParseEnum<TEnum>(string? s) where TEnum : struct {
             if (string.IsNullOrWhiteSpace(s)) return null;
             return Enum.TryParse<TEnum>(s, ignoreCase: true, out var v) ? v : null;
+        }
+
+        private static (ParkingType type, SegmentSide side) ParseParkingTags(JsonObject props) {
+            string? T(string key) =>
+                props.TryGetPropertyValue(key, out var v) ? v?.ToString()?.Trim().ToLowerInvariant() : null;
+
+            bool IsYes(string? s) => s == "yes" || s == "true" || s == "designated";
+            bool IsNo(string? s) => s == "no" || s == "false";
+
+            // same logic as before
+            var bothRaw = T("parking:both");
+            bool leftAllowed, rightAllowed;
+
+            if (bothRaw != null) {
+                if (IsYes(bothRaw)) { leftAllowed = rightAllowed = true; } else if (IsNo(bothRaw)) { leftAllowed = rightAllowed = false; } else {
+                    leftAllowed = IsYes(T("parking:left"));
+                    rightAllowed = IsYes(T("parking:right"));
+                }
+            } else {
+                leftAllowed = IsYes(T("parking:left"));
+                rightAllowed = IsYes(T("parking:right"));
+            }
+
+            SegmentSide side;
+            if (leftAllowed && rightAllowed) side = SegmentSide.Both;
+            else if (leftAllowed) side = SegmentSide.Left;
+            else if (rightAllowed) side = SegmentSide.Right;
+            else side = SegmentSide.Both; // “none” in current enum
+
+            ParkingType type = ParkingType.CantPark;
+            if (leftAllowed || rightAllowed) {
+                switch (T("parking:type")) {
+                    case "paid": type = ParkingType.Paid; break;
+                    case "free": type = ParkingType.Free; break;
+                    default: type = ParkingType.CantPark; break;
+                }
+            }
+
+            return (type, side);
         }
     }
 }
