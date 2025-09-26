@@ -41,21 +41,31 @@ public partial class SignUpPage : ContentPage
         CreateAccountBtn.IsEnabled = false;
         CreateAccountBtn.Text = "Creating Account...";
 
-        try
-        {
-            var response = await _authService.SignUpAsync(username, password);
+        try {
+            var tokens = await _authService.SignUpAsync(username, password); // throws on 400/409
 
-            if (response.IsSuccessStatusCode)
-            {
+            if (tokens is not null) {
                 await DisplayAlert("Success", $"Account created successfully! Welcome, {username}!", "OK");
+
+                // (optional) add a default car for the new user
+                //await AddDefaultCarAsync();   // shown below
+
+                // navigate
                 await Shell.Current.GoToAsync("..");
                 await Shell.Current.GoToAsync("ShowMapPage");
             }
+        }
+        catch (HttpRequestException ex) // contains status + body from the service
+        {
+            string msg;
+            if (ex.Message.Contains("400"))
+                msg = "Missing username or password. Please try again.";
+            else if (ex.Message.Contains("409"))
+                msg = "This username is already taken. Please choose another one.";
             else
-            {
-                var errorBody = await response.Content.ReadAsStringAsync();
-                await DisplayAlert("Error", errorBody, "OK");
-            }
+                msg = "Account creation failed. Please try again later.";
+
+            await DisplayAlert("Error", msg, "OK");
         }
         catch (Exception)
         {

@@ -26,40 +26,61 @@ public class AuthenticationService
     };
 
     private AuthenticationService() { }
-
-    public async Task<HttpResponseMessage> LoginAsync(string username, string password)
+    
+    public sealed class AuthResponse
     {
-        try
-        {
-            var payload = new { username = username, password = password };
-
-            System.Diagnostics.Debug.WriteLine($"Attempting login for user: {username}");
-            var response = await _http.PostAsJsonAsync("auth/login", payload, _options);
-            System.Diagnostics.Debug.WriteLine($"Login response: {response.StatusCode}");
-
-            return response;
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Login error: {ex.Message}");
-            throw;
-        }
+    public string AccessToken { get; set; } = "";
+    public DateTime AccessTokenExpiresAt { get; set; }
+    public string RefreshToken { get; set; } = "";
+    public DateTime RefreshTokenExpiresAt { get; set; }
+    public string TokenType { get; set; } = "Bearer";
     }
 
-    public async Task<HttpResponseMessage> SignUpAsync(string username, string password)
-    {
-        try
-        {
-            var payload = new { username = username, password = password };
-            var response = await _http.PostAsJsonAsync("auth/register", payload, _options);
-            return response;
 
-        }
-        catch (Exception ex)
+    public async Task<AuthResponse?> LoginAsync(string username, string password)
+    {
+        var payload = new { username, password };
+        var response = await _http.PostAsJsonAsync("auth/login", payload, _options);
+
+        if (!response.IsSuccessStatusCode)
         {
-            System.Diagnostics.Debug.WriteLine($"Login error: {ex.Message}");
-            throw;
+            var error = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Login failed: {response.StatusCode} {error}");
         }
+
+        var tokens = await response.Content.ReadFromJsonAsync<AuthResponse>(_options);
+
+        // store the token for later requests
+        if (tokens != null)
+        {
+            _http.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue(tokens.TokenType, tokens.AccessToken);
+        }
+
+        return tokens;
+    }
+
+    public async Task<AuthResponse?> SignUpAsync(string username, string password)
+    {
+    var payload = new { username, password };
+    var response = await _http.PostAsJsonAsync("auth/register", payload, _options);
+
+    if (!response.IsSuccessStatusCode)
+    {
+        var error = await response.Content.ReadAsStringAsync();
+        throw new HttpRequestException($"Sign-up failed: {response.StatusCode} {error}");
+    }
+
+    var tokens = await response.Content.ReadFromJsonAsync<AuthResponse>(_options);
+
+    // store the token
+    if (tokens != null)
+    {
+        _http.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue(tokens.TokenType, tokens.AccessToken);
+    }
+
+    return tokens;
     }
 
     public void Logout()
