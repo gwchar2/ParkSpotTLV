@@ -32,7 +32,7 @@ services:
 
       # Seeding paths
       Seeding__Paths__Zones: /app/db/Seed/zones.geojson
-      Seeding__Paths__StreetSegments: /app/db/Seed/street_segments_zone1.geojson
+      Seeding__Paths__StreetSegments: /app/db/Seed/street_segments.geojson
       Seeding__Paths__Users: /app/db/Seed/users_seed.json
 
       # Auth settings

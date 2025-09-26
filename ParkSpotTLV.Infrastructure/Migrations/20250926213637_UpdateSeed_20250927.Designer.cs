@@ -13,8 +13,8 @@ using ParkSpotTLV.Infrastructure;
 namespace ParkSpotTLV.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250926142917_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250926213637_UpdateSeed_20250927")]
+    partial class UpdateSeed_20250927
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
