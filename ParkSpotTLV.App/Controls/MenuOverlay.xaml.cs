@@ -1,4 +1,4 @@
-using ParkSpotTLV.Core.Services;
+using ParkSpotTLV.App.Services;
 using System.Net.Http.Json;
 
 namespace ParkSpotTLV.App.Controls;
