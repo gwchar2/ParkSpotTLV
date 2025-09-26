@@ -26,6 +26,7 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         Free = 1,
         Paid = 2
     }
+
     public enum SegmentSide { Both = 0, Left = 1, Right = 2 }   // Why is this important ?
 
     public class StreetSegment {

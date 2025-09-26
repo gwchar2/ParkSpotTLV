@@ -18,7 +18,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
     public sealed class SeedPaths {
         public string Zones { get; set; } = "ParkSpotTLV.Infrastructure/db/Seed/zones.geojson";
         public string Users { get; set; } = "ParkSpotTLV.Infrastructure/db/Seed/users_seed.json";
-        public string StreetSegments { get; set; } = "ParkSpotTLV.Infrastructure/db/Seed/street_segments.geojson";
+        public string StreetSegments { get; set; } = "ParkSpotTLV.Infrastructure/db/Seed/street_segments_zone1.geojson";
     }
 
     public sealed class SeedRunner : IHostedService {
