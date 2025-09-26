@@ -119,12 +119,32 @@ dotnet run --project ./ParkSpotTLV.Api
 dotnet user-secrets list --project ./ParkSpotTLV.Api
 ```
 
-- New dataset (fastest, guarantees fresh import)
-```bash
+- Completely new table
+```
+Delete the Migrations/ folder in ParkSpotTLV.Infrastructure
 docker compose down -v --remove-orphans
 docker compose up -d db
-dotnet ef migrations add InitialCreate --project .\ParkSpotTLV.Infrastructure --startup-project .\ParkSpotTLV.Api
-Press F5 on the docker-compose profile (API will auto-migrate and seed)
+dotnet ef migrations add InitialCreate -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
+dotnet ef database update -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
+F5
+Verify
+```
+
+- New tables OR table changes
+```bash
+docker start parkspot_db
+dotnet ef migrations add UpdateSeed_20250927(or some other name) -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
+dotnet ef database update --project .\ParkSpotTLV.Infrastructure --startup-project .\ParkSpotTLV.Api
+Restart DB+API
+Verify
+```
+
+- Updating information in the DB
+```bash
+docker start parkspot_db
+docker exec -it parkspot_db psql -U admin -d parkspot_dev  -c "TRUNCATE TABLE street_segments, zones RESTART IDENTITY CASCADE;"
+Restart DB+API
+Verify
 ```
 
 - Inspect the DB inside the container
