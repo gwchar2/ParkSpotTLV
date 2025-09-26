@@ -43,9 +43,9 @@ public partial class SignUpPage : ContentPage
 
         try
         {
-            bool success = await _authService.SignUpAsync(username, password);
+            var response = await _authService.SignUpAsync(username, password);
 
-            if (success)
+            if (response.IsSuccessStatusCode)
             {
                 await DisplayAlert("Success", $"Account created successfully! Welcome, {username}!", "OK");
                 await Shell.Current.GoToAsync("..");
@@ -53,7 +53,8 @@ public partial class SignUpPage : ContentPage
             }
             else
             {
-                await DisplayAlert("Error", "Username already exists. Please choose a different username.", "OK");
+                var errorBody = await response.Content.ReadAsStringAsync();
+                await DisplayAlert("Error", errorBody, "OK");
             }
         }
         catch (Exception)

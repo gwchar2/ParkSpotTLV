@@ -46,23 +46,20 @@ public class AuthenticationService
         }
     }
 
-    public async Task<bool> SignUpAsync(string username, string password)
+    public async Task<HttpResponseMessage> SignUpAsync(string username, string password)
     {
-        // Simulate network delay
-        await Task.Delay(500);
+        try
+        {
+            var payload = new { username = username, password = password };
+            var response = await _http.PostAsJsonAsync("auth/register", payload, _options);
+            return response;
 
-        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
-            return false;
-
-        // Check if user already exists
-        if (_users.ContainsKey(username))
-            return false;
-
-        // Add new user
-        _users[username] = password;
-        IsAuthenticated = true;
-        CurrentUsername = username;
-        return true;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Login error: {ex.Message}");
+            throw;
+        }
     }
 
     public void Logout()
@@ -86,7 +83,7 @@ public class AuthenticationService
 
         return true;
     }
-
+    // get username - check - not empty , mlonger than 3 , only ASCII , alphanumeric
     public bool ValidateUsername(string username)
     {
         // Username validation: at least 3 characters, alphanumeric + underscore only, must contain at least one alphanumeric
