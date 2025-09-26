@@ -5,6 +5,8 @@
 
 ### Bug Fixes
 
+* **streets:** Added zone 1 streets, changed the streetsegment class ([46287b8](https://github.com/gwchar2/ParkSpotTLV/commit/46287b8d2d20685e2b5893cc0d6258ead8b21ea8))
+* **streets:** Added zone 1 streets, changed the streetsegment class ([6c7b1ca](https://github.com/gwchar2/ParkSpotTLV/commit/6c7b1ca4e5f2593e20e13cc0ef74ec88e80c9d99))
 * **structure:** fix duplicate car and auth services ([fa515e7](https://github.com/gwchar2/ParkSpotTLV/commit/fa515e7cb57391d374a834b2e8de42f29e058f99))
 * **structure:** fix duplicate car and auth services ([fe16670](https://github.com/gwchar2/ParkSpotTLV/commit/fe166709f45c58f5c0b17087e131bc7d18548966))
 
