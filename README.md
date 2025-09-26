@@ -119,20 +119,7 @@ dotnet run --project ./ParkSpotTLV.Api
 dotnet user-secrets list --project ./ParkSpotTLV.Api
 ```
 
-- Loading brand new database from the terminal
-```bash
-docker compose down -v --rmi all
-docker compose build --no-cache
-docker compose up -d
-dotnet ef migrations add InitialCreate --project ParkSpotTLV.Infrastructure --startup-project ParkSpotTLV.Api
-dotnet ef database update --project ParkSpotTLV.Infrastructure --startup-project ParkSpotTLV.Api
-
-
-dotnet run --project ParkSpotTLV.Api
-docker exec -it parkspot_db psql -U admin -d parkspot_dev
-```
-
-- Clean reset (fastest, guarantees fresh import)
+- New dataset (fastest, guarantees fresh import)
 ```bash
 docker compose down -v --remove-orphans
 docker compose up -d db
