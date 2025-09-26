@@ -189,22 +189,33 @@ public class CarService
         return false;
     }
 
-    public async Task CreateDefaultCarForUserAsync()
+    public async Task<Car> CreateDefaultCarForUserAsync()
     {
-        if (!_authService.IsAuthenticated || _authService.CurrentUsername == null)
-            return;
+    var me = await _authService.AuthMeAsync();
+    System.Diagnostics.Debug.WriteLine($"Adding car for {me.Username}");
 
-        var defaultCar = new Car
-        {
-            Name = "My Car",
-            Type = CarType.Private,
-            HasResidentPermit = false,
-            ResidentPermitNumber = 0,
-            HasDisabledPermit = false
-        };
+    var defaultCarPayload = new
+    {
+        type = 1,
+        residentZoneCode = (string?)null,
+        disabledPermit = false
+    };
 
-        await AddCarAsync(defaultCar);
+    var response = await _http.PostAsJsonAsync("vehicles", defaultCarPayload, _options);
+
+    if (!response.IsSuccessStatusCode)
+    {
+        var body = await response.Content.ReadAsStringAsync();
+        throw new HttpRequestException($"Failed to create default car: {(int)response.StatusCode} {body}");
     }
+
+    var created = await response.Content.ReadFromJsonAsync<Car>(_options);
+    if (created is null)
+        throw new InvalidOperationException("Vehicle created but response body was empty.");
+
+    return created;
+}
+
 
     public void ClearUserCars()
     {

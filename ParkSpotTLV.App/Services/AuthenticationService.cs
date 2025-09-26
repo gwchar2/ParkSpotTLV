@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Net.Http.Json;
+using System.Net;
 
 namespace ParkSpotTLV.App.Services;
 
@@ -34,6 +35,13 @@ public class AuthenticationService
     public string RefreshToken { get; set; } = "";
     public DateTime RefreshTokenExpiresAt { get; set; }
     public string TokenType { get; set; } = "Bearer";
+    }
+
+    public sealed class MeResponse
+    {
+    public string Username { get; set; } = "";
+    public string Id { get; set; } = "";
+    public string[] Roles { get; set; } = Array.Empty<string>();
     }
 
 
@@ -87,6 +95,33 @@ public class AuthenticationService
     {
         IsAuthenticated = false;
         CurrentUsername = null;
+    }
+
+    // method no ensure authentication of current session
+    public async Task<MeResponse> AuthMeAsync()
+    {
+        // Ensure we even have a token attached
+        if (_http.DefaultRequestHeaders.Authorization == null)
+            throw new InvalidOperationException("Missing Authorization header – user is not logged in.");
+
+        var response = await _http.GetAsync("auth/me");
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized || response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            throw new HttpRequestException("Not authenticated or token expired. Please sign in again.");
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Failed to call /auth/me: {(int)response.StatusCode} {body}");
+        }
+
+        var me = await response.Content.ReadFromJsonAsync<MeResponse>(_options);
+        if (me == null)
+            throw new InvalidOperationException("Empty response from /auth/me.");
+
+        return me;
     }
 
     public bool ValidatePassword(string password)

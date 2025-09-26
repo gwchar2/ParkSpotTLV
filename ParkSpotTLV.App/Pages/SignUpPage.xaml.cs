@@ -5,6 +5,8 @@ namespace ParkSpotTLV.App.Pages;
 public partial class SignUpPage : ContentPage
 {
     private readonly AuthenticationService _authService = AuthenticationService.Instance;
+    private readonly CarService _carService = CarService.Instance;
+
 
     public SignUpPage()
     {
@@ -47,8 +49,16 @@ public partial class SignUpPage : ContentPage
             if (tokens is not null) {
                 await DisplayAlert("Success", $"Account created successfully! Welcome, {username}!", "OK");
 
-                // (optional) add a default car for the new user
-                //await AddDefaultCarAsync();   // shown below
+                // add a default car for the new user
+                try
+                {
+                    await _carService.CreateDefaultCarForUserAsync();
+                }
+                catch (Exception ex)
+                {
+                    // Don't fail signup if car creation fails - user account was already created
+                    System.Diagnostics.Debug.WriteLine($"Failed to create default car for user, but signup succeeded: {ex.Message}");
+                }
 
                 // navigate
                 await Shell.Current.GoToAsync("..");
