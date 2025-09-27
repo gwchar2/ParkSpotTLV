@@ -26,7 +26,7 @@ public partial class ShowMapPage : ContentPage
         var userCars = await _carService.GetUserCarsAsync();
 
         // Debug: Show how many cars were loaded
-        await DisplayAlert("Debug", $"Loaded {userCars.Count} cars from server", "OK");
+        // DEBUG: await DisplayAlert("Debug", $"Loaded {userCars.Count} cars from server", "OK");
 
         // Clear existing items from UI
         CarPicker.Items.Clear();
@@ -34,7 +34,7 @@ public partial class ShowMapPage : ContentPage
         // Add user's cars to UI
         foreach (var car in userCars)
         {
-            CarPicker.Items.Add(car.Id);
+            CarPicker.Items.Add(car.Name);
         }
 
         // temp

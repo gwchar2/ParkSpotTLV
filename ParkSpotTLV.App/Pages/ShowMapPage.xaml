@@ -51,7 +51,7 @@
                         HeightRequest="40">
                     <Grid>
                         <Picker x:Name="CarPicker"
-                                Title="Default Car"
+                                Title="Pick Car"
                                 BackgroundColor="Transparent"
                                 TextColor="Black"
                                 TitleColor="Gray"

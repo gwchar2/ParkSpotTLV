@@ -213,7 +213,7 @@ public class CarService
     var defaultCarPayload = new VehicleCreateRequest
     (
         Type : Core.Models.VehicleType.Car,
-        Name : "def name",
+        Name : "Default Car",
         ResidentZoneCode : null,
         HasDisabledPermit : false
     );

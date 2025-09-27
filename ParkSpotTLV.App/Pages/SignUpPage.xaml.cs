@@ -55,12 +55,12 @@ public partial class SignUpPage : ContentPage
                 try
                 {
                     var defaultCar = await _carService.CreateDefaultCarForUserAsync();
-                    await DisplayAlert("Debug", $"Default car created successfully: {defaultCar.Id}", "OK");
+                    // DEBUG: await DisplayAlert("Debug", $"Default car created successfully: {defaultCar.Id}", "OK");
                 }
-                catch (Exception ex)
+                catch (Exception )
                 {
                     // Don't fail signup if car creation fails - user account was already created
-                    await DisplayAlert("Debug", $"Failed to create default car: {ex.Message}", "OK");
+                    // DEBUG: await DisplayAlert("Debug", $"Failed to create default car: {ex.Message}", "OK");
                 }
 
                 // navigate
