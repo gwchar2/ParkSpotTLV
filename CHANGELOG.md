@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.6.2-beta.0...v0.7.0-beta.0) (2025-09-27)
+
+
+### Features
+
+* **App:** default car created succefully presented in map settings ([59c0139](https://github.com/gwchar2/ParkSpotTLV/commit/59c01399dc89a639a4580471b41bbed734916d39))
+* **structure:** dependency injection for use one shared httpClient for both Car ans Auth services ([e126165](https://github.com/gwchar2/ParkSpotTLV/commit/e12616502d10460b30dae8468b3531f21463fc51))
+
 ## [0.6.2-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.6.1-beta.0...v0.6.2-beta.0) (2025-09-26)
 
 
