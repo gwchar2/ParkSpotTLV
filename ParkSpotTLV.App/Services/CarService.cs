@@ -1,8 +1,9 @@
 using System.Net;
 using System.Text.Json;
 using System.Net.Http.Json;
-using ParkSpotTLV.App.Data.Models;
+//using ParkSpotTLV.App.Data.Models;
 using ParkSpotTLV.Contracts.Vehicles;
+using ParkSpotTLV.Core.Models;
 
 namespace ParkSpotTLV.App.Services;
 
@@ -10,24 +11,24 @@ public class Car
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public string Name { get; set; } = string.Empty;
-    public CarType Type { get; set; } = CarType.Private;
+    public VehicleType Type { get; set; } = VehicleType.Private;
     public bool HasResidentPermit { get; set; } = false;
     public int ResidentPermitNumber { get; set; } = 0;
     public bool HasDisabledPermit { get; set; } = false;
 
     public string TypeDisplayName => Type switch
     {
-        CarType.Private => "Private",
-        CarType.Truck => "Truck",
+        VehicleType.Private => "Private",
+        VehicleType.Truck => "Truck",
         _ => "Private"
     };
 }
 
-public enum CarType
-{
-    Private,
-    Truck
-}
+// public enum CarType
+// {
+//     Private,
+//     Truck
+// }
 
 public class CarService
 {
@@ -73,7 +74,7 @@ public class CarService
             new Car
             {
                 // Name = "My Car",
-                Type = CarType.Private,
+                Type = VehicleType.Private,
                 HasResidentPermit = false,
                 ResidentPermitNumber = 0,
                 HasDisabledPermit = false
@@ -85,7 +86,7 @@ public class CarService
             new Car
             {
                 // Name = "My Car",
-                Type = CarType.Private,
+                Type = VehicleType.Private,
                 HasResidentPermit = false,
                 ResidentPermitNumber = 0,
                 HasDisabledPermit = false
@@ -97,7 +98,7 @@ public class CarService
             new Car
             {
                 // Name = "My Car",
-                Type = CarType.Private,
+                Type = VehicleType.Private,
                 HasResidentPermit = false,
                 ResidentPermitNumber = 0,
                 HasDisabledPermit = false
@@ -133,25 +134,38 @@ public class CarService
 
     public async Task<bool> AddCarAsync(Car car)
     {
-        if (!_authService.IsAuthenticated || _authService.CurrentUsername == null)
-            return false;
+        var me = await _authService.AuthMeAsync();
 
-        var username = _authService.CurrentUsername;
+        var newCarPayload = new VehicleCreateRequest
+        (
+        Type : car.Type, // Core.Models.VehicleType.(car.Type),
+        Name : car.Name,
+        ResidentZoneCode : car.ResidentPermitNumber == 0 ? null : car.ResidentPermitNumber,
+        HasDisabledPermit : car.HasDisabledPermit
+        );
+
         var userCars = await GetUserCarsAsync();
 
         // Check if user already has 5 cars
         if (userCars.Count >= 5)
             return false;
 
-        userCars.Add(car);
+        var response = await _http.PostAsJsonAsync("vehicles", newCarPayload, _options);
 
-        // Update local storage
-        if (!_userCars.ContainsKey(username))
-            _userCars[username] = new List<Car>();
-        _userCars[username] = userCars;
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Failed to create vehicle: {(int)response.StatusCode} {body}");
+        }
 
-        return true;
-    }
+        var created = await response.Content.ReadFromJsonAsync<Car>(_options);
+        if (created is null)
+            throw new InvalidOperationException("Vehicle created but response body was empty.");
+
+            
+
+            return true;
+        }
 
     public async Task<bool> RemoveCarAsync(string carId)
     {
@@ -205,33 +219,32 @@ public class CarService
         return false;
     }
 
-    public async Task<Car> CreateDefaultCarForUserAsync()
-    {
-    var me = await _authService.AuthMeAsync();
-    System.Diagnostics.Debug.WriteLine($"Adding car for {me.Username}");
+//     public async Task<Car> CreateDefaultCarForUserAsync()
+//     {
+//     var me = await _authService.AuthMeAsync();
 
-    var defaultCarPayload = new VehicleCreateRequest
-    (
-        Type : Core.Models.VehicleType.Car,
-        Name : "Default Car",
-        ResidentZoneCode : null,
-        HasDisabledPermit : false
-    );
+//     var defaultCarPayload = new VehicleCreateRequest
+//     (
+//         Type : Core.Models.VehicleType.Private,
+//         Name : "Default Car",
+//         ResidentZoneCode : null,
+//         HasDisabledPermit : false
+//     );
 
-    var response = await _http.PostAsJsonAsync("vehicles", defaultCarPayload, _options);
+//     var response = await _http.PostAsJsonAsync("vehicles", defaultCarPayload, _options);
 
-    if (!response.IsSuccessStatusCode)
-    {
-        var body = await response.Content.ReadAsStringAsync();
-        throw new HttpRequestException($"Failed to create default car: {(int)response.StatusCode} {body}");
-    }
+//     if (!response.IsSuccessStatusCode)
+//     {
+//         var body = await response.Content.ReadAsStringAsync();
+//         throw new HttpRequestException($"Failed to create default car: {(int)response.StatusCode} {body}");
+//     }
 
-    var created = await response.Content.ReadFromJsonAsync<Car>(_options);
-    if (created is null)
-        throw new InvalidOperationException("Vehicle created but response body was empty.");
+//     var created = await response.Content.ReadFromJsonAsync<Car>(_options);
+//     if (created is null)
+//         throw new InvalidOperationException("Vehicle created but response body was empty.");
 
-    return created;
-}
+//     return created;
+// }
 
 
     public void ClearUserCars()

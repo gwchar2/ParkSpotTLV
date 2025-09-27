@@ -1,4 +1,6 @@
 using ParkSpotTLV.App.Services;
+using ParkSpotTLV.Core.Models;
+
 
 namespace ParkSpotTLV.App.Pages;
 
@@ -28,7 +30,7 @@ public partial class AddCarPage : ContentPage
             return;
         }
 
-        CarType carType = PrivateRadio.IsChecked ? CarType.Private : CarType.Truck;
+        VehicleType vehicleType = PrivateRadio.IsChecked ? VehicleType.Private : VehicleType.Truck;
         bool hasResidentPermit = ResidentPermitCheck.IsChecked;
         string zoneNumberText = ZoneNumberEntry.Text?.Trim() ?? "";
         bool hasDisabledPermit = DisabledPermitCheck.IsChecked;
@@ -45,10 +47,10 @@ public partial class AddCarPage : ContentPage
         }
 
         // Create new car
-        var newCar = new Car
+        var newCar = new ParkSpotTLV.App.Services.Car
         {
-            // Name = carName,
-            Type = carType,
+            Name = carName,
+            Type = vehicleType,
             HasResidentPermit = hasResidentPermit,
             ResidentPermitNumber = residentPermitNumber,
             HasDisabledPermit = hasDisabledPermit
