@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 using ParkSpotTLV.Infrastructure.Entities;
 using ParkSpotTLV.Core.Models;
 using System.Text.Json;
@@ -103,26 +104,51 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             foreach (var (geom, props) in GeoJsonLoader.LoadFeatures(_opts.Paths.StreetSegments)) {
                 var line = ToLineString(geom);
                 var osmID = GetString(props, "@id");
-                var (ptype, pside) = ParseParkingTags(props);
 
+                var parsed = ParseParkingTags(props);           // returns (type, side, explicitZoneCode)
                 var segment = new StreetSegment {
                     OSMId = string.IsNullOrWhiteSpace(osmID) ? "" : osmID,
                     NameEnglish = GetString(props, "name:en"),
                     NameHebrew = GetString(props, "name"),
                     Geom = line,
-                    ParkingType = ptype,
-                    Side = pside,
+                    ParkingType = parsed.type,
+                    Side = parsed.side,
                     LastUpdated = DateTimeOffset.UtcNow
                 };
 
-                int? zoneCode = null;
-                var rawZone = GetString(props, "parking_zone");
-                if (!string.IsNullOrWhiteSpace(rawZone) && int.TryParse(rawZone, out var parsed))
-                    zoneCode = parsed;
+                Guid? zoneId = null;
 
-                if (zoneCode.HasValue && zonesByCode.TryGetValue(zoneCode.Value, out var zid))
-                    segment.ZoneId = zid;
+                // 1) Prefer explicit zone code from tags (paid)
+                if (parsed.explicitZoneCode.HasValue &&
+                    zonesByCode.TryGetValue(parsed.explicitZoneCode.Value, out var zidFromProps)) {
+                    
+                    zoneId = zidFromProps;
+                }
 
+                // 2) If free and no explicit zone, infer by geometry
+                if (zoneId == null && parsed.type == ParkingType.Free) {
+                    var centroid = line.Centroid;
+
+                    // Try centroid containment
+                    var zoneByCentroidId = await db.Zones.AsNoTracking()
+                        .Where(z => z.Geom != null && z.Geom.Contains(centroid))
+                        .Select(z => (Guid?)z.Id)
+                        .FirstOrDefaultAsync(ct);
+
+                    if (zoneByCentroidId != null) {
+                        zoneId = zoneByCentroidId;
+                    } else {
+                        var zoneByIntersectId = await db.Zones.AsNoTracking()
+                            .Where(z => z.Geom != null && z.Geom.Intersects(line))
+                            .Select(z => (Guid?)z.Id)
+                            .FirstOrDefaultAsync(ct);
+
+                        if (zoneByIntersectId != null)
+                            zoneId = zoneByIntersectId;
+                    }
+                }
+
+                segment.ZoneId = zoneId;
                 db.StreetSegments.Add(segment);
             }
 
@@ -223,44 +249,60 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             if (string.IsNullOrWhiteSpace(s)) return null;
             return Enum.TryParse<TEnum>(s, ignoreCase: true, out var v) ? v : null;
         }
-
-        /* For zones 1-2 */
-        private static (ParkingType type, SegmentSide side) ParseParkingTags(JsonObject props) {
+        private static int? TryParseInt(string? s) {
+            if (string.IsNullOrWhiteSpace(s)) return null;
+            return int.TryParse(s, out var n) ? n : null;
+        }
+        private static (ParkingType type, SegmentSide side, int? explicitZoneCode) ParseParkingTags(JsonObject props) {
             string? T(string key) =>
-                props.TryGetPropertyValue(key, out var v) ? v?.ToString()?.Trim().ToLowerInvariant() : null;
+                props.TryGetPropertyValue(key, out var v) ? v?.ToString()?.Trim() : null;
 
-            bool IsYes(string? s) => s == "yes" || s == "true" || s == "designated";
-            bool IsNo(string? s) => s == "no" || s == "false";
+            // Paid variants (with explicit zone in tags)
+            // We check specific sides first; if both present, side=Both.
+            int? zoneRight = TryParseInt(T("parking:right:zone"));
+            int? zoneLeft = TryParseInt(T("parking:left:zone"));
+            int? zoneBoth = TryParseInt(T("parking:both:zone"));
 
-            var bothRaw = T("parking:both");
-            bool leftAllowed, rightAllowed;
+            bool paidRight = zoneRight.HasValue;
+            bool paidLeft = zoneLeft.HasValue;
+            bool paidBoth = zoneBoth.HasValue;
 
-            if (bothRaw != null) {
-                if (IsYes(bothRaw)) { leftAllowed = rightAllowed = true; } else if (IsNo(bothRaw)) { leftAllowed = rightAllowed = false; } else {
-                    leftAllowed = IsYes(T("parking:left"));
-                    rightAllowed = IsYes(T("parking:right"));
+            // Free variants
+            bool freeRight = string.Equals(T("parking:right"), "yes", StringComparison.OrdinalIgnoreCase);
+            bool freeLeft = string.Equals(T("parking:left"), "yes", StringComparison.OrdinalIgnoreCase);
+            bool freeBoth = string.Equals(T("parking:both"), "yes", StringComparison.OrdinalIgnoreCase);
+
+            // If any paid tag exists, we consider the segment Paid.
+            if (paidRight || paidLeft || paidBoth) {
+                var side = SegmentSide.Both;
+                if ((paidLeft || paidRight) && !(paidLeft && paidRight)) {
+                    side = paidLeft ? SegmentSide.Left : SegmentSide.Right;
+                } else if (paidBoth) {
+                    side = SegmentSide.Both;
+                } else if (paidLeft && paidRight) {
+                    side = SegmentSide.Both;
                 }
-            } else {
-                leftAllowed = IsYes(T("parking:left"));
-                rightAllowed = IsYes(T("parking:right"));
+                // Pick a zone code deterministically: prefer specific side over "both"
+                int? zoneCode = zoneRight ?? zoneLeft ?? zoneBoth;
+
+                return (ParkingType.Paid, side, zoneCode);
+            }
+            // Else if free tags exist, it’s Free.
+            if (freeLeft || freeRight || freeBoth) {
+                var side = SegmentSide.Both;
+                if ((freeLeft || freeRight) && !(freeLeft && freeRight)) {
+                    side = freeLeft ? SegmentSide.Left : SegmentSide.Right;
+                } else if (freeBoth) {
+                    side = SegmentSide.Both;
+                } else if (freeLeft && freeRight) {
+                    side = SegmentSide.Both;
+                }
+
+                return (ParkingType.Free, side, null);
             }
 
-            SegmentSide side;
-            if (leftAllowed && rightAllowed) side = SegmentSide.Both;
-            else if (leftAllowed) side = SegmentSide.Left;
-            else if (rightAllowed) side = SegmentSide.Right;
-            else side = SegmentSide.Both; // “none” in current enum
-
-            ParkingType type = ParkingType.CantPark;
-            if (leftAllowed || rightAllowed) {
-                switch (T("parking:type")) {
-                    case "paid": type = ParkingType.Paid; break;
-                    case "free": type = ParkingType.Free; break;
-                    default: type = ParkingType.CantPark; break;
-                }
-            }
-
-            return (type, side);
+            // If nothing matched (shouldn’t happen after your prefilter), default to Free/Both without zone.
+            return (ParkingType.Free, SegmentSide.Both, null);
         }
     }
 }
