@@ -119,30 +119,40 @@ dotnet run --project ./ParkSpotTLV.Api
 dotnet user-secrets list --project ./ParkSpotTLV.Api
 ```
 
-- Common EF Core commands
+- Completely new table
+```
+Delete the Migrations/ folder in ParkSpotTLV.Infrastructure
+docker compose down -v --remove-orphans
+docker compose up -d db
+dotnet ef migrations add InitialCreate -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
+dotnet ef database update -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
+F5
+Verify
+```
+
+- New tables OR table changes
 ```bash
-dotnet build
-dotnet ef migrations add <Name> --project ./ParkSpotTLV.Infrastructure --startup-project ./ParkSpotTLV.Api
-dotnet ef database update        --project ./ParkSpotTLV.Infrastructure --startup-project ./ParkSpotTLV.Api
-dotnet ef migrations list        --project ./ParkSpotTLV.Infrastructure --startup-project ./ParkSpotTLV.Api
+docker start parkspot_db
+dotnet ef migrations add UpdateSeed_20250927(or some other name) -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
+dotnet ef database update --project .\ParkSpotTLV.Infrastructure --startup-project .\ParkSpotTLV.Api
+Restart DB+API
+Verify
+```
+
+- Updating information in the DB
+```bash
+docker start parkspot_db
+docker exec -it parkspot_db psql -U admin -d parkspot_dev  -c "TRUNCATE TABLE street_segments, zones RESTART IDENTITY CASCADE;"
+Restart DB+API
+Verify
 ```
 
 - Inspect the DB inside the container
 ```bash
 docker exec -it parkspot_db psql -U admin -d parkspot_dev
-```
-Inside `psql`:
-```sql
-\dt
-SELECT code, name, taarif, ST_SRID(geom) FROM zones LIMIT 5;
-```
-
-- Reset the database (development)
-```bash
-docker compose down -v
-docker compose up -d db
-dotnet ef database update --project ./ParkSpotTLV.Infrastructure --startup-project ./ParkSpotTLV.Api
-docker compose up -d --build api
+SELECT * FROM "__EFMigrationsHistory";
+SELECT COUNT(*) AS zones FROM zones;
+SELECT COUNT(*) AS segments FROM street_segments;
 ```
 
 ## Port reference

@@ -128,10 +128,6 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<bool>("CarsOnly")
-                        .HasColumnType("boolean")
-                        .HasColumnName("cars_only");
-
                     b.Property<LineString>("Geom")
                         .IsRequired()
                         .HasColumnType("geometry(LineString,4326)")
@@ -141,10 +137,20 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_updated");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("NameEnglish")
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)")
-                        .HasColumnName("name");
+                        .HasColumnName("name_english");
+
+                    b.Property<string>("NameHebrew")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("name_hebrew");
+
+                    b.Property<string>("OSMId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("osm_id");
 
                     b.Property<int>("ParkingType")
                         .HasColumnType("integer")
@@ -165,6 +171,9 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .HasDatabaseName("ix_street_segments_geom");
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Geom"), "GIST");
+
+                    b.HasIndex("OSMId")
+                        .HasDatabaseName("ix_street_segments_osm_id");
 
                     b.HasIndex("ZoneId")
                         .HasDatabaseName("ix_street_segments_zone_id");

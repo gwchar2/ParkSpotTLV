@@ -52,9 +52,9 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     user_id = table.Column<Guid>(type: "uuid", nullable: false),
                     token_hash = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
-                    created_at_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    expires_at_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    revoked_at_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    created_at_utc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    expires_at_utc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    revoked_at_utc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     replaced_by_token_hash = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true)
                 },
                 constraints: table =>
@@ -74,7 +74,9 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     owner_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    type = table.Column<int>(type: "integer", nullable: false)
+                    name = table.Column<string>(type: "text", nullable: false),
+                    type = table.Column<int>(type: "integer", nullable: false),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -92,12 +94,12 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    name = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    osm_id = table.Column<string>(type: "text", nullable: false),
+                    name_english = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    name_hebrew = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
                     geom = table.Column<LineString>(type: "geometry(LineString,4326)", nullable: false),
                     zone_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    cars_only = table.Column<bool>(type: "boolean", nullable: false),
                     parking_type = table.Column<int>(type: "integer", nullable: false),
-                    parking_hours = table.Column<int>(type: "integer", nullable: false),
                     side = table.Column<int>(type: "integer", nullable: false),
                     last_updated = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
                 },
@@ -117,7 +119,7 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    vehicle_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    vehicle_id = table.Column<Guid>(type: "uuid", nullable: false),
                     type = table.Column<int>(type: "integer", nullable: false),
                     zone_code = table.Column<int>(type: "integer", nullable: true),
                     valid_to = table.Column<DateOnly>(type: "date", nullable: true),
@@ -127,7 +129,7 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                 {
                     table.PrimaryKey("pk_permits", x => x.id);
                     table.ForeignKey(
-                        name: "fk_permits_vehicle_vehicle_id",
+                        name: "fk_permits_vehicles_vehicle_id",
                         column: x => x.vehicle_id,
                         principalTable: "vehicles",
                         principalColumn: "id",
@@ -139,43 +141,6 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         principalColumn: "code",
                         onDelete: ReferentialAction.SetNull);
                 });
-
-            migrationBuilder.CreateTable(
-                name: "parking_rules",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    street_segment_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    day_of_week = table.Column<int>(type: "integer", nullable: false),
-                    start_time = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
-                    end_time = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
-                    style_priority = table.Column<int>(type: "integer", nullable: false),
-                    parking_type = table.Column<int>(type: "integer", nullable: false),
-                    max_duration_minutes = table.Column<int>(type: "integer", nullable: true, defaultValue: -1),
-                    note = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_parking_rules", x => x.id);
-                    table.CheckConstraint("ck_parkingrule_dayofweek_range", "day_of_week BETWEEN 0 AND 6");
-                    table.CheckConstraint("ck_parkingrule_time_order", "start_time < end_time");
-                    table.ForeignKey(
-                        name: "fk_parking_rules_street_segments_street_segment_id",
-                        column: x => x.street_segment_id,
-                        principalTable: "street_segments",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateIndex(
-                name: "ix_parking_rules_street_segment_id",
-                table: "parking_rules",
-                column: "street_segment_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_parking_rules_style_priority",
-                table: "parking_rules",
-                column: "style_priority");
 
             migrationBuilder.CreateIndex(
                 name: "ix_permits_vehicle_id",
@@ -220,6 +185,11 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                 .Annotation("Npgsql:IndexMethod", "GIST");
 
             migrationBuilder.CreateIndex(
+                name: "ix_street_segments_osm_id",
+                table: "street_segments",
+                column: "osm_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_street_segments_zone_id",
                 table: "street_segments",
                 column: "zone_id");
@@ -251,9 +221,6 @@ namespace ParkSpotTLV.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "parking_rules");
-
             migrationBuilder.DropTable(
                 name: "permits");
 

@@ -13,8 +13,8 @@ using ParkSpotTLV.Infrastructure;
 namespace ParkSpotTLV.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250925073821_UpdateLocalEntities")]
-    partial class UpdateLocalEntities
+    [Migration("20250926213637_UpdateSeed_20250927")]
+    partial class UpdateSeed_20250927
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -26,65 +26,6 @@ namespace ParkSpotTLV.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "postgis");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.ParkingRule", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<int>("DayOfWeek")
-                        .HasColumnType("integer")
-                        .HasColumnName("day_of_week");
-
-                    b.Property<TimeOnly>("EndTime")
-                        .HasColumnType("time without time zone")
-                        .HasColumnName("end_time");
-
-                    b.Property<int?>("MaxDurationMinutes")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(-1)
-                        .HasColumnName("max_duration_minutes");
-
-                    b.Property<string>("Note")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
-                        .HasColumnName("note");
-
-                    b.Property<int>("ParkingType")
-                        .HasColumnType("integer")
-                        .HasColumnName("parking_type");
-
-                    b.Property<TimeOnly>("StartTime")
-                        .HasColumnType("time without time zone")
-                        .HasColumnName("start_time");
-
-                    b.Property<Guid>("StreetSegmentId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("street_segment_id");
-
-                    b.Property<int>("StylePriority")
-                        .HasColumnType("integer")
-                        .HasColumnName("style_priority");
-
-                    b.HasKey("Id")
-                        .HasName("pk_parking_rules");
-
-                    b.HasIndex("StreetSegmentId")
-                        .HasDatabaseName("ix_parking_rules_street_segment_id");
-
-                    b.HasIndex("StylePriority")
-                        .HasDatabaseName("ix_parking_rules_style_priority");
-
-                    b.ToTable("parking_rules", null, t =>
-                        {
-                            t.HasCheckConstraint("ck_parkingrule_dayofweek_range", "day_of_week BETWEEN 0 AND 6");
-
-                            t.HasCheckConstraint("ck_parkingrule_time_order", "start_time < end_time");
-                        });
-                });
 
             modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.Permit", b =>
                 {
@@ -190,10 +131,6 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<bool>("CarsOnly")
-                        .HasColumnType("boolean")
-                        .HasColumnName("cars_only");
-
                     b.Property<LineString>("Geom")
                         .IsRequired()
                         .HasColumnType("geometry(LineString,4326)")
@@ -203,14 +140,20 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_updated");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("NameEnglish")
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)")
-                        .HasColumnName("name");
+                        .HasColumnName("name_english");
 
-                    b.Property<int>("ParkingHours")
-                        .HasColumnType("integer")
-                        .HasColumnName("parking_hours");
+                    b.Property<string>("NameHebrew")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("name_hebrew");
+
+                    b.Property<string>("OSMId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("osm_id");
 
                     b.Property<int>("ParkingType")
                         .HasColumnType("integer")
@@ -231,6 +174,9 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .HasDatabaseName("ix_street_segments_geom");
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Geom"), "GIST");
+
+                    b.HasIndex("OSMId")
+                        .HasDatabaseName("ix_street_segments_osm_id");
 
                     b.HasIndex("ZoneId")
                         .HasDatabaseName("ix_street_segments_zone_id");
@@ -273,6 +219,11 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
 
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uuid")
@@ -344,18 +295,6 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                     b.ToTable("zones", (string)null);
                 });
 
-            modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.ParkingRule", b =>
-                {
-                    b.HasOne("ParkSpotTLV.Infrastructure.Entities.StreetSegment", "StreetSegment")
-                        .WithMany("ParkingRules")
-                        .HasForeignKey("StreetSegmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_parking_rules_street_segments_street_segment_id");
-
-                    b.Navigation("StreetSegment");
-                });
-
             modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.Permit", b =>
                 {
                     b.HasOne("ParkSpotTLV.Infrastructure.Entities.Vehicle", "Vehicle")
@@ -410,11 +349,6 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .HasConstraintName("fk_vehicles_users_owner_id");
 
                     b.Navigation("Owner");
-                });
-
-            modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.StreetSegment", b =>
-                {
-                    b.Navigation("ParkingRules");
                 });
 
             modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.User", b =>
