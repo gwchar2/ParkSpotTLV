@@ -4,11 +4,15 @@ namespace ParkSpotTLV.App.Pages;
 
 public partial class SignUpPage : ContentPage
 {
-    private readonly AuthenticationService _authService = AuthenticationService.Instance;
+    private readonly AuthenticationService _authService ; // = AuthenticationService.Instance
+    private readonly CarService _carService; //  = CarService.Instance
 
-    public SignUpPage()
+
+    public SignUpPage(CarService carService, AuthenticationService authService)
     {
         InitializeComponent();
+        _carService = carService;
+        _authService = authService;
     }
 
     private async void OnCreateAccountClicked(object? sender, EventArgs e)
@@ -41,24 +45,44 @@ public partial class SignUpPage : ContentPage
         CreateAccountBtn.IsEnabled = false;
         CreateAccountBtn.Text = "Creating Account...";
 
-        try
-        {
-            bool success = await _authService.SignUpAsync(username, password);
+        try {
+            var tokens = await _authService.SignUpAsync(username, password); // throws on 400/409
 
-            if (success)
-            {
+            if (tokens is not null) {
                 await DisplayAlert("Success", $"Account created successfully! Welcome, {username}!", "OK");
+
+                // add a default car for the new user
+                try
+                {
+                    var defaultCar = await _carService.CreateDefaultCarForUserAsync();
+                    // DEBUG: await DisplayAlert("Debug", $"Default car created successfully: {defaultCar.Id}", "OK");
+                }
+                catch (Exception )
+                {
+                    // Don't fail signup if car creation fails - user account was already created
+                    // DEBUG: await DisplayAlert("Debug", $"Failed to create default car: {ex.Message}", "OK");
+                }
+
+                // navigate
                 await Shell.Current.GoToAsync("..");
                 await Shell.Current.GoToAsync("ShowMapPage");
             }
-            else
-            {
-                await DisplayAlert("Error", "Username already exists. Please choose a different username.", "OK");
-            }
         }
-        catch (Exception)
+        catch (HttpRequestException ex) // contains status + body from the service
         {
-            await DisplayAlert("Error", "Account creation failed. Please try again later.", "OK");
+            string msg;
+            if (ex.Message.Contains("400"))
+                msg = "Missing username or password. Please try again.";
+            else if (ex.Message.Contains("409"))
+                msg = "This username is already taken. Please choose another one.";
+            else
+                msg = $"Account creation failed: {ex.Message}";
+
+            await DisplayAlert("Error", msg, "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Account creation failed: {ex.Message}", "OK");
         }
         finally
         {

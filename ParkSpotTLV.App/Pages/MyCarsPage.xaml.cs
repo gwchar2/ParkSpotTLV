@@ -4,11 +4,12 @@ namespace ParkSpotTLV.App.Pages;
 
 public partial class MyCarsPage : ContentPage
 {
-    private readonly CarService _carService = CarService.Instance;
+    private readonly CarService _carService; //  = CarService.Instance
 
-    public MyCarsPage()
+    public MyCarsPage(CarService carService)
     {
         InitializeComponent();
+        _carService = carService;
         LoadUserCars();
     }
 
@@ -74,7 +75,7 @@ public partial class MyCarsPage : ContentPage
 
         var nameLabel = new Label
         {
-            Text = car.Name,
+            Text = $"Car {car.Id}",
             FontSize = 18,
             FontAttributes = FontAttributes.Bold,
             TextColor = Colors.Black
@@ -150,7 +151,7 @@ public partial class MyCarsPage : ContentPage
     private async void OnRemoveCarClicked(Car car)
     {
         bool confirm = await DisplayAlert("Remove Car",
-            $"Are you sure you want to remove '{car.Name}'?",
+            $"Are you sure you want to remove car {car.Id}?",
             "Yes", "No");
 
         if (confirm)
@@ -159,7 +160,7 @@ public partial class MyCarsPage : ContentPage
 
             if (success)
             {
-                await DisplayAlert("Success", $"'{car.Name}' has been removed.", "OK");
+                await DisplayAlert("Success", $"Car {car.Id} has been removed.", "OK");
                 LoadUserCars(); // Refresh the UI
             }
             else

@@ -1,19 +1,34 @@
 ﻿using ParkSpotTLV.App.Data.Services;
 
-namespace ParkSpotTLV.App {
-    public partial class App : Application {
-        public App() {
+namespace ParkSpotTLV.App
+{
+    public partial class App : Application
+    {
+        private readonly AppShell _shell;
+        private readonly ILocalDataService _localData;
+
+        // AppShell and ILocalDataService come from DI
+        public App(AppShell shell, ILocalDataService localData)
+        {
             InitializeComponent();
-            InitializeDatabaseAsync();
+            _shell = shell;
+            _localData = localData;
+
+            // fire-and-forget DB init
+            _ = InitializeDatabaseAsync();
         }
 
-        private async void InitializeDatabaseAsync()
+        protected override Window CreateWindow(IActivationState? activationState)
+        {
+            // Provide the root page for the app via a Window
+            return new Window(_shell);
+        }
+
+        private async Task InitializeDatabaseAsync()
         {
             try
             {
-                // Create the service directly instead of relying on DI during app construction
-                var localDataService = new LocalDataService();
-                await localDataService.InitializeAsync();
+                await _localData.InitializeAsync();
                 System.Diagnostics.Debug.WriteLine("Database initialized successfully");
             }
             catch (Exception ex)
@@ -21,10 +36,6 @@ namespace ParkSpotTLV.App {
                 System.Diagnostics.Debug.WriteLine($"Database initialization failed: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
             }
-        }
-
-        protected override Window CreateWindow(IActivationState? activationState) {
-            return new Window(new AppShell());
         }
     }
 }

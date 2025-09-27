@@ -3,10 +3,12 @@ using System.Net;
 
 namespace ParkSpotTLV.App.Pages {
     public partial class MainPage : ContentPage {
-        private readonly AuthenticationService _authService = AuthenticationService.Instance;
+        private readonly AuthenticationService _authService ; // = AuthenticationService.Instance
 
-        public MainPage() {
+        public MainPage(AuthenticationService authService)
+        {
             InitializeComponent();
+            _authService = authService;
         }
 
         private async void OnLoginClicked(object? sender, EventArgs e) {
@@ -23,41 +25,28 @@ namespace ParkSpotTLV.App.Pages {
             LoginBtn.IsEnabled = false;
             LoginBtn.Text = "Logging in...";
 
-            try
-            {
-                var response = await _authService.LoginAsync(username, password);
-                Console.WriteLine($"Response: {response.StatusCode}");
+            try {
+                var tokens = await _authService.LoginAsync(username, password); // throws on non-2xx
 
-                switch (response.StatusCode)
-            {
-
-                case HttpStatusCode.OK:
+                if (tokens is not null)
                 {
+                    // token is already attached to HttpClient by the service
                     await Shell.Current.GoToAsync("ShowMapPage");
-                    break;
                 }
-                case HttpStatusCode.BadRequest:
-                {
-                    await DisplayAlert("Error", "Missing username or password. Please try again.", "OK");
-                    break;
-                }
-                case HttpStatusCode.Unauthorized:
-                {
-                    await DisplayAlert("Error", "Invalid username or password. Please try again.", "OK");
-                    break;
-                }
-                default:
-                {
-                    await DisplayAlert("Error", "Login failed. Please try again.", "OK");
-                    break;
-                }
-                }
+            }
+            catch (HttpRequestException ex) {
+                // You can map common cases by checking ex.Message or wrapping extra info in the service
+                // e.g., if it contains "401" -> invalid credentials, "400" -> missing fields, etc.
+                var msg = ex.Message.Contains("401") ? "Invalid username or password."
+                        : ex.Message.Contains("400") ? "Missing username or password."
+                        : "Login failed. Please try again.";
+                await DisplayAlert("Error", msg, "OK");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Login error: {ex.Message}");
                 await DisplayAlert("Error", $"Login failed: {ex.Message}", "OK");
             }
+
             finally
             {
                 // Re-enable login button
