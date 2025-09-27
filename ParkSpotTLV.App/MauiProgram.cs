@@ -35,11 +35,7 @@ namespace ParkSpotTLV.App
                 client.BaseAddress = new Uri(DevApiBaseUrl);
             });
 
-            // Core app services you already had
-            builder.Services.AddSingleton<ILocalDataService, LocalDataService>();
-            builder.Services.AddTransient<ISyncService, SyncService>();
-            builder.Services.AddTransient<Pages.PreferencesPage>();
-            builder.Services.AddTransient<Pages.SignUpPage>();
+            
 
             // ---- Register your refactored services (DI-friendly) ----
             // Single shared HttpClient instance
@@ -63,6 +59,16 @@ namespace ParkSpotTLV.App
                 return new CarService(http, auth, opts);
             });
 
+            // Core app services you already had
+            builder.Services.AddSingleton<ILocalDataService, LocalDataService>();
+            builder.Services.AddTransient<ISyncService, SyncService>();
+            builder.Services.AddTransient<Pages.PreferencesPage>();
+            builder.Services.AddTransient<Pages.SignUpPage>();
+            builder.Services.AddTransient<Pages.AccountDetailsPage>();
+            builder.Services.AddTransient<Pages.MyCarsPage>();
+            builder.Services.AddTransient<Pages.ShowMapPage>();
+            builder.Services.AddTransient<Pages.AddCarPage>();
+            
             // (Optional) if you resolved MenuOverlay via DI
             builder.Services.AddSingleton<AppShell>();
             builder.Services.AddTransient<MenuOverlay>();

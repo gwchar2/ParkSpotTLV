@@ -1,6 +1,8 @@
 using System.Net;
 using System.Text.Json;
 using System.Net.Http.Json;
+using ParkSpotTLV.App.Data.Models;
+using ParkSpotTLV.Contracts.Vehicles;
 
 namespace ParkSpotTLV.App.Services;
 
@@ -70,7 +72,7 @@ public class CarService
         {
             new Car
             {
-                Name = "My Car",
+                // Name = "My Car",
                 Type = CarType.Private,
                 HasResidentPermit = false,
                 ResidentPermitNumber = 0,
@@ -82,7 +84,7 @@ public class CarService
         {
             new Car
             {
-                Name = "My Car",
+                // Name = "My Car",
                 Type = CarType.Private,
                 HasResidentPermit = false,
                 ResidentPermitNumber = 0,
@@ -94,7 +96,7 @@ public class CarService
         {
             new Car
             {
-                Name = "My Car",
+                // Name = "My Car",
                 Type = CarType.Private,
                 HasResidentPermit = false,
                 ResidentPermitNumber = 0,
@@ -208,12 +210,13 @@ public class CarService
     var me = await _authService.AuthMeAsync();
     System.Diagnostics.Debug.WriteLine($"Adding car for {me.Username}");
 
-    var defaultCarPayload = new
-    {
-        type = 1,
-        residentZoneCode = (string?)null,
-        hasDisabledPermit = false
-    };
+    var defaultCarPayload = new VehicleCreateRequest
+    (
+        Type : Core.Models.VehicleType.Car,
+        Name : "def name",
+        ResidentZoneCode : null,
+        HasDisabledPermit : false
+    );
 
     var response = await _http.PostAsJsonAsync("vehicles", defaultCarPayload, _options);
 

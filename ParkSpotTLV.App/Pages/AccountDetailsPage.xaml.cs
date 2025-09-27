@@ -86,7 +86,7 @@ public partial class AccountDetailsPage : ContentPage
 
         var nameLabel = new Label
         {
-            Text = car.Name,
+            Text = $"Car {car.Id}",
             FontSize = 16,
             FontAttributes = FontAttributes.Bold,
             TextColor = Colors.Black
@@ -275,7 +275,7 @@ public partial class AccountDetailsPage : ContentPage
     private async void OnRemoveCarClicked(Car car)
     {
         bool confirm = await DisplayAlert("Remove Car",
-            $"Are you sure you want to remove '{car.Name}'?",
+            $"Are you sure you want to remove car {car.Id}?",
             "Yes", "No");
 
         if (confirm)
@@ -284,7 +284,7 @@ public partial class AccountDetailsPage : ContentPage
 
             if (success)
             {
-                await DisplayAlert("Success", $"'{car.Name}' has been removed.", "OK");
+                await DisplayAlert("Success", $"Car {car.Id} has been removed.", "OK");
                 LoadUserCars(); // Refresh the UI
             }
             else

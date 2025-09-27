@@ -47,7 +47,7 @@ public partial class AddCarPage : ContentPage
         // Create new car
         var newCar = new Car
         {
-            Name = carName,
+            // Name = carName,
             Type = carType,
             HasResidentPermit = hasResidentPermit,
             ResidentPermitNumber = residentPermitNumber,

@@ -54,12 +54,13 @@ public partial class SignUpPage : ContentPage
                 // add a default car for the new user
                 try
                 {
-                    await _carService.CreateDefaultCarForUserAsync();
+                    var defaultCar = await _carService.CreateDefaultCarForUserAsync();
+                    await DisplayAlert("Debug", $"Default car created successfully: {defaultCar.Id}", "OK");
                 }
                 catch (Exception ex)
                 {
                     // Don't fail signup if car creation fails - user account was already created
-                    System.Diagnostics.Debug.WriteLine($"Failed to create default car for user, but signup succeeded: {ex.Message}");
+                    await DisplayAlert("Debug", $"Failed to create default car: {ex.Message}", "OK");
                 }
 
                 // navigate
