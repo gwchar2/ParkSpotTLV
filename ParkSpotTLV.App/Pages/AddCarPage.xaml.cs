@@ -4,11 +4,13 @@ namespace ParkSpotTLV.App.Pages;
 
 public partial class AddCarPage : ContentPage
 {
-    private readonly CarService _carService = CarService.Instance;
+    private readonly CarService _carService; //  = CarService.Instance
 
-    public AddCarPage()
+    public AddCarPage(CarService carService)
     {
         InitializeComponent();
+        _carService = carService;
+
     }
 
     private void OnResidentPermitChanged(object sender, CheckedChangedEventArgs e)
@@ -45,7 +47,7 @@ public partial class AddCarPage : ContentPage
         // Create new car
         var newCar = new Car
         {
-            Name = carName,
+            // Name = carName,
             Type = carType,
             HasResidentPermit = hasResidentPermit,
             ResidentPermitNumber = residentPermitNumber,

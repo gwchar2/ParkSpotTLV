@@ -6,9 +6,13 @@ namespace ParkSpotTLV.App.Controls;
 public partial class MenuOverlay : Grid{
 
     public record VersionResponse(string Version);
-    public MenuOverlay()
+    private readonly AuthenticationService _authService;
+    private readonly HttpClient _http;
+    public MenuOverlay(AuthenticationService authService, IHttpClientFactory httpFactory)
     {
         InitializeComponent();
+        _authService = authService;
+        _http = httpFactory.CreateClient("Api");
     }
 
     public async Task ShowMenu()
@@ -19,9 +23,9 @@ public partial class MenuOverlay : Grid{
         await MenuPanel.TranslateTo(0, 0, 300, Easing.CubicOut);
 
         /* Will fetch version */
-        using var client = new HttpClient();
+        //using var client = new HttpClient();
         try {
-            var response = await client.GetFromJsonAsync<VersionResponse>("http://10.0.2.2:8080/version");
+            var response = await _http.GetFromJsonAsync<VersionResponse>("http://10.0.2.2:8080/version");
             VersionLabel.Text = $"Version: {response?.Version ?? "N/A"}";
         }
         catch (Exception ex) {
@@ -63,8 +67,8 @@ public partial class MenuOverlay : Grid{
     {
         await CloseMenu();
 
-        var authService = AuthenticationService.Instance;
-        string username = authService.CurrentUsername ?? "User";
+        //var authService = AuthenticationService.Instance;
+        string username = _authService.CurrentUsername ?? "User";
 
         if (Application.Current?.Windows.FirstOrDefault()?.Page is Page page)
         {
@@ -76,7 +80,7 @@ public partial class MenuOverlay : Grid{
             if (confirm)
             {
                 // Logout from authentication service
-                authService.Logout();
+                _authService.Logout();
 
                 // Navigate back to login page
                 await Shell.Current.GoToAsync("//MainPage");
