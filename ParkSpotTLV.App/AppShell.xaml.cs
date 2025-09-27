@@ -4,9 +4,13 @@ using ParkSpotTLV.App.Pages;
 namespace ParkSpotTLV.App {
     public partial class AppShell : Shell {
         private MenuOverlay? _currentMenuOverlay;
+        private readonly IServiceProvider _services;
 
-        public AppShell() {
+
+        public AppShell(IServiceProvider services)
+        {
             InitializeComponent();
+            _services = services;
 
             Routing.RegisterRoute("SignUpPage", typeof(SignUpPage));
             Routing.RegisterRoute("ShowMapPage", typeof(ShowMapPage));
@@ -44,7 +48,7 @@ namespace ParkSpotTLV.App {
                 RemoveMenuOverlay();
 
                 // Create new menu overlay
-                _currentMenuOverlay = new MenuOverlay();
+                _currentMenuOverlay =  _services.GetRequiredService<MenuOverlay>();
 
                 // Create an absolute layout overlay
                 var overlayContainer = new AbsoluteLayout();

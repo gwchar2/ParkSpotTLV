@@ -29,23 +29,37 @@ public enum CarType
 
 public class CarService
 {
-    private static CarService? _instance;
-    public static CarService Instance => _instance ??= new CarService();
 
-    private readonly AuthenticationService _authService = AuthenticationService.Instance;
+    private readonly AuthenticationService _authService;
+    private readonly HttpClient _http;
+    private readonly JsonSerializerOptions _options;
 
-    private readonly HttpClient _http = new() { BaseAddress = new Uri("http://10.0.2.2:8080/") };
+    //private static CarService? _instance;
+    //public static CarService Instance => _instance ??= new CarService();
 
-    private readonly JsonSerializerOptions _options = new() {
-        PropertyNameCaseInsensitive = true
-    };
+    //private readonly AuthenticationService _authService = AuthenticationService.Instance;
+
+    //private readonly HttpClient _http = new() { BaseAddress = new Uri("http://10.0.2.2:8080/") };
+
+    // private readonly JsonSerializerOptions _options = new() {
+    //     PropertyNameCaseInsensitive = true
+    // };
 
 
     // Dictionary to store cars per user: username -> list of cars
     private readonly Dictionary<string, List<Car>> _userCars = new();
 
-    private CarService()
+    // private CarService()
+    // {
+    //     InitializeDemoData();
+    // }
+
+    public CarService(HttpClient http, AuthenticationService authService, JsonSerializerOptions? options = null)
     {
+        _http = http;                            // already has BaseAddress + Authorization
+        _authService = authService;
+        _options = options ?? new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
         InitializeDemoData();
     }
 
@@ -198,7 +212,7 @@ public class CarService
     {
         type = 1,
         residentZoneCode = (string?)null,
-        disabledPermit = false
+        hasDisabledPermit = false
     };
 
     var response = await _http.PostAsJsonAsync("vehicles", defaultCarPayload, _options);

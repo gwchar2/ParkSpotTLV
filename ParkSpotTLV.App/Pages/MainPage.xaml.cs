@@ -3,10 +3,12 @@ using System.Net;
 
 namespace ParkSpotTLV.App.Pages {
     public partial class MainPage : ContentPage {
-        private readonly AuthenticationService _authService = AuthenticationService.Instance;
+        private readonly AuthenticationService _authService ; // = AuthenticationService.Instance
 
-        public MainPage() {
+        public MainPage(AuthenticationService authService)
+        {
             InitializeComponent();
+            _authService = authService;
         }
 
         private async void OnLoginClicked(object? sender, EventArgs e) {

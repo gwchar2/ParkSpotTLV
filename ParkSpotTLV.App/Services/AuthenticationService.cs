@@ -6,13 +6,16 @@ namespace ParkSpotTLV.App.Services;
 
 public class AuthenticationService
 {
-    private static AuthenticationService? _instance;
-    public static AuthenticationService Instance => _instance ??= new AuthenticationService();
+
+    private readonly HttpClient _http;
+    private readonly JsonSerializerOptions _options;
+    // private static AuthenticationService? _instance;
+    // public static AuthenticationService Instance => _instance ??= new AuthenticationService();
 
     public bool IsAuthenticated { get; private set; }
     public string? CurrentUsername { get; private set; }
 
-    private readonly HttpClient _http = new() { BaseAddress = new Uri("http://10.0.2.2:8080/") };
+    // private readonly HttpClient _http = new() { BaseAddress = new Uri("http://10.0.2.2:8080/") };
 
     // Simple in-memory user storage (for demo purposes)
     private readonly Dictionary<string, string> _users = new()
@@ -22,12 +25,16 @@ public class AuthenticationService
         { "john_doe", "mypassword" }
     };
 
-    private readonly JsonSerializerOptions _options = new() {
-        PropertyNameCaseInsensitive = true
-    };
+    // private readonly JsonSerializerOptions _options = new() {
+    //     PropertyNameCaseInsensitive = true
+    // };
 
-    private AuthenticationService() { }
-    
+    // private AuthenticationService() { }
+    public AuthenticationService(HttpClient http, JsonSerializerOptions? options = null)
+    {
+        _http = http;    // same HttpClient instance as CarService
+        _options = options ?? new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+    }
     public sealed class AuthResponse
     {
     public string AccessToken { get; set; } = "";

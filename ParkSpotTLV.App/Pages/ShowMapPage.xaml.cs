@@ -5,11 +5,12 @@ namespace ParkSpotTLV.App.Pages;
 public partial class ShowMapPage : ContentPage
 {
     private bool isParked = false;
-    private readonly CarService _carService = CarService.Instance;
+    private readonly CarService _carService; //  = CarService.Instance
 
-    public ShowMapPage()
+    public ShowMapPage(CarService carService)
     {
         InitializeComponent();
+        _carService = carService;
         LoadUserCars();
     }
 
@@ -27,14 +28,14 @@ public partial class ShowMapPage : ContentPage
         // Clear existing items from UI
         CarPicker.Items.Clear();
 
-        // // Add user's cars to UI
-        // foreach (var car in userCars)
-        // {
-        //     CarPicker.Items.Add(car.Name);
-        // }
+        // Add user's cars to UI
+        foreach (var car in userCars)
+        {
+            CarPicker.Items.Add(car.Id);
+        }
 
         // temp
-        CarPicker.Items.Add("loaded users cars");
+        // CarPicker.Items.Add("loaded users cars");
 
         // Add "Add Car" option
         CarPicker.Items.Add("+ Add Car");

@@ -4,13 +4,15 @@ namespace ParkSpotTLV.App.Pages;
 
 public partial class SignUpPage : ContentPage
 {
-    private readonly AuthenticationService _authService = AuthenticationService.Instance;
-    private readonly CarService _carService = CarService.Instance;
+    private readonly AuthenticationService _authService ; // = AuthenticationService.Instance
+    private readonly CarService _carService; //  = CarService.Instance
 
 
-    public SignUpPage()
+    public SignUpPage(CarService carService, AuthenticationService authService)
     {
         InitializeComponent();
+        _carService = carService;
+        _authService = authService;
     }
 
     private async void OnCreateAccountClicked(object? sender, EventArgs e)
@@ -73,13 +75,13 @@ public partial class SignUpPage : ContentPage
             else if (ex.Message.Contains("409"))
                 msg = "This username is already taken. Please choose another one.";
             else
-                msg = "Account creation failed. Please try again later.";
+                msg = $"Account creation failed: {ex.Message}";
 
             await DisplayAlert("Error", msg, "OK");
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            await DisplayAlert("Error", "Account creation failed. Please try again later.", "OK");
+            await DisplayAlert("Error", $"Account creation failed: {ex.Message}", "OK");
         }
         finally
         {

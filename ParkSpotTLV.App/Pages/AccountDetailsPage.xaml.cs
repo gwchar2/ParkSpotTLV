@@ -4,12 +4,14 @@ namespace ParkSpotTLV.App.Pages;
 
 public partial class AccountDetailsPage : ContentPage
 {
-    private readonly AuthenticationService _authService = AuthenticationService.Instance;
-    private readonly CarService _carService = CarService.Instance;
+    private readonly AuthenticationService _authService ; // = AuthenticationService.Instance
+    private readonly CarService _carService ; // = CarService.Instance
 
-    public AccountDetailsPage()
+    public AccountDetailsPage(CarService carService, AuthenticationService authService)
     {
         InitializeComponent();
+        _carService = carService;
+        _authService = authService;
         LoadUserData();
     }
 
