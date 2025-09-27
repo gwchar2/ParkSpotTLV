@@ -18,4 +18,5 @@ namespace ParkSpotTLV.Contracts.Vehicles {
         bool HasDisabledPermit
     );
 
+
 }

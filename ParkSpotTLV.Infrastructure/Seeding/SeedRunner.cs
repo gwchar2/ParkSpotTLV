@@ -102,8 +102,8 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
 
             foreach (var (geom, props) in GeoJsonLoader.LoadFeatures(_opts.Paths.StreetSegments)) {
                 var line = ToLineString(geom);
-                var (ptype, pside) = ParseParkingTags(props);
                 var osmID = GetString(props, "@id");
+                var (ptype, pside) = ParseParkingTags(props);
 
                 var segment = new StreetSegment {
                     OSMId = string.IsNullOrWhiteSpace(osmID) ? "" : osmID,
@@ -224,6 +224,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             return Enum.TryParse<TEnum>(s, ignoreCase: true, out var v) ? v : null;
         }
 
+        /* For zones 1-2 */
         private static (ParkingType type, SegmentSide side) ParseParkingTags(JsonObject props) {
             string? T(string key) =>
                 props.TryGetPropertyValue(key, out var v) ? v?.ToString()?.Trim().ToLowerInvariant() : null;
@@ -231,7 +232,6 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             bool IsYes(string? s) => s == "yes" || s == "true" || s == "designated";
             bool IsNo(string? s) => s == "no" || s == "false";
 
-            // same logic as before
             var bothRaw = T("parking:both");
             bool leftAllowed, rightAllowed;
 

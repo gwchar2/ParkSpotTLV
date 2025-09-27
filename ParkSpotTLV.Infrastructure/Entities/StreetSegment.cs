@@ -21,13 +21,12 @@ PaidB (Extended Paid Parking – Central areas) - Zones 6,7,9,10 - 08:00–21:00
 
 
 namespace ParkSpotTLV.Infrastructure.Entities {
-    public enum ParkingType {
-        CantPark = 0,
+    public enum ParkingType { 
         Free = 1,
         Paid = 2
     }
 
-    public enum SegmentSide { Both = 0, Left = 1, Right = 2 }   // Why is this important ?
+    public enum SegmentSide { Both = 0, Left = 1, Right = 2 }   
 
     public class StreetSegment {
 
@@ -38,7 +37,7 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         [Required] public LineString Geom { get; set; } = default!;
         public Guid? ZoneId { get; set; }
         public Zone? Zone { get; set; }
-        public ParkingType ParkingType { get; set; } = ParkingType.CantPark;
+        public ParkingType ParkingType { get; set; } = ParkingType.Free;
         public SegmentSide Side { get; set; } = SegmentSide.Both;
         public DateTimeOffset? LastUpdated { get; set; }
     }
