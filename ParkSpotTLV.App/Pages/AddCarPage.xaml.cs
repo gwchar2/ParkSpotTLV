@@ -57,10 +57,10 @@ public partial class AddCarPage : ContentPage
         };
 
         // Save car using CarService
-        bool success = await _carService.AddCarAsync(newCar);
-
-        if (success)
+        try
         {
+            bool success = await _carService.AddCarAsync(newCar);
+
             string message = $"Car saved: {carName} ({newCar.TypeDisplayName})";
             if (hasResidentPermit)
                 message += $"\nResident permit - Zone: {residentPermitNumber}";
@@ -70,9 +70,10 @@ public partial class AddCarPage : ContentPage
             await DisplayAlert("Success", message, "OK");
             await Shell.Current.GoToAsync("..");
         }
-        else
+        catch (Exception ex)
         {
-            await DisplayAlert("Error", "Failed to add car. You can have maximum 5 cars.", "OK");
+            await DisplayAlert("Error", ex.Message, "OK");
         }
+        
     }
 }

@@ -140,15 +140,15 @@ public class CarService
         (
         Type : car.Type, // Core.Models.VehicleType.(car.Type),
         Name : car.Name,
-        ResidentZoneCode : car.ResidentPermitNumber == 0 ? null : car.ResidentPermitNumber,
+        ResidentZoneCode : car.HasResidentPermit && car.ResidentPermitNumber != 0 ? car.ResidentPermitNumber : null,
         HasDisabledPermit : car.HasDisabledPermit
         );
 
         var userCars = await GetUserCarsAsync();
 
         // Check if user already has 5 cars
-        if (userCars.Count >= 5)
-            return false;
+        // if (userCars.Count >= 5)
+        //     return false;
 
         var response = await _http.PostAsJsonAsync("vehicles", newCarPayload, _options);
 
@@ -161,33 +161,43 @@ public class CarService
         var created = await response.Content.ReadFromJsonAsync<Car>(_options);
         if (created is null)
             throw new InvalidOperationException("Vehicle created but response body was empty.");
-
-            
-
-            return true;
-        }
+        return true;
+    }
 
     public async Task<bool> RemoveCarAsync(string carId)
     {
-        if (!_authService.IsAuthenticated || _authService.CurrentUsername == null)
-            return false;
+        var me = await _authService.AuthMeAsync();
 
-        var userCars = await GetUserCarsAsync();
-        var carToRemove = userCars.FirstOrDefault(c => c.Id == carId);
+        // First, get the vehicle to retrieve its RowVersion
+        var getResponse = await _http.GetAsync($"vehicles/{carId}");
 
-        if (carToRemove != null)
+        if (!getResponse.IsSuccessStatusCode)
         {
-            userCars.Remove(carToRemove);
-
-            // Update local storage
-            var username = _authService.CurrentUsername;
-            if (_userCars.ContainsKey(username))
-                _userCars[username] = userCars;
-
-            return true;
+            var body = await getResponse.Content.ReadAsStringAsync();
+            return false;
         }
 
-        return false;
+        var vehicle = await getResponse.Content.ReadFromJsonAsync<VehicleResponse>(_options);
+        if (vehicle is null)
+            return false;
+
+        var deletePayload = new VehicleDeleteRequest
+        (
+            RowVersion: vehicle.RowVersion
+        );
+
+        var response = await _http.SendAsync(new HttpRequestMessage(HttpMethod.Delete, $"vehicles/{carId}")
+        {
+            Content = JsonContent.Create(deletePayload, options: _options)
+        });
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            return false;
+        }
+
+        return true;
     }
 
     public async Task<Car?> GetCarAsync(string carId)
