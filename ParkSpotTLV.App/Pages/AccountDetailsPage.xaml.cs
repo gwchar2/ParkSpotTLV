@@ -12,23 +12,34 @@ public partial class AccountDetailsPage : ContentPage
         InitializeComponent();
         _carService = carService;
         _authService = authService;
-        LoadUserData();
+        // LoadUserData();
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
+        LoadUserData();
         LoadUserCars();
     }
 
-    private void LoadUserData()
+    private async void LoadUserData()
     {
-        // Load current user data
-        if (_authService.IsAuthenticated && !string.IsNullOrEmpty(_authService.CurrentUsername))
+        // Load current user data from API
+        try
         {
-            UsernameEntry.Text = _authService.CurrentUsername;
+            var userMe = await _authService.AuthMeAsync();
+            UsernameEntry.Text = userMe.Username;
         }
-        LoadUserCars();
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error loading user data: {ex.Message}");
+            // Fallback to cached username if API call fails
+            if (!string.IsNullOrEmpty(_authService.CurrentUsername))
+            {
+                UsernameEntry.Text = _authService.CurrentUsername;
+            }
+        }
+        
     }
 
     private async void LoadUserCars()

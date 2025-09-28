@@ -65,7 +65,6 @@ namespace ParkSpotTLV.App
             builder.Services.AddTransient<Pages.PreferencesPage>();
             builder.Services.AddTransient<Pages.SignUpPage>();
             builder.Services.AddTransient<Pages.AccountDetailsPage>();
-            builder.Services.AddTransient<Pages.MyCarsPage>();
             builder.Services.AddTransient<Pages.ShowMapPage>();
             builder.Services.AddTransient<Pages.AddCarPage>();
             
