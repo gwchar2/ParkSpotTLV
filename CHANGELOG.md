@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.7.0-beta.0...v0.7.1-beta.0) (2025-09-28)
+
+
+### Features
+
+* Finished segments for ALL zones. ([911c969](https://github.com/gwchar2/ParkSpotTLV/commit/911c969938289c4de3259412b4c021967c5b5beb))
+
 ## [0.7.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.6.2-beta.0...v0.7.0-beta.0) (2025-09-27)
 
 
