@@ -9,5 +9,9 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         // A user can add multiple vehicles
         public ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+        public DateTimeOffset? ParkingStartedAtUtc { get; set; }
+        public DateTimeOffset? FreeParkingUntilUtc { get; set; }
+        public TimeSpan FreeParkingBudget { get; set; } = TimeSpan.FromHours(2);
+        public DateTimeOffset? LastUpdated { get; set; }
     }
 }

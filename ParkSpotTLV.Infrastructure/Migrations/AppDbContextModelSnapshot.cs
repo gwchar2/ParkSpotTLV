@@ -133,10 +133,6 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .HasColumnType("geometry(LineString,4326)")
                         .HasColumnName("geom");
 
-                    b.Property<DateTimeOffset?>("LastUpdated")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_updated");
-
                     b.Property<string>("NameEnglish")
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)")
@@ -155,6 +151,12 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                     b.Property<int>("ParkingType")
                         .HasColumnType("integer")
                         .HasColumnName("parking_type");
+
+                    b.Property<bool>("PrivilegedParking")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("privileged_parking");
 
                     b.Property<int>("Side")
                         .HasColumnType("integer")
@@ -187,6 +189,24 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<TimeSpan>("FreeParkingBudget")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("interval")
+                        .HasColumnName("free_parking_budget")
+                        .HasDefaultValueSql("interval '2 hours'");
+
+                    b.Property<DateTimeOffset?>("FreeParkingUntilUtc")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("free_parking_until_utc");
+
+                    b.Property<DateTimeOffset?>("LastUpdated")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_updated");
+
+                    b.Property<DateTimeOffset?>("ParkingStartedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("parking_started_at_utc");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()

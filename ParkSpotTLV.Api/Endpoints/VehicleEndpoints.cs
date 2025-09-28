@@ -22,7 +22,6 @@ namespace ParkSpotTLV.Api.Endpoints {
                 AppDbContext db,
                 CancellationToken ct) => {
                     var sub = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    Console.WriteLine($"sub={sub}");
                     if (!Guid.TryParse(sub, out var userId))
                         return Results.Unauthorized();
 
