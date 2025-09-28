@@ -2,7 +2,6 @@
 **/bin/
 **/obj/
 **/Logs/
-**/Migrations/
 .vs/
 *.user
 *.db
