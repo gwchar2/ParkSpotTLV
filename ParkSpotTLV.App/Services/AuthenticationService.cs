@@ -14,6 +14,7 @@ public class AuthenticationService
 
     public bool IsAuthenticated { get; private set; }
     public string? CurrentUsername { get; private set; }
+    private string? _refreshToken;
 
     // private readonly HttpClient _http = new() { BaseAddress = new Uri("http://10.0.2.2:8080/") };
 
@@ -65,11 +66,13 @@ public class AuthenticationService
 
         var tokens = await response.Content.ReadFromJsonAsync<AuthResponse>(_options);
 
-        // store the token for later requests
+        // store the tokens for later requests
         if (tokens != null)
         {
             _http.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue(tokens.TokenType, tokens.AccessToken);
+            _refreshToken = tokens.RefreshToken;
+            IsAuthenticated = true;
         }
 
         return tokens;
@@ -88,11 +91,13 @@ public class AuthenticationService
 
     var tokens = await response.Content.ReadFromJsonAsync<AuthResponse>(_options);
 
-    // store the token
+    // store the tokens
     if (tokens != null)
     {
         _http.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue(tokens.TokenType, tokens.AccessToken);
+        _refreshToken = tokens.RefreshToken;
+        IsAuthenticated = true;
     }
 
     return tokens;
@@ -102,6 +107,8 @@ public class AuthenticationService
     {
         IsAuthenticated = false;
         CurrentUsername = null;
+        _refreshToken = null;
+        _http.DefaultRequestHeaders.Authorization = null;
     }
 
     // method no ensure authentication of current session
@@ -111,7 +118,7 @@ public class AuthenticationService
         if (_http.DefaultRequestHeaders.Authorization == null)
             throw new InvalidOperationException("Missing Authorization header – user is not logged in.");
 
-        var response = await _http.GetAsync("auth/me");
+        var response = await ExecuteWithTokenRefreshAsync(() => _http.GetAsync("auth/me"));
 
         if (response.StatusCode == HttpStatusCode.Unauthorized || response.StatusCode == HttpStatusCode.Forbidden)
         {
@@ -129,6 +136,96 @@ public class AuthenticationService
             throw new InvalidOperationException("Empty response from /auth/me.");
 
         return me;
+    }
+
+    public async Task<bool> RefreshTokenAsync()
+    {
+        if (string.IsNullOrEmpty(_refreshToken))
+        {
+            IsAuthenticated = false;
+            return false;
+        }
+
+        try
+        {
+            var payload = new { refreshToken = _refreshToken };
+            var response = await _http.PostAsJsonAsync("auth/refresh", payload, _options);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                // Refresh token is invalid or expired
+                IsAuthenticated = false;
+                _refreshToken = null;
+                _http.DefaultRequestHeaders.Authorization = null;
+                return false;
+            }
+
+            var tokens = await response.Content.ReadFromJsonAsync<AuthResponse>(_options);
+            if (tokens != null)
+            {
+                // Update the authorization header with new access token
+                _http.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue(tokens.TokenType, tokens.AccessToken);
+                _refreshToken = tokens.RefreshToken;
+                IsAuthenticated = true;
+                return true;
+            }
+
+            return false;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error refreshing token: {ex.Message}");
+            IsAuthenticated = false;
+            _refreshToken = null;
+            _http.DefaultRequestHeaders.Authorization = null;
+            return false;
+        }
+    }
+
+    public async Task<HttpResponseMessage> ExecuteWithTokenRefreshAsync(Func<Task<HttpResponseMessage>> apiCall, int maxRetries = 1)
+    {
+        var response = await apiCall();
+
+        // If the call succeeds or it's not an auth issue, return immediately
+        if (response.IsSuccessStatusCode || response.StatusCode != HttpStatusCode.Unauthorized)
+        {
+            return response;
+        }
+
+        // Try to refresh token and retry the call
+        for (int attempt = 0; attempt < maxRetries; attempt++)
+        {
+            var refreshSuccess = await RefreshTokenAsync();
+            if (!refreshSuccess)
+            {
+                // Refresh failed, return the original unauthorized response
+                return response;
+            }
+
+            // Retry the original API call with the new token
+            response.Dispose(); // Clean up the previous response
+            response = await apiCall();
+
+            if (response.IsSuccessStatusCode || response.StatusCode != HttpStatusCode.Unauthorized)
+            {
+                return response;
+            }
+        }
+
+        return response;
+    }
+
+    public async Task<T?> ExecuteWithTokenRefreshAsync<T>(Func<Task<HttpResponseMessage>> apiCall, int maxRetries = 1)
+    {
+        var response = await ExecuteWithTokenRefreshAsync(apiCall, maxRetries);
+
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadFromJsonAsync<T>(_options);
+        }
+
+        return default(T);
     }
 
     public bool ValidatePassword(string password)

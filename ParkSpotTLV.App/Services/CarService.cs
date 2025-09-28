@@ -111,7 +111,7 @@ public class CarService
     {
         try
         {
-            var response = await _http.GetAsync("/vehicles");
+            var response = await _authService.ExecuteWithTokenRefreshAsync(() => _http.GetAsync("/vehicles"));
             if (response.IsSuccessStatusCode)
             {
                 var cars = await response.Content.ReadFromJsonAsync<List<Car>>(_options);
@@ -122,13 +122,6 @@ public class CarService
         {
             System.Diagnostics.Debug.WriteLine($"Error fetching cars: {ex.Message}");
         }
-
-        // // Fallback to local data
-        // if (_authService.IsAuthenticated && _authService.CurrentUsername != null)
-        // {
-        //     var username = _authService.CurrentUsername;
-        //     return _userCars.TryGetValue(username, out var cars) ? cars : new List<Car>();
-        // }
 
         return new List<Car>();
     }
@@ -151,7 +144,7 @@ public class CarService
             // if (userCars.Count >= 5)
             //     return false;
 
-            var response = await _http.PostAsJsonAsync("vehicles", newCarPayload, _options);
+            var response = await _authService.ExecuteWithTokenRefreshAsync(() => _http.PostAsJsonAsync("vehicles", newCarPayload, _options));
 
             if (!response.IsSuccessStatusCode)
             {
@@ -176,7 +169,7 @@ public class CarService
         var me = await _authService.AuthMeAsync();
 
         // First, get the vehicle to retrieve its RowVersion
-        var getResponse = await _http.GetAsync($"vehicles/{carId}");
+        var getResponse = await _authService.ExecuteWithTokenRefreshAsync(() => _http.GetAsync($"vehicles/{carId}"));
 
         if (!getResponse.IsSuccessStatusCode)
         {
@@ -193,10 +186,10 @@ public class CarService
             RowVersion: vehicle.RowVersion
         );
 
-        var response = await _http.SendAsync(new HttpRequestMessage(HttpMethod.Delete, $"vehicles/{carId}")
+        var response = await _authService.ExecuteWithTokenRefreshAsync(() => _http.SendAsync(new HttpRequestMessage(HttpMethod.Delete, $"vehicles/{carId}")
         {
             Content = JsonContent.Create(deletePayload, options: _options)
-        });
+        }));
 
         if (!response.IsSuccessStatusCode)
         {
@@ -211,7 +204,7 @@ public class CarService
     {
         try
         {
-            var response = await _http.GetAsync($"/vehicles/{carId}");
+            var response = await _authService.ExecuteWithTokenRefreshAsync(() => _http.GetAsync($"/vehicles/{carId}"));
             if (response.IsSuccessStatusCode)
             {
                 var car = await response.Content.ReadFromJsonAsync<Car>(_options);
@@ -231,7 +224,7 @@ public class CarService
         try
         {
             // First, get the current vehicle to retrieve its RowVersion
-            var getResponse = await _http.GetAsync($"/vehicles/{updatedCar.Id}");
+            var getResponse = await _authService.ExecuteWithTokenRefreshAsync(() => _http.GetAsync($"/vehicles/{updatedCar.Id}"));
 
             if (!getResponse.IsSuccessStatusCode)
                 return false;
@@ -251,10 +244,10 @@ public class CarService
             );
 
             // Send PATCH request to update the vehicle
-            var response = await _http.SendAsync(new HttpRequestMessage(HttpMethod.Patch, $"/vehicles/{updatedCar.Id}")
+            var response = await _authService.ExecuteWithTokenRefreshAsync(() => _http.SendAsync(new HttpRequestMessage(HttpMethod.Patch, $"/vehicles/{updatedCar.Id}")
             {
                 Content = JsonContent.Create(updatePayload, options: _options)
-            });
+            }));
 
             if (!response.IsSuccessStatusCode)
             {
