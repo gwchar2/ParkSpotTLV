@@ -228,25 +228,47 @@ public class CarService
 
     public async Task<bool> UpdateCarAsync(Car updatedCar)
     {
-        if (!_authService.IsAuthenticated || _authService.CurrentUsername == null)
-            return false;
-
-        var userCars = await GetUserCarsAsync();
-        var existingCarIndex = userCars.FindIndex(c => c.Id == updatedCar.Id);
-
-        if (existingCarIndex >= 0)
+        try
         {
-            userCars[existingCarIndex] = updatedCar;
+            // First, get the current vehicle to retrieve its RowVersion
+            var getResponse = await _http.GetAsync($"/vehicles/{updatedCar.Id}");
 
-            // Update local storage
-            var username = _authService.CurrentUsername;
-            if (_userCars.ContainsKey(username))
-                _userCars[username] = userCars;
+            if (!getResponse.IsSuccessStatusCode)
+                return false;
+
+            var currentVehicle = await getResponse.Content.ReadFromJsonAsync<VehicleResponse>(_options);
+            if (currentVehicle == null)
+                return false;
+
+            // Create update request with RowVersion and changes
+            var updatePayload = new VehicleUpdateRequest
+            (
+                RowVersion: currentVehicle.RowVersion,
+                Type: updatedCar.Type,
+                Name: updatedCar.Name,
+                ResidentZoneCode: updatedCar.HasResidentPermit && updatedCar.ResidentPermitNumber != 0 ? updatedCar.ResidentPermitNumber : null,
+                DisabledPermit: updatedCar.HasDisabledPermit
+            );
+
+            // Send PATCH request to update the vehicle
+            var response = await _http.SendAsync(new HttpRequestMessage(HttpMethod.Patch, $"/vehicles/{updatedCar.Id}")
+            {
+                Content = JsonContent.Create(updatePayload, options: _options)
+            });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Failed to update vehicle: {(int)response.StatusCode} {body}");
+            }
 
             return true;
         }
-
-        return false;
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error updating car: {ex.Message}");
+            throw; // Re-throw to let the UI handle the specific error
+        }
     }
 
 //     public async Task<Car> CreateDefaultCarForUserAsync()

@@ -86,7 +86,7 @@ public partial class AccountDetailsPage : ContentPage
 
         var nameLabel = new Label
         {
-            Text = $"Car {car.Name}",
+            Text = $" {car.Name}",
             FontSize = 16,
             FontAttributes = FontAttributes.Bold,
             TextColor = Colors.Black
