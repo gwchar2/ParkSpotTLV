@@ -16,9 +16,10 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         // Short numeric code if you follow the city’s numbering (e.g., 1,2,4,6,7,9,10,12,13)
         public int? Code { get; set; }
 
+        [Required] public Taarif Taarif { get; set; } = Taarif.City_Center;
+
         // Human label for maps/UX (e.g., "Zone 6")
         [MaxLength(64)] public string? Name { get; set; }
-        public Taarif Taarif { get; set; }
 
         // MultiPolygon boundary for the zone (use SRID 4326)
         [Required] public MultiPolygon Geom { get; set; } = default!;

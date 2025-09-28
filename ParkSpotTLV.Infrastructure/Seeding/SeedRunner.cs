@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
 using ParkSpotTLV.Infrastructure.Entities;
 using ParkSpotTLV.Core.Models;
 using System.Text.Json;
@@ -105,15 +104,14 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                 var line = ToLineString(geom);
                 var osmID = GetString(props, "@id");
 
-                var parsed = ParseParkingTags(props);           // returns (type, side, explicitZoneCode)
+                var parsed = ParseParkingTags(props);           // returns (type, side, explicitZoneCode, Priveleged?)
                 var segment = new StreetSegment {
                     OSMId = string.IsNullOrWhiteSpace(osmID) ? "" : osmID,
                     NameEnglish = GetString(props, "name:en"),
                     NameHebrew = GetString(props, "name"),
                     Geom = line,
                     ParkingType = parsed.type,
-                    Side = parsed.side,
-                    LastUpdated = DateTimeOffset.UtcNow
+                    Side = parsed.side
                 };
 
                 Guid? zoneId = null;
@@ -181,7 +179,8 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                 var user = new User {
                     Id = ParseGuid(GetString(u, "id")) ?? Guid.NewGuid(),
                     Username = GetString(u, "username") ?? "user",
-                    PasswordHash = GetString(u, "passwordHash") ?? ""
+                    PasswordHash = GetString(u, "passwordHash") ?? "",
+                    LastUpdated = DateTimeOffset.UtcNow
                 };
 
                 // Vehicles + vehicle-scoped permits (no user-scoped permits in current model)
@@ -253,7 +252,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             if (string.IsNullOrWhiteSpace(s)) return null;
             return int.TryParse(s, out var n) ? n : null;
         }
-        private static (ParkingType type, SegmentSide side, int? explicitZoneCode) ParseParkingTags(JsonObject props) {
+        private static (ParkingType type, SegmentSide side, int? explicitZoneCode, bool PrivelegedParking) ParseParkingTags(JsonObject props) {
             string? T(string key) =>
                 props.TryGetPropertyValue(key, out var v) ? v?.ToString()?.Trim() : null;
 
@@ -272,6 +271,10 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             bool freeLeft = string.Equals(T("parking:left"), "yes", StringComparison.OrdinalIgnoreCase);
             bool freeBoth = string.Equals(T("parking:both"), "yes", StringComparison.OrdinalIgnoreCase);
 
+            // Figure out if parking is privileged or not
+            bool privileged = string.Equals(T("restriction:conditional"),  "zone_only @ 8:00-21:00", StringComparison.OrdinalIgnoreCase)
+                                || string.Equals(T("restriction:conditional"), "zone_only @ 8:00-17:00", StringComparison.OrdinalIgnoreCase);
+
             // If any paid tag exists, we consider the segment Paid.
             if (paidRight || paidLeft || paidBoth) {
                 var side = SegmentSide.Both;
@@ -285,10 +288,9 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                 // Pick a zone code deterministically: prefer specific side over "both"
                 int? zoneCode = zoneRight ?? zoneLeft ?? zoneBoth;
 
-                return (ParkingType.Paid, side, zoneCode);
-            }
-            // Else if free tags exist, it’s Free.
-            if (freeLeft || freeRight || freeBoth) {
+                return (ParkingType.Paid, side, zoneCode, privileged);
+            } 
+            else if (freeLeft || freeRight || freeBoth) { // Else if free tags exist, it’s Free.
                 var side = SegmentSide.Both;
                 if ((freeLeft || freeRight) && !(freeLeft && freeRight)) {
                     side = freeLeft ? SegmentSide.Left : SegmentSide.Right;
@@ -298,11 +300,11 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                     side = SegmentSide.Both;
                 }
 
-                return (ParkingType.Free, side, null);
+                return (ParkingType.Free, side, null, privileged);
             }
 
             // If nothing matched (shouldn’t happen after your prefilter), default to Free/Both without zone.
-            return (ParkingType.Free, SegmentSide.Both, null);
+            return (ParkingType.Free, SegmentSide.Both, null, privileged);
         }
     }
 }

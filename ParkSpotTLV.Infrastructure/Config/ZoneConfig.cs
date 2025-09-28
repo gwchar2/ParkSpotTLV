@@ -12,11 +12,11 @@ namespace ParkSpotTLV.Infrastructure.Config {
 
             e.Property(z => z.Name).HasMaxLength(64);
 
+            e.Property(z => z.Taarif).IsRequired();
+
             e.Property(z => z.Code).IsRequired();
             e.HasAlternateKey(z => z.Code);
             e.HasIndex(z => z.Code).IsUnique();
-
-            e.Property(z => z.Taarif).IsRequired();
 
             // Geometry: MultiPolygon with SRID 4326
             e.Property(z => z.Geom)

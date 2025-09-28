@@ -4,6 +4,7 @@ using ParkSpotTLV.Contracts.Auth;
 using ParkSpotTLV.Core.Auth;
 using ParkSpotTLV.Infrastructure;
 using ParkSpotTLV.Infrastructure.Entities;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace ParkSpotTLV.Api.Endpoints;
@@ -15,8 +16,6 @@ public static class AuthEndpoints {
     public static IEndpointRouteBuilder MapAuth(this IEndpointRouteBuilder routes) {
 
         var auth = routes.MapGroup("/auth").WithTags("Auth");
-
-
 
         /* REGISTER REQUEST 
          * Accepts: username, password
@@ -52,13 +51,14 @@ public static class AuthEndpoints {
                        var user = new User {
                            Id = Guid.NewGuid(),
                            Username = normalized,
-                           PasswordHash = pwdHash
+                           PasswordHash = pwdHash,
+                           LastUpdated = DateTimeOffset.UtcNow
                        };
 
                        db.Users.Add(user);
                        await db.SaveChangesAsync(ct);
                        var access = jwt.IssueAccessToken(user.Id, user.Username);
-                       var issued = refresh.Issue(user.Id);             // Issue function already inserts to table!!
+                       var issued = refresh.Issue(user.Id);                                 // Issue function already inserts to table!!
 
                        return Results.Created("/auth/register", new TokenPairResponse(
                            access.AccessToken,
@@ -96,7 +96,7 @@ public static class AuthEndpoints {
                                 type: "https://httpstatuses.com/401"
                            );
                        var normalized = body.Username.Trim().ToLowerInvariant();
-                       
+
                        var user = await db.Users.AsNoTracking().SingleOrDefaultAsync(us => us.Username == normalized, ct);
                        if (user is null)
                            return Results.Problem(
@@ -113,6 +113,21 @@ public static class AuthEndpoints {
                                     statusCode: StatusCodes.Status401Unauthorized,
                                     type: "https://httpstatuses.com/401"
                                 );
+
+                       // --- Daily reset logic ---
+                       var nowUtc = DateTimeOffset.UtcNow;
+                       var lastDay = user.LastUpdated?.UtcDateTime.Date;
+                       var today = nowUtc.UtcDateTime.Date;
+
+                       // New day: reset the budget back to 2 hours (and optionally clear any active counters)
+                       if (lastDay is null || lastDay.Value != today) {
+                           user.FreeParkingBudget = TimeSpan.FromHours(2);
+                           user.ParkingStartedAtUtc = null;
+                           user.FreeParkingUntilUtc = null;
+                       }
+
+                       user.LastUpdated = nowUtc;
+                       await db.SaveChangesAsync(ct);
 
                        var access = jwt.IssueAccessToken(user.Id, user.Username);               // Temporary access token
                        var issued = refresh.Issue(user.Id);                                     // We state that a token has been issued
@@ -132,9 +147,7 @@ public static class AuthEndpoints {
             .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized)
             .WithSummary("Sign in")
-            .WithDescription("Verifies credentials and returns a short-lived access token with a new refresh token.")
-            .WithOpenApi();
-
+            .WithDescription("Verifies credentials and returns a short-lived access token with a new refresh token.");
 
         /* REFRESH REQUEST
          * Accepts: RefreshToken in body
@@ -143,7 +156,8 @@ public static class AuthEndpoints {
          *      401 for invalid/expired/revoked/reused tokens; 400 if malformed.
          */
         auth.MapPost("/refresh",
-            ([FromBody] RefreshRequest body,
+            async ([FromBody] RefreshRequest body,
+                   AppDbContext db,
                    IRefreshTokenService refreshService,
                    CancellationToken ct) => {
 
@@ -156,6 +170,31 @@ public static class AuthEndpoints {
 
                        try {
                            var result = refreshService.ValidateAndRotate(body.RefreshToken);
+
+                           // Reset free parking time left
+                           Guid? userId = null;
+                           var jwt = new JwtSecurityTokenHandler().ReadJwtToken(result.AccessToken);
+                           var sub = jwt.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+                           if (Guid.TryParse(sub, out var parsed)) userId = parsed;
+
+                           if (userId is Guid uid) {
+                               var user = await db.Users.SingleOrDefaultAsync(u => u.Id == uid, ct);
+                               if (user is not null) {
+                                   var nowUtc = DateTimeOffset.UtcNow;
+                                   var lastDay = user.LastUpdated?.UtcDateTime.Date;
+                                   var today = nowUtc.UtcDateTime.Date;
+
+                                   if (lastDay is null || lastDay.Value != today) {
+                                       user.FreeParkingBudget = TimeSpan.FromHours(2);
+                                       user.ParkingStartedAtUtc = null;
+                                       user.FreeParkingUntilUtc = null;
+                                   }
+
+                                   user.LastUpdated = nowUtc;
+                                   await db.SaveChangesAsync(ct);
+                               }
+                           }
+
                            var response = new TokenPairResponse(
                                AccessToken: result.AccessToken,
                                AccessTokenExpiresAt: result.AccessExpiresAtUtc,
@@ -271,8 +310,6 @@ public static class AuthEndpoints {
             .WithSummary("Log out")
             .WithDescription("Revokes the current session's refresh token, or all refresh tokens for the authenticated user.");
 
-
-
         /* GET ME — current authenticated user */
         auth.MapGet("/me", async (
             HttpContext ctx,
@@ -309,6 +346,58 @@ public static class AuthEndpoints {
             .ProducesProblem(StatusCodes.Status404NotFound)
             .WithSummary("Current user")
             .WithDescription("Returns the authenticated user's id, username, and a vehicles count.");
+
+        /* CHANGE PASSWORD REQUEST
+         * Accepts: Access token (Bearer) to identify user & old password
+         * Returns: 
+         *      200 Successfully changed password
+         *      400 Invalid fields
+         *      401 If the caller has no valid access token (or user disabled).
+         */
+        auth.MapPost("/change-password",
+            async ([FromBody] UpdatePasswordRequest body,
+                   HttpContext ctx,
+                   AppDbContext db,
+                   IPasswordHasher hasher,
+                   CancellationToken ct) => {
+
+                       var sub = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                       if (!Guid.TryParse(sub, out var userId))
+                           return Results.Unauthorized();
+
+                       if (string.IsNullOrWhiteSpace(body.OldPassword) || string.IsNullOrWhiteSpace(body.NewPassword))
+                           return Results.Problem(
+                                title: "Old and new passwords are required.",
+                                statusCode: StatusCodes.Status400BadRequest,
+                                type: "https://httpstatuses.com/400"
+                                );
+
+                       var user = await db.Users.SingleOrDefaultAsync(u => u.Id == userId, ct);
+                       if (user is null) return Results.Unauthorized();
+
+                       var confirmation = hasher.Verify(body.OldPassword, user.PasswordHash);
+                       if (!confirmation.isValid)
+                           return Results.Problem(
+                               title: "Invalid old password.",
+                               statusCode: StatusCodes.Status400BadRequest,
+                               type: "https://httpstatuses.com/400"
+                               );
+
+                       user.PasswordHash = hasher.Hash(body.NewPassword);
+                       user.LastUpdated = DateTimeOffset.UtcNow;
+
+                       await db.SaveChangesAsync(ct);
+                       return Results.Ok(new {
+                           message = "Password updated successfully."
+                       });
+
+                   })
+            .RequireAuthorization()
+            .Produces<string>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .WithSummary("Change Password")
+            .WithDescription("Changes password for current user");
 
         return routes;
            
