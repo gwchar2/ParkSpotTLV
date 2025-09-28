@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 //using ParkSpotTLV.App.Data.Models;
 using ParkSpotTLV.Contracts.Vehicles;
 using ParkSpotTLV.Core.Models;
+using Xamarin.Google.Crypto.Tink.Proto;
 
 namespace ParkSpotTLV.App.Services;
 
@@ -134,34 +135,40 @@ public class CarService
 
     public async Task<bool> AddCarAsync(Car car)
     {
-        var me = await _authService.AuthMeAsync();
-
-        var newCarPayload = new VehicleCreateRequest
-        (
-        Type : car.Type, // Core.Models.VehicleType.(car.Type),
-        Name : car.Name,
-        ResidentZoneCode : car.HasResidentPermit && car.ResidentPermitNumber != 0 ? car.ResidentPermitNumber : null,
-        HasDisabledPermit : car.HasDisabledPermit
-        );
-
-        var userCars = await GetUserCarsAsync();
-
-        // Check if user already has 5 cars
-        // if (userCars.Count >= 5)
-        //     return false;
-
-        var response = await _http.PostAsJsonAsync("vehicles", newCarPayload, _options);
-
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            var body = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Failed to create vehicle: {(int)response.StatusCode} {body}");
-        }
+            var newCarPayload = new VehicleCreateRequest
+            (
+            Type : car.Type, // Core.Models.VehicleType.(car.Type),
+            Name : car.Name,
+            ResidentZoneCode : car.HasResidentPermit && car.ResidentPermitNumber != 0 ? car.ResidentPermitNumber : null,
+            HasDisabledPermit : car.HasDisabledPermit
+            );
 
-        var created = await response.Content.ReadFromJsonAsync<Car>(_options);
-        if (created is null)
-            throw new InvalidOperationException("Vehicle created but response body was empty.");
-        return true;
+            var userCars = await GetUserCarsAsync();
+
+            // Check if user already has 5 cars
+            // if (userCars.Count >= 5)
+            //     return false;
+
+            var response = await _http.PostAsJsonAsync("vehicles", newCarPayload, _options);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Failed to create vehicle: {(int)response.StatusCode} {body}");
+            }
+
+            var created = await response.Content.ReadFromJsonAsync<Car>(_options);
+            if (created is null)
+                throw new InvalidOperationException("Vehicle created but response body was empty.");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error adding car: {ex.Message}");
+            throw; // Re-throw to let the UI handle the specific error
+        }
     }
 
     public async Task<bool> RemoveCarAsync(string carId)
@@ -202,8 +209,21 @@ public class CarService
 
     public async Task<Car?> GetCarAsync(string carId)
     {
-        var userCars = await GetUserCarsAsync();
-        return userCars.FirstOrDefault(c => c.Id == carId);
+        try
+        {
+            var response = await _http.GetAsync($"/vehicles/{carId}");
+            if (response.IsSuccessStatusCode)
+            {
+                var car = await response.Content.ReadFromJsonAsync<Car>(_options);
+                return car;
+            }
+            return null;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error fetching car: {ex.Message}");
+        }
+        return null;
     }
 
     public async Task<bool> UpdateCarAsync(Car updatedCar)
