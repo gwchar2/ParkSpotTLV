@@ -18,6 +18,8 @@ public partial class AddCarPage : ContentPage
     private void OnResidentPermitChanged(object sender, CheckedChangedEventArgs e)
     {
         ZoneNumberEntry.IsVisible = e.Value;
+        FreeMinutesEntry.IsVisible = e.Value;
+        FreeMinutesLabel.IsVisible = e.Value;
     }
 
     private async void OnSaveCarClicked(object sender, EventArgs e)
