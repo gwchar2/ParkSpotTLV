@@ -121,30 +121,32 @@ dotnet user-secrets list --project ./ParkSpotTLV.Api
 
 - Completely new table
 ```
+docker compose down
+If database tables change:
 Delete the contents of Migrations/ folder in ParkSpotTLV.Infrastructure
-docker compose down -v --remove-orphans
 docker compose up -d db
 dotnet ef migrations add InitialCreate -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
 dotnet ef database update -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
-F5
+docker compose build api
+docker compose up -d api
 Verify
 ```
+//FOR MAC
+
 
 - New tables OR table changes
 ```bash
 docker start parkspot_db or docker compose up -d db
 dotnet ef migrations add UpdateSeed_20250927(or some other name) -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
 dotnet ef database update --project .\ParkSpotTLV.Infrastructure --startup-project .\ParkSpotTLV.Api
+/// for MAC
+dotnet ef database update \
+  --project ./ParkSpotTLV.Infrastructure \
+  --startup-project ./ParkSpotTLV.Api
 Restart DB+API
 Verify
 ```
-{
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5ZTg3YTJiNi1hNTMwLTRiZTAtYTdlZS1lMTk0NWViODI5MTMiLCJuYW1lIjoidGVzdDEiLCJqdGkiOiJjZTVhZjczMC00MTcwLTRkZTItOTYwNy1jYWU0ZGZhZmYzZjAiLCJpYXQiOjE3NTkwOTM0NDMsIm5iZiI6MTc1OTA5MzQ0MywiZXhwIjoxNzU5MDk0MDQzLCJpc3MiOiJQYXJrU3BvdFRMViIsImF1ZCI6IlBhcmtTcG90VExWLkFwcCJ9.JOrSo5a7jUkxD0GV67GuQWeIApTD4Wj4Hqq2EZ6Cjck",
-  "accessTokenExpiresAt": "2025-09-28T21:14:03.4221808+00:00",
-  "refreshToken": "yQ0FC0bQR-Ui0jDBlTFN_RIRttF1r5RNSil6x4FbMgM",
-  "refreshTokenExpiresAt": "2025-10-12T21:04:03.3397706+00:00",
-  "tokenType": "Bearer"
-}
+
 - Updating information in the DB
 ```bash
 docker start parkspot_db

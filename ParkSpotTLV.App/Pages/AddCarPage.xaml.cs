@@ -18,6 +18,8 @@ public partial class AddCarPage : ContentPage
     private void OnResidentPermitChanged(object sender, CheckedChangedEventArgs e)
     {
         ZoneNumberEntry.IsVisible = e.Value;
+        FreeMinutesEntry.IsVisible = e.Value;
+        FreeMinutesLabel.IsVisible = e.Value;
     }
 
     private async void OnSaveCarClicked(object sender, EventArgs e)
@@ -59,12 +61,18 @@ public partial class AddCarPage : ContentPage
         // Save car using CarService
         try
         {
-            bool success = await _carService.AddCarAsync(newCar);
+            var addedCar = await _carService.AddCarAsync(newCar);
 
-            string message = $"Car saved: {carName} ({newCar.TypeDisplayName})";
-            if (hasResidentPermit)
-                message += $"\nResident permit - Zone: {residentPermitNumber}";
-            if (hasDisabledPermit)
+            if (addedCar == null)
+            {
+                await DisplayAlert("Error", "Failed to add car", "OK");
+                return;
+            }
+
+            string message = $"Car saved: {addedCar.Name} ({addedCar.Type})";
+            if (addedCar.HasResidentPermit)
+                message += $"\nResident permit - Zone: {addedCar.ResidentPermitNumber}";
+            if (addedCar.HasDisabledPermit)
                 message += "\nDisabled parking permit";
 
             await DisplayAlert("Success", message, "OK");

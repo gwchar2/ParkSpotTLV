@@ -118,6 +118,9 @@ public partial class AccountDetailsPage : ContentPage
             TextColor = Colors.Gray
         };
 
+        infoLayout.Children.Add(nameLabel);
+        infoLayout.Children.Add(typeLabel);
+
         var permitsText = new List<string>();
         if (car.HasResidentPermit)
             permitsText.Add($"Resident #{car.ResidentPermitNumber}");
@@ -135,9 +138,18 @@ public partial class AccountDetailsPage : ContentPage
             infoLayout.Children.Add(permitsLabel);
         }
 
-        infoLayout.Children.Add(nameLabel);
-        infoLayout.Children.Add(typeLabel);
-
+        var FreeParkingText = new List<string>();
+        if (car.HasResidentPermit) {
+            FreeParkingText.Add("Free parking time left: 120 minutes.") ;
+            var FreeParkingLabel = new Label
+            {
+                Text = string.Join(", ", FreeParkingText),
+                FontSize = 12,
+                TextColor = Color.FromArgb("#2E7D32")
+            };
+            infoLayout.Children.Add(FreeParkingLabel);
+        }
+        
         var removeButton = new Button
         {
             Text = "Remove",
