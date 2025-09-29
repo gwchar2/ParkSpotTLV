@@ -253,14 +253,31 @@ public class AuthenticationService
     
     // }
 
-    public async Task<bool> UpdatePasswordAsync(string newPassword)
+    public async Task<bool> UpdatePasswordAsync(string newPassword, string oldPassword)
     {
-        // TODO
+        // Validate the new password first
+        if (!ValidatePassword(newPassword))
+        {
+            return false;
+        }
 
-        // Simulate network delay
-        await Task.Delay(300);
+        try
+        {
+            var payload = new {
+                newPassword = newPassword,
+                oldPassword = oldPassword
+            };
 
-        return true;
+            var response = await ExecuteWithTokenRefreshAsync(() =>
+                _http.PostAsJsonAsync("auth/change-password", payload, _options));
+
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error updating password: {ex.Message}");
+            return false;
+        }
     }
 
     // Test helper methods
