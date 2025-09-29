@@ -4,113 +4,101 @@
              x:Class="ParkSpotTLV.App.Pages.AccountDetailsPage"
              Title="Account Details">
 
-    <Grid>
-        <ScrollView Padding="20">
-            <VerticalStackLayout Spacing="25">
+    <Grid Padding="20" RowDefinitions="Auto,*,Auto">
+        <!-- Header + User Info -->
+        <VerticalStackLayout Spacing="25" Grid.Row="0">
+            <Label Text="Account Details"
+                   FontSize="28"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   TextColor="#2E7D32"
+                   Margin="0,10,0,20" />
 
-                <!-- Header -->
-                <Label Text="Account Details"
-                       FontSize="28"
+            <!-- Username Section -->
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Username"
+                       FontSize="16"
                        FontAttributes="Bold"
-                       HorizontalOptions="Center"
-                       TextColor="#2E7D32"
-                       Margin="0,10,0,20" />
+                       TextColor="Black" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <Entry x:Name="UsernameEntry"
+                           Grid.Column="0"
+                           Text="john_doe"
+                           IsReadOnly="True"
+                           BackgroundColor="LightGray"
+                           FontSize="16" />
+                </Grid>
+            </VerticalStackLayout>
 
-                <!-- Username Section -->
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Username"
-                           FontSize="16"
-                           FontAttributes="Bold"
-                           TextColor="Black" />
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                        <Entry x:Name="UsernameEntry"
-                               Grid.Column="0"
-                               Text="john_doe"
-                               IsReadOnly="True"
-                               BackgroundColor="LightGray"
-                               FontSize="16" />
-                        <!-- <Button x:Name="EditUsernameBtn"
-                                Grid.Column="1"
-                                Text="Edit"
-                                BackgroundColor="#2E7D32"
-                                TextColor="White"
-                                FontSize="14"
-                                WidthRequest="70"
-                                HeightRequest="40"
-                                Clicked="OnEditUsernameClicked" /> -->
-                    </Grid>
-                </VerticalStackLayout>
+            <!-- Password Section -->
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Password"
+                       FontSize="16"
+                       FontAttributes="Bold"
+                       TextColor="Black" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <Entry x:Name="PasswordEntry"
+                           Grid.Column="0"
+                           Text="••••••••"
+                           IsPassword="True"
+                           IsReadOnly="True"
+                           BackgroundColor="LightGray"
+                           FontSize="16" />
+                    <Button x:Name="EditPasswordBtn"
+                            Grid.Column="1"
+                            Text="Edit"
+                            BackgroundColor="#2E7D32"
+                            TextColor="White"
+                            FontSize="14"
+                            WidthRequest="70"
+                            HeightRequest="40"
+                            Clicked="OnEditPasswordClicked" />
+                </Grid>
+            </VerticalStackLayout>
 
-                <!-- Password Section -->
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Password"
-                           FontSize="16"
-                           FontAttributes="Bold"
-                           TextColor="Black" />
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                        <Entry x:Name="PasswordEntry"
-                               Grid.Column="0"
-                               Text="••••••••"
-                               IsPassword="True"
-                               IsReadOnly="True"
-                               BackgroundColor="LightGray"
-                               FontSize="16" />
-                        <Button x:Name="EditPasswordBtn"
-                                Grid.Column="1"
-                                Text="Edit"
-                                BackgroundColor="#2E7D32"
-                                TextColor="White"
-                                FontSize="14"
-                                WidthRequest="70"
-                                HeightRequest="40"
-                                Clicked="OnEditPasswordClicked" />
-                    </Grid>
-                </VerticalStackLayout>
+            <!-- Divider -->
+            <BoxView BackgroundColor="LightGray"
+                     HeightRequest="1"
+                     Margin="0,10" />
 
-                <!-- Divider -->
-                <BoxView BackgroundColor="LightGray"
-                         HeightRequest="1"
-                         Margin="0,10" />
+            <!-- My Cars Title -->
+            <Label Text="My Cars"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   TextColor="#2E7D32" />
+        </VerticalStackLayout>
 
-                <!-- My Cars Section -->
-                <VerticalStackLayout Spacing="15">
-                    <Label Text="My Cars"
-                           FontSize="20"
-                           FontAttributes="Bold"
-                           TextColor="#2E7D32" />
-
-                    <!-- Cars List -->
-                    <VerticalStackLayout x:Name="CarsContainer" Spacing="15">
-                        <!-- Cars will be dynamically added here -->
-                    </VerticalStackLayout>
-
-                    <!-- Add Car Button -->
-                    <Button x:Name="AddCarBtn"
-                            Text="+ Add Car"
-                            BackgroundColor="Transparent"
-                            TextColor="#2E7D32"
-                            BorderColor="#2E7D32"
-                            BorderWidth="2"
-                            FontSize="16"
-                            Clicked="OnAddCarClicked"
-                            HorizontalOptions="Fill"
-                            HeightRequest="50"
-                            Margin="0,10,0,0" />
-                    <!-- Find Parking Button -->
-                    <Button x:Name="FindParkingBtn"
-                            Text="Find Parking"
-                            BackgroundColor="White"
-                            TextColor="Gray"
-                            BorderColor="Gray"
-                            BorderWidth="2"
-                            FontSize="16"
-                            Clicked="OnFindParkingClicked"
-                            HorizontalOptions="Fill"
-                            HeightRequest="50"
-                            CornerRadius="25" />
-                </VerticalStackLayout>
-
+        <!-- Cars List Scrollable -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout x:Name="CarsContainer" Spacing="15">
+                <!-- Cars will be dynamically added here -->
             </VerticalStackLayout>
         </ScrollView>
+
+        <!-- Buttons Fixed at Bottom -->
+        <VerticalStackLayout Grid.Row="2" Spacing="10">
+            <Button x:Name="AddCarBtn"
+                    Text="+ Add Car"
+                    BackgroundColor="Transparent"
+                    TextColor="#2E7D32"
+                    BorderColor="#2E7D32"
+                    BorderWidth="2"
+                    FontSize="16"
+                    Clicked="OnAddCarClicked"
+                    HorizontalOptions="Fill"
+                    HeightRequest="50" />
+            <Button x:Name="FindParkingBtn"
+                    Text="Find Parking"
+                    BackgroundColor="White"
+                    TextColor="Gray"
+                    BorderColor="Gray"
+                    BorderWidth="2"
+                    FontSize="16"
+                    Clicked="OnFindParkingClicked"
+                    HorizontalOptions="Fill"
+                    HeightRequest="50"
+                    CornerRadius="25"
+                    Margin="0,0,0,20" />
+        </VerticalStackLayout>
     </Grid>
 </ContentPage>
