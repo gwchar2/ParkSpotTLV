@@ -4,7 +4,7 @@ using System.Net.Http.Json;
 //using ParkSpotTLV.App.Data.Models;
 using ParkSpotTLV.Contracts.Vehicles;
 using ParkSpotTLV.Core.Models;
-using Xamarin.Google.Crypto.Tink.Proto;
+//using Xamarin.Google.Crypto.Tink.Proto;
 
 namespace ParkSpotTLV.App.Services;
 
@@ -25,11 +25,6 @@ public class Car
     };
 }
 
-// public enum CarType
-// {
-//     Private,
-//     Truck
-// }
 
 public class CarService
 {
@@ -37,26 +32,7 @@ public class CarService
     private readonly AuthenticationService _authService;
     private readonly HttpClient _http;
     private readonly JsonSerializerOptions _options;
-
-    //private static CarService? _instance;
-    //public static CarService Instance => _instance ??= new CarService();
-
-    //private readonly AuthenticationService _authService = AuthenticationService.Instance;
-
-    //private readonly HttpClient _http = new() { BaseAddress = new Uri("http://10.0.2.2:8080/") };
-
-    // private readonly JsonSerializerOptions _options = new() {
-    //     PropertyNameCaseInsensitive = true
-    // };
-
-
-    // Dictionary to store cars per user: username -> list of cars
     private readonly Dictionary<string, List<Car>> _userCars = new();
-
-    // private CarService()
-    // {
-    //     InitializeDemoData();
-    // }
 
     public CarService(HttpClient http, AuthenticationService authService, JsonSerializerOptions? options = null)
     {
@@ -64,48 +40,8 @@ public class CarService
         _authService = authService;
         _options = options ?? new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
-        InitializeDemoData();
     }
 
-    private void InitializeDemoData()
-    {
-        // Add default cars for demo users
-        _userCars["admin"] = new List<Car>
-        {
-            new Car
-            {
-                // Name = "My Car",
-                Type = VehicleType.Private,
-                HasResidentPermit = false,
-                ResidentPermitNumber = 0,
-                HasDisabledPermit = false
-            }
-        };
-
-        _userCars["test"] = new List<Car>
-        {
-            new Car
-            {
-                // Name = "My Car",
-                Type = VehicleType.Private,
-                HasResidentPermit = false,
-                ResidentPermitNumber = 0,
-                HasDisabledPermit = false
-            }
-        };
-
-        _userCars["john_doe"] = new List<Car>
-        {
-            new Car
-            {
-                // Name = "My Car",
-                Type = VehicleType.Private,
-                HasResidentPermit = false,
-                ResidentPermitNumber = 0,
-                HasDisabledPermit = false
-            }
-        };
-    }
 
     public async Task<List<Car>> GetUserCarsAsync()
     {
@@ -264,50 +200,5 @@ public class CarService
         }
     }
 
-//     public async Task<Car> CreateDefaultCarForUserAsync()
-//     {
-//     var me = await _authService.AuthMeAsync();
 
-//     var defaultCarPayload = new VehicleCreateRequest
-//     (
-//         Type : Core.Models.VehicleType.Private,
-//         Name : "Default Car",
-//         ResidentZoneCode : null,
-//         HasDisabledPermit : false
-//     );
-
-//     var response = await _http.PostAsJsonAsync("vehicles", defaultCarPayload, _options);
-
-//     if (!response.IsSuccessStatusCode)
-//     {
-//         var body = await response.Content.ReadAsStringAsync();
-//         throw new HttpRequestException($"Failed to create default car: {(int)response.StatusCode} {body}");
-//     }
-
-//     var created = await response.Content.ReadFromJsonAsync<Car>(_options);
-//     if (created is null)
-//         throw new InvalidOperationException("Vehicle created but response body was empty.");
-
-//     return created;
-// }
-
-
-    public void ClearUserCars()
-    {
-        if (!_authService.IsAuthenticated || _authService.CurrentUsername == null)
-            return;
-
-        var username = _authService.CurrentUsername;
-        if (_userCars.ContainsKey(username))
-        {
-            _userCars[username].Clear();
-        }
-    }
-
-    // Test helper method
-    public void Reset()
-    {
-        _userCars.Clear();
-        InitializeDemoData();
-    }
 }

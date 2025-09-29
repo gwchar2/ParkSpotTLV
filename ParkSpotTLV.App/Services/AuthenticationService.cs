@@ -9,28 +9,12 @@ public class AuthenticationService
 
     private readonly HttpClient _http;
     private readonly JsonSerializerOptions _options;
-    // private static AuthenticationService? _instance;
-    // public static AuthenticationService Instance => _instance ??= new AuthenticationService();
 
     public bool IsAuthenticated { get; private set; }
     public string? CurrentUsername { get; private set; }
     private string? _refreshToken;
+    
 
-    // private readonly HttpClient _http = new() { BaseAddress = new Uri("http://10.0.2.2:8080/") };
-
-    // Simple in-memory user storage (for demo purposes)
-    private readonly Dictionary<string, string> _users = new()
-    {
-        { "admin", "password" },
-        { "test", "test123" },
-        { "john_doe", "mypassword" }
-    };
-
-    // private readonly JsonSerializerOptions _options = new() {
-    //     PropertyNameCaseInsensitive = true
-    // };
-
-    // private AuthenticationService() { }
     public AuthenticationService(HttpClient http, JsonSerializerOptions? options = null)
     {
         _http = http;    // same HttpClient instance as CarService
@@ -264,67 +248,23 @@ public class AuthenticationService
         return true;
     }
 
-    public async Task<bool> UpdateUsernameAsync(string newUsername)
-    {
-        // Simulate network delay
-        await Task.Delay(300);
-
-        if (!IsAuthenticated || CurrentUsername == null)
-            return false;
-
-        // Validate new username
-        if (!ValidateUsername(newUsername))
-            return false;
-
-        // Check if new username already exists (and it's not the current user)
-        if (_users.ContainsKey(newUsername) && newUsername != CurrentUsername)
-            return false;
-
-        // Update username
-        var currentPassword = _users[CurrentUsername];
-        _users.Remove(CurrentUsername);
-        _users[newUsername] = currentPassword;
-        CurrentUsername = newUsername;
-
-        return true;
-    }
+    // public async Task<bool> UpdateUsernameAsync(string newUsername)
+    // {
+    
+    // }
 
     public async Task<bool> UpdatePasswordAsync(string newPassword)
     {
+        // TODO
+
         // Simulate network delay
         await Task.Delay(300);
-
-        if (!IsAuthenticated || CurrentUsername == null)
-            return false;
-
-        // Validate new password
-        if (!ValidatePassword(newPassword))
-            return false;
-
-        // Update password
-        _users[CurrentUsername] = newPassword;
 
         return true;
     }
 
     // Test helper methods
-    public void Reset()
-    {
-        IsAuthenticated = false;
-        CurrentUsername = null;
-        _users.Clear();
-        _users["admin"] = "password";
-        _users["test"] = "test123";
-        _users["john_doe"] = "mypassword";
-    }
 
-    public bool UserExists(string username)
-    {
-        return _users.ContainsKey(username);
-    }
 
-    public int GetUserCount()
-    {
-        return _users.Count;
-    }
+    
 }

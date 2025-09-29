@@ -29,7 +29,7 @@
                                IsReadOnly="True"
                                BackgroundColor="LightGray"
                                FontSize="16" />
-                        <Button x:Name="EditUsernameBtn"
+                        <!-- <Button x:Name="EditUsernameBtn"
                                 Grid.Column="1"
                                 Text="Edit"
                                 BackgroundColor="#2E7D32"
@@ -37,7 +37,7 @@
                                 FontSize="14"
                                 WidthRequest="70"
                                 HeightRequest="40"
-                                Clicked="OnEditUsernameClicked" />
+                                Clicked="OnEditUsernameClicked" /> -->
                     </Grid>
                 </VerticalStackLayout>
 
