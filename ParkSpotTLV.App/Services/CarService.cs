@@ -76,9 +76,9 @@ public class CarService
 
             var userCars = await GetUserCarsAsync();
 
-            // Check if user already has 5 cars
-            // if (userCars.Count >= 5)
-            //     return false;
+            //Check if user already has 5 cars
+            if (userCars.Count >= 5)
+                return false;
 
             var response = await _authService.ExecuteWithTokenRefreshAsync(() => _http.PostAsJsonAsync("vehicles", newCarPayload, _options));
 

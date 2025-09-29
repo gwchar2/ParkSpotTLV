@@ -25,9 +25,6 @@ public partial class ShowMapPage : ContentPage
         // get user's list of cars from server
         var userCars = await _carService.GetUserCarsAsync();
 
-        // Debug: Show how many cars were loaded
-        // DEBUG: await DisplayAlert("Debug", $"Loaded {userCars.Count} cars from server", "OK");
-
         // Clear existing items from UI
         CarPicker.Items.Clear();
 
@@ -37,11 +34,11 @@ public partial class ShowMapPage : ContentPage
             CarPicker.Items.Add(car.Name);
         }
 
-        // temp
-        // CarPicker.Items.Add("loaded users cars");
-
         // Add "Add Car" option
-        CarPicker.Items.Add("+ Add Car");
+        if (userCars.Count < 5) {
+            CarPicker.Items.Add("+ Add Car");
+        }
+        
 
         // Set default selection to first car if available
         if (userCars.Count > 0)
