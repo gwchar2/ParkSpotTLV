@@ -67,6 +67,14 @@ public partial class AccountDetailsPage : ContentPage
             };
             CarsContainer.Children.Add(noCarsLabel);
         }
+        if (userCars.Count >=5){
+            AddCarBtn.IsEnabled = false;
+            AddCarBtn.Text = "You can have up to 5 cars";
+        }
+        else {
+            AddCarBtn.IsEnabled = true;
+            AddCarBtn.Text = "Add car";
+        }
     }
 
     private void CreateCarUI(Car car)
@@ -163,67 +171,101 @@ public partial class AccountDetailsPage : ContentPage
         CarsContainer.Children.Add(carFrame);
     }
 
+    
 
-    private async void OnEditPasswordClicked(object sender, EventArgs e)
+    private void OnChangePasswordClicked(object sender, EventArgs e)
     {
-        if (EditPasswordBtn.Text == "Edit")
+        // Show the password change section
+        PasswordChangeSection.IsVisible = true;
+        ChangePasswordBtn.IsVisible = false;
+
+        // Clear any previous entries
+        OldPasswordEntry.Text = "";
+        NewPasswordEntry.Text = "";
+        ConfirmPasswordEntry.Text = "";
+    }
+
+    private void OnCancelPasswordClicked(object sender, EventArgs e)
+    {
+        // Hide the password change section
+        PasswordChangeSection.IsVisible = false;
+        ChangePasswordBtn.IsVisible = true;
+
+        // Clear the entries
+        OldPasswordEntry.Text = "";
+        NewPasswordEntry.Text = "";
+        ConfirmPasswordEntry.Text = "";
+    }
+
+    private async void OnSavePasswordClicked(object sender, EventArgs e)
+    {
+        string oldPassword = OldPasswordEntry.Text?.Trim() ?? "";
+        string newPassword = NewPasswordEntry.Text?.Trim() ?? "";
+        string confirmPassword = ConfirmPasswordEntry.Text?.Trim() ?? "";
+
+        // Validate inputs
+        if (string.IsNullOrEmpty(oldPassword))
         {
-            // Enable editing
-            PasswordEntry.IsReadOnly = false;
-            PasswordEntry.BackgroundColor = Colors.White;
-            PasswordEntry.Text = ""; // Clear for new password input
-            EditPasswordBtn.Text = "Save";
-            EditPasswordBtn.BackgroundColor = Color.FromArgb("#4CAF50");
+            await DisplayAlert("Error", "Please enter your current password.", "OK");
+            return;
         }
-        else
+
+        if (string.IsNullOrEmpty(newPassword))
         {
-            string newPassword = PasswordEntry.Text?.Trim() ?? "";
+            await DisplayAlert("Error", "Please enter a new password.", "OK");
+            return;
+        }
 
-            // Validate password using auth service
-            if (!_authService.ValidatePassword(newPassword))
+        if (newPassword != confirmPassword)
+        {
+            await DisplayAlert("Error", "New passwords do not match.", "OK");
+            return;
+        }
+
+        // Validate new password using auth service
+        if (!_authService.ValidatePassword(newPassword))
+        {
+            await DisplayAlert("Error", "Password must be at least 6 characters long and contain no whitespace characters.", "OK");
+            return;
+        }
+
+        // Disable buttons during update
+        SavePasswordBtn.IsEnabled = false;
+        CancelPasswordBtn.IsEnabled = false;
+        SavePasswordBtn.Text = "Saving...";
+
+        try
+        {
+            bool success = await _authService.UpdatePasswordAsync(newPassword, oldPassword);
+
+            if (success)
             {
-                await DisplayAlert("Error", "Password must be at least 6 characters long and contain no whitespace characters.", "OK");
-                return;
+                await DisplayAlert("Success", "Password updated successfully!", "OK");
+
+                // Hide the password change section
+                PasswordChangeSection.IsVisible = false;
+                ChangePasswordBtn.IsVisible = true;
+
+                // Clear the entries
+                OldPasswordEntry.Text = "";
+                NewPasswordEntry.Text = "";
+                ConfirmPasswordEntry.Text = "";
             }
-
-            // Disable button during update
-            EditPasswordBtn.IsEnabled = false;
-            EditPasswordBtn.Text = "Saving...";
-
-            try
+            else
             {
-                bool success = await _authService.UpdatePasswordAsync(newPassword);
-
-                if (success)
-                {
-                    // Save changes
-                    PasswordEntry.IsReadOnly = true;
-                    PasswordEntry.BackgroundColor = Colors.LightGray;
-                    PasswordEntry.Text = "••••••••"; // Hide password again
-                    EditPasswordBtn.Text = "Edit";
-                    EditPasswordBtn.BackgroundColor = Color.FromArgb("#2E7D32");
-
-                    await DisplayAlert("Success", "Password updated successfully!", "OK");
-                }
-                else
-                {
-                    await DisplayAlert("Error", "Failed to update password. Please try again.", "OK");
-                    PasswordEntry.Text = "••••••••"; // Reset to hidden password
-                }
+                await DisplayAlert("Error", "Failed to update password. Please check your current password and try again.", "OK");
             }
-            catch (Exception)
-            {
-                await DisplayAlert("Error", "Failed to update password. Please try again later.", "OK");
-                PasswordEntry.Text = "••••••••"; // Reset to hidden password
-            }
-            finally
-            {
-                EditPasswordBtn.IsEnabled = true;
-                if (EditPasswordBtn.Text == "Saving...")
-                {
-                    EditPasswordBtn.Text = "Save";
-                }
-            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "Failed to update password. Please try again later.", "OK");
+            System.Diagnostics.Debug.WriteLine($"Error updating password: {ex.Message}");
+        }
+        finally
+        {
+            SavePasswordBtn.IsEnabled = true;
+            CancelPasswordBtn.IsEnabled = true;
+            SavePasswordBtn.Text = "Save";
         }
     }
 

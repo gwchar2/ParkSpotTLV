@@ -14,47 +14,72 @@
                    TextColor="#2E7D32"
                    Margin="0,10,0,20" />
 
-            <!-- Username Section -->
-            <VerticalStackLayout Spacing="10">
-                <Label Text="Username"
-                       FontSize="16"
-                       FontAttributes="Bold"
-                       TextColor="Black" />
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                    <Entry x:Name="UsernameEntry"
-                           Grid.Column="0"
-                           Text="john_doe"
-                           IsReadOnly="True"
-                           BackgroundColor="LightGray"
-                           FontSize="16" />
-                </Grid>
-            </VerticalStackLayout>
+                <!-- Username Section -->
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Username"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="Black" />
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <Entry x:Name="UsernameEntry"
+                               Grid.Column="0"
+                               Text="john_doe"
+                               IsReadOnly="True"
+                               BackgroundColor="LightGray"
+                               FontSize="16" />
+                    </Grid>
+                </VerticalStackLayout>
 
-            <!-- Password Section -->
-            <VerticalStackLayout Spacing="10">
-                <Label Text="Password"
-                       FontSize="16"
-                       FontAttributes="Bold"
-                       TextColor="Black" />
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                    <Entry x:Name="PasswordEntry"
-                           Grid.Column="0"
-                           Text="••••••••"
-                           IsPassword="True"
-                           IsReadOnly="True"
-                           BackgroundColor="LightGray"
-                           FontSize="16" />
-                    <Button x:Name="EditPasswordBtn"
-                            Grid.Column="1"
-                            Text="Edit"
-                            BackgroundColor="#2E7D32"
-                            TextColor="White"
-                            FontSize="14"
-                            WidthRequest="70"
-                            HeightRequest="40"
-                            Clicked="OnEditPasswordClicked" />
-                </Grid>
-            </VerticalStackLayout>
+                <!-- Password Section -->
+                <VerticalStackLayout Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <Button x:Name="ChangePasswordBtn"
+                                Grid.Column="0"
+                                Text="Change Password"
+                                BackgroundColor="#2E7D32"
+                                TextColor="White"
+                                FontSize="14"
+                                WidthRequest="260"
+                                HeightRequest="40"
+                                Clicked="OnChangePasswordClicked" />
+                    </Grid>
+
+                    <!-- Password Change Fields (initially hidden) -->
+                    <VerticalStackLayout x:Name="PasswordChangeSection"
+                                        Spacing="10"
+                                        IsVisible="False">
+                        <Entry x:Name="OldPasswordEntry"
+                               Placeholder="Current Password"
+                               IsPassword="True"
+                               FontSize="16" />
+                        <Entry x:Name="NewPasswordEntry"
+                               Placeholder="New Password"
+                               IsPassword="True"
+                               FontSize="16" />
+                        <Entry x:Name="ConfirmPasswordEntry"
+                               Placeholder="Confirm New Password"
+                               IsPassword="True"
+                               FontSize="16" />
+                        <HorizontalStackLayout Spacing="10" HorizontalOptions="End">
+                            <Button x:Name="CancelPasswordBtn"
+                                    Text="Cancel"
+                                    BackgroundColor="Gray"
+                                    TextColor="White"
+                                    FontSize="14"
+                                    WidthRequest="70"
+                                    HeightRequest="35"
+                                    Clicked="OnCancelPasswordClicked" />
+                            <Button x:Name="SavePasswordBtn"
+                                    Text="Save"
+                                    BackgroundColor="#4CAF50"
+                                    TextColor="White"
+                                    FontSize="14"
+                                    WidthRequest="70"
+                                    HeightRequest="35"
+                                    Clicked="OnSavePasswordClicked" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
 
             <!-- Divider -->
             <BoxView BackgroundColor="LightGray"
