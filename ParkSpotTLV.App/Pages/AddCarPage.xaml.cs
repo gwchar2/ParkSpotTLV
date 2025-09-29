@@ -1,4 +1,6 @@
 using ParkSpotTLV.App.Services;
+using ParkSpotTLV.Core.Models;
+
 
 namespace ParkSpotTLV.App.Pages;
 
@@ -28,7 +30,7 @@ public partial class AddCarPage : ContentPage
             return;
         }
 
-        CarType carType = PrivateRadio.IsChecked ? CarType.Private : CarType.Truck;
+        VehicleType vehicleType = PrivateRadio.IsChecked ? VehicleType.Private : VehicleType.Truck;
         bool hasResidentPermit = ResidentPermitCheck.IsChecked;
         string zoneNumberText = ZoneNumberEntry.Text?.Trim() ?? "";
         bool hasDisabledPermit = DisabledPermitCheck.IsChecked;
@@ -45,20 +47,20 @@ public partial class AddCarPage : ContentPage
         }
 
         // Create new car
-        var newCar = new Car
+        var newCar = new ParkSpotTLV.App.Services.Car
         {
-            // Name = carName,
-            Type = carType,
+            Name = carName,
+            Type = vehicleType,
             HasResidentPermit = hasResidentPermit,
             ResidentPermitNumber = residentPermitNumber,
             HasDisabledPermit = hasDisabledPermit
         };
 
         // Save car using CarService
-        bool success = await _carService.AddCarAsync(newCar);
-
-        if (success)
+        try
         {
+            bool success = await _carService.AddCarAsync(newCar);
+
             string message = $"Car saved: {carName} ({newCar.TypeDisplayName})";
             if (hasResidentPermit)
                 message += $"\nResident permit - Zone: {residentPermitNumber}";
@@ -68,9 +70,10 @@ public partial class AddCarPage : ContentPage
             await DisplayAlert("Success", message, "OK");
             await Shell.Current.GoToAsync("..");
         }
-        else
+        catch (Exception ex)
         {
-            await DisplayAlert("Error", "Failed to add car. You can have maximum 5 cars.", "OK");
+            await DisplayAlert("Error", ex.Message, "OK");
         }
+        
     }
 }

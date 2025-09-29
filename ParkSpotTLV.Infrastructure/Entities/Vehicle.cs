@@ -8,7 +8,7 @@ namespace ParkSpotTLV.Infrastructure.Entities { // ADD NAME
         public User Owner { get; set; } = default!;
         public Guid OwnerId { get; set; }
         public string Name { get; set; } = "";
-        public VehicleType Type { get; set; } = VehicleType.Car;
+        public VehicleType Type { get; set; } = VehicleType.Private;
 
         /* Concurrency token EF updates this automatically (So that 2 writes wont be appointed to same variable at once!) */
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]

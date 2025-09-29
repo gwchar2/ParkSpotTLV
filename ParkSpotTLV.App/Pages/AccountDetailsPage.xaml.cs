@@ -12,23 +12,34 @@ public partial class AccountDetailsPage : ContentPage
         InitializeComponent();
         _carService = carService;
         _authService = authService;
-        LoadUserData();
+        // LoadUserData();
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
+        LoadUserData();
         LoadUserCars();
     }
 
-    private void LoadUserData()
+    private async void LoadUserData()
     {
-        // Load current user data
-        if (_authService.IsAuthenticated && !string.IsNullOrEmpty(_authService.CurrentUsername))
+        // Load current user data from API
+        try
         {
-            UsernameEntry.Text = _authService.CurrentUsername;
+            var userMe = await _authService.AuthMeAsync();
+            UsernameEntry.Text = userMe.Username;
         }
-        LoadUserCars();
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error loading user data: {ex.Message}");
+            // Fallback to cached username if API call fails
+            if (!string.IsNullOrEmpty(_authService.CurrentUsername))
+            {
+                UsernameEntry.Text = _authService.CurrentUsername;
+            }
+        }
+        
     }
 
     private async void LoadUserCars()
@@ -86,7 +97,7 @@ public partial class AccountDetailsPage : ContentPage
 
         var nameLabel = new Label
         {
-            Text = $"Car {car.Id}",
+            Text = $" {car.Name}",
             FontSize = 16,
             FontAttributes = FontAttributes.Bold,
             TextColor = Colors.Black
@@ -140,68 +151,68 @@ public partial class AccountDetailsPage : ContentPage
         CarsContainer.Children.Add(carFrame);
     }
 
-    private async void OnEditUsernameClicked(object sender, EventArgs e)
-    {
-        if (EditUsernameBtn.Text == "Edit")
-        {
-            // Enable editing
-            UsernameEntry.IsReadOnly = false;
-            UsernameEntry.BackgroundColor = Colors.White;
-            EditUsernameBtn.Text = "Save";
-            EditUsernameBtn.BackgroundColor = Color.FromArgb("#4CAF50");
-        }
-        else
-        {
-            string newUsername = UsernameEntry.Text?.Trim() ?? "";
+    // private async void OnEditUsernameClicked(object sender, EventArgs e)
+    // {
+    //     if (EditUsernameBtn.Text == "Edit")
+    //     {
+    //         // Enable editing
+    //         UsernameEntry.IsReadOnly = false;
+    //         UsernameEntry.BackgroundColor = Colors.White;
+    //         EditUsernameBtn.Text = "Save";
+    //         EditUsernameBtn.BackgroundColor = Color.FromArgb("#4CAF50");
+    //     }
+    //     else
+    //     {
+    //         string newUsername = UsernameEntry.Text?.Trim() ?? "";
 
-            // Validate username
-            if (!_authService.ValidateUsername(newUsername))
-            {
-                await DisplayAlert("Error", "Username must be at least 3 characters and contain only letters, numbers, and underscores.", "OK");
-                return;
-            }
+    //         // Validate username
+    //         if (!_authService.ValidateUsername(newUsername))
+    //         {
+    //             await DisplayAlert("Error", "Username must be at least 3 characters and contain only letters, numbers, and underscores.", "OK");
+    //             return;
+    //         }
 
-            // Disable button during update
-            EditUsernameBtn.IsEnabled = false;
-            EditUsernameBtn.Text = "Saving...";
+    //         // Disable button during update
+    //         EditUsernameBtn.IsEnabled = false;
+    //         EditUsernameBtn.Text = "Saving...";
 
-            try
-            {
-                bool success = await _authService.UpdateUsernameAsync(newUsername);
+    //         try
+    //         {
+    //             bool success = await _authService.UpdateUsernameAsync(newUsername);
 
-                if (success)
-                {
-                    // Save changes
-                    UsernameEntry.IsReadOnly = true;
-                    UsernameEntry.BackgroundColor = Colors.LightGray;
-                    EditUsernameBtn.Text = "Edit";
-                    EditUsernameBtn.BackgroundColor = Color.FromArgb("#2E7D32");
+    //             if (success)
+    //             {
+    //                 // Save changes
+    //                 UsernameEntry.IsReadOnly = true;
+    //                 UsernameEntry.BackgroundColor = Colors.LightGray;
+    //                 EditUsernameBtn.Text = "Edit";
+    //                 EditUsernameBtn.BackgroundColor = Color.FromArgb("#2E7D32");
 
-                    await DisplayAlert("Success", "Username updated successfully!", "OK");
-                }
-                else
-                {
-                    await DisplayAlert("Error", "Username already exists. Please choose a different username.", "OK");
-                    // Restore original username
-                    UsernameEntry.Text = _authService.CurrentUsername;
-                }
-            }
-            catch (Exception)
-            {
-                await DisplayAlert("Error", "Failed to update username. Please try again later.", "OK");
-                // Restore original username
-                UsernameEntry.Text = _authService.CurrentUsername;
-            }
-            finally
-            {
-                EditUsernameBtn.IsEnabled = true;
-                if (EditUsernameBtn.Text == "Saving...")
-                {
-                    EditUsernameBtn.Text = "Save";
-                }
-            }
-        }
-    }
+    //                 await DisplayAlert("Success", "Username updated successfully!", "OK");
+    //             }
+    //             else
+    //             {
+    //                 await DisplayAlert("Error", "Username already exists. Please choose a different username.", "OK");
+    //                 // Restore original username
+    //                 UsernameEntry.Text = _authService.CurrentUsername;
+    //             }
+    //         }
+    //         catch (Exception)
+    //         {
+    //             await DisplayAlert("Error", "Failed to update username. Please try again later.", "OK");
+    //             // Restore original username
+    //             UsernameEntry.Text = _authService.CurrentUsername;
+    //         }
+    //         finally
+    //         {
+    //             EditUsernameBtn.IsEnabled = true;
+    //             if (EditUsernameBtn.Text == "Saving...")
+    //             {
+    //                 EditUsernameBtn.Text = "Save";
+    //             }
+    //         }
+    //     }
+    // }
 
     private async void OnEditPasswordClicked(object sender, EventArgs e)
     {
@@ -275,7 +286,7 @@ public partial class AccountDetailsPage : ContentPage
     private async void OnRemoveCarClicked(Car car)
     {
         bool confirm = await DisplayAlert("Remove Car",
-            $"Are you sure you want to remove car {car.Id}?",
+            $"Are you sure you want to remove car {car.Name}?",
             "Yes", "No");
 
         if (confirm)
@@ -284,7 +295,7 @@ public partial class AccountDetailsPage : ContentPage
 
             if (success)
             {
-                await DisplayAlert("Success", $"Car {car.Id} has been removed.", "OK");
+                await DisplayAlert("Success", $"Car {car.Name} has been removed.", "OK");
                 LoadUserCars(); // Refresh the UI
             }
             else
