@@ -110,6 +110,9 @@ public partial class AccountDetailsPage : ContentPage
             TextColor = Colors.Gray
         };
 
+        infoLayout.Children.Add(nameLabel);
+        infoLayout.Children.Add(typeLabel);
+
         var permitsText = new List<string>();
         if (car.HasResidentPermit)
             permitsText.Add($"Resident #{car.ResidentPermitNumber}");
@@ -126,10 +129,7 @@ public partial class AccountDetailsPage : ContentPage
             };
             infoLayout.Children.Add(permitsLabel);
         }
-
-        infoLayout.Children.Add(nameLabel);
-        infoLayout.Children.Add(typeLabel);
-
+        
         var removeButton = new Button
         {
             Text = "Remove",

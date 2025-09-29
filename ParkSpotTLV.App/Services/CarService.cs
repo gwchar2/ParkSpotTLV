@@ -42,6 +42,18 @@ public class CarService
 
     }
 
+    private static Car MapVehicleResponseToCar(VehicleResponse vehicleResponse)
+    {
+        return new Car
+        {
+            Id = vehicleResponse.Id.ToString(),
+            Name = vehicleResponse.Name,
+            Type = vehicleResponse.Type,
+            HasResidentPermit = vehicleResponse.ResidentZoneCode.HasValue,
+            ResidentPermitNumber = vehicleResponse.ResidentZoneCode ?? 0,
+            HasDisabledPermit = vehicleResponse.DisabledPermit
+        };
+    }
 
     public async Task<List<Car>> GetUserCarsAsync()
     {
@@ -50,8 +62,8 @@ public class CarService
             var response = await _authService.ExecuteWithTokenRefreshAsync(() => _http.GetAsync("/vehicles"));
             if (response.IsSuccessStatusCode)
             {
-                var cars = await response.Content.ReadFromJsonAsync<List<Car>>(_options);
-                return cars ?? new List<Car>();
+                var vehicleResponses = await response.Content.ReadFromJsonAsync<List<VehicleResponse>>(_options);
+                return vehicleResponses?.Select(MapVehicleResponseToCar).ToList() ?? new List<Car>();
             }
         }
         catch (Exception ex)
@@ -62,7 +74,7 @@ public class CarService
         return new List<Car>();
     }
 
-    public async Task<bool> AddCarAsync(Car car)
+    public async Task<Car?> AddCarAsync(Car car)
     {
         try
         {
@@ -76,10 +88,6 @@ public class CarService
 
             var userCars = await GetUserCarsAsync();
 
-            // Check if user already has 5 cars
-            // if (userCars.Count >= 5)
-            //     return false;
-
             var response = await _authService.ExecuteWithTokenRefreshAsync(() => _http.PostAsJsonAsync("vehicles", newCarPayload, _options));
 
             if (!response.IsSuccessStatusCode)
@@ -88,15 +96,16 @@ public class CarService
                 throw new HttpRequestException($"Failed to create vehicle: {(int)response.StatusCode} {body}");
             }
 
-            var created = await response.Content.ReadFromJsonAsync<Car>(_options);
-            if (created is null)
+            var createdResponse = await response.Content.ReadFromJsonAsync<VehicleResponse>(_options);
+            if (createdResponse is null)
                 throw new InvalidOperationException("Vehicle created but response body was empty.");
-            return true;
+
+            return MapVehicleResponseToCar(createdResponse);
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Error adding car: {ex.Message}");
-            throw; // Re-throw to let the UI handle the specific error
+            return null;
         }
     }
 
@@ -143,8 +152,8 @@ public class CarService
             var response = await _authService.ExecuteWithTokenRefreshAsync(() => _http.GetAsync($"/vehicles/{carId}"));
             if (response.IsSuccessStatusCode)
             {
-                var car = await response.Content.ReadFromJsonAsync<Car>(_options);
-                return car;
+                var vehicleResponse = await response.Content.ReadFromJsonAsync<VehicleResponse>(_options);
+                return vehicleResponse != null ? MapVehicleResponseToCar(vehicleResponse) : null;
             }
             return null;
         }
