@@ -1,4 +1,4 @@
-﻿using ParkSpotTLV.Core.Models;
+﻿using ParkSpotTLV.Contracts.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ParkSpotTLV.Infrastructure.Entities {

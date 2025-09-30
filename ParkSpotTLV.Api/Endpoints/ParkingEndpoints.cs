@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ParkSpotTLV.Contracts.Parking;
+using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Core.Models;
 using ParkSpotTLV.Infrastructure;
 using System.Security.Claims;

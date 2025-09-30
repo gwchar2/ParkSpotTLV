@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using ParkSpotTLV.Contracts.Auth;
 using ParkSpotTLV.Core.Auth;
-using ParkSpotTLV.Core.Models;
+using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Infrastructure;
 using ParkSpotTLV.Infrastructure.Entities;
 using System.IdentityModel.Tokens.Jwt;

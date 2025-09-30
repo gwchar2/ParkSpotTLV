@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using ParkSpotTLV.Core.Models;
+using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Infrastructure.Entities;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -49,7 +49,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             await SeedZonesAsync(db, ct);
             await SeedStreetSegmentsAsync(db, ct);
             await SeedUsersAsync(db, ct);
-
+            await SeedTariffWindowsAsync(db, ct);
             _log.LogInformation("Seeding completed.");
         }
 
@@ -143,6 +143,57 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                 db.StreetSegments.Add(segment);
             }
 
+            await db.SaveChangesAsync(ct);
+        }
+
+        // ---------------------- Taarif Windows Async ----------------------
+        /* 
+        * Seeds A/B tariff paid windows:
+        *  - Group A: Sun–Thu 08:00–19:00; Fri 08:00–17:00; Sat none
+        *  - Group B: Sun–Thu 08:00–21:00; Fri 08:00–17:00; Sat none
+        * Outside paid windows -> FREE by definition.
+        */
+        private static async Task SeedTariffWindowsAsync(AppDbContext db, CancellationToken ct) {
+            var hasAny = await db.TariffGroupWindows.AsNoTracking().AnyAsync(ct);
+            if (hasAny) return;
+
+            var aWeekdays = new TariffGroupWindow {
+                Taarif = Taarif.City_Center, // Group A
+                Days = DaysOfWeekMask.Sun | DaysOfWeekMask.Mon | DaysOfWeekMask.Tue | DaysOfWeekMask.Wed | DaysOfWeekMask.Thu,
+                IsAllDay = false,
+                StartLocalTime = new TimeOnly(8, 0),
+                EndLocalTime = new TimeOnly(19, 0),
+                Priority = 0,
+                Enabled = true,
+                Note = "A: Sun–Thu 08:00–19:00"
+            };
+            var aFri = new TariffGroupWindow {
+                Taarif = Taarif.City_Center,
+                Days = DaysOfWeekMask.Fri,
+                IsAllDay = false,
+                StartLocalTime = new TimeOnly(8, 0),
+                EndLocalTime = new TimeOnly(17, 0),
+                Note = "A: Fri 08:00–17:00"
+            };
+
+            var bWeekdays = new TariffGroupWindow {
+                Taarif = Taarif.City_Outskirts, // Group B
+                Days = DaysOfWeekMask.Sun | DaysOfWeekMask.Mon | DaysOfWeekMask.Tue | DaysOfWeekMask.Wed | DaysOfWeekMask.Thu,
+                IsAllDay = false,
+                StartLocalTime = new TimeOnly(8, 0),
+                EndLocalTime = new TimeOnly(21, 0),
+                Note = "B: Sun–Thu 08:00–21:00"
+            };
+            var bFri = new TariffGroupWindow {
+                Taarif = Taarif.City_Outskirts,
+                Days = DaysOfWeekMask.Fri,
+                IsAllDay = false,
+                StartLocalTime = new TimeOnly(8, 0),
+                EndLocalTime = new TimeOnly(17, 0),
+                Note = "B: Fri 08:00–17:00"
+            };
+
+            db.TariffGroupWindows.AddRange(aWeekdays, aFri, bWeekdays, bFri);
             await db.SaveChangesAsync(ct);
         }
 

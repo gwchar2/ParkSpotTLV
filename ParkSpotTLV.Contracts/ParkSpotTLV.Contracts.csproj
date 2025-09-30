@@ -12,4 +12,8 @@ wire-level contracts so API and MAUI stay in sync.
   <ItemGroup>
     <ProjectReference Include="..\ParkSpotTLV.Core\ParkSpotTLV.Core.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Parking\" />
+  </ItemGroup>
 </Project>

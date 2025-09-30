@@ -1,4 +1,4 @@
-﻿using ParkSpotTLV.Core.Models;
+﻿using ParkSpotTLV.Contracts.Enums;
 
 namespace ParkSpotTLV.Contracts.Vehicles {
     public sealed record VehicleResponse {

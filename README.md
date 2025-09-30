@@ -155,6 +155,7 @@ SELECT * FROM "__EFMigrationsHistory";
 SELECT COUNT(*) AS zones FROM zones;
 SELECT COUNT(*) AS segments FROM street_segments;
 SELECT id, code, name FROM zones ORDER BY code LIMIT 10;
+
 SELECT DISTINCT ON (z.code)
        z.code        AS zone_code,
        s.id          AS segment_id,
@@ -162,6 +163,16 @@ SELECT DISTINCT ON (z.code)
 FROM street_segments s
 JOIN zones z ON s.zone_id = z.id
 ORDER BY z.code, s.name_english NULLS LAST;
+
+SELECT taarif,
+       days,
+       start_local_time, end_local_time,
+       (days & 1)<>0  AS sun, (days & 2)<>0  AS mon, (days & 4)<>0  AS tue,
+       (days & 8)<>0  AS wed, (days & 16)<>0 AS thu, (days & 32)<>0 AS fri,
+       (days & 64)<>0 AS sat
+FROM tariff_group_windows
+ORDER BY taarif, days, start_local_time;
+
 ```
 
 ## Port reference

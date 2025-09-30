@@ -1,11 +1,4 @@
-﻿using ParkSpotTLV.Contracts.StreetSegments;
-using ParkSpotTLV.Infrastructure;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ParkSpotTLV.Contracts;
-using System.Security.Claims;
-
-
+﻿
 namespace ParkSpotTLV.Api.Endpoints {
     public static class StreetEndpoints {
 

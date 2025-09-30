@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using ParkSpotTLV.Core.Models;
+using ParkSpotTLV.Contracts.Enums;
 
 namespace ParkSpotTLV.Contracts.Permits {
 

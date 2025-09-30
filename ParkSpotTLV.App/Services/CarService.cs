@@ -1,8 +1,7 @@
-using System.Net;
 using System.Text.Json;
 using System.Net.Http.Json;
-using ParkSpotTLV.App.Data.Models;
 using ParkSpotTLV.Contracts.Vehicles;
+using ParkSpotTLV.Contracts.Enums;
 
 namespace ParkSpotTLV.App.Services;
 
@@ -212,7 +211,7 @@ public class CarService
 
     var defaultCarPayload = new VehicleCreateRequest
     (
-        Type : Core.Models.VehicleType.Car,
+        Type : VehicleType.Car,
         Name : "Default Car",
         ResidentZoneCode : null,
         HasDisabledPermit : false

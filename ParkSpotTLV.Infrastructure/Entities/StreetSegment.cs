@@ -1,6 +1,6 @@
 ﻿using NetTopologySuite.Geometries;
 using System.ComponentModel.DataAnnotations;
-using ParkSpotTLV.Core.Models;
+using ParkSpotTLV.Contracts.Enums;
 /* 
 www.openstreetmap.org/
 https://overpass-turbo.eu/index.html
@@ -30,7 +30,7 @@ Blue-white curb where only vehicles with a permit for that specific zone may par
 
 
 namespace ParkSpotTLV.Infrastructure.Entities {  
-    public enum SegmentSide { Both = 0, Left = 1, Right = 2 }   
+      
 
     public class StreetSegment {
         /*

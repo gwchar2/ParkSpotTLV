@@ -1,4 +1,4 @@
-﻿using ParkSpotTLV.Core.Models;
+﻿using ParkSpotTLV.Contracts.Enums;
 
 namespace ParkSpotTLV.Contracts.Permits {
     public sealed record PermitResponse {

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ParkSpotTLV.Contracts.Vehicles;
 using ParkSpotTLV.Infrastructure;
 using ParkSpotTLV.Infrastructure.Entities;
-using ParkSpotTLV.Core.Models;
+using ParkSpotTLV.Contracts.Enums;
 using System.Security.Claims;
 
 
