@@ -12,9 +12,7 @@
           {
             "id": "33333333-3333-3333-3333-333333333333",
             "type": "ZoneResident",
-            "zoneCode": 6,
-            "validTo": "2026-12-31",
-            "isActive": true
+            "zoneCode": 6
           }
         ]
       }
@@ -32,16 +30,12 @@
         "permits": [
           {
             "id": "66666666-6666-6666-6666-666666666666",
-            "type": "Disability",
-            "validTo": "2027-06-30",
-            "isActive": true
+            "type": "Disability"
           },
           {
             "id": "77777777-7777-7777-7777-777777777777",
             "type": "ZoneResident",
-            "zoneCode": 9,
-            "validTo": "2026-05-01",
-            "isActive": true
+            "zoneCode": 9
           }
         ]
       }

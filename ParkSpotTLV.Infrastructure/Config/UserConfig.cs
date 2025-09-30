@@ -17,18 +17,6 @@ namespace ParkSpotTLV.Infrastructure.Config {
             e.Property(x => x.PasswordHash)
              .IsRequired()
              .HasMaxLength(256);
-
-            e.Property(x => x.ParkingStartedAtUtc);
-
-            e.Property(x => x.FreeParkingUntilUtc)              
-             .HasColumnType("timestamptz");
-
-            e.Property(x => x.FreeParkingBudget)                
-             .HasColumnType("interval")
-             .HasDefaultValueSql("interval '2 hours'");
-
-            e.Property(x => x.LastUpdated);
-
         }
     }
 }

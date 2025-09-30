@@ -15,6 +15,7 @@ using Serilog;
 using System.Reflection;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
+
 /* --------------------------------------------------------------------------
  * BOOTSTRAP LOGGING
  * -------------------------------------------------------------------------- */
@@ -77,9 +78,7 @@ try {
     builder.Services.AddOptions<AuthOptions>()
         .Bind(builder.Configuration.GetSection("Auth"))
         .ValidateDataAnnotations()
-        .Validate(o => o.Signing.Type == "HMAC"
-                       ? !string.IsNullOrWhiteSpace(o.Signing.HmacSecret)
-                       : true,
+        .Validate(o => o.Signing.Type != "HMAC" || !string.IsNullOrWhiteSpace(o.Signing.HmacSecret),
                   "HMAC Selected but Auth:Signing:HmacSecret is missing!");
 
     /* ----------------------------------------------------------------------
@@ -154,7 +153,9 @@ try {
     app.MapHealth();
     app.MapAuth();
     app.MapVehicles();
-    app.MapParking();
+    app.MapPermits();
+    //app.MapParking();
+    //app.MapSegments();
     /* ----------------------------------------------------------------------
      * RUN
      * ---------------------------------------------------------------------- */
@@ -170,20 +171,14 @@ finally {
 /* --------------------------------------------------------------------------
  * RUNTIME HEALTH
  * -------------------------------------------------------------------------- */
-public sealed class RuntimeHealth {
-    public DateTimeOffset StartedAtUtc { get; }
-    public string Version { get; }
-
-    public RuntimeHealth(IConfiguration cfg) {
-        Version = cfg["App:Version"]
+public sealed class RuntimeHealth(IConfiguration cfg) {
+    public DateTimeOffset StartedAtUtc { get; } = DateTimeOffset.UtcNow;
+    public string Version { get; } = cfg["App:Version"]
                ?? (Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly())
                   .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
                ?? (Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly())
                   .GetName().Version?.ToString()
                ?? "0.0.0-dev";
-
-        StartedAtUtc = DateTimeOffset.UtcNow;
-    }
 }
 
 
@@ -217,7 +212,7 @@ public static class OpenApiExtensions {
                     .OfType<IAuthorizeData>()?.Any() == true;
 
                 if (requiresAuth) {
-                    operation.Security ??= new List<OpenApiSecurityRequirement>();
+                    operation.Security ??= [];
                     operation.Security.Add(new OpenApiSecurityRequirement
                     {
                         {

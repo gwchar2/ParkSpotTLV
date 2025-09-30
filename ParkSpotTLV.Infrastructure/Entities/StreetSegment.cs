@@ -1,5 +1,6 @@
 ﻿using NetTopologySuite.Geometries;
 using System.ComponentModel.DataAnnotations;
+using ParkSpotTLV.Core.Models;
 /* 
 www.openstreetmap.org/
 https://overpass-turbo.eu/index.html
@@ -28,25 +29,30 @@ Blue-white curb where only vehicles with a permit for that specific zone may par
 */
 
 
-namespace ParkSpotTLV.Infrastructure.Entities {
-    public enum ParkingType { 
-        Free = 1,
-        Paid = 2
-    }
-    
+namespace ParkSpotTLV.Infrastructure.Entities {  
     public enum SegmentSide { Both = 0, Left = 1, Right = 2 }   
 
     public class StreetSegment {
+        /*
+         * Ownership
+         */
+        public Guid Id { get; set; } = Guid.NewGuid();                  // Database ID
 
-        public Guid Id { get; set; } = Guid.NewGuid();
-        [Required] public string OSMId { get; set; } = "";
+        /*
+         * Geometric Data
+         */
+        [Required] public LineString Geom { get; set; } = default!;
+
+        /*
+         * Data
+         */
+        [Required] public string OSMId { get; set; } = "";              // ID on Opensourcemap @way ... 
         [MaxLength(128)] public string? NameEnglish { get; set; }
         [MaxLength(128)] public string? NameHebrew { get; set; }
-        [Required] public LineString Geom { get; set; } = default!;
         public Guid? ZoneId { get; set; }
         public Zone? Zone { get; set; }
         public ParkingType ParkingType { get; set; } = ParkingType.Free;
         public SegmentSide Side { get; set; } = SegmentSide.Both;
-        public bool PrivilegedParking { get; set; } = false; //  "restriction:conditional" : "Parking only for zone permit holders" / "parking:side:zone" :"*"
+        public bool PrivilegedParking { get; set; } = false;            //  "restriction:conditional" : "Parking only for zone permit holders" / "parking:side:zone" :"*"
     }
 }

@@ -64,7 +64,6 @@ namespace ParkSpotTLV.Infrastructure.Auth {
             return new RefreshIssueResult(raw, expires);
         }
 
-
         /* Validates and rotates a refresh token:
          * - Ensures it’s active, not expired, not reused
          * - Revokes if reused
@@ -122,7 +121,6 @@ namespace ParkSpotTLV.Infrastructure.Auth {
 
         }
 
-
         /* Revokes a single refresh token by its raw value */
         public void RevokeByRawToken(string rawRefreshToken) {
             var now = DateTimeOffset.UtcNow;
@@ -138,7 +136,6 @@ namespace ParkSpotTLV.Infrastructure.Auth {
             }
 
         }
-
 
         /* Revokes all active refresh tokens for a given user */
         public void RevokeAllForUser(Guid userId) {

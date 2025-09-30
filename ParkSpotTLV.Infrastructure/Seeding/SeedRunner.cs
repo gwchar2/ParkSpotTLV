@@ -3,8 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using ParkSpotTLV.Infrastructure.Entities;
 using ParkSpotTLV.Core.Models;
+using ParkSpotTLV.Infrastructure.Entities;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -21,22 +21,15 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
         public string StreetSegments { get; set; } = "ParkSpotTLV.Infrastructure/db/Seed/street_segments.geojson";
     }
 
-    public sealed class SeedRunner : IHostedService {
-        private readonly IServiceProvider _sp;
-        private readonly IHostEnvironment _env;
-        private readonly ILogger<SeedRunner> _log;
-        private readonly SeedOptions _opts;
-
-        public SeedRunner(
-            IServiceProvider sp,
-            IHostEnvironment env,
-            IOptions<SeedOptions> opts,
-            ILogger<SeedRunner> log) {
-            _sp = sp;
-            _env = env;
-            _opts = opts.Value;
-            _log = log;
-            }
+    public sealed class SeedRunner(
+        IServiceProvider sp,
+        IHostEnvironment env,
+        IOptions<SeedOptions> opts,
+        ILogger<SeedRunner> log) : IHostedService {
+        private readonly IServiceProvider _sp = sp;
+        private readonly IHostEnvironment _env = env;
+        private readonly ILogger<SeedRunner> _log = log;
+        private readonly SeedOptions _opts = opts.Value;
 
         public async Task StartAsync(CancellationToken ct) {
             if (!_opts.Enabled) {
@@ -104,27 +97,27 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                 var line = ToLineString(geom);
                 var osmID = GetString(props, "@id");
 
-                var parsed = ParseParkingTags(props);           // returns (type, side, explicitZoneCode, Priveleged?)
+                var (type, side, explicitZoneCode, PrivelegedParking) = ParseParkingTags(props);           // returns (type, side, explicitZoneCode, Priveleged?)
                 var segment = new StreetSegment {
                     OSMId = string.IsNullOrWhiteSpace(osmID) ? "" : osmID,
                     NameEnglish = GetString(props, "name:en"),
                     NameHebrew = GetString(props, "name"),
                     Geom = line,
-                    ParkingType = parsed.type,
-                    Side = parsed.side
+                    ParkingType = type,
+                    Side = side
                 };
 
                 Guid? zoneId = null;
 
                 // 1) Prefer explicit zone code from tags (paid)
-                if (parsed.explicitZoneCode.HasValue &&
-                    zonesByCode.TryGetValue(parsed.explicitZoneCode.Value, out var zidFromProps)) {
+                if (explicitZoneCode.HasValue &&
+                    zonesByCode.TryGetValue(explicitZoneCode.Value, out var zidFromProps)) {
                     
                     zoneId = zidFromProps;
                 }
 
                 // 2) If free and no explicit zone, infer by geometry
-                if (zoneId == null && parsed.type == ParkingType.Free) {
+                if (zoneId == null && type == ParkingType.Free) {
                     var centroid = line.Centroid;
 
                     // Try centroid containment
@@ -173,46 +166,40 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                 .ToDictionaryAsync(z => z.Code!.Value, z => z.Id, ct);
 
             var json = await File.ReadAllTextAsync(_opts.Paths.Users, ct);
-            var users = JsonSerializer.Deserialize<List<JsonObject>>(json) ?? new();
+            var users = JsonSerializer.Deserialize<List<JsonObject>>(json) ?? [];
 
             foreach (var u in users) {
                 var user = new User {
                     Id = ParseGuid(GetString(u, "id")) ?? Guid.NewGuid(),
                     Username = GetString(u, "username") ?? "user",
                     PasswordHash = GetString(u, "passwordHash") ?? "",
-                    LastUpdated = DateTimeOffset.UtcNow
                 };
 
                 // Vehicles + vehicle-scoped permits (no user-scoped permits in current model)
-                foreach (var v in u["vehicles"]?.AsArray() ?? new()) {
+                foreach (var v in u["vehicles"]?.AsArray() ?? []) {
                     var vo = v!.AsObject();
                     var vehicle = new Vehicle {
                         Id = ParseGuid(GetString(vo, "id")) ?? Guid.NewGuid(),
                         Owner = user,
                         Name = GetString(vo, "name") ?? "Default Car Name",
-                        Type = ParseEnum<VehicleType>(GetString(vo, "type")) ?? VehicleType.Car
+                        Type = ParseEnum<VehicleType>(GetString(vo, "type")) ?? VehicleType.Car,
                     };
 
-                    foreach (var p in vo["permits"]?.AsArray() ?? new()) {
+                    foreach (var p in vo["permits"]?.AsArray() ?? []) {
                         var po = p!.AsObject();
                         var permit = new Permit {
                             Id = ParseGuid(GetString(po, "id")) ?? Guid.NewGuid(),
                             Type = ParseEnum<PermitType>(GetString(po, "type")) ?? PermitType.Default,
-                            Vehicle = vehicle,
-                            ValidTo = ParseDateOnly(GetString(po, "validTo")),
-                            IsActive = GetBool(po, "isActive") ?? true
+                            Vehicle = vehicle
                         };
 
                         var zoneCode = GetInt(po, "zoneCode");
-                        if (zoneCode is not null && zonesByCode.ContainsKey(zoneCode.Value))
+                        if (zoneCode is not null && zonesByCode.ContainsKey(zoneCode.Value)) 
                             permit.ZoneCode = zoneCode.Value;
 
-
-
-
+                        permit.LastUpdated = DateTimeOffset.UtcNow;
                         vehicle.Permits.Add(permit);
                     }
-
                     user.Vehicles.Add(vehicle);
                 }
 
@@ -227,7 +214,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
         private static NetTopologySuite.Geometries.MultiPolygon ToMultiPolygon(NetTopologySuite.Geometries.Geometry g)
             => g switch {
                 NetTopologySuite.Geometries.MultiPolygon mp => mp,
-                NetTopologySuite.Geometries.Polygon p => new NetTopologySuite.Geometries.MultiPolygon(new[] { p }),
+                NetTopologySuite.Geometries.Polygon p => new NetTopologySuite.Geometries.MultiPolygon([p]),
                 _ => throw new InvalidDataException($"Expected Polygon/MultiPolygon, got {g.GeometryType}.")
             };
 
@@ -242,7 +229,6 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
         private static int? GetInt(JsonObject o, string key) => o[key] is null ? null : o[key]!.GetValue<int?>();
         private static bool? GetBool(JsonObject o, string key) => o[key] is null ? null : o[key]!.GetValue<bool?>();
         private static Guid? ParseGuid(string? s) => Guid.TryParse(s, out var g) ? g : null;
-        private static DateOnly? ParseDateOnly(string? s) => DateOnly.TryParse(s, out var d) ? d : null;
 
         private static TEnum? ParseEnum<TEnum>(string? s) where TEnum : struct {
             if (string.IsNullOrWhiteSpace(s)) return null;
