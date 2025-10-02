@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Security.Claims;
 
-namespace ParkSpotTLV.Api.Http {
+namespace ParkSpotTLV.Api.Middleware.Http {
     public sealed class TracingMiddleware {
 
         private static readonly ActivitySource ActivitySource = new("Backend.Api");

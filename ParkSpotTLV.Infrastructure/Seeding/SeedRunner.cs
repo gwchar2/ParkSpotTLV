@@ -7,6 +7,7 @@ using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Infrastructure.Entities;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ParkSpotTLV.Infrastructure.Seeding {
     public sealed class SeedOptions {
@@ -50,6 +51,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             await SeedStreetSegmentsAsync(db, ct);
             await SeedUsersAsync(db, ct);
             await SeedTariffWindowsAsync(db, ct);
+
             _log.LogInformation("Seeding completed.");
         }
 
@@ -72,8 +74,8 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                     Name = GetString(props, "name"),
                     LastUpdated = DateTimeOffset.UtcNow
                 };
-                var temp = GetInt(props, "taarif");
-                zone.Taarif = temp.HasValue ? (Taarif)temp.Value : Taarif.City_Center;
+                var temp = GetInt(props, "tariff");
+                zone.Taarif = temp.HasValue ? (Tariff)temp.Value : Tariff.City_Center;
                 db.Zones.Add(zone);
             }
 
@@ -90,14 +92,14 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             _log.LogInformation("Seeding StreetSegments from {Path}", _opts.Paths.StreetSegments);
 
             var zonesByCode = await db.Zones.AsNoTracking()
-                .Where(z => z.Code != null)
-                .ToDictionaryAsync(z => z.Code!.Value, z => z.Id, ct);
+                .Where(z => z.Code.HasValue)
+                .ToDictionaryAsync(z => z.Code.Value, z => z.Id, ct);
 
             foreach (var (geom, props) in GeoJsonLoader.LoadFeatures(_opts.Paths.StreetSegments)) {
                 var line = ToLineString(geom);
                 var osmID = GetString(props, "@id");
 
-                var (type, side, explicitZoneCode, PrivelegedParking) = ParseParkingTags(props);           // returns (type, side, explicitZoneCode, Priveleged?)
+                var (type, side, explicitZoneCode) = ParseParkingTags(props);           // returns (type, side, explicitZoneCode, Priveleged?)
                 var segment = new StreetSegment {
                     OSMId = string.IsNullOrWhiteSpace(osmID) ? "" : osmID,
                     NameEnglish = GetString(props, "name:en"),
@@ -109,14 +111,11 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
 
                 Guid? zoneId = null;
 
-                // 1) Prefer explicit zone code from tags (paid)
-                if (explicitZoneCode.HasValue &&
-                    zonesByCode.TryGetValue(explicitZoneCode.Value, out var zidFromProps)) {
-                    
+                // Prefer explicit zone code from tags (paid)
+                if (explicitZoneCode.HasValue && zonesByCode.TryGetValue(explicitZoneCode.Value, out var zidFromProps))
                     zoneId = zidFromProps;
-                }
 
-                // 2) If free and no explicit zone, infer by geometry
+                // If free and no explicit zone, infer by geometry
                 if (zoneId == null && type == ParkingType.Free) {
                     var centroid = line.Centroid;
 
@@ -151,49 +150,48 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
         * Seeds A/B tariff paid windows:
         *  - Group A: Sun–Thu 08:00–19:00; Fri 08:00–17:00; Sat none
         *  - Group B: Sun–Thu 08:00–21:00; Fri 08:00–17:00; Sat none
-        * Outside paid windows -> FREE by definition.
+        *  - Outside paid windows -> FREE by definition.
         */
         private static async Task SeedTariffWindowsAsync(AppDbContext db, CancellationToken ct) {
-            var hasAny = await db.TariffGroupWindows.AsNoTracking().AnyAsync(ct);
-            if (hasAny) return;
+            if (await db.TariffWindows.AnyAsync(ct))
+                return; 
 
-            var aWeekdays = new TariffGroupWindow {
-                Taarif = Taarif.City_Center, // Group A
-                Days = DaysOfWeekMask.Sun | DaysOfWeekMask.Mon | DaysOfWeekMask.Tue | DaysOfWeekMask.Wed | DaysOfWeekMask.Thu,
-                IsAllDay = false,
-                StartLocalTime = new TimeOnly(8, 0),
-                EndLocalTime = new TimeOnly(19, 0),
-                Priority = 0,
-                Enabled = true,
-                Note = "A: Sun–Thu 08:00–19:00"
-            };
-            var aFri = new TariffGroupWindow {
-                Taarif = Taarif.City_Center,
-                Days = DaysOfWeekMask.Fri,
-                IsAllDay = false,
-                StartLocalTime = new TimeOnly(8, 0),
-                EndLocalTime = new TimeOnly(17, 0),
-                Note = "A: Fri 08:00–17:00"
-            };
+            var id = 1;
+            var data = new List<TariffWindow>();
 
-            var bWeekdays = new TariffGroupWindow {
-                Taarif = Taarif.City_Outskirts, // Group B
-                Days = DaysOfWeekMask.Sun | DaysOfWeekMask.Mon | DaysOfWeekMask.Tue | DaysOfWeekMask.Wed | DaysOfWeekMask.Thu,
-                IsAllDay = false,
-                StartLocalTime = new TimeOnly(8, 0),
-                EndLocalTime = new TimeOnly(21, 0),
-                Note = "B: Sun–Thu 08:00–21:00"
-            };
-            var bFri = new TariffGroupWindow {
-                Taarif = Taarif.City_Outskirts,
-                Days = DaysOfWeekMask.Fri,
-                IsAllDay = false,
-                StartLocalTime = new TimeOnly(8, 0),
-                EndLocalTime = new TimeOnly(17, 0),
-                Note = "B: Fri 08:00–17:00"
-            };
+            void AddRange(Tariff t, (DayOfWeek dow, string start, string end)[] items) {
+                foreach (var (dow, start, end) in items) {
+                    data.Add(new TariffWindow {
+                        Id = id++,
+                        Tariff = t,
+                        DayOfWeek = dow,
+                        StartLocal = TimeOnly.Parse(start),
+                        EndLocal = TimeOnly.Parse(end)
+                    });
+                }
+            }
 
-            db.TariffGroupWindows.AddRange(aWeekdays, aFri, bWeekdays, bFri);
+            // City_Center
+            AddRange(Tariff.City_Center,[
+                (DayOfWeek.Sunday,    "08:00", "21:00"),
+                (DayOfWeek.Monday,    "08:00", "21:00"),
+                (DayOfWeek.Tuesday,   "08:00", "21:00"),
+                (DayOfWeek.Wednesday, "08:00", "21:00"),
+                (DayOfWeek.Thursday,  "08:00", "21:00"),
+                (DayOfWeek.Friday,    "08:00", "17:00"),
+            ]);
+
+            // City_Outskirts
+            AddRange(Tariff.City_Outskirts,[
+                (DayOfWeek.Sunday,    "08:00", "19:00"),
+                (DayOfWeek.Monday,    "08:00", "19:00"),
+                (DayOfWeek.Tuesday,   "08:00", "19:00"),
+                (DayOfWeek.Wednesday, "08:00", "19:00"),
+                (DayOfWeek.Thursday,  "08:00", "19:00"),
+                (DayOfWeek.Friday,    "08:00", "17:00"),
+            ]);
+
+            db.TariffWindows.AddRange(data);
             await db.SaveChangesAsync(ct);
         }
 
@@ -214,7 +212,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
 
             var zonesByCode = await db.Zones.AsNoTracking()
                 .Where(z => z.Code != null)
-                .ToDictionaryAsync(z => z.Code!.Value, z => z.Id, ct);
+                .ToDictionaryAsync(z => z.Code!, z => z.Id, ct);
 
             var json = await File.ReadAllTextAsync(_opts.Paths.Users, ct);
             var users = JsonSerializer.Deserialize<List<JsonObject>>(json) ?? [];
@@ -289,7 +287,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             if (string.IsNullOrWhiteSpace(s)) return null;
             return int.TryParse(s, out var n) ? n : null;
         }
-        private static (ParkingType type, SegmentSide side, int? explicitZoneCode, bool PrivelegedParking) ParseParkingTags(JsonObject props) {
+        private static (ParkingType type, SegmentSide side, int? explicitZoneCode) ParseParkingTags(JsonObject props) {
             string? T(string key) =>
                 props.TryGetPropertyValue(key, out var v) ? v?.ToString()?.Trim() : null;
 
@@ -302,11 +300,6 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             bool paidRight = zoneRight.HasValue;
             bool paidLeft = zoneLeft.HasValue;
             bool paidBoth = zoneBoth.HasValue;
-
-            // Free variants
-            bool freeRight = string.Equals(T("parking:right"), "yes", StringComparison.OrdinalIgnoreCase);
-            bool freeLeft = string.Equals(T("parking:left"), "yes", StringComparison.OrdinalIgnoreCase);
-            bool freeBoth = string.Equals(T("parking:both"), "yes", StringComparison.OrdinalIgnoreCase);
 
             // Figure out if parking is privileged or not
             bool privileged = string.Equals(T("restriction:conditional"),  "zone_only @ 8:00-21:00", StringComparison.OrdinalIgnoreCase)
@@ -325,23 +318,15 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                 // Pick a zone code deterministically: prefer specific side over "both"
                 int? zoneCode = zoneRight ?? zoneLeft ?? zoneBoth;
 
-                return (ParkingType.Paid, side, zoneCode, privileged);
+                return (privileged ? ParkingType.Privileged : ParkingType.Paid, side, zoneCode);
             } 
-            else if (freeLeft || freeRight || freeBoth) { // Else if free tags exist, it’s Free.
-                var side = SegmentSide.Both;
-                if ((freeLeft || freeRight) && !(freeLeft && freeRight)) {
-                    side = freeLeft ? SegmentSide.Left : SegmentSide.Right;
-                } else if (freeBoth) {
-                    side = SegmentSide.Both;
-                } else if (freeLeft && freeRight) {
-                    side = SegmentSide.Both;
-                }
-
-                return (ParkingType.Free, side, null, privileged);
-            }
 
             // If nothing matched (shouldn’t happen after your prefilter), default to Free/Both without zone.
-            return (ParkingType.Free, SegmentSide.Both, null, privileged);
+            return (privileged ? ParkingType.Privileged : ParkingType.Free, SegmentSide.Both, null);
         }
+
+        
+
     }
+
 }

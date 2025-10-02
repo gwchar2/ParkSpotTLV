@@ -1,13 +1,13 @@
 ﻿using NetTopologySuite.Geometries;
 using System.ComponentModel.DataAnnotations;
-
+using ParkSpotTLV.Contracts.Enums;
 /*
  * Zone definition for the database
 */
 
 
 namespace ParkSpotTLV.Infrastructure.Entities {
-    public enum Taarif { City_Center = 1, City_Outskirts = 2 }
+    
 
     public class Zone {
         /* 
@@ -19,7 +19,7 @@ namespace ParkSpotTLV.Infrastructure.Entities {
          * Zone Data
          */
         public int? Code { get; set; }
-        [Required] public Taarif Taarif { get; set; } = Taarif.City_Center;
+        [Required] public Tariff Taarif { get; set; } = Tariff.City_Center;
         [MaxLength(64)] public string? Name { get; set; } // E.g. "Zone 6"
 
         /*

@@ -49,6 +49,13 @@ namespace ParkSpotTLV.Api.Endpoints {
                             DisabledPermit = v.Permits.Any(p => p.Type == PermitType.Disability),
                             RowVersion = Convert.ToBase64String(BitConverter.GetBytes(v.Xmin))})
                         .ToListAsync(ct);
+
+                    if (vehicles is null)
+                        return Results.Problem(
+                            title: "Vehicles not found or not owned by user.",
+                            statusCode: StatusCodes.Status403Forbidden
+                            );
+
                     return Results.Ok(vehicles);
                 })
                 .WithSummary("List Vehicles")

@@ -13,9 +13,7 @@ namespace ParkSpotTLV.Infrastructure {
         public DbSet<Permit> Permits => Set<Permit>();    
         public DbSet<StreetSegment> StreetSegments => Set<StreetSegment>();
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
-        public DbSet<StreetSegmentRuleWindow> StreetSegmentRuleWindows => Set<StreetSegmentRuleWindow>();
-        public DbSet<TariffGroupWindow> TariffGroupWindows => Set<TariffGroupWindow>();
-
+        public DbSet<TariffWindow> TariffWindows => Set<TariffWindow>();
         protected override void OnModelCreating(ModelBuilder model) {
             model.HasPostgresExtension("postgis");
             model.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

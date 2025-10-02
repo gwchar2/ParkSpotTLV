@@ -164,14 +164,7 @@ FROM street_segments s
 JOIN zones z ON s.zone_id = z.id
 ORDER BY z.code, s.name_english NULLS LAST;
 
-SELECT taarif,
-       days,
-       start_local_time, end_local_time,
-       (days & 1)<>0  AS sun, (days & 2)<>0  AS mon, (days & 4)<>0  AS tue,
-       (days & 8)<>0  AS wed, (days & 16)<>0 AS thu, (days & 32)<>0 AS fri,
-       (days & 64)<>0 AS sat
-FROM tariff_group_windows
-ORDER BY taarif, days, start_local_time;
+
 
 ```
 

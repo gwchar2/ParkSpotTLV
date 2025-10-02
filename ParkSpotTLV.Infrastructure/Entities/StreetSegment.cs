@@ -53,6 +53,6 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         public Zone? Zone { get; set; }
         public ParkingType ParkingType { get; set; } = ParkingType.Free;
         public SegmentSide Side { get; set; } = SegmentSide.Both;
-        public bool PrivilegedParking { get; set; } = false;            //  "restriction:conditional" : "Parking only for zone permit holders" / "parking:side:zone" :"*"
+       
     }
 }

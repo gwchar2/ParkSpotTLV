@@ -24,19 +24,6 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         public Zone? Zone { get; set; }
 
         /* 
-         * Parking information - need to add to config if want to use them!
-         
-        public DateTimeOffset? ParkingStartedAtUtc { get; set; }            // Parking started at 
-        public DateTimeOffset? FreeParkingUntilUtc { get; set; }            // Free parking available until
-        public TimeSpan FreeParkingBudget { get; set; } = TimeSpan.Zero;    // Total free Parking budget
-        public DateOnly? FreeBudgetLastResetDate { get; set; }              // When was the free parking timer last reset
-        public bool CurrentlyParking { get; set; } = false;                 // Is user currently parked?
-        public bool CurrentlyParkingForFree { get; set; } = false;          // Is user currently parking for free?
-        */
-
-
-
-        /* 
          * Concurrency 
          */
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)] public uint Xmin { get; private set; }
