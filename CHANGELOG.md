@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.9.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.8.0-beta.0...v0.9.0-beta.0) (2025-10-03)
+
+
+### Features
+
+* **Map:** drawing segments on map ([1513d3c](https://github.com/gwchar2/ParkSpotTLV/commit/1513d3c7848e049d1548f749f6bbfea3ba0a3d77))
+* **Map:** google map implemented ([728d045](https://github.com/gwchar2/ParkSpotTLV/commit/728d045b89b9a6ce624d6550df220e4fd61532b5))
+* **Map:** search bar ([9f4d2ba](https://github.com/gwchar2/ParkSpotTLV/commit/9f4d2baef1efbc9783127f7aab831622bab4fb3b))
+* **Map:** settings choise passed to loadMap ([a4abf2a](https://github.com/gwchar2/ParkSpotTLV/commit/a4abf2a1bdea7abe1fd2c819ab257205ca8041b7))
+
 ## [0.8.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.7.1-beta.0...v0.8.0-beta.0) (2025-09-29)
 
 
