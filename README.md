@@ -177,6 +177,8 @@ ORDER BY z.code, s.name_english NULLS LAST;
 
 - Host to DB: `localhost:5433`
 - API container to DB container: `parkspot_db:5432`
+- API google maps : 'AIzaSyC7dBzURpYQwnVMqgaMcL2cnA5IDs-VB58'
+- SHA-1 : 68:3A:70:71:B4:54:ED:23:1F:39:B7:6B:5E:45:8A:39:5B:00:B9:27
 
 
 

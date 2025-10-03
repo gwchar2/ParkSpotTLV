@@ -1,4 +1,8 @@
 using ParkSpotTLV.App.Services;
+using Microsoft.Maui.Controls.Maps;
+using Microsoft.Maui.Maps;
+using Microsoft.Maui.Devices.Sensors;
+
 
 namespace ParkSpotTLV.App.Pages;
 
@@ -14,9 +18,29 @@ public partial class ShowMapPage : ContentPage
         LoadUserCars();
     }
 
-    protected override void OnAppearing()
+    protected async override void OnAppearing()
     {
         base.OnAppearing();
+
+        // Center on Tel Aviv
+        var center = new Location(32.0853, 34.7818);
+        MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(center, Distance.FromKilometers(5)));
+
+        // Add a simple polyline (pretend it's your LineString)
+        var line = new Polyline { StrokeWidth = 4 };
+        line.Geopath.Add(center);
+        line.Geopath.Add(new Location(32.0800, 34.7700));
+        line.Geopath.Add(new Location(32.0700, 34.7600));
+        MyMap.MapElements.Add(line);
+
+        var results = await Geocoding.GetLocationsAsync("Ibn Gabirol St 50, Tel Aviv, Israel");
+        var loc = results?.FirstOrDefault();
+        if (loc != null) {
+            MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(
+            new Location(loc.Latitude, loc.Longitude),
+            Distance.FromKilometers(1)));
+        }
+        
         LoadUserCars();
     }
 

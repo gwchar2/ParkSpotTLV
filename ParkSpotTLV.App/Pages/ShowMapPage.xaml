@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:ParkSpotTLV.App.Controls"
+             xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
              x:Class="ParkSpotTLV.App.Pages.ShowMapPage"
              Title="Map">
 
@@ -207,10 +208,7 @@
                 Stroke="Gray"
                 StrokeShape="RoundRectangle 10"
                 Margin="20">
-            <Image Source="map.png"
-                   Aspect="AspectFill"
-                   BackgroundColor="LightBlue">
-            </Image>
+            <maps:Map x:Name="MyMap" />
         </Border>
 
         <!-- "Park Here" button-->
