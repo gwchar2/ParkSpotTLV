@@ -60,6 +60,14 @@ namespace ParkSpotTLV.App
                 return new CarService(http, auth, opts);
             });
 
+            builder.Services.AddSingleton<MapService>(sp =>
+            {
+                var http = sp.GetRequiredService<HttpClient>();
+                var auth = sp.GetRequiredService<AuthenticationService>();
+                var opts = sp.GetRequiredService<JsonSerializerOptions>();
+                return new MapService(http, auth, opts);
+            });
+
             // Core app services you already had
             builder.Services.AddSingleton<ILocalDataService, LocalDataService>();
             builder.Services.AddTransient<ISyncService, SyncService>();

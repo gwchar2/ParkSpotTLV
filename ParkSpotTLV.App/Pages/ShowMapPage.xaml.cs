@@ -2,6 +2,8 @@ using ParkSpotTLV.App.Services;
 using Microsoft.Maui.Controls.Maps;
 using Microsoft.Maui.Maps;
 using Microsoft.Maui.Devices.Sensors;
+using System.Threading.Tasks;
+using System.Text.Json;
 
 
 namespace ParkSpotTLV.App.Pages;
@@ -9,41 +11,68 @@ namespace ParkSpotTLV.App.Pages;
 public partial class ShowMapPage : ContentPage
 {
     private bool isParked = false;
-    private readonly CarService _carService; //  = CarService.Instance
+    private readonly CarService _carService; 
+    private readonly MapService _mapService;
 
-    public ShowMapPage(CarService carService)
+    public ShowMapPage(CarService carService,MapService mapService)
     {
         InitializeComponent();
         _carService = carService;
+        _mapService = mapService;
         LoadUserCars();
     }
 
-    protected async override void OnAppearing()
+    protected override void OnAppearing()
     {
         base.OnAppearing();
+        LoadMapAsync();
+        LoadUserCars();
+    }
+
+
+    private async void LoadMapAsync()
+    {
+        var geoJsonData = await _mapService.getSegmentsAsync();
 
         // Center on Tel Aviv
         var center = new Location(32.0853, 34.7818);
         MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(center, Distance.FromKilometers(5)));
 
-        // Add a simple polyline (pretend it's your LineString)
-        var line = new Polyline { StrokeWidth = 4 };
-        line.Geopath.Add(center);
-        line.Geopath.Add(new Location(32.0800, 34.7700));
-        line.Geopath.Add(new Location(32.0700, 34.7600));
-        MyMap.MapElements.Add(line);
+        // Parse GeoJSON and draw LineStrings
+        var json = JsonSerializer.Serialize(geoJsonData);
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
 
-        var results = await Geocoding.GetLocationsAsync("Ibn Gabirol St 50, Tel Aviv, Israel");
-        var loc = results?.FirstOrDefault();
-        if (loc != null) {
-            MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(
-            new Location(loc.Latitude, loc.Longitude),
-            Distance.FromKilometers(1)));
+        if (root.TryGetProperty("features", out var features))
+        {
+            foreach (var feature in features.EnumerateArray())
+            {
+                if (feature.TryGetProperty("geometry", out var geometry) &&
+                    geometry.TryGetProperty("type", out var type) &&
+                    type.GetString() == "LineString")
+                {
+                    var line = new Polyline
+                    {
+                        StrokeWidth = 4,
+                        StrokeColor = Color.FromArgb("#2E7D32")
+                    };
+
+                    if (geometry.TryGetProperty("coordinates", out var coordinates))
+                    {
+                        foreach (var coordinate in coordinates.EnumerateArray())
+                        {
+                            // GeoJSON format is [longitude, latitude]
+                            double longitude = coordinate[0].GetDouble();
+                            double latitude = coordinate[1].GetDouble();
+                            line.Geopath.Add(new Location(latitude, longitude));
+                        }
+                    }
+
+                    MyMap.MapElements.Add(line);
+                }
+            }
         }
-        
-        LoadUserCars();
     }
-
     private async void LoadUserCars()
     {
         // get user's list of cars from server
@@ -59,10 +88,11 @@ public partial class ShowMapPage : ContentPage
         }
 
         // Add "Add Car" option
-        if (userCars.Count < 5) {
+        if (userCars.Count < 5)
+        {
             CarPicker.Items.Add("+ Add Car");
         }
-        
+
 
         // Set default selection to first car if available
         if (userCars.Count > 0)
