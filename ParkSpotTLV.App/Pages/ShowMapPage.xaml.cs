@@ -11,7 +11,14 @@ namespace ParkSpotTLV.App.Pages;
 public partial class ShowMapPage : ContentPage
 {
     private bool isParked = false;
-    private readonly CarService _carService; 
+    private string? pickedCarName;
+    private string? pickedDay;
+    private string? pickedTime;
+    private bool showRed;
+    private bool showBlue;
+    private bool showGreen;
+    private bool showYellow;
+    private readonly CarService _carService;
     private readonly MapService _mapService;
 
     public ShowMapPage(CarService carService,MapService mapService)
@@ -25,12 +32,13 @@ public partial class ShowMapPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        LoadMapAsync();
+        setSelectedSettings();
+        LoadMapAsync(pickedCarName,pickedDay,pickedTime, showRed , showBlue , showGreen , showYellow);
         LoadUserCars();
     }
 
 
-    private async void LoadMapAsync()
+    private async void LoadMapAsync(string? car, string? day, string? time, bool red, bool blue, bool green, bool yellow)
     {
         // Enable showing user location on map
         MyMap.IsShowingUser = true;
@@ -131,22 +139,23 @@ public partial class ShowMapPage : ContentPage
 
     private void OnNoParkingTapped(object sender, EventArgs e)
     {
-       // Filter logic here
+       showRed = !showRed ;
     }
 
     private void OnPaidParkingTapped(object sender, EventArgs e)
     {
-        // Filter logic here
+        showBlue = !showBlue;
+
     }
 
     private void OnFreeParkingTapped(object sender, EventArgs e)
     {
-        // Filter logic here
+        showGreen = !showGreen;
     }
 
     private void OnRestrictedTapped(object sender, EventArgs e)
     {
-        // Filter logic here
+       showYellow = !showYellow;
     }
 
     private async void OnCarPickerChanged(object sender, EventArgs e)
@@ -172,8 +181,20 @@ public partial class ShowMapPage : ContentPage
         SettingsToggleBtn.Text = SettingsPanel.IsVisible ? "⚙️ ▲" : "⚙️ ▼";
     }
 
+    private void setSelectedSettings(){
+        pickedCarName = CarPicker.SelectedItem?.ToString();
+        pickedDay = DatePicker.SelectedItem?.ToString(); 
+        pickedTime = TimePicker.SelectedItem?.ToString();
+        showRed = NoParkingCheck.IsChecked ;
+        showBlue  = PaidParkingCheck.IsChecked ;
+        showGreen = FreeParkingCheck.IsChecked ;
+        showYellow = RestrictedCheck.IsChecked ;
+    }
+
     private async void OnApplyClicked(object sender, EventArgs e)
     {
+        setSelectedSettings();
+        LoadMapAsync(pickedCarName,pickedDay,pickedTime, showRed , showBlue , showGreen , showYellow);
         await DisplayAlert("Apply", "Changes applied successfully!", "OK");
 
         // Auto-hide settings panel after applying changes
