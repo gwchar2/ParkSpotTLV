@@ -32,13 +32,26 @@ public partial class ShowMapPage : ContentPage
 
     private async void LoadMapAsync()
     {
+        // Enable showing user location on map
+        MyMap.IsShowingUser = true;
+
+        // Get user location
+        var location = await GetCurrentLocationAsync();
+
+        if (location != null)
+        {
+            MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(location, Distance.FromKilometers(1)));
+
+        }
+        else
+        {
+            // Fallback to Tel Aviv if location unavailable
+            var center = new Location(32.0853, 34.7818);
+            MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(center, Distance.FromKilometers(5)));
+        }
+
+        // Get and draw parking segments
         var geoJsonData = await _mapService.getSegmentsAsync();
-
-        // Center on Tel Aviv
-        var center = new Location(32.0853, 34.7818);
-        MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(center, Distance.FromKilometers(5)));
-
-        // Parse GeoJSON and draw LineStrings
         var json = JsonSerializer.Serialize(geoJsonData);
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
@@ -71,6 +84,21 @@ public partial class ShowMapPage : ContentPage
                     MyMap.MapElements.Add(line);
                 }
             }
+        }
+    }
+
+    private async Task<Location?> GetCurrentLocationAsync()
+    {
+        try
+        {
+            var request = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(10));
+            var location = await Geolocation.GetLocationAsync(request);
+            return location;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Location Error", $"Unable to get location: {ex.Message}", "OK");
+            return null;
         }
     }
     private async void LoadUserCars()
@@ -320,6 +348,34 @@ public partial class ShowMapPage : ContentPage
 
         // Show as modal
         await Navigation.PushModalAsync(popup);
+    }
+
+    private async void OnSearchAddress(object sender, EventArgs e)
+    {
+        var searchBar = (SearchBar)sender;
+        var address = searchBar.Text;
+
+        if (string.IsNullOrWhiteSpace(address))
+            return;
+
+        try
+        {
+            var locations = await Geocoding.GetLocationsAsync(address);
+            var location = locations?.FirstOrDefault();
+
+            if (location != null)
+            {
+                MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(location, Distance.FromKilometers(0.5)));
+            }
+            else
+            {
+                await DisplayAlert("Not Found", "Address not found. Please try a different search.", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Search Error", $"Unable to search: {ex.Message}", "OK");
+        }
     }
 
     private async Task ShowParkingConfirmedPopup(string message)

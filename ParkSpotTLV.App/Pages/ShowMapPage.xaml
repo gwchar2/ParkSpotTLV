@@ -10,6 +10,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -201,8 +202,16 @@
         </Grid>
         </Border>
 
+        <!-- Search Bar -->
+        <SearchBar Grid.Row="2"
+                   x:Name="AddressSearchBar"
+                   Placeholder="Search address..."
+                   SearchButtonPressed="OnSearchAddress"
+                   Margin="20,10,20,0"
+                   BackgroundColor="White" />
+
         <!-- Map Image -->
-        <Border Grid.Row="2"
+        <Border Grid.Row="3"
                 Padding="20"
                 StrokeThickness="1"
                 Stroke="Gray"
@@ -212,7 +221,7 @@
         </Border>
 
         <!-- "Park Here" button-->
-        <Button Grid.Row="3"
+        <Button Grid.Row="4"
                 x:Name="ParkHereBtn"
                 Text="Park Here"
                 BackgroundColor="#2E7D32"
