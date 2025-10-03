@@ -1,25 +1,114 @@
 using ParkSpotTLV.App.Services;
+using Microsoft.Maui.Controls.Maps;
+using Microsoft.Maui.Maps;
+using Microsoft.Maui.Devices.Sensors;
+using System.Threading.Tasks;
+using System.Text.Json;
+
 
 namespace ParkSpotTLV.App.Pages;
 
 public partial class ShowMapPage : ContentPage
 {
     private bool isParked = false;
-    private readonly CarService _carService; //  = CarService.Instance
+    private string? pickedCarName;
+    private string? pickedDay;
+    private string? pickedTime;
+    private bool showRed;
+    private bool showBlue;
+    private bool showGreen;
+    private bool showYellow;
+    private readonly CarService _carService;
+    private readonly MapService _mapService;
 
-    public ShowMapPage(CarService carService)
+    public ShowMapPage(CarService carService,MapService mapService)
     {
         InitializeComponent();
         _carService = carService;
+        _mapService = mapService;
         LoadUserCars();
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
+        setSelectedSettings();
+        LoadMapAsync(pickedCarName,pickedDay,pickedTime, showRed , showBlue , showGreen , showYellow);
         LoadUserCars();
     }
 
+
+    private async void LoadMapAsync(string? car, string? day, string? time, bool red, bool blue, bool green, bool yellow)
+    {
+        // Enable showing user location on map
+        MyMap.IsShowingUser = true;
+
+        // Get user location
+        var location = await GetCurrentLocationAsync();
+
+        if (location != null)
+        {
+            MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(location, Distance.FromKilometers(1)));
+
+        }
+        else
+        {
+            // Fallback to Tel Aviv if location unavailable
+            var center = new Location(32.0853, 34.7818);
+            MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(center, Distance.FromKilometers(5)));
+        }
+
+        // Get and draw parking segments
+        var geoJsonData = await _mapService.getSegmentsAsync();
+        var json = JsonSerializer.Serialize(geoJsonData);
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        if (root.TryGetProperty("features", out var features))
+        {
+            foreach (var feature in features.EnumerateArray())
+            {
+                if (feature.TryGetProperty("geometry", out var geometry) &&
+                    geometry.TryGetProperty("type", out var type) &&
+                    type.GetString() == "LineString")
+                {
+                    var line = new Polyline
+                    {
+                        StrokeWidth = 4,
+                        StrokeColor = Color.FromArgb("#2E7D32")
+                    };
+
+                    if (geometry.TryGetProperty("coordinates", out var coordinates))
+                    {
+                        foreach (var coordinate in coordinates.EnumerateArray())
+                        {
+                            // GeoJSON format is [longitude, latitude]
+                            double longitude = coordinate[0].GetDouble();
+                            double latitude = coordinate[1].GetDouble();
+                            line.Geopath.Add(new Location(latitude, longitude));
+                        }
+                    }
+
+                    MyMap.MapElements.Add(line);
+                }
+            }
+        }
+    }
+
+    private async Task<Location?> GetCurrentLocationAsync()
+    {
+        try
+        {
+            var request = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(10));
+            var location = await Geolocation.GetLocationAsync(request);
+            return location;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Location Error", $"Unable to get location: {ex.Message}", "OK");
+            return null;
+        }
+    }
     private async void LoadUserCars()
     {
         // get user's list of cars from server
@@ -35,10 +124,11 @@ public partial class ShowMapPage : ContentPage
         }
 
         // Add "Add Car" option
-        if (userCars.Count < 5) {
+        if (userCars.Count < 5)
+        {
             CarPicker.Items.Add("+ Add Car");
         }
-        
+
 
         // Set default selection to first car if available
         if (userCars.Count > 0)
@@ -49,22 +139,23 @@ public partial class ShowMapPage : ContentPage
 
     private void OnNoParkingTapped(object sender, EventArgs e)
     {
-       // Filter logic here
+       showRed = !showRed ;
     }
 
     private void OnPaidParkingTapped(object sender, EventArgs e)
     {
-        // Filter logic here
+        showBlue = !showBlue;
+
     }
 
     private void OnFreeParkingTapped(object sender, EventArgs e)
     {
-        // Filter logic here
+        showGreen = !showGreen;
     }
 
     private void OnRestrictedTapped(object sender, EventArgs e)
     {
-        // Filter logic here
+       showYellow = !showYellow;
     }
 
     private async void OnCarPickerChanged(object sender, EventArgs e)
@@ -90,8 +181,20 @@ public partial class ShowMapPage : ContentPage
         SettingsToggleBtn.Text = SettingsPanel.IsVisible ? "⚙️ ▲" : "⚙️ ▼";
     }
 
+    private void setSelectedSettings(){
+        pickedCarName = CarPicker.SelectedItem?.ToString();
+        pickedDay = DatePicker.SelectedItem?.ToString(); 
+        pickedTime = TimePicker.SelectedItem?.ToString();
+        showRed = NoParkingCheck.IsChecked ;
+        showBlue  = PaidParkingCheck.IsChecked ;
+        showGreen = FreeParkingCheck.IsChecked ;
+        showYellow = RestrictedCheck.IsChecked ;
+    }
+
     private async void OnApplyClicked(object sender, EventArgs e)
     {
+        setSelectedSettings();
+        LoadMapAsync(pickedCarName,pickedDay,pickedTime, showRed , showBlue , showGreen , showYellow);
         await DisplayAlert("Apply", "Changes applied successfully!", "OK");
 
         // Auto-hide settings panel after applying changes
@@ -266,6 +369,34 @@ public partial class ShowMapPage : ContentPage
 
         // Show as modal
         await Navigation.PushModalAsync(popup);
+    }
+
+    private async void OnSearchAddress(object sender, EventArgs e)
+    {
+        var searchBar = (SearchBar)sender;
+        var address = searchBar.Text;
+
+        if (string.IsNullOrWhiteSpace(address))
+            return;
+
+        try
+        {
+            var locations = await Geocoding.GetLocationsAsync(address);
+            var location = locations?.FirstOrDefault();
+
+            if (location != null)
+            {
+                MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(location, Distance.FromKilometers(0.5)));
+            }
+            else
+            {
+                await DisplayAlert("Not Found", "Address not found. Please try a different search.", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Search Error", $"Unable to search: {ex.Message}", "OK");
+        }
     }
 
     private async Task ShowParkingConfirmedPopup(string message)

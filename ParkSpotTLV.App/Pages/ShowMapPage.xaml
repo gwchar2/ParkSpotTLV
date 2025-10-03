@@ -2,11 +2,13 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:ParkSpotTLV.App.Controls"
+             xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
              x:Class="ParkSpotTLV.App.Pages.ShowMapPage"
              Title="Map">
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -200,21 +202,26 @@
         </Grid>
         </Border>
 
+        <!-- Search Bar -->
+        <SearchBar Grid.Row="2"
+                   x:Name="AddressSearchBar"
+                   Placeholder="Search address..."
+                   SearchButtonPressed="OnSearchAddress"
+                   Margin="20,10,20,0"
+                   BackgroundColor="White" />
+
         <!-- Map Image -->
-        <Border Grid.Row="2"
+        <Border Grid.Row="3"
                 Padding="20"
                 StrokeThickness="1"
                 Stroke="Gray"
                 StrokeShape="RoundRectangle 10"
                 Margin="20">
-            <Image Source="map.png"
-                   Aspect="AspectFill"
-                   BackgroundColor="LightBlue">
-            </Image>
+            <maps:Map x:Name="MyMap" />
         </Border>
 
         <!-- "Park Here" button-->
-        <Button Grid.Row="3"
+        <Button Grid.Row="4"
                 x:Name="ParkHereBtn"
                 Text="Park Here"
                 BackgroundColor="#2E7D32"

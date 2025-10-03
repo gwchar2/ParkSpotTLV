@@ -17,6 +17,7 @@ namespace ParkSpotTLV.App
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseMauiMaps()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -57,6 +58,14 @@ namespace ParkSpotTLV.App
                 var auth = sp.GetRequiredService<AuthenticationService>();
                 var opts = sp.GetRequiredService<JsonSerializerOptions>();
                 return new CarService(http, auth, opts);
+            });
+
+            builder.Services.AddSingleton<MapService>(sp =>
+            {
+                var http = sp.GetRequiredService<HttpClient>();
+                var auth = sp.GetRequiredService<AuthenticationService>();
+                var opts = sp.GetRequiredService<JsonSerializerOptions>();
+                return new MapService(http, auth, opts);
             });
 
             // Core app services you already had
