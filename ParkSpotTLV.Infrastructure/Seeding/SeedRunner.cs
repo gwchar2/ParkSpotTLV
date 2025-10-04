@@ -7,7 +7,6 @@ using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Infrastructure.Entities;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ParkSpotTLV.Infrastructure.Seeding {
     public sealed class SeedOptions {
@@ -91,9 +90,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
 
             _log.LogInformation("Seeding StreetSegments from {Path}", _opts.Paths.StreetSegments);
 
-            var zonesByCode = await db.Zones.AsNoTracking()
-                .Where(z => z.Code.HasValue)
-                .ToDictionaryAsync(z => z.Code.Value, z => z.Id, ct);
+            var zonesByCode = await db.Zones.AsNoTracking().Where(z => z.Code.HasValue).ToDictionaryAsync(z => z.Code!.Value, z => z.Id, ct);
 
             foreach (var (geom, props) in GeoJsonLoader.LoadFeatures(_opts.Paths.StreetSegments)) {
                 var line = ToLineString(geom);
@@ -210,9 +207,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
 
             _log.LogInformation("Seeding Users from {Path}", _opts.Paths.Users);
 
-            var zonesByCode = await db.Zones.AsNoTracking()
-                .Where(z => z.Code != null)
-                .ToDictionaryAsync(z => z.Code!, z => z.Id, ct);
+            var zonesByCode = await db.Zones.AsNoTracking().Where(z => z.Code != null).ToDictionaryAsync(z => z.Code!.Value, z => z, ct);
 
             var json = await File.ReadAllTextAsync(_opts.Paths.Users, ct);
             var users = JsonSerializer.Deserialize<List<JsonObject>>(json) ?? [];

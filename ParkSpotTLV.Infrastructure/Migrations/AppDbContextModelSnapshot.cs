@@ -272,6 +272,10 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                     b.HasIndex("OwnerId")
                         .HasDatabaseName("ix_vehicles_owner_id");
 
+                    b.HasIndex("OwnerId", "Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_vehicles_owner_id_name");
+
                     b.ToTable("vehicles", (string)null);
                 });
 

@@ -9,6 +9,7 @@ namespace ParkSpotTLV.Contracts.Vehicles {
         public int? ResidentZoneCode { get; init; }            // null => no residency
         public Guid? DisabilityPermitId { get; init; }
         public bool DisabledPermit { get; init; }
+        public Guid? DefaultPermitId { get; init; }
         public string RowVersion { get; init; } = default!;    // send back on PATCH/DELETE
 
     }
