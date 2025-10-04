@@ -7,6 +7,7 @@ using ParkSpotTLV.Infrastructure;
 using ParkSpotTLV.Infrastructure.Entities;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using ParkSpotTLV.Api.Endpoints.Support;
 
 namespace ParkSpotTLV.Api.Endpoints {
     public static class AuthEndpoints {
@@ -22,26 +23,17 @@ namespace ParkSpotTLV.Api.Endpoints {
              *      409 if username is taken; 400 if policy fails.
              */
             auth.MapPost("/register",
-                async ([FromBody] RegisterRequest body,AppDbContext db,IPasswordHasher hasher,IJwtService jwt,IRefreshTokenService refresh,CancellationToken ct) => {
-                    
+                async ([FromBody] RegisterRequest body,HttpContext ctx, AppDbContext db,IPasswordHasher hasher,IJwtService jwt,IRefreshTokenService refresh,CancellationToken ct) => {
+
                     if (string.IsNullOrWhiteSpace(body.Username) || string.IsNullOrWhiteSpace(body.Password))
-                        return Results.Problem(
-                            title: "Username and password are required.",
-                            statusCode: StatusCodes.Status400BadRequest,
-                            type: "https://httpstatuses.com/400"
-                            );
+                        return AuthProblems.MissingInfo(ctx);
                     
                     var normalized = body.Username.Trim().ToLowerInvariant();
                     
                     var exists = await db.Users.AsNoTracking().AnyAsync(u => u.Username == normalized, ct);
                     
-                    if (exists)
-                        return Results.Problem(
-                            title: "Username already taken.",
-                            statusCode: StatusCodes.Status409Conflict,
-                            type: "https://httpstatuses.com/409"
-                            );
-                    
+                    if (exists) return AuthProblems.UsernameTaken(ctx);
+
                     var pwdHash = hasher.Hash(body.Password);
                     
                     var user = new User {
@@ -81,35 +73,21 @@ namespace ParkSpotTLV.Api.Endpoints {
              *      401 for bad creds; 400 if malformed.
              */
             auth.MapPost("/login",
-                async ([FromBody] RegisterRequest body,AppDbContext db,IPasswordHasher hasher,IJwtService jwt,IRefreshTokenService refresh,CancellationToken ct) => {
+                async ([FromBody] RegisterRequest body, HttpContext ctx, AppDbContext db,IPasswordHasher hasher,IJwtService jwt,IRefreshTokenService refresh,CancellationToken ct) => {
                            
                     if (string.IsNullOrWhiteSpace(body.Username) || string.IsNullOrWhiteSpace(body.Password))
-                        return Results.Problem( 
-                            title: "Username and password are required.",
-                            statusCode: StatusCodes.Status400BadRequest,
-                            type: "https://httpstatuses.com/400"
-                            );
+                        return AuthProblems.MissingInfo(ctx);
 
                     var normalized = body.Username.Trim().ToLowerInvariant();
                     
                     var user = await db.Users.AsNoTracking().SingleOrDefaultAsync(us => us.Username == normalized, ct);
                     if (user is null)
-                        return Results.Problem(
-                            title: "Invalid credentials.",
-                            statusCode: StatusCodes.Status401Unauthorized,
-                            type: "https://httpstatuses.com/401"
-                            );
-                    
-                    
+                        return AuthProblems.InvalidCreds(ctx);
+
                     var (isValid, needsRehash) = hasher.Verify(body.Password, user.PasswordHash);
                     
-                    if (!isValid)
-                        return Results.Problem(
-                            title: "Invalid credentials.",
-                            statusCode: StatusCodes.Status401Unauthorized,
-                            type: "https://httpstatuses.com/401"
-                            );
-                    
+                    if (!isValid) return AuthProblems.InvalidCreds(ctx);
+
                     await db.SaveChangesAsync(ct);
                     
                     var access = jwt.IssueAccessToken(user.Id, user.Username);               // Temporary access token
@@ -140,14 +118,10 @@ namespace ParkSpotTLV.Api.Endpoints {
              *      401 for invalid/expired/revoked/reused tokens; 400 if malformed.
              */
             auth.MapPost("/refresh",
-                ([FromBody] RefreshRequest body, AppDbContext db, IRefreshTokenService refreshService, CancellationToken ct) => {
-                    
+                ([FromBody] RefreshRequest body,HttpContext ctx, AppDbContext db, IRefreshTokenService refreshService, CancellationToken ct) => {
+
                     if (body is null || string.IsNullOrWhiteSpace(body.RefreshToken))
-                        return Results.Problem(
-                            title: "Refresh token is required",
-                            statusCode: StatusCodes.Status400BadRequest,
-                            type: "https://httpstatuses.com/400"
-                            );
+                        return GeneralProblems.MissingRefresh(ctx);
 
                     try {
                         var result = refreshService.ValidateAndRotate(body.RefreshToken);
@@ -166,18 +140,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         return Results.Ok(response);
                     }
                     catch (UnauthorizedAccessException) {
-                        return Results.Problem(
-                            title: "Invalid or expired refresh token.",
-                            statusCode: StatusCodes.Status401Unauthorized,
-                            type: "https://httpstatuses.com/401"
-                        );
-                    }
-                    catch (Exception ex) {
-                        return Results.Problem(
-                            title: ex.Message,
-                            statusCode: StatusCodes.Status500InternalServerError,
-                            type: "https://httpstatuses.com/500"
-                        );
+                        return GeneralProblems.ExpiredToken(ctx);
                     }
                 })
                 .Accepts<RefreshRequest>("application/json")
@@ -197,66 +160,38 @@ namespace ParkSpotTLV.Api.Endpoints {
              *      401 if the caller has no valid access token (or user disabled).
              */
             auth.MapPost("/logout",
-                ([FromBody] LogoutRequest body,HttpContext http,IRefreshTokenService refreshService) => {
-                    
-                    if (body is null)
-                        return Results.Problem(
-                            title: "Request body is required.",
-                            statusCode: StatusCodes.Status400BadRequest,
-                            type: "https://httpstatuses.com/400"
-                            );
-                    
+                ([FromBody] LogoutRequest body,HttpContext ctx,IRefreshTokenService refreshService) => {
+
+                    if (body is null) return GeneralProblems.MissingBody(ctx);
                     
                     /* To remove ALL devices, we require a valid JWT bearer */
                     if (body.AllDevices) {
-                        var subscriptions = http.User.FindFirstValue(ClaimTypes.NameIdentifier)
-                                            ?? http.User.FindFirstValue("subscriptions");
+                        var subscriptions = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                                            ?? ctx.User.FindFirstValue("subscriptions");
 
                         if (string.IsNullOrWhiteSpace(subscriptions) || !Guid.TryParse(subscriptions, out var userId))
-                            return Results.Problem(
-                                title: "Authentication required to log out all devices.",
-                                statusCode: StatusCodes.Status401Unauthorized,
-                                type: "https://httpstatuses.com/401"
-                                );
+                            return AuthProblems.AuthentRequired(ctx);
 
                         try {
                             refreshService.RevokeAllForUser(userId);
                             return Results.NoContent();
                         }
                         catch (Exception) {
-                            return Results.Problem(
-                                title: "Unexpected error while revoking tokens.",
-                                statusCode: StatusCodes.Status500InternalServerError,
-                                type: "https://httpstatuses.com/500"
-                            );
+                            return GeneralProblems.Unexpected(ctx);
                         }
                     }
                     /* single-session logout by refresh token (no auth required) */
-                    if (string.IsNullOrWhiteSpace(body.RefreshToken)) {
-                        return Results.Problem(
-                            title: "Either set allDevices=true or provide refreshToken.",
-                            statusCode: StatusCodes.Status400BadRequest,
-                            type: "https://httpstatuses.com/400"
-                        );
-                    }
+                    if (string.IsNullOrWhiteSpace(body.RefreshToken)) return AuthProblems.SingleSession(ctx); 
 
                     try {
                         refreshService.RevokeByRawToken(body.RefreshToken);
                         return Results.NoContent();
                     }
                     catch (UnauthorizedAccessException) {
-                        return Results.Problem(
-                            title: "Invalid or expired refresh token.",
-                            statusCode: StatusCodes.Status401Unauthorized,
-                            type: "https://httpstatuses.com/401"
-                        );
+                        return GeneralProblems.ExpiredToken(ctx);
                     }
                     catch (Exception) {
-                        return Results.Problem(
-                            title: "Unexpected error while revoking token.",
-                            statusCode: StatusCodes.Status500InternalServerError,
-                            type: "https://httpstatuses.com/500"
-                        );
+                        return GeneralProblems.Unexpected(ctx);
                     }
                 })
                 .Accepts<LogoutRequest>("application/json")
@@ -269,13 +204,8 @@ namespace ParkSpotTLV.Api.Endpoints {
             /* GET ME — current authenticated user */
             auth.MapGet("/me", 
                 async (HttpContext ctx,AppDbContext db,CancellationToken ct) => {
-                    var sub = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    if (!Guid.TryParse(sub, out var userId))
-                        return Results.Problem(
-                            title: "Invalid or expired token.",
-                            statusCode: StatusCodes.Status401Unauthorized,
-                            type: "https://httpstatuses.com/401"
-                            );
+
+                    var userId = ctx.GetUserId();
 
                     // Load profile
                     var user = await db.Users
@@ -284,12 +214,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         .Select(u => new { u.Id, u.Username })
                         .SingleOrDefaultAsync(ct);
 
-                    if (user is null) 
-                        return Results.Problem(
-                            title: "user not found",
-                            statusCode: StatusCodes.Status404NotFound,
-                            type: "https://httpstatuses.com/404"
-                            );
+                    if (user is null) return GeneralProblems.NotFound(ctx);
 
                     // Count how many vehicles user owns
                     var vehiclesCount = await db.Vehicles
@@ -303,6 +228,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         ));
                 })
                 .RequireAuthorization()
+                .RequireUser()
                 .Produces<UserMeResponse>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status401Unauthorized)
                 .ProducesProblem(StatusCodes.Status404NotFound)
@@ -319,36 +245,20 @@ namespace ParkSpotTLV.Api.Endpoints {
             auth.MapPost("/change-password",
                 async ([FromBody] UpdatePasswordRequest body,HttpContext ctx,AppDbContext db, IPasswordHasher hasher, CancellationToken ct) => {
 
-                    var sub = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    if (!Guid.TryParse(sub, out var userId))
-                        return Results.Problem(
-                            title: "Invalid or expired token.",
-                            statusCode: StatusCodes.Status401Unauthorized,
-                            type: "https://httpstatuses.com/401"
-                        ); ;
-                    
+                    var userId = ctx.GetUserId();
+
                     if (string.IsNullOrWhiteSpace(body.OldPassword) || string.IsNullOrWhiteSpace(body.NewPassword))
-                        return Results.Problem(
-                            title: "Old and new passwords are required.",
-                            statusCode: StatusCodes.Status400BadRequest,
-                            type: "https://httpstatuses.com/400"
-                            );
-                    
-                    
+                        return AuthProblems.OldInfo(ctx);
+
                     var user = await db.Users.SingleOrDefaultAsync(u => u.Id == userId, ct);
                     
                     if (user is null) return Results.Unauthorized();
                     
                     var (isValid, needsRehash) = hasher.Verify(body.OldPassword, user.PasswordHash);
-                    
-                    if (!isValid)
-                        return Results.Problem(
-                            title: "Invalid old password.",
-                            statusCode: StatusCodes.Status400BadRequest,
-                            type: "https://httpstatuses.com/400"
-                            );
-                    
-                    
+
+                    if (!isValid) return AuthProblems.InvalidOldPass(ctx);
+
+
                     user.PasswordHash = hasher.Hash(body.NewPassword);
                     
                     await db.SaveChangesAsync(ct);
@@ -357,6 +267,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                     });
                 })
                 .RequireAuthorization()
+                .RequireUser()
                 .Produces<string>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status400BadRequest)
                 .ProducesProblem(StatusCodes.Status401Unauthorized)

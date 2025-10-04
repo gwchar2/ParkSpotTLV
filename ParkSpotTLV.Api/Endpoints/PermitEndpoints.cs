@@ -1,8 +1,9 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ParkSpotTLV.Contracts.Permits;
+using ParkSpotTLV.Api.Endpoints.Support;
 using ParkSpotTLV.Contracts.Enums;
+using ParkSpotTLV.Contracts.Permits;
 using ParkSpotTLV.Infrastructure;
 using ParkSpotTLV.Infrastructure.Entities;
 using System.Security.Claims;
@@ -12,7 +13,7 @@ namespace ParkSpotTLV.Api.Endpoints {
 
         public static IEndpointRouteBuilder MapPermits(this IEndpointRouteBuilder routes) {
 
-            var group = routes.MapGroup("/permits").RequireAuthorization().WithTags("Permit Requests");
+            var group = routes.MapGroup("/permits").RequireAuthorization().WithTags("Permit Requests").RequireUser();
             /* GET PERMITS -> Use GET VEHICLES */
 
 
@@ -27,25 +28,14 @@ namespace ParkSpotTLV.Api.Endpoints {
             group.MapPost("/",
                 async ([FromBody] PermitCreateRequest body, HttpContext ctx, AppDbContext db, CancellationToken ct) => {
 
-                    var sub = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    if (!Guid.TryParse(sub, out var userId))
-                        return Results.Problem(
-                            title: "Invalid or expired token.",
-                            statusCode: StatusCodes.Status401Unauthorized,
-                            type: "https://httpstatuses.com/401"
-                            );
+                    var userId = ctx.GetUserId();
 
                     // If the vehicle is not found, return not found vehicle
                     var vehicle = await db.Vehicles.FirstOrDefaultAsync(v => v.Id == body.VehicleId, ct);
-                    if (vehicle is null)
-                        return Results.Problem(
-                            title: "Vehicle was not found.",
-                            statusCode: StatusCodes.Status404NotFound,
-                            type: "https://httpstatuses.com/404"
-                            );
+                    if (vehicle is null) return VehicleProblems.NotFound(ctx);
 
                     // Check if there is a maximum amount of permits on the vehicle already
-                    if (await db.Permits.CountAsync(p => p.VehicleId == vehicle.Id, ct) == 2)
+                    if (await db.Permits.CountAsync(p => p.VehicleId == vehicle.Id, ct) == 3)
                         return Results.Problem(
                             title: "Maximum of 2 permits per vehicle", 
                             statusCode: StatusCodes.Status400BadRequest
@@ -57,25 +47,11 @@ namespace ParkSpotTLV.Api.Endpoints {
                     if (body.Type == PermitType.ZoneResident) {
 
                         var hasResident = vehicle.Permits.FirstOrDefault(p => p.Type == PermitType.ZoneResident);
-                        if (hasResident is not null)
-                            return Results.Problem(
-                                title: "Vehicle can not have more than 1 permit of same type", 
-                                statusCode: StatusCodes.Status409Conflict
-                                );
-
-                        if (!body.ResidentZoneCode.HasValue)
-                            return Results.Problem(
-                                title: "Please add a zone code!", 
-                                statusCode: StatusCodes.Status400BadRequest
-                                );
+                        if (hasResident is not null) return PermitProblems.MaxOne(ctx);
+                        if (!body.ResidentZoneCode.HasValue) return PermitProblems.MissingZone(ctx);
 
                         var zone = await db.Zones.FirstOrDefaultAsync(z => z.Code == body.ResidentZoneCode, ct);
-                        if (zone is null)
-                            return Results.Problem(
-                                title: "Invalid zone code",
-                                detail: $"Zone code {body.ResidentZoneCode} does not exist.", 
-                                statusCode: StatusCodes.Status404NotFound
-                                );
+                        if (zone is null) return GeneralProblems.InvalidZoneCode(ctx);
 
                         permit.Type = body.Type;
                         permit.ZoneCode = body.ResidentZoneCode;
@@ -87,11 +63,7 @@ namespace ParkSpotTLV.Api.Endpoints {
 
                     } else if (body.Type == PermitType.Disability) {
                         var hasDisability = vehicle.Permits.FirstOrDefault(p => p.Type == PermitType.Disability);
-                        if (hasDisability is not null)
-                            return Results.Problem(
-                                title: "Vehicle can not have more than 1 permit of same type", 
-                                statusCode: StatusCodes.Status409Conflict
-                                );
+                        if (hasDisability is not null) return PermitProblems.MaxOne(ctx);
 
                         permit.Type = body.Type;
                         permit.Vehicle = vehicle;
@@ -100,21 +72,14 @@ namespace ParkSpotTLV.Api.Endpoints {
                     }
                     else if (body.Type == PermitType.Default) {
                         var hasDefault = vehicle.Permits.FirstOrDefault(p => p.Type == PermitType.Default);
-                        if (hasDefault is not null)
-                            return Results.Problem(
-                                title: "Vehicle can not have more than 1 permit of same type",
-                                statusCode: StatusCodes.Status409Conflict
-                                );
+                        if (hasDefault is not null) return PermitProblems.MaxOne(ctx);
 
                         permit.Type = body.Type;
                         permit.Vehicle = vehicle;
                         permit.VehicleId = body.VehicleId;
                         db.Permits.Add(permit);
                     } else {
-                        return Results.Problem(
-                            title: "Please choose type of permit",
-                            statusCode: StatusCodes.Status400BadRequest
-                            );
+                        return PermitProblems.ChooseType(ctx);
                     }
 
                     await db.SaveChangesAsync(ct);
@@ -151,28 +116,11 @@ namespace ParkSpotTLV.Api.Endpoints {
             group.MapGet("/{id:guid}",
                 async (Guid id, HttpContext ctx, AppDbContext db, CancellationToken ct) => {
 
-                    var sub = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    if (!Guid.TryParse(sub, out var userId))
-                        return Results.Problem(
-                            title: "Invalid or expired token.",
-                            statusCode: StatusCodes.Status401Unauthorized,
-                            type: "https://httpstatuses.com/401"
-                            );
+                    var userId = ctx.GetUserId();
 
                     var permit = await db.Permits.AsNoTracking().Include(p => p.Vehicle).SingleOrDefaultAsync(p => p.Id == id, ct);
 
-                    if (permit is null) return Results.Problem(
-                            title: "Permit not found",
-                            statusCode: StatusCodes.Status404NotFound,
-                            type: "https://httpstatuses.com/404"
-                            );
-
-                    if (permit.Vehicle.OwnerId != userId) 
-                        return Results.Problem(
-                            title: "Permit does not belong to this user.",
-                            statusCode: StatusCodes.Status403Forbidden,
-                            type: "https://httpstatuses.com/403"
-                            );
+                    if (permit is null || permit.Vehicle.OwnerId != userId) return PermitProblems.Forbidden(ctx);
 
                     var dto = new PermitResponse {
                         PermitId = id,
@@ -206,70 +154,28 @@ namespace ParkSpotTLV.Api.Endpoints {
             group.MapPatch("/{id:guid}",
                 async (Guid id, [FromBody] PermitUpdateRequest body, HttpContext ctx, AppDbContext db, CancellationToken ct) => {
 
+                    var userId = ctx.GetUserId();
 
-                    var sub = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    if (!Guid.TryParse(sub, out var userId))
-                        return Results.Problem(
-                            title: "Invalid or expired token.",
-                            statusCode: StatusCodes.Status401Unauthorized,
-                            type: "https://httpstatuses.com/401"
-                        );
+                    if (string.IsNullOrWhiteSpace(body.RowVersion)) return GeneralProblems.MissingRowVersion(ctx);
 
-                    if (string.IsNullOrWhiteSpace(body.RowVersion))
-                        return Results.Problem(
-                            title: "Missing rowVersion", 
-                            statusCode: StatusCodes.Status400BadRequest
-                            );
-
-                    uint expectedXmin;
-                    try { 
-                        expectedXmin = BitConverter.ToUInt32(Convert.FromBase64String(body.RowVersion)); 
-                    }
-                    catch { 
-                        return Results.Problem(
-                            title: "Invalid RowVersion format", 
-                            statusCode: StatusCodes.Status400BadRequest
-                            ); 
-                    }
+                    if (!Guards.TryBase64ToUInt32(body.RowVersion, out uint expectedXmin))
+                        return GeneralProblems.InvalidRowVersion(ctx);
 
                     // Get the permit from DB, check for rights
                     var permit = await db.Permits.Include(p => p.Id == id).SingleOrDefaultAsync(ct);
-                    if (permit is null)
-                        return Results.Problem(
-                            title: "Permit not found.",
-                            statusCode: StatusCodes.Status404NotFound,
-                            type: "https://httpstatuses.com/404"
-                            );
-
-                    if (permit.Vehicle.Id != userId)
-                        return Results.Problem(
-                            title: "Vehicle does not belong to current user.",
-                            statusCode: StatusCodes.Status403Forbidden,
-                            type: "https://httpstatuses.com/403"
-                            );
+                    if (permit is null || permit.Vehicle.Id != userId)
+                        return PermitProblems.Forbidden(ctx);
 
                     // Check if the vehicle already has a permit of the 'want-to-change-to' type
-                    if (permit.Type != body.Type && (permit.Vehicle.Permits.Select(p => p.Type == body.Type) is not null)) 
-                        return Results.Problem(
-                            title: "Vehicle already has permit.",
-                            detail: $"Vehicle {permit.VehicleId} already has a permit of type {body.Type}.", 
-                            statusCode: StatusCodes.Status409Conflict
-                            );
+                    if (permit.Type != body.Type && (permit.Vehicle.Permits.Select(p => p.Type == body.Type) is not null))
+                        return PermitProblems.MaxOne(ctx);
 
                     // Check for concurrency
-                    if (permit.Xmin != expectedXmin)
-                        return Results.Problem(
-                            title: "Concurrency Error",
-                            detail: "The permit was modified by another request. Reload and try again.",
-                            statusCode: StatusCodes.Status409Conflict
-                            );
+                    if (permit.Xmin != expectedXmin) return GeneralProblems.ConcurrencyError(ctx);
 
                     // Implement the change (If its zone permit -> MUST HAVE zone code)
                     if (body.Type == PermitType.ZoneResident && !body.ZoneCode.HasValue)
-                            return Results.Problem(
-                                title: "Zone permit must include a zone.", 
-                                statusCode: StatusCodes.Status400BadRequest
-                                );
+                        return PermitProblems.MissingZoneCode(ctx);
 
                     permit.Type = body.Type;
                     permit.ZoneCode = body.ZoneCode;
@@ -311,60 +217,23 @@ namespace ParkSpotTLV.Api.Endpoints {
             group.MapDelete("/{id:guid}",
                 async (Guid id, [FromBody] PermitDeleteRequest body, HttpContext ctx, AppDbContext db, CancellationToken ct) => {
 
-                    var sub = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    if (!Guid.TryParse(sub, out var userId))
-                        return Results.Problem(
-                            title: "Invalid or expired token.",
-                            statusCode: StatusCodes.Status401Unauthorized,
-                            type: "https://httpstatuses.com/401"
-                            );
+                    var userId = ctx.GetUserId();
 
                     // We check for concurrency
-                    if (string.IsNullOrWhiteSpace(body.RowVersion))
-                        return Results.Problem(
-                            title: "Missing RowVersion",
-                            statusCode: StatusCodes.Status400BadRequest
-                            );
+                    if (string.IsNullOrWhiteSpace(body.RowVersion)) return GeneralProblems.MissingRowVersion(ctx);
 
-                    uint expectedXmin;
-                    try {
-                        expectedXmin = BitConverter.ToUInt32(Convert.FromBase64String(body.RowVersion));
-                    } catch {
-                        return Results.Problem(
-                            title: "Invalid RowVersion format",
-                            statusCode: StatusCodes.Status400BadRequest
-                            );
-                    }
+                    if (!Guards.TryBase64ToUInt32(body.RowVersion, out uint expectedXmin))
+                        return GeneralProblems.InvalidRowVersion(ctx);
 
                     // We need to make sure the permit belongs to specified user
                     var permit = await db.Permits.AsNoTracking().Include(p => p.Vehicle).SingleOrDefaultAsync(p => p.Id == id, ct);
 
-                    if (permit is null) 
-                        return Results.Problem(
-                            title: "Permit not found.",
-                            statusCode: StatusCodes.Status404NotFound
-                            );
+                    if (permit is null || permit.Vehicle.OwnerId != userId)  return PermitProblems.Forbidden(ctx);
 
-                    if (permit.Vehicle.OwnerId != userId) 
-                        return Results.Problem(
-                            title: "Permit does not belong to user.",
-                            statusCode: StatusCodes.Status403Forbidden
-                            );
-
-                    if (permit.Xmin != expectedXmin)
-                        return Results.Problem(
-                            title: "Concurrency Error",
-                            detail: "The permit was modified by another request. Reload and try again.",
-                            statusCode: StatusCodes.Status409Conflict
-                            );
+                    if (permit.Xmin != expectedXmin) return GeneralProblems.ConcurrencyError(ctx);
 
                     // Check if we leave the vehicle with 0 permits (NOT POSSIBLE)
-                    if (permit.Vehicle.Permits.Count == 0)
-                        return Results.Problem(
-                            title: "Max permits for user reached.",
-                            detail: $"Can not remove permit, Vehicle {permit.VehicleId} will have 0 permits.",
-                            statusCode: StatusCodes.Status409Conflict
-                            );
+                    if (permit.Type == PermitType.Default) return PermitProblems.CantRemoveDef(ctx);
 
                     // Delete the permit
                     db.Permits.Remove(permit);

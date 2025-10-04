@@ -28,5 +28,6 @@ namespace ParkSpotTLV.Contracts.Enums {
                 _ => "Truck"
             };
 
+
     }
 }
