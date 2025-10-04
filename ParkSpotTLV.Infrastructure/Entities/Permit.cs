@@ -20,8 +20,8 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         /* 
          * Zone Code for residential permit 
          */
-        public int? ZoneCode { get; set; }
-        public Zone? Zone { get; set; }
+        public int? ZoneCode { get; set; } = 0;
+        public Zone? Zone { get; set; } 
 
         /* 
          * Concurrency 

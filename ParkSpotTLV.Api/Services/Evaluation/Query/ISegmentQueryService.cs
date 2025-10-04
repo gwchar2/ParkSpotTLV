@@ -9,7 +9,8 @@ namespace ParkSpotTLV.Api.Services.Evaluation.Query {
      */
     public interface ISegmentQueryService {
 
-        Task<IReadOnlyList<SegmentSnapshot>> GetViewportAsync (double minLon, double maxLon, double minLat, double maxLat, CancellationToken cancellationToken);
+        Task<IReadOnlyList<SegmentSnapshot>> GetViewportAsync (
+            double minLon, double minLat, double maxLon, double maxLat, double centerLon, double centerLat, CancellationToken cancellationToken);
 
     }
 }

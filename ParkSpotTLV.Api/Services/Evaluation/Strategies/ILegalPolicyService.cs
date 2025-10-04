@@ -8,9 +8,9 @@ namespace ParkSpotTLV.Api.Services.Evaluation.Strategies {
      * Can the segment use a privileged parking spot?
      */
 
-    public interface IPrivilegedPolicyService {
+    public interface ILegalPolicyService {
 
-        bool IsLegalNow(ParkingType parkingType, int? segmentZoneCode, PermitPov permitPov, bool ProviligedActiveNow);
+        bool IsLegalNow(ParkingType parkingType, int? segmentZoneCode, PermitSnapshot permitPov, bool ProviligedActiveNow);
 
     }
 }

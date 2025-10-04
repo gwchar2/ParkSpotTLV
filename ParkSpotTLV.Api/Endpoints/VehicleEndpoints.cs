@@ -38,7 +38,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         .Include(v => v.Permits)
                         .Select(v => new VehicleResponse {
                             Id = v.Id,
-                            Type = v.Type,
+                            Type = EnumMappings.MapVehicleType(v.Type),
                             Name = v.Name,
                             ResidencyPermitId = v.Permits.Where(p => p.Type == PermitType.ZoneResident).Select(p => p.Id).FirstOrDefault(),
                             ResidentZoneCode = v.Permits
@@ -47,7 +47,8 @@ namespace ParkSpotTLV.Api.Endpoints {
                                 .FirstOrDefault(),
                             DisabilityPermitId = v.Permits.Where(p => p.Type == PermitType.Disability).Select(p => p.Id).FirstOrDefault(),
                             DisabledPermit = v.Permits.Any(p => p.Type == PermitType.Disability),
-                            RowVersion = Convert.ToBase64String(BitConverter.GetBytes(v.Xmin))})
+                            RowVersion = Convert.ToBase64String(BitConverter.GetBytes(v.Xmin))
+                        })
                         .ToListAsync(ct);
 
                     if (vehicles is null)
@@ -58,10 +59,10 @@ namespace ParkSpotTLV.Api.Endpoints {
 
                     return Results.Ok(vehicles);
                 })
-                .WithSummary("List Vehicles")
-                .WithDescription("List caller's vehicles.")
                 .Produces<List<VehicleResponse>>(StatusCodes.Status200OK)
-                .ProducesProblem(StatusCodes.Status401Unauthorized);
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .WithSummary("List Vehicles")
+                .WithDescription("List caller's vehicles.");
 
             /* GET /id Gets a specific vehicle
              * Accepts: Vehicle ID + Access Token
@@ -107,7 +108,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         .Include(v => v.Permits)
                         .Select(v => new VehicleResponse {
                             Id = v.Id,
-                            Type = v.Type,
+                            Type = EnumMappings.MapVehicleType(v.Type),
                             Name = v.Name,
                             ResidencyPermitId = v.Permits.Where(p => p.Type == PermitType.ZoneResident).Select(p => p.Id).FirstOrDefault(),
                             ResidentZoneCode = v.Permits
@@ -146,15 +147,13 @@ namespace ParkSpotTLV.Api.Endpoints {
                             type: "https://httpstatuses.com/401"
                         );
 
+                    if (await db.Vehicles.AsNoTracking().AnyAsync(z => z.OwnerId == userId && z.Name == body.Name, ct))
+                        return Results.Problem(
+                            title: "Name already exists",
+                            statusCode: StatusCodes.Status400BadRequest);
 
                     var hasResidency = body.ResidentZoneCode.HasValue;
                     var hasDisability = body.HasDisabledPermit;
-
-
-                    if (!hasResidency && !hasDisability)
-                        return Results.Problem(
-                            title: "Please add a permit!", 
-                            statusCode: StatusCodes.Status400BadRequest);
 
                     // If residency provided, validate that Zone.Code exists
                     if (hasResidency) {
@@ -174,6 +173,13 @@ namespace ParkSpotTLV.Api.Endpoints {
                         Type = body.Type,
                         Name = body.Name
                     };
+                    /* need to test */
+                    if (!hasResidency && !hasDisability) {
+                        vehicle.Permits.Add(new Permit {
+                            Type = PermitType.Default,
+                            Vehicle = vehicle
+                        });
+                    }
 
                     // If the vehicle has residencypermit, add it.
                     if (hasResidency) {
@@ -202,13 +208,10 @@ namespace ParkSpotTLV.Api.Endpoints {
                         .Include(v => v.Permits)
                         .Select(v => new VehicleResponse {
                             Id = v.Id,
-                            Type = v.Type,
+                            Type = EnumMappings.MapVehicleType(v.Type),
                             Name = v.Name,
                             ResidencyPermitId = v.Permits.Where(p => p.Type == PermitType.ZoneResident).Select(p => p.Id).FirstOrDefault(),
-                            ResidentZoneCode = v.Permits
-                                .Where(p => p.Type == PermitType.ZoneResident)
-                                .Select(p => p.ZoneCode)
-                                .FirstOrDefault(),
+                            ResidentZoneCode = v.Permits.Where(p => p.Type == PermitType.ZoneResident).Select(p => p.ZoneCode).FirstOrDefault(),
                             DisabilityPermitId = v.Permits.Where(p => p.Type == PermitType.Disability).Select(p => p.Id).FirstOrDefault(),
                             DisabledPermit = v.Permits.Any(p => p.Type == PermitType.Disability),
                             RowVersion = Convert.ToBase64String(BitConverter.GetBytes(v.Xmin))})
@@ -297,7 +300,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         .Where(v => v.Id == id)
                         .Select(v => new VehicleResponse {
                             Id = v.Id,
-                            Type = v.Type,
+                            Type = EnumMappings.MapVehicleType(v.Type),
                             Name = v.Name,
                             ResidencyPermitId = v.Permits.Where(p => p.Type == PermitType.ZoneResident).Select(p => p.Id).FirstOrDefault(),
                             ResidentZoneCode = v.Permits

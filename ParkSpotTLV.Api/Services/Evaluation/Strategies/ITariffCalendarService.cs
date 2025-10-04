@@ -5,7 +5,7 @@ using ParkSpotTLV.Contracts.Enums;
 namespace ParkSpotTLV.Api.Services.Evaluation.Strategies {
 
     /*
-     * Together with Tariff + now, we return the currently active, and the next in line time boundaries.
+     * Checks if the time given falls in active hours
      */
     public interface ITariffCalendarService {
 

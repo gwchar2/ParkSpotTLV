@@ -1,4 +1,6 @@
-﻿using ParkSpotTLV.Contracts.Enums;
+﻿using NetTopologySuite.Geometries;
+using ParkSpotTLV.Contracts.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace ParkSpotTLV.Api.Services.Evaluation.Contracts {
 
@@ -7,12 +9,13 @@ namespace ParkSpotTLV.Api.Services.Evaluation.Contracts {
      * Produced by ISegmentQueryService (Query Object)
      */
     public sealed record SegmentSnapshot (
-        
         Guid SegmentId,
         int? ZoneCode,
         Tariff Tariff, 
-        ParkingType ParkingType
-
+        ParkingType ParkingType,
+        LineString Geom,
+        string? NameHebrew,
+        string? NameEnglish
     );
     
 }

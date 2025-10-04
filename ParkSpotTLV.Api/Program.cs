@@ -31,7 +31,7 @@ try {
     // Auth (options, hashing, JWT, refresh)
     builder.Services.AddAuthFeature(builder.Configuration);
 
-    // Map segment services (Step 2 later)
+    // Map segment services
     builder.Services.AddEvaluation();
 
     var app = builder.Build();
@@ -47,6 +47,7 @@ try {
     app.MapAuth();
     app.MapVehicles();
     app.MapPermits();
+    app.MapSegments();
 
     app.Run();
 }

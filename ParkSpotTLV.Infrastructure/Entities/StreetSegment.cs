@@ -11,7 +11,7 @@ For BOTH categories -> If you have a zone permit -> You have 2 free daily hours 
 All zones cost money during the day in their regulated areas. In addition, some streets inside each zone are marked as “מועדפת”, and those are permit-only during the signed hours.
 In all zones, after the official hours of payment/restriction end, the streets are free for all drivers.
 
-PaidA (Standard Paid Parking – most zones) Zones 1,2,4,12,13 - 08:00–17:00 (Mon–Thu), 08:00–17:00 (Fri) 7 ₪ / 4.90 ₪ per hour
+PaidA (Standard Paid Parking – most zones) Zones 1,2,4,12,13 - 08:00–19:00 (Mon–Thu), 08:00–17:00 (Fri) 7 ₪ / 4.90 ₪ per hour
     Payment required Sunday–Thursday 08:00–19:00.
     Fridays and holiday eves 08:00–17:00.
     Price: 7 ₪ per hour if no permit at all for Tel-Aviv. If have SOME zone permit -> 4.90 ₪

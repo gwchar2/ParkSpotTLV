@@ -1,16 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Infrastructure;
+using System.Reflection.Metadata;
 
 namespace ParkSpotTLV.Api.Services.Evaluation.Strategies {
 
     /*
-     * Calendar boundaries for paid/privileged time windows
+     * Checks if the time given falls in active hours
      */
     public sealed class TariffCalendarService(AppDbContext db) : ITariffCalendarService {
 
         private readonly AppDbContext _db = db;
-
+        private const int WEEK_DAYS = 7;
 
         // Gets the current status according to the day of the week
         public TariffCalendarStatus GetStatus(Tariff tariff, DateTimeOffset now) {
@@ -59,7 +60,7 @@ namespace ParkSpotTLV.Api.Services.Evaluation.Strategies {
 
         // Finds the next start
         private DateTimeOffset? NextStartForTariff(Tariff tariff, DateTimeOffset now) {
-            for (int i = 0; i < 7; i++) {
+            for (int i = 0; i < WEEK_DAYS; i++) {
                 var day = now.AddDays(i);
                 var windows = _db.TariffWindows.AsNoTracking()
                     .Where(t => t.Tariff == tariff && t.DayOfWeek == day.DayOfWeek)

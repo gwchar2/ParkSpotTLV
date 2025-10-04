@@ -85,9 +85,9 @@ namespace ParkSpotTLV.Api.Endpoints {
 
 
 
-                    } else if (body.Type == PermitType.ZoneResident) {
-                        var hasResident = vehicle.Permits.FirstOrDefault(p => p.Type == PermitType.Disability);
-                        if (hasResident is not null)
+                    } else if (body.Type == PermitType.Disability) {
+                        var hasDisability = vehicle.Permits.FirstOrDefault(p => p.Type == PermitType.Disability);
+                        if (hasDisability is not null)
                             return Results.Problem(
                                 title: "Vehicle can not have more than 1 permit of same type", 
                                 statusCode: StatusCodes.Status409Conflict
@@ -97,9 +97,21 @@ namespace ParkSpotTLV.Api.Endpoints {
                         permit.Vehicle = vehicle;
                         permit.VehicleId = body.VehicleId;
                         db.Permits.Add(permit);
+                    } else if (body.Type == PermitType.Default) {
+                        var hasDefault = vehicle.Permits.FirstOrDefault(p => p.Type == PermitType.Default);
+                        if (hasDefault is not null)
+                            return Results.Problem(
+                                title: "Vehicle can not have more than 1 permit of same type",
+                                statusCode: StatusCodes.Status409Conflict
+                                );
+
+                        permit.Type = body.Type;
+                        permit.Vehicle = vehicle;
+                        permit.VehicleId = body.VehicleId;
+                        db.Permits.Add(permit);
                     } else {
                         return Results.Problem(
-                            title: "Please choose type of permit", 
+                            title: "Please choose type of permit",
                             statusCode: StatusCodes.Status400BadRequest
                             );
                     }
@@ -110,7 +122,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                     var dto = await db.Permits.AsNoTracking().Where(p => p.Id == permit.Id).Select(p => new PermitResponse {
                         PermitId = p.Id,
                         VehicleId = p.VehicleId,
-                        Type = p.Type,
+                        PermitType = EnumMappings.MapPermitType(p.Type),
                         ResidentZoneCode = p.ZoneCode,
                         LastUpdated = p.LastUpdated
                     }).SingleAsync(ct);
@@ -164,7 +176,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                     var dto = new PermitResponse {
                         PermitId = id,
                         VehicleId = permit.VehicleId,
-                        Type = permit.Type,
+                        PermitType = EnumMappings.MapPermitType(permit.Type),
                         ResidentZoneCode = permit.ZoneCode,
                         LastUpdated = permit.LastUpdated
                     };
@@ -269,7 +281,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                     var dto = await db.Permits.AsNoTracking().Where(p => p.Id == id).Select(p => new PermitResponse {
                         PermitId = p.Id,
                         VehicleId = p.VehicleId,
-                        Type = p.Type,
+                        PermitType = EnumMappings.MapPermitType(p.Type),
                         ResidentZoneCode = p.ZoneCode,
                         LastUpdated = p.LastUpdated
                     }).SingleAsync(ct);
