@@ -173,7 +173,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         Type = body.Type,
                         Name = body.Name
                     };
-                    /* need to test */
+                    /* NEED TO TEST THIS */
                     if (!hasResidency && !hasDisability) {
                         vehicle.Permits.Add(new Permit {
                             Type = PermitType.Default,

@@ -97,7 +97,9 @@ namespace ParkSpotTLV.Api.Endpoints {
                         permit.Vehicle = vehicle;
                         permit.VehicleId = body.VehicleId;
                         db.Permits.Add(permit);
-                    } else if (body.Type == PermitType.Default) {
+                    }
+                    /* NEED TO TEST THIS */
+                    else if (body.Type == PermitType.Default) {
                         var hasDefault = vehicle.Permits.FirstOrDefault(p => p.Type == PermitType.Default);
                         if (hasDefault is not null)
                             return Results.Problem(

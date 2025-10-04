@@ -78,7 +78,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                                     VehicleId = permit.VehicleId
                                 };
                             } else {
-                                /* NEED TO TEST */
+                                /* NEED TO TEST THIS */
                                 pov = new PermitSnapshot {
                                     Type = PermitSnapType.None,
                                     ZoneCode = 0,
