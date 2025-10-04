@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.9.1-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.9.0-beta.0...v0.9.1-beta.0) (2025-10-04)
+
+
+### Features
+
+* Added map segments endpoint, fixed some permit / vehicle things. ([219689f](https://github.com/gwchar2/ParkSpotTLV/commit/219689fe7731d5d96c23d25cbadb5d6566195795))
+
+
+### Bug Fixes
+
+* Fixed a few endpoints ([a412fbe](https://github.com/gwchar2/ParkSpotTLV/commit/a412fbe4b588b4e70a20b0bfa7bae1c41e9d82bb))
+
 ## [0.9.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.8.0-beta.0...v0.9.0-beta.0) (2025-10-03)
 
 
