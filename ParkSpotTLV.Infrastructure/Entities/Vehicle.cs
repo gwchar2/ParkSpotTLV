@@ -10,7 +10,7 @@ namespace ParkSpotTLV.Infrastructure.Entities { // ADD NAME
         public Guid Id { get; set; } = Guid.NewGuid();
         public User Owner { get; set; } = default!;
         public Guid OwnerId { get; set; }
-
+       
         /* 
          * Defining data
          */

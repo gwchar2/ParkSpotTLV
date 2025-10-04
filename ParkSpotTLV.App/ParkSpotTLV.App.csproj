@@ -26,7 +26,8 @@
   		<AndroidPackageFormat>apk</AndroidPackageFormat>
   		<AndroidPackageName>ParkSpotTLV</AndroidPackageName> <!-- overrides APK filename -->
   		<AndroidPackageFileName>ParkSpotTLV.apk</AndroidPackageFileName> <!-- custom output name -->
-
+		<AndroidManifestPlaceholders>mapsApiKey=$(GOOGLE_MAPS_API_KEY)</AndroidManifestPlaceholders>
+		
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
@@ -40,7 +41,8 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
-	</PropertyGroup>
+	  <UserSecretsId>0133e85c-9576-4212-8ecf-b11c32a8a242</UserSecretsId>
+  </PropertyGroup>
 
 	<ItemGroup>
 		<!-- App Icon -->

@@ -24,7 +24,7 @@ namespace ParkSpotTLV.Contracts.Enums {
 
         public static string MapVehicleType(VehicleType v) => v
             switch {
-                VehicleType.Car => "Car",
+                VehicleType.Private => "Private",
                 _ => "Truck"
             };
 

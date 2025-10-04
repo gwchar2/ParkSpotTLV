@@ -13,7 +13,7 @@ namespace ParkSpotTLV.Infrastructure.Config {
 
             e.Property(x => x.ZoneCode).IsRequired(false);
             e.HasIndex(x => x.ZoneCode);
-
+            
             e.HasOne(x => x.Zone)
              .WithMany()
              .HasForeignKey(p => p.ZoneCode)

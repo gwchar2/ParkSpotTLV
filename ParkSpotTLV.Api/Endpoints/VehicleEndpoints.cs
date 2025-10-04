@@ -47,6 +47,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                                 .FirstOrDefault(),
                             DisabilityPermitId = v.Permits.Where(p => p.Type == PermitType.Disability).Select(p => p.Id).FirstOrDefault(),
                             DisabledPermit = v.Permits.Any(p => p.Type == PermitType.Disability),
+                            DefaultPermitId = v.Permits.Where(p => p.Type == PermitType.Default).Select(p => p.Id).FirstOrDefault(),
                             RowVersion = Convert.ToBase64String(BitConverter.GetBytes(v.Xmin))
                         })
                         .ToListAsync(ct);
@@ -117,6 +118,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                                 .FirstOrDefault(),
                             DisabilityPermitId = v.Permits.Where(p => p.Type == PermitType.Disability).Select(p => p.Id).FirstOrDefault(),
                             DisabledPermit = v.Permits.Any(p => p.Type == PermitType.Disability),
+                            DefaultPermitId = v.Permits.Where(p => p.Type == PermitType.Default).Select(p => p.Id).FirstOrDefault(),
                             RowVersion = Convert.ToBase64String(BitConverter.GetBytes(v.Xmin)) })
                         .SingleAsync(ct);
 
@@ -167,18 +169,22 @@ namespace ParkSpotTLV.Api.Endpoints {
                         }
                     }
 
-                    // Create a new vehicle with a list of permits
+                    // Create a new vehicle with a default permit
                     var vehicle = new Vehicle {
                         OwnerId = userId,
                         Type = body.Type,
                         Name = body.Name
                     };
-                    /* NEED TO TEST THIS */
+                    var permit = new Permit {
+                        Type = PermitType.Default,
+                        Vehicle = vehicle,
+                        VehicleId = vehicle.Id
+                    };
+                    db.Permits.Add(permit);
+
                     if (!hasResidency && !hasDisability) {
-                        vehicle.Permits.Add(new Permit {
-                            Type = PermitType.Default,
-                            Vehicle = vehicle
-                        });
+                        db.Vehicles.Add(vehicle);
+                        await db.SaveChangesAsync(ct);
                     }
 
                     // If the vehicle has residencypermit, add it.
@@ -214,6 +220,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                             ResidentZoneCode = v.Permits.Where(p => p.Type == PermitType.ZoneResident).Select(p => p.ZoneCode).FirstOrDefault(),
                             DisabilityPermitId = v.Permits.Where(p => p.Type == PermitType.Disability).Select(p => p.Id).FirstOrDefault(),
                             DisabledPermit = v.Permits.Any(p => p.Type == PermitType.Disability),
+                            DefaultPermitId = v.Permits.Where(p => p.Type == PermitType.Default).Select(p => p.Id).FirstOrDefault(),
                             RowVersion = Convert.ToBase64String(BitConverter.GetBytes(v.Xmin))})
                         .SingleAsync(ct);
 
@@ -309,6 +316,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                                 .FirstOrDefault(),
                             DisabilityPermitId = v.Permits.Where(p => p.Type == PermitType.Disability).Select(p => p.Id).FirstOrDefault(),
                             DisabledPermit = v.Permits.Any(p => p.Type == PermitType.Disability),
+                            DefaultPermitId = v.Permits.Where(p => p.Type == PermitType.Default).Select(p => p.Id).FirstOrDefault(),
                             RowVersion = Convert.ToBase64String(BitConverter.GetBytes(v.Xmin))})
                         .ToListAsync(ct);
 
