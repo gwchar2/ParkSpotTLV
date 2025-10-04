@@ -1,5 +1,5 @@
 ﻿
 
-namespace ParkSpotTLV.Contracts.Enums {
-    public enum VehicleType { Car = 1, Truck = 2 }
+namespace ParkSpotTLV.Core.Models {
+    public enum VehicleType { Private = 1, Truck = 2 }
 }

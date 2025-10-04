@@ -15,7 +15,7 @@ namespace ParkSpotTLV.Infrastructure.Entities { // ADD NAME
          * Defining data
          */
         public string Name { get; set; } = "";
-        public VehicleType Type { get; set; } = VehicleType.Car;
+        public VehicleType Type { get; set; } = VehicleType.Private;
 
         /*
          * Concurrency

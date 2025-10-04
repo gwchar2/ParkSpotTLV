@@ -1,4 +1,6 @@
 using ParkSpotTLV.App.Services;
+using ParkSpotTLV.Core.Models;
+
 
 namespace ParkSpotTLV.App.Pages;
 
@@ -16,6 +18,8 @@ public partial class AddCarPage : ContentPage
     private void OnResidentPermitChanged(object sender, CheckedChangedEventArgs e)
     {
         ZoneNumberEntry.IsVisible = e.Value;
+        FreeMinutesEntry.IsVisible = e.Value;
+        FreeMinutesLabel.IsVisible = e.Value;
     }
 
     private async void OnSaveCarClicked(object sender, EventArgs e)
@@ -28,7 +32,7 @@ public partial class AddCarPage : ContentPage
             return;
         }
 
-        CarType carType = PrivateRadio.IsChecked ? CarType.Private : CarType.Truck;
+        VehicleType vehicleType = PrivateRadio.IsChecked ? VehicleType.Private : VehicleType.Truck;
         bool hasResidentPermit = ResidentPermitCheck.IsChecked;
         string zoneNumberText = ZoneNumberEntry.Text?.Trim() ?? "";
         bool hasDisabledPermit = DisabledPermitCheck.IsChecked;
@@ -45,32 +49,39 @@ public partial class AddCarPage : ContentPage
         }
 
         // Create new car
-        var newCar = new Car
+        var newCar = new ParkSpotTLV.App.Services.Car
         {
-            // Name = carName,
-            Type = carType,
+            Name = carName,
+            Type = vehicleType,
             HasResidentPermit = hasResidentPermit,
             ResidentPermitNumber = residentPermitNumber,
             HasDisabledPermit = hasDisabledPermit
         };
 
         // Save car using CarService
-        bool success = await _carService.AddCarAsync(newCar);
-
-        if (success)
+        try
         {
-            string message = $"Car saved: {carName} ({newCar.TypeDisplayName})";
-            if (hasResidentPermit)
-                message += $"\nResident permit - Zone: {residentPermitNumber}";
-            if (hasDisabledPermit)
+            var addedCar = await _carService.AddCarAsync(newCar);
+
+            if (addedCar == null)
+            {
+                await DisplayAlert("Error", "Failed to add car", "OK");
+                return;
+            }
+
+            string message = $"Car saved: {addedCar.Name} ({addedCar.Type})";
+            if (addedCar.HasResidentPermit)
+                message += $"\nResident permit - Zone: {addedCar.ResidentPermitNumber}";
+            if (addedCar.HasDisabledPermit)
                 message += "\nDisabled parking permit";
 
             await DisplayAlert("Success", message, "OK");
             await Shell.Current.GoToAsync("..");
         }
-        else
+        catch (Exception ex)
         {
-            await DisplayAlert("Error", "Failed to add car. You can have maximum 5 cars.", "OK");
+            await DisplayAlert("Error", ex.Message, "OK");
         }
+        
     }
 }

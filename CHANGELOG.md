@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.9.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.8.0-beta.0...v0.9.0-beta.0) (2025-10-03)
+
+
+### Features
+
+* **Map:** drawing segments on map ([1513d3c](https://github.com/gwchar2/ParkSpotTLV/commit/1513d3c7848e049d1548f749f6bbfea3ba0a3d77))
+* **Map:** google map implemented ([728d045](https://github.com/gwchar2/ParkSpotTLV/commit/728d045b89b9a6ce624d6550df220e4fd61532b5))
+* **Map:** search bar ([9f4d2ba](https://github.com/gwchar2/ParkSpotTLV/commit/9f4d2baef1efbc9783127f7aab831622bab4fb3b))
+* **Map:** settings choise passed to loadMap ([a4abf2a](https://github.com/gwchar2/ParkSpotTLV/commit/a4abf2a1bdea7abe1fd2c819ab257205ca8041b7))
+
+## [0.8.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.7.1-beta.0...v0.8.0-beta.0) (2025-09-29)
+
+
+### Features
+
+* **App:** Auth and Car services connected to API except password update ([cb89424](https://github.com/gwchar2/ParkSpotTLV/commit/cb894246e6cf3382a8537e9dc85f491bb6ffe59c))
+* **App:** change password success ([36d3acb](https://github.com/gwchar2/ParkSpotTLV/commit/36d3acb3253dd3d94890428448eb21722eef7016))
+* **App:** free parking info presented. not connected to API ([b5e20c6](https://github.com/gwchar2/ParkSpotTLV/commit/b5e20c66b49e78a88619e7e7338a693cb836201e))
+* **UI:** free parking minutes added to edit/add car pages ([8e171e1](https://github.com/gwchar2/ParkSpotTLV/commit/8e171e1d7972cc29244a4140fd4809bc4e865399))
+
+
+### Bug Fixes
+
+* **App:** fixing car deserialization ([1528a33](https://github.com/gwchar2/ParkSpotTLV/commit/1528a3300b46a94b6e550706392af4f7d8c22374))
+* **UI:** add car disabled when more than 5 in accountdetails ([077c6e6](https://github.com/gwchar2/ParkSpotTLV/commit/077c6e63c41e162db0a00d0b88fdc03634d9decd))
+* **UI:** add car disabled when more than 5 in showMapPage ([8c3f06f](https://github.com/gwchar2/ParkSpotTLV/commit/8c3f06fd6fbacc68241533d6823b8f5afb817aea))
+* **UI:** fix scroll on accountDetailsPage ([9270cdd](https://github.com/gwchar2/ParkSpotTLV/commit/9270cddb626741fd7491e95ca70bc336d12e8a55))
+
 ## [0.7.1-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.7.0-beta.0...v0.7.1-beta.0) (2025-09-28)
 
 

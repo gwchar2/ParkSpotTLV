@@ -12,23 +12,34 @@ public partial class AccountDetailsPage : ContentPage
         InitializeComponent();
         _carService = carService;
         _authService = authService;
-        LoadUserData();
+        // LoadUserData();
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
+        LoadUserData();
         LoadUserCars();
     }
 
-    private void LoadUserData()
+    private async void LoadUserData()
     {
-        // Load current user data
-        if (_authService.IsAuthenticated && !string.IsNullOrEmpty(_authService.CurrentUsername))
+        // Load current user data from API
+        try
         {
-            UsernameEntry.Text = _authService.CurrentUsername;
+            var userMe = await _authService.AuthMeAsync();
+            UsernameEntry.Text = userMe.Username;
         }
-        LoadUserCars();
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error loading user data: {ex.Message}");
+            // Fallback to cached username if API call fails
+            if (!string.IsNullOrEmpty(_authService.CurrentUsername))
+            {
+                UsernameEntry.Text = _authService.CurrentUsername;
+            }
+        }
+        
     }
 
     private async void LoadUserCars()
@@ -55,6 +66,14 @@ public partial class AccountDetailsPage : ContentPage
                 Margin = new Thickness(0, 20)
             };
             CarsContainer.Children.Add(noCarsLabel);
+        }
+        if (userCars.Count >=5){
+            AddCarBtn.IsEnabled = false;
+            AddCarBtn.Text = "You can have up to 5 cars";
+        }
+        else {
+            AddCarBtn.IsEnabled = true;
+            AddCarBtn.Text = "Add car";
         }
     }
 
@@ -86,7 +105,7 @@ public partial class AccountDetailsPage : ContentPage
 
         var nameLabel = new Label
         {
-            Text = $"Car {car.Id}",
+            Text = $" {car.Name}",
             FontSize = 16,
             FontAttributes = FontAttributes.Bold,
             TextColor = Colors.Black
@@ -98,6 +117,9 @@ public partial class AccountDetailsPage : ContentPage
             FontSize = 14,
             TextColor = Colors.Gray
         };
+
+        infoLayout.Children.Add(nameLabel);
+        infoLayout.Children.Add(typeLabel);
 
         var permitsText = new List<string>();
         if (car.HasResidentPermit)
@@ -116,9 +138,18 @@ public partial class AccountDetailsPage : ContentPage
             infoLayout.Children.Add(permitsLabel);
         }
 
-        infoLayout.Children.Add(nameLabel);
-        infoLayout.Children.Add(typeLabel);
-
+        var FreeParkingText = new List<string>();
+        if (car.HasResidentPermit) {
+            FreeParkingText.Add("Free parking time left: 120 minutes.") ;
+            var FreeParkingLabel = new Label
+            {
+                Text = string.Join(", ", FreeParkingText),
+                FontSize = 12,
+                TextColor = Color.FromArgb("#2E7D32")
+            };
+            infoLayout.Children.Add(FreeParkingLabel);
+        }
+        
         var removeButton = new Button
         {
             Text = "Remove",
@@ -140,129 +171,101 @@ public partial class AccountDetailsPage : ContentPage
         CarsContainer.Children.Add(carFrame);
     }
 
-    private async void OnEditUsernameClicked(object sender, EventArgs e)
+    
+
+    private void OnChangePasswordClicked(object sender, EventArgs e)
     {
-        if (EditUsernameBtn.Text == "Edit")
-        {
-            // Enable editing
-            UsernameEntry.IsReadOnly = false;
-            UsernameEntry.BackgroundColor = Colors.White;
-            EditUsernameBtn.Text = "Save";
-            EditUsernameBtn.BackgroundColor = Color.FromArgb("#4CAF50");
-        }
-        else
-        {
-            string newUsername = UsernameEntry.Text?.Trim() ?? "";
+        // Show the password change section
+        PasswordChangeSection.IsVisible = true;
+        ChangePasswordBtn.IsVisible = false;
 
-            // Validate username
-            if (!_authService.ValidateUsername(newUsername))
-            {
-                await DisplayAlert("Error", "Username must be at least 3 characters and contain only letters, numbers, and underscores.", "OK");
-                return;
-            }
-
-            // Disable button during update
-            EditUsernameBtn.IsEnabled = false;
-            EditUsernameBtn.Text = "Saving...";
-
-            try
-            {
-                bool success = await _authService.UpdateUsernameAsync(newUsername);
-
-                if (success)
-                {
-                    // Save changes
-                    UsernameEntry.IsReadOnly = true;
-                    UsernameEntry.BackgroundColor = Colors.LightGray;
-                    EditUsernameBtn.Text = "Edit";
-                    EditUsernameBtn.BackgroundColor = Color.FromArgb("#2E7D32");
-
-                    await DisplayAlert("Success", "Username updated successfully!", "OK");
-                }
-                else
-                {
-                    await DisplayAlert("Error", "Username already exists. Please choose a different username.", "OK");
-                    // Restore original username
-                    UsernameEntry.Text = _authService.CurrentUsername;
-                }
-            }
-            catch (Exception)
-            {
-                await DisplayAlert("Error", "Failed to update username. Please try again later.", "OK");
-                // Restore original username
-                UsernameEntry.Text = _authService.CurrentUsername;
-            }
-            finally
-            {
-                EditUsernameBtn.IsEnabled = true;
-                if (EditUsernameBtn.Text == "Saving...")
-                {
-                    EditUsernameBtn.Text = "Save";
-                }
-            }
-        }
+        // Clear any previous entries
+        OldPasswordEntry.Text = "";
+        NewPasswordEntry.Text = "";
+        ConfirmPasswordEntry.Text = "";
     }
 
-    private async void OnEditPasswordClicked(object sender, EventArgs e)
+    private void OnCancelPasswordClicked(object sender, EventArgs e)
     {
-        if (EditPasswordBtn.Text == "Edit")
+        // Hide the password change section
+        PasswordChangeSection.IsVisible = false;
+        ChangePasswordBtn.IsVisible = true;
+
+        // Clear the entries
+        OldPasswordEntry.Text = "";
+        NewPasswordEntry.Text = "";
+        ConfirmPasswordEntry.Text = "";
+    }
+
+    private async void OnSavePasswordClicked(object sender, EventArgs e)
+    {
+        string oldPassword = OldPasswordEntry.Text?.Trim() ?? "";
+        string newPassword = NewPasswordEntry.Text?.Trim() ?? "";
+        string confirmPassword = ConfirmPasswordEntry.Text?.Trim() ?? "";
+
+        // Validate inputs
+        if (string.IsNullOrEmpty(oldPassword))
         {
-            // Enable editing
-            PasswordEntry.IsReadOnly = false;
-            PasswordEntry.BackgroundColor = Colors.White;
-            PasswordEntry.Text = ""; // Clear for new password input
-            EditPasswordBtn.Text = "Save";
-            EditPasswordBtn.BackgroundColor = Color.FromArgb("#4CAF50");
+            await DisplayAlert("Error", "Please enter your current password.", "OK");
+            return;
         }
-        else
+
+        if (string.IsNullOrEmpty(newPassword))
         {
-            string newPassword = PasswordEntry.Text?.Trim() ?? "";
+            await DisplayAlert("Error", "Please enter a new password.", "OK");
+            return;
+        }
 
-            // Validate password using auth service
-            if (!_authService.ValidatePassword(newPassword))
+        if (newPassword != confirmPassword)
+        {
+            await DisplayAlert("Error", "New passwords do not match.", "OK");
+            return;
+        }
+
+        // Validate new password using auth service
+        if (!_authService.ValidatePassword(newPassword))
+        {
+            await DisplayAlert("Error", "Password must be at least 6 characters long and contain no whitespace characters.", "OK");
+            return;
+        }
+
+        // Disable buttons during update
+        SavePasswordBtn.IsEnabled = false;
+        CancelPasswordBtn.IsEnabled = false;
+        SavePasswordBtn.Text = "Saving...";
+
+        try
+        {
+            bool success = await _authService.UpdatePasswordAsync(newPassword, oldPassword);
+
+            if (success)
             {
-                await DisplayAlert("Error", "Password must be at least 6 characters long and contain no whitespace characters.", "OK");
-                return;
+                await DisplayAlert("Success", "Password updated successfully!", "OK");
+
+                // Hide the password change section
+                PasswordChangeSection.IsVisible = false;
+                ChangePasswordBtn.IsVisible = true;
+
+                // Clear the entries
+                OldPasswordEntry.Text = "";
+                NewPasswordEntry.Text = "";
+                ConfirmPasswordEntry.Text = "";
             }
-
-            // Disable button during update
-            EditPasswordBtn.IsEnabled = false;
-            EditPasswordBtn.Text = "Saving...";
-
-            try
+            else
             {
-                bool success = await _authService.UpdatePasswordAsync(newPassword);
-
-                if (success)
-                {
-                    // Save changes
-                    PasswordEntry.IsReadOnly = true;
-                    PasswordEntry.BackgroundColor = Colors.LightGray;
-                    PasswordEntry.Text = "••••••••"; // Hide password again
-                    EditPasswordBtn.Text = "Edit";
-                    EditPasswordBtn.BackgroundColor = Color.FromArgb("#2E7D32");
-
-                    await DisplayAlert("Success", "Password updated successfully!", "OK");
-                }
-                else
-                {
-                    await DisplayAlert("Error", "Failed to update password. Please try again.", "OK");
-                    PasswordEntry.Text = "••••••••"; // Reset to hidden password
-                }
+                await DisplayAlert("Error", "Failed to update password. Please check your current password and try again.", "OK");
             }
-            catch (Exception)
-            {
-                await DisplayAlert("Error", "Failed to update password. Please try again later.", "OK");
-                PasswordEntry.Text = "••••••••"; // Reset to hidden password
-            }
-            finally
-            {
-                EditPasswordBtn.IsEnabled = true;
-                if (EditPasswordBtn.Text == "Saving...")
-                {
-                    EditPasswordBtn.Text = "Save";
-                }
-            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "Failed to update password. Please try again later.", "OK");
+            System.Diagnostics.Debug.WriteLine($"Error updating password: {ex.Message}");
+        }
+        finally
+        {
+            SavePasswordBtn.IsEnabled = true;
+            CancelPasswordBtn.IsEnabled = true;
+            SavePasswordBtn.Text = "Save";
         }
     }
 
@@ -275,7 +278,7 @@ public partial class AccountDetailsPage : ContentPage
     private async void OnRemoveCarClicked(Car car)
     {
         bool confirm = await DisplayAlert("Remove Car",
-            $"Are you sure you want to remove car {car.Id}?",
+            $"Are you sure you want to remove car {car.Name}?",
             "Yes", "No");
 
         if (confirm)
@@ -284,7 +287,7 @@ public partial class AccountDetailsPage : ContentPage
 
             if (success)
             {
-                await DisplayAlert("Success", $"Car {car.Id} has been removed.", "OK");
+                await DisplayAlert("Success", $"Car {car.Name} has been removed.", "OK");
                 LoadUserCars(); // Refresh the UI
             }
             else

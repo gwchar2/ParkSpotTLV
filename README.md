@@ -121,6 +121,8 @@ dotnet user-secrets list --project ./ParkSpotTLV.Api
 
 - Completely new table
 ```
+docker compose down
+If database tables change:
 Delete the contents of Migrations/ folder in ParkSpotTLV.Infrastructure
 docker compose down -v --remove-orphans
 dotnet ef migrations add InitialCreate -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
@@ -129,12 +131,18 @@ dotnet ef database update -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
 Re-F5
 Verify
 ```
+//FOR MAC
+
 
 - New tables OR table changes
 ```bash
 docker start parkspot_db or docker compose up -d db
 dotnet ef migrations add UpdateSeed_20250927(or some other name) -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
 dotnet ef database update --project .\ParkSpotTLV.Infrastructure --startup-project .\ParkSpotTLV.Api
+/// for MAC
+dotnet ef database update \
+  --project ./ParkSpotTLV.Infrastructure \
+  --startup-project ./ParkSpotTLV.Api
 Restart DB+API
 Verify
 ```
@@ -172,6 +180,8 @@ ORDER BY z.code, s.name_english NULLS LAST;
 
 - Host to DB: `localhost:5433`
 - API container to DB container: `parkspot_db:5432`
+- API google maps : 'AIzaSyC7dBzURpYQwnVMqgaMcL2cnA5IDs-VB58'
+- SHA-1 : 68:3A:70:71:B4:54:ED:23:1F:39:B7:6B:5E:45:8A:39:5B:00:B9:27
 
 
 

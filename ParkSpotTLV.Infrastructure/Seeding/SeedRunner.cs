@@ -231,7 +231,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                         Id = ParseGuid(GetString(vo, "id")) ?? Guid.NewGuid(),
                         Owner = user,
                         Name = GetString(vo, "name") ?? "Default Car Name",
-                        Type = ParseEnum<VehicleType>(GetString(vo, "type")) ?? VehicleType.Car,
+                        Type = ParseEnum<VehicleType>(GetString(vo, "type")) ?? VehicleType.Private
                     };
 
                     foreach (var p in vo["permits"]?.AsArray() ?? []) {

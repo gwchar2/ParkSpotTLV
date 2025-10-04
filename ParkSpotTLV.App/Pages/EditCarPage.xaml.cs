@@ -1,34 +1,76 @@
+using ParkSpotTLV.App.Services;
+using ParkSpotTLV.Core.Models;
+
 namespace ParkSpotTLV.App.Pages;
 
-public partial class EditCarPage : ContentPage
+public partial class EditCarPage : ContentPage, IQueryAttributable
 {
-    public EditCarPage()
+    private readonly CarService _carService;
+    private string _carId = string.Empty;
+    private ParkSpotTLV.App.Services.Car? _currentCar;
+
+    public EditCarPage(CarService carService)
     {
         InitializeComponent();
-
-        // Load existing car data (for now, populate with sample data)
-        LoadCarData();
+        _carService = carService;
     }
 
-    private void LoadCarData()
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        // TODO: In a real app, you'd pass car ID and load data from database
-        // For now, populate with sample data
-        CarNameEntry.Text = "My Toyota";
-        PrivateRadio.IsChecked = true;
-        ResidentPermitCheck.IsChecked = true;
-        ZoneNumberEntry.IsVisible = true;
-        ZoneNumberEntry.Text = "12";
-        DisabledPermitCheck.IsChecked = false;
+        if (query.ContainsKey("carId"))
+        {
+            _carId = query["carId"].ToString() ?? string.Empty;
+            LoadCarData();
+        }
+    }
+
+    private async void LoadCarData()
+    {
+        if (string.IsNullOrEmpty(_carId))
+            return;
+
+        try
+        {
+            _currentCar = await _carService.GetCarAsync(_carId);
+
+            if (_currentCar == null)
+            {
+                await DisplayAlert("Error", "Car not found", "OK");
+                await Shell.Current.GoToAsync("..");
+                return;
+            }
+
+            // Populate form with car data
+            CarNameEntry.Text = _currentCar.Name;
+            PrivateRadio.IsChecked = _currentCar.Type == VehicleType.Private;
+            TruckRadio.IsChecked = _currentCar.Type == VehicleType.Truck;
+            ResidentPermitCheck.IsChecked = _currentCar.HasResidentPermit;
+            ZoneNumberEntry.IsVisible = _currentCar.HasResidentPermit;
+            ZoneNumberEntry.Text = _currentCar.HasResidentPermit ? _currentCar.ResidentPermitNumber.ToString() : "";
+            DisabledPermitCheck.IsChecked = _currentCar.HasDisabledPermit;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Failed to load car data: {ex.Message}", "OK");
+            await Shell.Current.GoToAsync("..");
+        }
     }
 
     private void OnResidentPermitChanged(object sender, CheckedChangedEventArgs e)
     {
         ZoneNumberEntry.IsVisible = e.Value;
+        FreeMinutesEntry.IsVisible = e.Value;
+        FreeMinutesLabel.IsVisible = e.Value;
     }
 
     private async void OnSaveCarClicked(object sender, EventArgs e)
     {
+        if (_currentCar == null)
+        {
+            await DisplayAlert("Error", "No car data loaded", "OK");
+            return;
+        }
+
         string carName = CarNameEntry.Text?.Trim() ?? "";
 
         if (string.IsNullOrEmpty(carName))
@@ -37,20 +79,52 @@ public partial class EditCarPage : ContentPage
             return;
         }
 
-        string carType = PrivateRadio.IsChecked ? "Private" : "Truck";
+        VehicleType vehicleType = PrivateRadio.IsChecked ? VehicleType.Private : VehicleType.Truck;
         bool hasResidentPermit = ResidentPermitCheck.IsChecked;
-        string zoneNumber = ZoneNumberEntry.Text?.Trim() ?? "";
+        string zoneNumberText = ZoneNumberEntry.Text?.Trim() ?? "";
         bool hasDisabledPermit = DisabledPermitCheck.IsChecked;
 
-        string message = $"Car updated: {carName} ({carType})";
+        // Validate resident permit number if permit is checked
+        int residentPermitNumber = 0;
         if (hasResidentPermit)
-            message += $"\nResident permit - Zone: {zoneNumber}";
-        if (hasDisabledPermit)
-            message += "\nDisabled parking permit";
+        {
+            if (string.IsNullOrEmpty(zoneNumberText) || !int.TryParse(zoneNumberText, out residentPermitNumber))
+            {
+                await DisplayAlert("Error", "Please enter a valid zone number for resident permit", "OK");
+                return;
+            }
+        }
 
-        await DisplayAlert("Success", message, "OK");
+        // Update the current car object
+        _currentCar.Name = carName;
+        _currentCar.Type = vehicleType;
+        _currentCar.HasResidentPermit = hasResidentPermit;
+        _currentCar.ResidentPermitNumber = residentPermitNumber;
+        _currentCar.HasDisabledPermit = hasDisabledPermit;
 
-        // Navigate back to previous page
-        await Shell.Current.GoToAsync("..");
+        try
+        {
+            bool success = await _carService.UpdateCarAsync(_currentCar);
+
+            if (success)
+            {
+                string message = $"Car updated: {carName} ({_currentCar.TypeDisplayName})";
+                if (hasResidentPermit)
+                    message += $"\nResident permit - Zone: {residentPermitNumber}";
+                if (hasDisabledPermit)
+                    message += "\nDisabled parking permit";
+
+                await DisplayAlert("Success", message, "OK");
+                await Shell.Current.GoToAsync("..");
+            }
+            else
+            {
+                await DisplayAlert("Error", "Failed to update car", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", ex.Message, "OK");
+        }
     }
 }

@@ -1,4 +1,5 @@
 using ParkSpotTLV.App.Services;
+using ParkSpotTLV.Core.Models;
 
 namespace ParkSpotTLV.App.Pages;
 
@@ -54,13 +55,21 @@ public partial class SignUpPage : ContentPage
                 // add a default car for the new user
                 try
                 {
-                    var defaultCar = await _carService.CreateDefaultCarForUserAsync();
+                    var defCar = new ParkSpotTLV.App.Services.Car
+                        {
+                            Name = "Default Car",
+                            Type = VehicleType.Private,
+                            HasResidentPermit = false,
+                            ResidentPermitNumber = 0,
+                            HasDisabledPermit = false
+                        };
+                    await _carService.AddCarAsync(defCar);
                     // DEBUG: await DisplayAlert("Debug", $"Default car created successfully: {defaultCar.Id}", "OK");
                 }
-                catch (Exception )
+                catch (Exception ex )
                 {
                     // Don't fail signup if car creation fails - user account was already created
-                    // DEBUG: await DisplayAlert("Debug", $"Failed to create default car: {ex.Message}", "OK");
+                    await DisplayAlert("Debug", $"Failed to create default car: {ex.Message}", "OK");
                 }
 
                 // navigate
