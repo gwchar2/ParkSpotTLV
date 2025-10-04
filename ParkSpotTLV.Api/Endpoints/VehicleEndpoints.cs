@@ -1,19 +1,18 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ParkSpotTLV.Api.Endpoints.Support;
+using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Contracts.Vehicles;
 using ParkSpotTLV.Infrastructure;
 using ParkSpotTLV.Infrastructure.Entities;
-using ParkSpotTLV.Contracts.Enums;
-using System.Security.Claims;
-
-
 
 namespace ParkSpotTLV.Api.Endpoints {
     public static class VehicleEndpoints {
 
         public static IEndpointRouteBuilder MapVehicles (this IEndpointRouteBuilder routes) {
-            var group = routes.MapGroup("/vehicles").WithTags("Vehicle Requests").RequireAuthorization();
+            var group = routes.MapGroup("/vehicles").WithTags("Vehicle Requests").RequireAuthorization().RequireUser();
+
 
             /* GET /VEHICLES
              * Accepts: Access Token
@@ -24,13 +23,7 @@ namespace ParkSpotTLV.Api.Endpoints {
             group.MapGet("/", async (
                 HttpContext ctx, AppDbContext db, CancellationToken ct) => {
 
-                    var sub = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    if (!Guid.TryParse(sub, out var userId))
-                        return Results.Problem(
-                            title: "Invalid or expired token.",
-                            statusCode: StatusCodes.Status401Unauthorized,
-                            type: "https://httpstatuses.com/401"
-                            );
+                    var userId = ctx.GetUserId();
 
                     var vehicles = await db.Vehicles
                         .AsNoTracking()
@@ -52,13 +45,8 @@ namespace ParkSpotTLV.Api.Endpoints {
                         })
                         .ToListAsync(ct);
 
-                    if (vehicles is null)
-                        return Results.Problem(
-                            title: "Vehicles not found or not owned by user.",
-                            statusCode: StatusCodes.Status403Forbidden
-                            );
+                    return vehicles is null ? VehicleProblems.Forbidden(ctx) : Results.Ok(vehicles);
 
-                    return Results.Ok(vehicles);
                 })
                 .Produces<List<VehicleResponse>>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status401Unauthorized)
@@ -76,32 +64,15 @@ namespace ParkSpotTLV.Api.Endpoints {
             group.MapGet("/{id:guid}", async (
                 Guid id, HttpContext ctx, AppDbContext db, CancellationToken ct) => {
 
-                    var sub = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    if (!Guid.TryParse(sub, out var userId))
-                        return Results.Problem(
-                            title: "Invalid or expired token.",
-                            statusCode: StatusCodes.Status401Unauthorized,
-                            type: "https://httpstatuses.com/401"
-                            );
-
+                    var userId = ctx.GetUserId();
+                    
                     var ownerId = await db.Vehicles
                         .AsNoTracking()
                         .Where(v => v.Id == id)
                         .Select(v => v.OwnerId)
                         .SingleOrDefaultAsync(ct);
 
-                    if (ownerId == Guid.Empty) 
-                        return Results.Problem(
-                            title: "Vehicle not found",
-                            statusCode: StatusCodes.Status404NotFound,
-                            type: "https://httpstatuses.com/404"
-                            );
-
-                    if (ownerId != userId) 
-                        return Results.Problem(
-                            title: "Vehicle does not belong to user.",
-                            statusCode: StatusCodes.Status403Forbidden
-                            );
+                    if (ownerId == Guid.Empty || ownerId != userId) return VehicleProblems.Forbidden(ctx);
 
                     var dto = await db.Vehicles
                         .AsNoTracking()
@@ -141,18 +112,10 @@ namespace ParkSpotTLV.Api.Endpoints {
             group.MapPost("/", async (
                 [FromBody] VehicleCreateRequest body, HttpContext ctx, AppDbContext db, CancellationToken ct) => {
 
-                    var sub = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier);                       // Configured in line 113 program.cs & line 38 JwtService.cs
-                    if (!Guid.TryParse(sub, out var userId))
-                        return Results.Problem(
-                            title: "Invalid or expired token.",
-                            statusCode: StatusCodes.Status401Unauthorized,
-                            type: "https://httpstatuses.com/401"
-                        );
+                    var userId = ctx.GetUserId();
 
                     if (await db.Vehicles.AsNoTracking().AnyAsync(z => z.OwnerId == userId && z.Name == body.Name, ct))
-                        return Results.Problem(
-                            title: "Name already exists",
-                            statusCode: StatusCodes.Status400BadRequest);
+                        return VehicleProblems.NameExists(ctx);
 
                     var hasResidency = body.ResidentZoneCode.HasValue;
                     var hasDisability = body.HasDisabledPermit;
@@ -160,46 +123,31 @@ namespace ParkSpotTLV.Api.Endpoints {
                     // If residency provided, validate that Zone.Code exists
                     if (hasResidency) {
                         var exists = await db.Zones.AsNoTracking().AnyAsync(z => z.Code == body.ResidentZoneCode!.Value, ct);
-
-                        if (!exists) {
-                            return Results.Problem(
-                                title: "Invalid zone code",
-                                detail: $"Zone code {body.ResidentZoneCode} does not exist.",
-                                statusCode: StatusCodes.Status400BadRequest);
-                        }
+                        if (!exists)  return GeneralProblems.InvalidZoneCode(ctx);
                     }
 
                     // Create a new vehicle with a default permit
                     var vehicle = new Vehicle {
                         OwnerId = userId,
                         Type = body.Type,
-                        Name = body.Name
+                        Name = body.Name,
+                        Permits = new List<Permit>()
                     };
-                    var permit = new Permit {
-                        Type = PermitType.Default,
-                        Vehicle = vehicle,
-                        VehicleId = vehicle.Id
-                    };
-                    db.Permits.Add(permit);
-
-                    if (!hasResidency && !hasDisability) {
-                        db.Vehicles.Add(vehicle);
-                        await db.SaveChangesAsync(ct);
-                    }
+                    vehicle.Permits.Add(new Permit { 
+                        Type = PermitType.Default 
+                    });
 
                     // If the vehicle has residencypermit, add it.
                     if (hasResidency) {
                         vehicle.Permits.Add(new Permit {
                             Type = PermitType.ZoneResident,
                             ZoneCode = body.ResidentZoneCode!.Value,
-                            Vehicle = vehicle
                         });
                     }
-                    // Else, If the vehicle has disability permit, add it.
+                    // If the vehicle has disability permit, add it.
                     if (hasDisability) {
                         vehicle.Permits.Add(new Permit {
                             Type = PermitType.Disability,
-                            Vehicle = vehicle
                         });
                     }
 
@@ -245,59 +193,25 @@ namespace ParkSpotTLV.Api.Endpoints {
              */
             group.MapPatch("/{id:guid}",
                 async (Guid id,[FromBody] VehicleUpdateRequest body, HttpContext ctx, AppDbContext db, CancellationToken ct) => {
-                    // Authorize the user
-                    var sub = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    if (!Guid.TryParse(sub, out var userId))
-                        return Results.Problem(
-                            title: "Invalid or expired token.",
-                            statusCode: StatusCodes.Status401Unauthorized,
-                            type: "https://httpstatuses.com/401"
-                            );
+
+                    var userId = ctx.GetUserId();
 
                     // Check for concurrency
-                    if (string.IsNullOrWhiteSpace(body.RowVersion))
-                        return Results.Problem(
-                            title: "Missing RowVersion", 
-                            statusCode: StatusCodes.Status400BadRequest);
+                    if (string.IsNullOrWhiteSpace(body.RowVersion)) return GeneralProblems.MissingRowVersion(ctx);
 
-                    uint expectedXmin;
-                    try { 
-                        expectedXmin = BitConverter.ToUInt32(Convert.FromBase64String(body.RowVersion)); 
-                    } catch { 
-                        return Results.Problem(
-                            title: "Invalid RowVersion format", 
-                            statusCode: StatusCodes.Status400BadRequest); 
-                    }
+                    if (!Guards.TryBase64ToUInt32(body.RowVersion, out uint expectedXmin))
+                        return GeneralProblems.InvalidRowVersion(ctx);
 
                     // Get the vehicle from the DB & check ownership
                     var vehicle = await db.Vehicles.Include(v => v.Permits).SingleOrDefaultAsync(v => v.Id == id, ct);
 
-                    if (vehicle is null) 
-                        return Results.Problem(
-                            title: "Vehicle not found",
-                            statusCode: StatusCodes.Status404NotFound,
-                            type: "https://httpstatuses.com/404"
-                            );
+                    if (vehicle is null || vehicle.OwnerId != userId) return VehicleProblems.Forbidden(ctx);
 
-                    if (vehicle.OwnerId != userId) 
-                        return Results.Problem(
-                            title: "Vehicle does not belong to user.",
-                            statusCode: StatusCodes.Status403Forbidden
-                            );
+                    if (vehicle.Xmin != expectedXmin) return GeneralProblems.ConcurrencyError(ctx);
 
+                    if (body.Type.HasValue) vehicle.Type = body.Type.Value;
 
-                    if (vehicle.Xmin != expectedXmin)
-                        return Results.Problem(
-                            title: "Concurrency Error",
-                            detail: "The permit was modified by another request. Reload and try again.",
-                            statusCode: StatusCodes.Status409Conflict
-                            );
-
-                    if (body.Type.HasValue)
-                        vehicle.Type = body.Type.Value;
-
-                    if (!string.IsNullOrWhiteSpace(body.Name)) 
-                        vehicle.Name = body.Name.Trim();
+                    if (!string.IsNullOrWhiteSpace(body.Name))  vehicle.Name = body.Name.Trim();
 
                     await db.SaveChangesAsync(ct);
 
@@ -344,56 +258,22 @@ namespace ParkSpotTLV.Api.Endpoints {
             group.MapDelete("/{id:guid}", 
                 async (Guid id, [FromBody] VehicleDeleteRequest body, HttpContext ctx, AppDbContext db, CancellationToken ct) => {
 
-                    var sub = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    if (!Guid.TryParse(sub, out var userId))
-                        return Results.Problem(
-                            title: "Invalid or expired token.",
-                            statusCode: StatusCodes.Status401Unauthorized,
-                            type: "https://httpstatuses.com/401"
-                        );
-
+                    var userId = ctx.GetUserId();
 
                     // We make sure that RowVersion exists and is legal, so there are no race conditions
-                    if (string.IsNullOrWhiteSpace(body.RowVersion))
-                        return Results.Problem(
-                            title: "Missing RowVersion", 
-                            statusCode: StatusCodes.Status400BadRequest
-                            );
-
-                    uint expectedXmin;
-                    try {
-                        expectedXmin = BitConverter.ToUInt32(Convert.FromBase64String(body.RowVersion));
-                    }
-                    catch {
-                        return Results.Problem(
-                            title: "Invalid rowVersion format", 
-                            statusCode: StatusCodes.Status400BadRequest
-                            );
-                    }
+                    if (string.IsNullOrWhiteSpace(body.RowVersion)) return GeneralProblems.MissingRowVersion(ctx);
+                    if (!Guards.TryBase64ToUInt32(body.RowVersion, out uint expectedXmin))
+                        return GeneralProblems.InvalidRowVersion(ctx);
 
                     // We load the vehicle from the DB
                     var vehicle = await db.Vehicles.SingleOrDefaultAsync(v => v.Id == id, ct);
-                    if (vehicle == null)
-                        return Results.Problem(
-                            title: "Vehicle not found",
-                            statusCode: StatusCodes.Status404NotFound,
-                            type: "https://httpstatuses.com/404"
-                            );
+                    if (vehicle == null) return VehicleProblems.NotFound(ctx);
 
                     // We check if the person requesting is truely the owner
-                    if (vehicle.OwnerId != userId)
-                        return Results.Problem(
-                            title: "Vehicle does not belong to user.",
-                            statusCode: StatusCodes.Status403Forbidden
-                            );
+                    if (vehicle.OwnerId != userId) return VehicleProblems.Forbidden(ctx);
 
                     // We check there are no race conditions
-                    if (vehicle.Xmin != expectedXmin)
-                        return Results.Problem(
-                            title: "Concurrency Error",
-                            detail: "The permit was modified by another request. Reload and try again.",
-                            statusCode: StatusCodes.Status409Conflict
-                            );
+                    if (vehicle.Xmin != expectedXmin) return GeneralProblems.ConcurrencyError(ctx);
 
                     // Delete 
                     db.Vehicles.Remove(vehicle);

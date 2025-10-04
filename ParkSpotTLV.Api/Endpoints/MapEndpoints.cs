@@ -2,12 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.IO;
+using ParkSpotTLV.Api.Endpoints.Support;
 using ParkSpotTLV.Api.Services.Evaluation.Contracts;
 using ParkSpotTLV.Api.Services.Evaluation.Facade;
 using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Contracts.Map;
 using ParkSpotTLV.Infrastructure;
-using System.Security.Claims;
 using System.Text.Json;
 
 namespace ParkSpotTLV.Api.Endpoints {
@@ -15,20 +15,13 @@ namespace ParkSpotTLV.Api.Endpoints {
 
         public static IEndpointRouteBuilder MapSegments (this IEndpointRouteBuilder routes) {
 
-            var group = routes.MapGroup("/map").RequireAuthorization().WithTags("Map Segment Requests");
+            var group = routes.MapGroup("/map").RequireAuthorization().WithTags("Map Segment Requests").RequireUser();
 
 
             group.MapPost("/segments",
                 async ([FromBody] GetMapSegmentsRequest body, HttpContext ctx, AppDbContext db, TimeProvider clock, IMapSegmentsEvaluator evaluator, CancellationToken ct) => {
 
-                    // Check token validity
-                    var sub = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    if (!Guid.TryParse(sub, out var userId))
-                        return Results.Problem(
-                            title: "Invalid or expired token.",
-                            statusCode: StatusCodes.Status401Unauthorized,
-                            type: "https://httpstatuses.com/401"
-                            );
+                    var userId = ctx.GetUserId();
 
                     // Check BBOX validation
                     if ((body.MinLon >= body.MaxLon || body.MinLat >= body.MaxLat)
@@ -65,12 +58,7 @@ namespace ParkSpotTLV.Api.Endpoints {
 
                             } else if (permit.Type == PermitType.ZoneResident) {
 
-                                if (permit.Zone?.Code is null)
-                                    return Results.Problem(
-                                        title: "Permit missing zone!.",
-                                        statusCode: StatusCodes.Status400BadRequest,
-                                        type: "https://httpstatuses.com/400"
-                                        );
+                                if (permit.Zone?.Code is null) return PermitProblems.MissingZoneCode(ctx);
 
                                 pov = new PermitSnapshot {
                                     Type = PermitSnapType.Zone,
