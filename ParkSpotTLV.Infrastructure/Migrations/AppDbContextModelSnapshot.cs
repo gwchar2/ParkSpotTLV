@@ -31,23 +31,23 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("is_active");
+                    b.Property<DateTimeOffset?>("LastUpdated")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_updated");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer")
                         .HasColumnName("type");
 
-                    b.Property<DateOnly?>("ValidTo")
-                        .HasColumnType("date")
-                        .HasColumnName("valid_to");
-
                     b.Property<Guid>("VehicleId")
                         .HasColumnType("uuid")
                         .HasColumnName("vehicle_id");
+
+                    b.Property<uint>("Xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
 
                     b.Property<int?>("ZoneCode")
                         .HasColumnType("integer")
@@ -152,12 +152,6 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("parking_type");
 
-                    b.Property<bool>("PrivilegedParking")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("privileged_parking");
-
                     b.Property<int>("Side")
                         .HasColumnType("integer")
                         .HasColumnName("side");
@@ -183,30 +177,46 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                     b.ToTable("street_segments", (string)null);
                 });
 
+            modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.TariffWindow", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("integer")
+                        .HasColumnName("day_of_week");
+
+                    b.Property<TimeOnly>("EndLocal")
+                        .HasColumnType("time")
+                        .HasColumnName("end_local");
+
+                    b.Property<TimeOnly>("StartLocal")
+                        .HasColumnType("time")
+                        .HasColumnName("start_local");
+
+                    b.Property<int>("Tariff")
+                        .HasColumnType("integer")
+                        .HasColumnName("tariff");
+
+                    b.HasKey("Id")
+                        .HasName("pk_tariff_windows");
+
+                    b.HasIndex("Tariff", "DayOfWeek")
+                        .HasDatabaseName("ix_tariff_windows_tariff_day_of_week");
+
+                    b.ToTable("tariff_windows", (string)null);
+                });
+
             modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
-
-                    b.Property<TimeSpan>("FreeParkingBudget")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("interval")
-                        .HasColumnName("free_parking_budget")
-                        .HasDefaultValueSql("interval '2 hours'");
-
-                    b.Property<DateTimeOffset?>("FreeParkingUntilUtc")
-                        .HasColumnType("timestamptz")
-                        .HasColumnName("free_parking_until_utc");
-
-                    b.Property<DateTimeOffset?>("LastUpdated")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_updated");
-
-                    b.Property<DateTimeOffset?>("ParkingStartedAtUtc")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("parking_started_at_utc");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()

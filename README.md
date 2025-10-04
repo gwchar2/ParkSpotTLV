@@ -124,11 +124,11 @@ dotnet user-secrets list --project ./ParkSpotTLV.Api
 docker compose down
 If database tables change:
 Delete the contents of Migrations/ folder in ParkSpotTLV.Infrastructure
-docker compose up -d db
+docker compose down -v --remove-orphans
 dotnet ef migrations add InitialCreate -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
+F5
 dotnet ef database update -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
-docker compose build api
-docker compose up -d api
+Re-F5
 Verify
 ```
 //FOR MAC
@@ -163,6 +163,7 @@ SELECT * FROM "__EFMigrationsHistory";
 SELECT COUNT(*) AS zones FROM zones;
 SELECT COUNT(*) AS segments FROM street_segments;
 SELECT id, code, name FROM zones ORDER BY code LIMIT 10;
+
 SELECT DISTINCT ON (z.code)
        z.code        AS zone_code,
        s.id          AS segment_id,
@@ -170,6 +171,8 @@ SELECT DISTINCT ON (z.code)
 FROM street_segments s
 JOIN zones z ON s.zone_id = z.id
 ORDER BY z.code, s.name_english NULLS LAST;
+
+
 
 ```
 

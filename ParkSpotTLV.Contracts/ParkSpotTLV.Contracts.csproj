@@ -9,7 +9,9 @@ wire-level contracts so API and MAUI stay in sync.
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+	
   <ItemGroup>
     <ProjectReference Include="..\ParkSpotTLV.Core\ParkSpotTLV.Core.csproj" />
+	  
   </ItemGroup>
 </Project>

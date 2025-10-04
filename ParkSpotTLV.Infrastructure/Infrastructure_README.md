@@ -15,7 +15,7 @@ dotnet ef migrations list --project ParkSpotTLV.Infrastructure --startup-project
 
 In docker terminal, loading the database parkspot-db:
 ```bash
-docker exec -it parkspot-db psql -U admin -d parkspot_dev
+docker exec -it parkspot_db psql -U admin -d parkspot_dev
 ```
 
 To list tables:

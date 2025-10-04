@@ -1,10 +1,9 @@
 ﻿using System.Diagnostics;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Serilog;
 
 
-namespace ParkSpotTLV.Api.Http {
+namespace ParkSpotTLV.Api.Middleware.Http {
 
     /*
      * Logs every request’s metadata (start + completed) safely (no bodies, redacted headers).

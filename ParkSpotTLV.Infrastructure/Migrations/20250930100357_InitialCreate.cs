@@ -1,0 +1,243 @@
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+using NetTopologySuite.Geometries;
+
+#nullable disable
+
+namespace ParkSpotTLV.Infrastructure.Migrations
+{
+    /// <inheritdoc />
+    public partial class InitialCreate : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:PostgresExtension:postgis", ",,");
+
+            migrationBuilder.CreateTable(
+                name: "users",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    username = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    password_hash = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_users", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "zones",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    code = table.Column<int>(type: "integer", nullable: false),
+                    taarif = table.Column<int>(type: "integer", nullable: false),
+                    name = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    geom = table.Column<MultiPolygon>(type: "geometry(MultiPolygon,4326)", nullable: false),
+                    last_updated = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_zones", x => x.id);
+                    table.UniqueConstraint("ak_zones_code", x => x.code);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "refresh_tokens",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    token_hash = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    created_at_utc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    expires_at_utc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    revoked_at_utc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    replaced_by_token_hash = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_refresh_tokens", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_refresh_tokens_users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "vehicles",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    owner_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    name = table.Column<string>(type: "text", nullable: false),
+                    type = table.Column<int>(type: "integer", nullable: false),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_vehicles", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_vehicles_users_owner_id",
+                        column: x => x.owner_id,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "street_segments",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    geom = table.Column<LineString>(type: "geometry(LineString,4326)", nullable: false),
+                    osm_id = table.Column<string>(type: "text", nullable: false),
+                    name_english = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    name_hebrew = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    zone_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    parking_type = table.Column<int>(type: "integer", nullable: false),
+                    side = table.Column<int>(type: "integer", nullable: false),
+                    privileged_parking = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_street_segments", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_street_segments_zones_zone_id",
+                        column: x => x.zone_id,
+                        principalTable: "zones",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "permits",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    vehicle_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    type = table.Column<int>(type: "integer", nullable: false),
+                    zone_code = table.Column<int>(type: "integer", nullable: true),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false),
+                    last_updated = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_permits", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_permits_vehicles_vehicle_id",
+                        column: x => x.vehicle_id,
+                        principalTable: "vehicles",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_permits_zones_zone_code",
+                        column: x => x.zone_code,
+                        principalTable: "zones",
+                        principalColumn: "code",
+                        onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_permits_vehicle_id",
+                table: "permits",
+                column: "vehicle_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_permits_zone_code",
+                table: "permits",
+                column: "zone_code");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_refresh_tokens_expires_at_utc",
+                table: "refresh_tokens",
+                column: "expires_at_utc");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_refresh_tokens_replaced_by_token_hash",
+                table: "refresh_tokens",
+                column: "replaced_by_token_hash");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_refresh_tokens_revoked_at_utc",
+                table: "refresh_tokens",
+                column: "revoked_at_utc");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_refresh_tokens_token_hash",
+                table: "refresh_tokens",
+                column: "token_hash",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_refresh_tokens_user_id",
+                table: "refresh_tokens",
+                column: "user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_street_segments_geom",
+                table: "street_segments",
+                column: "geom")
+                .Annotation("Npgsql:IndexMethod", "GIST");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_street_segments_osm_id",
+                table: "street_segments",
+                column: "osm_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_street_segments_zone_id",
+                table: "street_segments",
+                column: "zone_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_users_username",
+                table: "users",
+                column: "username",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_vehicles_owner_id",
+                table: "vehicles",
+                column: "owner_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_zones_code",
+                table: "zones",
+                column: "code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_zones_geom",
+                table: "zones",
+                column: "geom")
+                .Annotation("Npgsql:IndexMethod", "GIST");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "permits");
+
+            migrationBuilder.DropTable(
+                name: "refresh_tokens");
+
+            migrationBuilder.DropTable(
+                name: "street_segments");
+
+            migrationBuilder.DropTable(
+                name: "vehicles");
+
+            migrationBuilder.DropTable(
+                name: "zones");
+
+            migrationBuilder.DropTable(
+                name: "users");
+        }
+    }
+}

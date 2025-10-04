@@ -1,32 +1,36 @@
 ﻿using NetTopologySuite.Geometries;
-using ParkSpotTLV.Infrastructure.Entities;
 using System.ComponentModel.DataAnnotations;
-
+using ParkSpotTLV.Contracts.Enums;
 /*
  * Zone definition for the database
 */
 
 
 namespace ParkSpotTLV.Infrastructure.Entities {
-    public enum Taarif { City_Center = 1, City_Outskirts = 2 }
+    
 
     public class Zone {
+        /* 
+         * Ownership 
+         */
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        // Short numeric code if you follow the city’s numbering (e.g., 1,2,4,6,7,9,10,12,13)
+        /* 
+         * Zone Data
+         */
         public int? Code { get; set; }
+        [Required] public Tariff Taarif { get; set; } = Tariff.City_Center;
+        [MaxLength(64)] public string? Name { get; set; } // E.g. "Zone 6"
 
-        [Required] public Taarif Taarif { get; set; } = Taarif.City_Center;
+        /*
+         * Geometric data
+         */
+        [Required] public MultiPolygon Geom { get; set; } = default!; // MultiPolygon boundary for the zone (use SRID 4326)
+        public ICollection<StreetSegment> Segments { get; set; } = []; // Streets/segments associated to this zone (kept)
 
-        // Human label for maps/UX (e.g., "Zone 6")
-        [MaxLength(64)] public string? Name { get; set; }
-
-        // MultiPolygon boundary for the zone (use SRID 4326)
-        [Required] public MultiPolygon Geom { get; set; } = default!;
-
-        // Streets/segments associated to this zone (kept)
-        public ICollection<StreetSegment> Segments { get; set; } = new List<StreetSegment>();
-
+        /*
+         * Concurrency
+         */
         public DateTimeOffset? LastUpdated { get; set; }
     }
 }

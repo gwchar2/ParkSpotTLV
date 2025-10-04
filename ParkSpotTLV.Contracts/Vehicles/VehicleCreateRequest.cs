@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using ParkSpotTLV.Core.Models;
+using ParkSpotTLV.Contracts.Enums;
 
 namespace ParkSpotTLV.Contracts.Vehicles {
     /*
@@ -7,15 +7,13 @@ namespace ParkSpotTLV.Contracts.Vehicles {
      * - Either residentZoneCode (int) OR disabledPermit == true (or both).
      * Validation for “zone exists” happens server-side (not via attributes).
     */
-    public sealed record VehicleCreateRequest (
+    public sealed record VehicleCreateRequest(
 
         [Required] VehicleType Type,
-
         [Required] string Name,
-        // Null => no residency permit. If provided, must match an existing Zone.Code.
-        int? ResidentZoneCode,
-        // If true => a Disability permit will be created. Defaults to false if omitted.
-        bool HasDisabledPermit
+        int? ResidentZoneCode,  // Null => no residency permit. If provided, must match an existing Zone.Code.
+        bool HasDisabledPermit  // If true => a Disability permit will be created. Defaults to false if omitted.
+
     );
 
 

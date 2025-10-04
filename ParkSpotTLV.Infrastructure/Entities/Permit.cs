@@ -1,15 +1,32 @@
-﻿using ParkSpotTLV.Core.Models;
+﻿using ParkSpotTLV.Contracts.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ParkSpotTLV.Infrastructure.Entities {
 
     public class Permit {
+
+        /* 
+         * Owner and dry details 
+         */
         public Guid Id { get; set; } = Guid.NewGuid();
-        public Vehicle? Vehicle { get; set; } = default!;
+        public Vehicle Vehicle { get; set; } = default!;
         public Guid VehicleId { get; set; }
+
+        /* 
+         * Permit Type 
+         */
         public PermitType Type { get; set; } = PermitType.Default;
-        public int? ZoneCode { get; set; }
-        public Zone? Zone { get; set; }
-        public DateOnly? ValidTo { get; set; }
-        public bool IsActive { get; set; } = true;
+
+        /* 
+         * Zone Code for residential permit 
+         */
+        public int? ZoneCode { get; set; } = 0; /* NEED TO TEST THIS */
+        public Zone? Zone { get; set; } 
+
+        /* 
+         * Concurrency 
+         */
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)] public uint Xmin { get; private set; }
+        public DateTimeOffset? LastUpdated { get; set; } = DateTimeOffset.Now;                 // Last update on user
     }
 }

@@ -1,4 +1,3 @@
-using System.Net;
 using System.Text.Json;
 using System.Net.Http.Json;
 //using ParkSpotTLV.App.Data.Models;

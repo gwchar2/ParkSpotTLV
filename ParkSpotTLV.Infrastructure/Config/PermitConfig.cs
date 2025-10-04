@@ -10,8 +10,6 @@ namespace ParkSpotTLV.Infrastructure.Config {
             e.HasKey(x => x.Id);
 
             e.Property(x => x.Type).IsRequired();
-            e.Property(x => x.ValidTo);
-            e.Property(x => x.IsActive).HasDefaultValue(true);
 
             e.Property(x => x.ZoneCode).IsRequired(false);
             e.HasIndex(x => x.ZoneCode);
@@ -27,6 +25,13 @@ namespace ParkSpotTLV.Infrastructure.Config {
              .WithMany(v => v.Permits)
              .HasForeignKey(p => p.VehicleId)
              .OnDelete(DeleteBehavior.Cascade);
+
+            e.Property(v => v.Xmin)
+             .IsConcurrencyToken()
+             .ValueGeneratedOnAddOrUpdate()
+             .HasColumnName("xmin");
+
+            e.Property(x => x.LastUpdated);
         }
     }
 }

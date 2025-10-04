@@ -13,6 +13,10 @@ namespace ParkSpotTLV.Infrastructure.Config {
             e.HasIndex(x => x.OwnerId);
 
             e.Property(x => x.Name).IsRequired();
+            e.HasIndex(v => new { 
+                v.OwnerId, 
+                v.Name 
+            }).IsUnique();
 
             e.HasOne(v => v.Owner)
              .WithMany(u => u.Vehicles)

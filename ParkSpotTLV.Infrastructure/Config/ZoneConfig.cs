@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using NetTopologySuite.Geometries;
 using ParkSpotTLV.Infrastructure.Entities;
 
 namespace ParkSpotTLV.Infrastructure.Config {
