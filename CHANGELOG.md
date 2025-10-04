@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.2-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.9.1-beta.0...v0.9.2-beta.0) (2025-10-04)
+
+
+### Bug Fixes
+
+* Small fixes for endpoints, perfected the system ([cf80f9d](https://github.com/gwchar2/ParkSpotTLV/commit/cf80f9dd2616aa2085575e693a57bd1da859fefa))
+
 ## [0.9.1-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.9.0-beta.0...v0.9.1-beta.0) (2025-10-04)
 
 
