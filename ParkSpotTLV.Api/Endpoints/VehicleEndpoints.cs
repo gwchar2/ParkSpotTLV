@@ -275,6 +275,9 @@ namespace ParkSpotTLV.Api.Endpoints {
                     // We check there are no race conditions
                     if (vehicle.Xmin != expectedXmin) return GeneralProblems.ConcurrencyError(ctx);
 
+                    // Cant remove last vehicle, account must have one at least.
+                    if (vehicle.Owner.Vehicles.Count == 1) return VehicleProblems.CantRemove(ctx);
+
                     // Delete 
                     db.Vehicles.Remove(vehicle);
                     await db.SaveChangesAsync(ct);

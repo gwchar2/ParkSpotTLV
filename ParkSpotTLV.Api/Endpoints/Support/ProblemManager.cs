@@ -28,6 +28,8 @@ namespace ParkSpotTLV.Api.Endpoints.Support {
            GlobalProblemManager.Forbidden("Vehicle not found or not owned by user.", ctx);
         public static ProblemHttpResult NameExists(HttpContext ctx) =>
             GlobalProblemManager.BadRequest("Vehicle already exists with this name.", ctx);
+        public static ProblemHttpResult CantRemove(HttpContext ctx) =>
+            GlobalProblemManager.BadRequest("Profile must have at least one vehicle.", ctx);
     }
 
     public static class AuthProblems {
