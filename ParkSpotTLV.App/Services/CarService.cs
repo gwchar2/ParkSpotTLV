@@ -1,29 +1,11 @@
 using System.Text.Json;
 using System.Net.Http.Json;
-//using ParkSpotTLV.App.Data.Models;
 using ParkSpotTLV.Contracts.Vehicles;
+using ParkSpotTLV.Contracts.Permits;
+using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Core.Models;
-//using Xamarin.Google.Crypto.Tink.Proto;
 
 namespace ParkSpotTLV.App.Services;
-
-public class Car
-{
-    public string Id { get; set; } = Guid.NewGuid().ToString();
-    public string Name { get; set; } = string.Empty;
-    public VehicleType Type { get; set; } = VehicleType.Private;
-    public bool HasResidentPermit { get; set; } = false;
-    public int ResidentPermitNumber { get; set; } = 0;
-    public bool HasDisabledPermit { get; set; } = false;
-
-    public string TypeDisplayName => Type switch
-    {
-        VehicleType.Private => "Private",
-        VehicleType.Truck => "Truck",
-        _ => "Private"
-    };
-}
-
 
 public class CarService
 {
@@ -43,11 +25,14 @@ public class CarService
 
     private static Car MapVehicleResponseToCar(VehicleResponse vehicleResponse)
     {
+        // Parse the string Type to CarType enum
+        var carType = vehicleResponse.Type.ToLower() == "truck" ? CarType.Truck : CarType.Private;
+
         return new Car
         {
             Id = vehicleResponse.Id.ToString(),
             Name = vehicleResponse.Name,
-            Type = vehicleResponse.Type,
+            Type = carType,
             HasResidentPermit = vehicleResponse.ResidentZoneCode.HasValue,
             ResidentPermitNumber = vehicleResponse.ResidentZoneCode ?? 0,
             HasDisabledPermit = vehicleResponse.DisabledPermit
@@ -77,9 +62,12 @@ public class CarService
     {
         try
         {
+            // Convert CarType to VehicleType
+            var vehicleType = car.Type == CarType.Truck ? VehicleType.Truck : VehicleType.Private;
+
             var newCarPayload = new VehicleCreateRequest
             (
-            Type : car.Type, // Core.Models.VehicleType.(car.Type),
+            Type : vehicleType,
             Name : car.Name,
             ResidentZoneCode : car.HasResidentPermit && car.ResidentPermitNumber != 0 ? car.ResidentPermitNumber : null,
             HasDisabledPermit : car.HasDisabledPermit
@@ -163,6 +151,136 @@ public class CarService
         return null;
     }
 
+    private async Task UpdateResidentPermitAsync(Guid permitId, Car updatedCar)
+    {
+        // Get current permit to retrieve RowVersion
+        var getPermitResponse = await _authService.ExecuteWithTokenRefreshAsync(() => _http.GetAsync($"/permits/{permitId}"));
+
+        if (!getPermitResponse.IsSuccessStatusCode)
+            throw new HttpRequestException($"Failed to get resident permit: {getPermitResponse.StatusCode}");
+
+        var currentPermit = await getPermitResponse.Content.ReadFromJsonAsync<PermitResponse>(_options);
+        if (currentPermit == null)
+            throw new InvalidOperationException("Failed to retrieve current permit data");
+        
+        // Update the permit
+        var updatePermitPayload = new PermitUpdateRequest(
+            RowVersion: currentPermit.RowVersion,
+            Type: PermitType.ZoneResident,
+            ZoneCode: updatedCar.HasResidentPermit ? updatedCar.ResidentPermitNumber : null
+        );
+
+        var updatePermitResponse = await _authService.ExecuteWithTokenRefreshAsync(() =>
+            _http.SendAsync(new HttpRequestMessage(HttpMethod.Patch, $"/permits/{permitId}")
+            {
+                Content = JsonContent.Create(updatePermitPayload, options: _options)
+            }));
+
+        if (!updatePermitResponse.IsSuccessStatusCode)
+        {
+            var body = await updatePermitResponse.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Failed to update resident permit: {(int)updatePermitResponse.StatusCode} {body}");
+        }
+    }
+
+    private async Task AddResidentPermitAsync(Car car)
+    {
+        var createPermitPayload = new PermitCreateRequest(
+            Type: PermitType.ZoneResident,
+            VehicleId: Guid.Parse(car.Id),
+            HasDisabledPermit: false,
+            ResidentZoneCode: car.ResidentPermitNumber
+        );
+
+        var response = await _authService.ExecuteWithTokenRefreshAsync(() =>
+            _http.PostAsJsonAsync("/permits", createPermitPayload, _options));
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Failed to add resident permit: {(int)response.StatusCode} {body}");
+        }
+    }
+
+    private async Task RemoveResidentPermitAsync(Guid permitId)
+    {
+        // Get current permit to retrieve RowVersion
+        var getPermitResponse = await _authService.ExecuteWithTokenRefreshAsync(() => _http.GetAsync($"/permits/{permitId}"));
+
+        if (!getPermitResponse.IsSuccessStatusCode)
+            throw new HttpRequestException($"Failed to get resident permit: {getPermitResponse.StatusCode}");
+
+        var currentPermit = await getPermitResponse.Content.ReadFromJsonAsync<PermitResponse>(_options);
+        if (currentPermit == null)
+            throw new InvalidOperationException("Failed to retrieve current permit data");
+
+        var deletePermitPayload = new PermitDeleteRequest(
+            Id: currentPermit.PermitId,
+            RowVersion: currentPermit.RowVersion
+        );
+
+        var deleteResponse = await _authService.ExecuteWithTokenRefreshAsync(() =>
+            _http.SendAsync(new HttpRequestMessage(HttpMethod.Delete, $"/permits/{permitId}")
+            {
+                Content = JsonContent.Create(deletePermitPayload, options: _options)
+            }));
+
+        if (!deleteResponse.IsSuccessStatusCode)
+        {
+            var body = await deleteResponse.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Failed to delete resident permit: {(int)deleteResponse.StatusCode} {body}");
+        }
+    }
+
+    private async Task AddDisabledPermitAsync(Car car)
+    {
+        var createPermitPayload = new PermitCreateRequest(
+            Type: PermitType.Disability,
+            VehicleId: Guid.Parse(car.Id),
+            HasDisabledPermit: true,
+            ResidentZoneCode: null
+        );
+
+        var response = await _authService.ExecuteWithTokenRefreshAsync(() =>
+            _http.PostAsJsonAsync("/permits", createPermitPayload, _options));
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Failed to add disabled permit: {(int)response.StatusCode} {body}");
+        }
+    }
+
+    private async Task RemoveDisabledPermitAsync(Guid permitId)
+    {
+        // Get current permit to retrieve RowVersion
+        var getPermitResponse = await _authService.ExecuteWithTokenRefreshAsync(() => _http.GetAsync($"/permits/{permitId}"));
+
+        if (!getPermitResponse.IsSuccessStatusCode)
+            throw new HttpRequestException($"Failed to get disabled permit: {getPermitResponse.StatusCode}");
+
+        var currentPermit = await getPermitResponse.Content.ReadFromJsonAsync<PermitResponse>(_options);
+        if (currentPermit == null)
+            throw new InvalidOperationException("Failed to retrieve current permit data");
+
+        var deletePermitPayload = new PermitDeleteRequest(
+            Id: currentPermit.PermitId,
+            RowVersion: currentPermit.RowVersion
+        );
+
+        var deleteResponse = await _authService.ExecuteWithTokenRefreshAsync(() =>
+            _http.SendAsync(new HttpRequestMessage(HttpMethod.Delete, $"/permits/{permitId}")
+            {
+                Content = JsonContent.Create(deletePermitPayload, options: _options)
+            }));
+
+        if (!deleteResponse.IsSuccessStatusCode)
+        {
+            var body = await deleteResponse.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Failed to delete disabled permit: {(int)deleteResponse.StatusCode} {body}");
+        }
+    }
+
     public async Task<bool> UpdateCarAsync(Car updatedCar)
     {
         try
@@ -177,14 +295,16 @@ public class CarService
             if (currentVehicle == null)
                 return false;
 
+
+            // Convert CarType to VehicleType
+            var vehicleType = updatedCar.Type == CarType.Truck ? VehicleType.Truck : VehicleType.Private;
+
             // Create update request with RowVersion and changes
             var updatePayload = new VehicleUpdateRequest
             (
                 RowVersion: currentVehicle.RowVersion,
-                Type: updatedCar.Type,
-                Name: updatedCar.Name,
-                ResidentZoneCode: updatedCar.HasResidentPermit && updatedCar.ResidentPermitNumber != 0 ? updatedCar.ResidentPermitNumber : null,
-                DisabledPermit: updatedCar.HasDisabledPermit
+                Type: vehicleType,
+                Name: updatedCar.Name
             );
 
             // Send PATCH request to update the vehicle
@@ -199,7 +319,53 @@ public class CarService
                 throw new HttpRequestException($"Failed to update vehicle: {(int)response.StatusCode} {body}");
             }
 
+            // Handle resident permit changes
+            bool hadResidentPermit = currentVehicle.ResidentZoneCode.HasValue;
+            bool hasResidentPermit = updatedCar.HasResidentPermit;
+            bool zoneCodeChanged = currentVehicle.ResidentZoneCode != updatedCar.ResidentPermitNumber;
+
+            if (hadResidentPermit && !hasResidentPermit)
+            {
+                // Resident permit removed - delete it
+                if (currentVehicle.ResidencyPermitId.HasValue)
+                {
+                    await RemoveResidentPermitAsync(currentVehicle.ResidencyPermitId.Value);
+                }
+            }
+            else if (!hadResidentPermit && hasResidentPermit)
+            {
+                // Resident permit added
+                await AddResidentPermitAsync(updatedCar);
+            }
+            else if (hadResidentPermit && hasResidentPermit && zoneCodeChanged)
+            {
+                // Zone number changed - update the permit
+                if (currentVehicle.ResidencyPermitId.HasValue)
+                {
+                    await UpdateResidentPermitAsync(currentVehicle.ResidencyPermitId.Value, updatedCar);
+                }
+            }
+
+            // Handle disabled permit changes
+            if (currentVehicle.DisabledPermit != updatedCar.HasDisabledPermit)
+            {
+                if (updatedCar.HasDisabledPermit)
+                {
+                    // Disabled permit added
+                    await AddDisabledPermitAsync(updatedCar);
+                }
+                else
+                {
+                    // Disabled permit removed
+                    if (currentVehicle.DisabilityPermitId.HasValue)
+                    {
+                        await RemoveDisabledPermitAsync(currentVehicle.DisabilityPermitId.Value);
+                    }
+                }
+            }
+
             return true;
+        
         }
         catch (Exception ex)
         {
@@ -207,6 +373,28 @@ public class CarService
             throw; // Re-throw to let the UI handle the specific error
         }
     }
+
+    public async Task<Guid?> getActivePermitAsync(string? carId)
+    {
+        if (string.IsNullOrEmpty(carId))
+            return null;
+
+        try
+        {
+            var response = await _authService.ExecuteWithTokenRefreshAsync(() => _http.GetAsync($"/vehicles/{carId}"));
+            if (response.IsSuccessStatusCode)
+            {
+                var vehicleResponse = await response.Content.ReadFromJsonAsync<VehicleResponse>(_options);
+                return vehicleResponse?.ResidencyPermitId;
+            }
+            return null;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error fetching car: {ex.Message}");
+        }
+        return null;
+    } 
 
 
 }

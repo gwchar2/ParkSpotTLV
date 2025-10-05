@@ -12,14 +12,9 @@
 		android:roundIcon="@mipmap/appicon_round"
 		android:supportsRtl="true">
 
-
+		
 		<meta-data
 			android:name="com.google.android.geo.API_KEY"
-			android:value="${mapsApiKey}" />
-
-		<!--
-		<meta-data
-			android:name="com.google.android.geo.API_KEY"
-			android:value="AIzaSyC7dBzURpYQwnVMqgaMcL2cnA5IDs-VB58" /> -->
+			android:value="AIzaSyC7dBzURpYQwnVMqgaMcL2cnA5IDs-VB58" />
 	</application>
 </manifest>

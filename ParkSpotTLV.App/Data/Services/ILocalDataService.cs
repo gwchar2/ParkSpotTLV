@@ -10,7 +10,7 @@ public interface ILocalDataService
     Task SaveUserPreferencesAsync(UserPreferences preferences);
 
     Task<LocalUser?> GetCurrentUserAsync();
-    Task SaveUserAsync(LocalUser user);
+    Task SaveUserAsync(String token, DateTimeOffset expiresAt);
     Task<bool> IsUserLoggedInAsync();
     Task LogoutAsync();
 

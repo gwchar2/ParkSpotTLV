@@ -126,12 +126,12 @@ If database tables change:
 Delete the contents of Migrations/ folder in ParkSpotTLV.Infrastructure
 docker compose down -v --remove-orphans
 dotnet ef migrations add InitialCreate -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
-F5
+F5 // docker compose up -d db
 dotnet ef database update -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
-Re-F5
+Re-F5 // docker compose up -d api
 Verify
 ```
-//FOR MAC
+
 
 
 - New tables OR table changes

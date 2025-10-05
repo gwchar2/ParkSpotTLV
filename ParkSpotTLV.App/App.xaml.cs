@@ -28,7 +28,6 @@ namespace ParkSpotTLV.App
             try
             {
                 await _localData.InitializeAsync();
-                System.Diagnostics.Debug.WriteLine("Database initialized successfully");
             }
             catch (Exception ex)
             {
