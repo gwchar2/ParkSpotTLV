@@ -16,11 +16,14 @@
 		<!-- BELONGS TO TOMMER ! -->
 		<meta-data
 			android:name="com.google.android.geo.API_KEY"
-			android:value="AIzaSyBbMR9eVNQPEfJFiiwl0yo-63YwV-RgcqU"/>
+			android:value="${mapsApiKey}"/>
 
-		<!-- BELONGS TO MICHAL ! -->
 		<!-- meta-data
 			android:name="com.google.android.geo.API_KEY"
-			android:value="AIzaSyC7dBzURpYQwnVMqgaMcL2cnA5IDs-VB58" />-->
+			android:value="" />
+			מיכל אל תשימי פה את המפתח, זה מופיע לכולם באינטנרט ובסוף מישהו יגנוב את זה ויהיה לך חיוב של אלפי דולרים בגוגל 
+			תבדקי עם הצ'אט איך אפשר להסתיר את זה, בווינדוז אני שמתי את זה כמשתנה סביבה, אבל אני לא מכיר את הפעולות במאק
+			פשוט צריך לוודא שהמפתח לא מופיע באף קובץ
+			-->
 	</application>
 </manifest>
