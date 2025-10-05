@@ -15,7 +15,7 @@ namespace ParkSpotTLV.Infrastructure.Auth {
         private readonly ILogger<Argon2PasswordHasher> _log;
         private readonly Argon2Options _opts;
 
-        private int _t;             // Iterations
+        private readonly int _t;             // Iterations
         private readonly int _mKiB; // memory in KiB
         private readonly int _p;    // Parallelism
 

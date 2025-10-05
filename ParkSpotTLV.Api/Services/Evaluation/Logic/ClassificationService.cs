@@ -35,7 +35,6 @@ namespace ParkSpotTLV.Api.Services.Evaluation.Logic {
             if (_restricted.IsRestrictedNow(availabilityNow, now))
                 return ("RESTRICTED", "PrivilegedRestriction", PayNow: false, PayLater: false);
 
-
             // FREE now branch:      
             if (!isPayNow) {
 
