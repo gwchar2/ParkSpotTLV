@@ -26,7 +26,8 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         /* 
          * Concurrency 
          */
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)] public uint Xmin { get; private set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)] 
+        public uint Xmin { get; private set; }
         public DateTimeOffset? LastUpdated { get; set; } = DateTimeOffset.Now;                 // Last update on user
     }
 }

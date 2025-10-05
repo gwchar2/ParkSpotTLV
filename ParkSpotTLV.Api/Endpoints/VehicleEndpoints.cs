@@ -131,7 +131,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         OwnerId = userId,
                         Type = body.Type,
                         Name = body.Name,
-                        Permits = new List<Permit>()
+                        Permits = []
                     };
                     vehicle.Permits.Add(new Permit { 
                         Type = PermitType.Default 

@@ -41,6 +41,8 @@ namespace ParkSpotTLV.Api.Endpoints {
                         Username = normalized,
                         PasswordHash = pwdHash
                     };
+
+                    // Add default car
                     
                     db.Users.Add(user);
                     await db.SaveChangesAsync(ct);
