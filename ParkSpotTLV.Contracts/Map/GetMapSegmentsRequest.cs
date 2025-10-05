@@ -5,23 +5,18 @@ namespace ParkSpotTLV.Contracts.Map {
     public sealed record GetMapSegmentsRequest (
 
         [Required] Guid ActivePermitId,
-        [Required] double MinLon,
-        [Required] double MinLat,
-        [Required] double MaxLon,
-        [Required] double MaxLat,
+        [Required] double MinLon,                   // sw.Longitude
+        [Required] double MinLat,                   // sw.Latitude
+        [Required] double MaxLon,                   // ne.Longitude
+        [Required] double MaxLat,                   // ne.Latitude
         [Required] double CenterLon,
         [Required] double CenterLat,
         DateTimeOffset Now,
 
         // Preferences 
-        int MinParkingTime = 60,
-
-        bool ShowFree = true,
-        bool ShowPaid = true,
-        bool ShowLimited = true,
-        bool ShowAll = false
+        int MinParkingTime = 60
         );
-    
+
 }
 /*
 "activePermitId": "67e3f301-0e00-47d6-8916-e2f890b9dbf4",

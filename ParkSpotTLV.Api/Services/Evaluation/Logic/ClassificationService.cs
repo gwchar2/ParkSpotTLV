@@ -14,13 +14,13 @@ namespace ParkSpotTLV.Api.Services.Evaluation.Logic {
         private readonly IRestrictedSpec _restricted = restricted;
         private readonly IPaymentDecisionService _payment = payment;
         /*
-         * Restricted now, future doesnt matter             -> RESTRICTED -> RED,   PayOnStart = X,     WillHaveToPayLater?: ILEGAL,   _restricted.IsRestrictedNow()
+         * Restricted now, future doesnt matter             -> NOPARKING -> RED,   PayOnStart = X,     WillHaveToPayLater?: ILEGAL,   _restricted.IsRestrictedNow()
          * Free now, turns RESTRICTED within Required       -> LIMITED -> ORANGE,   PayOnStart = false, WillHaveToPayLater?: FALSE,     
          * PAID now, turns RESTRICTED within Required       -> LIMITED -> ORANGE,   PayOnStart = true,  WillHaveToPayLater?: TRUE,      
-         * Free now, turns PAID within Required             -> OK -> GREEN,         PayOnStart = false, WillHaveToPayLater?: !TRUE!,    
-         * Free now, stays FREE within required             -> OK -> GREEN,         PayOnStart = false, WillHaveToPayLater?: FALSE,      
-         * PAID now, turns FREE within Required             -> OK -> GREEN,         PayOnStart = true,  WillHaveToPayLater?: TRUE,     
-         * PAID now, stays PAID within Required             -> OK -> GREEN,         PayOnStart = true,  WillHaveToPayLater?: TRUE,      
+         * Free now, turns PAID within Required             -> PAID -> GREEN,         PayOnStart = false, WillHaveToPayLater?: !TRUE!,    
+         * Free now, stays FREE within required             -> FREE -> GREEN,         PayOnStart = false, WillHaveToPayLater?: FALSE,      
+         * PAID now, turns FREE within Required             -> PAID-> GREEN,         PayOnStart = true,  WillHaveToPayLater?: TRUE,     
+         * PAID now, stays PAID within Required             -> PAID -> GREEN,         PayOnStart = true,  WillHaveToPayLater?: TRUE,      
          */
         public (string Group, string Reason, bool PayNow, bool PayLater) Classify(ParkingType parkingType, Availability availabilityNow, 
             PaymentDecision paymentDecisionNow, PaymentDecision? decisionAtPaidStart, TariffCalendarStatus calNow, DateTimeOffset now, int MinParkingTime) {
@@ -33,7 +33,7 @@ namespace ParkSpotTLV.Api.Services.Evaluation.Logic {
 
             // Restricted now, future doesnt matter -> RESTRICTED -> RED,                   PayOnStart = X,     WillHaveToPayLater?: X,
             if (_restricted.IsRestrictedNow(availabilityNow, now))
-                return ("RESTRICTED", "PrivilegedRestriction", PayNow: false, PayLater: false);
+                return ("NOPARKING", "PrivilegedRestriction", PayNow: false, PayLater: false);
 
             // FREE now branch:      
             if (!isPayNow) {
@@ -45,7 +45,7 @@ namespace ParkSpotTLV.Api.Services.Evaluation.Logic {
                     && !calNow.ActiveNow
                     && paymentDecisionNow.Reason != "DisabilityPermitHolder"
                     && paymentDecisionNow.Reason != "PermitHomeZone")
-                    return ("LIMITED", $"Will become privileged-zone parking at {privilegedStart}", PayNow: false, PayLater: false);
+                    return ("RESTRICTED", $"Will become privileged-zone parking at {privilegedStart}", PayNow: false, PayLater: false);
 
                 // If I dont need to pay now because im a disability permit holder or zone permit (of same zone), I wont need to pay later as well.
                 if (paymentDecisionNow.Reason is "DisabilityPermitHolder" or "PermitHomeZone") {
@@ -90,7 +90,7 @@ namespace ParkSpotTLV.Api.Services.Evaluation.Logic {
                     && privilegedStartWhilePaid <= horizonEnd
                     && parkingType == ParkingType.Privileged
                     && calNow.ActiveNow)
-                    return ("LIMITED", $"Will become privileged-zone parking at {privilegedStartWhilePaid}", PayNow: true, PayLater: true);
+                    return ("RESTRICTED", $"Will become privileged-zone parking at {privilegedStartWhilePaid}", PayNow: true, PayLater: true);
 
                 // PAID now, turns FREE later                   -> OK->GREEN,           PayOnStart = true,  WillHaveToPayLater ?: TRUE,   
                 if (calNow.ActiveNow && calNow.NextEnd is DateTimeOffset paidEnd && paidEnd <= horizonEnd)

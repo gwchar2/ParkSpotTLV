@@ -22,7 +22,7 @@ namespace ParkSpotTLV.Api.Services.Evaluation.Facade {
 
         public async Task<IReadOnlyList<SegmentResult>> EvaluateAsync(MapSegmentsRequest request, CancellationToken ct) {
 
-            var rows = await _query.GetViewportAsync(request.MinLon, request.MinLat, request.MaxLon, request.MaxLat, request.CenterLon ,request.CenterLat, ct);
+            var rows = await _query.GetViewportAsync(request.MinLon, request.MaxLon, request.MinLat, request.MaxLat, request.CenterLon ,request.CenterLat, ct);
             var now = request.Now;
 
             var results = new List<SegmentResult>(rows.Count);
@@ -52,7 +52,7 @@ namespace ParkSpotTLV.Api.Services.Evaluation.Facade {
 
                 // We will now adjust AvailableUntil variable according to the start time of next payment segment (if exists) including the daily budget it has.
                 var adjustedNextChange = availabilityNow.NextChange;
-                    // If the permit is active, the next change will be once the free budget remaining is done.
+                // If the permit is active, the next change will be once the free budget remaining is done.
                 if (calNow.ActiveNow 
                     && paymentDecisionNow.Reason == "RemainingDailyBudget" 
                     && paymentDecisionNow.FreeBudgetRemainingMinutes is int remainingNow 
@@ -79,8 +79,8 @@ namespace ParkSpotTLV.Api.Services.Evaluation.Facade {
                 // Build result
                 results.Add(new SegmentResult(
                     row.SegmentId, row.ZoneCode, row.Tariff,
-                    row.NameEnglish,
                     row.NameHebrew,
+                    row.NameEnglish,
                     Group: group,
                     Reason: reason,
                     row.ParkingType,
@@ -89,7 +89,7 @@ namespace ParkSpotTLV.Api.Services.Evaluation.Facade {
                     AvailableFrom: availabilityNow.AvailableFrom,
                     AvailableUntil: availabilityNow.AvailableUntil ?? availabilityNow.AvailableFrom?.AddMinutes(request.MinParkingTime),
                     NextChange: adjustedNextChange,
-                    FreeBudgetRemaining: paymentDecisionNow.FreeBudgetRemainingMinutes,
+                    FreeBudgetRemaining: paymentDecisionNow?.FreeBudgetRemainingMinutes ?? decisionAtPaidStart?.FreeBudgetRemainingMinutes,
                     Geom: row.Geom
                 ));
             }
