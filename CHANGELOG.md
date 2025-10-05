@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.10.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.9.4-beta.0...v0.10.0-beta.0) (2025-10-05)
+
+
+### Features
+
+* **CarService:** handle permit changes ([64227a5](https://github.com/gwchar2/ParkSpotTLV/commit/64227a5bdfca69970ffddec1d43d5c4829e4c67a))
+* **Map:** MAP IS NOW WORKING ([11f5ce7](https://github.com/gwchar2/ParkSpotTLV/commit/11f5ce7d166903fd8d084f724fa5c3f93f29322a))
+
+
+### Bug Fixes
+
+* **App:** local db mess ([e80fb16](https://github.com/gwchar2/ParkSpotTLV/commit/e80fb160700f39c77c8ce0159f8222592225cac4))
+* I dont know what ([a37f141](https://github.com/gwchar2/ParkSpotTLV/commit/a37f141f3c578c6651fdbc70f72c2f0e33485b0e))
+
 ## [0.9.4-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.9.3-beta.0...v0.9.4-beta.0) (2025-10-05)
 
 
