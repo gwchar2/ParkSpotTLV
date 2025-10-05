@@ -12,13 +12,6 @@
         public double CenterLat { get; init; }
         public DateTimeOffset Now { get; init; } = DateTimeOffset.Now;
         public PermitSnapshot Pov { get; init; } = default!;
-
-        /* Preferences */
-        public bool ShowFree { get; init; } = true;
-        public bool ShowPaid { get; init; } = true;
-        public bool ShowLimited { get; init; } = true;
-        public bool ShowAll { get; init; } = false;             // Will also show illegal? NEED TO ASK MICHAL
-
         /* Minimal time treshold / duration of parking */
         public int MinParkingTime { get; init; } = 60;
     }

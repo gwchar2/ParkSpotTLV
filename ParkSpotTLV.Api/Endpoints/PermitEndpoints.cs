@@ -180,7 +180,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         return PermitProblems.MissingZoneCode(ctx);
 
                     if (body.Type == PermitType.Disability && body.ZoneCode.HasValue)
-                        permit.ZoneCode = 0;
+                        permit.ZoneCode = null;
                     else
                         permit.ZoneCode = body.ZoneCode;
 

@@ -93,10 +93,6 @@ namespace ParkSpotTLV.Api.Endpoints {
                         CenterLat = body.CenterLat,
                         Now = now,
                         Pov = pov,
-                        ShowFree = body.ShowFree,
-                        ShowPaid = body.ShowPaid,
-                        ShowLimited = body.ShowLimited,
-                        ShowAll = body.ShowAll,
                         MinParkingTime = minDuration > 720 ? 720 : minDuration
                     };
 

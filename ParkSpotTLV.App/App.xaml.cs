@@ -14,7 +14,6 @@ namespace ParkSpotTLV.App
             _shell = shell;
             _localData = localData;
 
-            // fire-and-forget DB init
             _ = InitializeDatabaseAsync();
         }
 
