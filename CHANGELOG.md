@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.10.0-beta.0...v0.10.1-beta.0) (2025-10-05)
+
+
+### Bug Fixes
+
+* Cant remove last vehicle ([b944f1e](https://github.com/gwchar2/ParkSpotTLV/commit/b944f1ef62b8ffded90076c0376c1d6aa7e4aa01))
+
 ## [0.10.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.9.4-beta.0...v0.10.0-beta.0) (2025-10-05)
 
 
