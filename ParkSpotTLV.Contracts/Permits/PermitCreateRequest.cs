@@ -7,7 +7,7 @@ namespace ParkSpotTLV.Contracts.Permits {
 
         [Required] PermitType Type,
         [Required] Guid VehicleId,
-        bool HasDisabledPermit,
+        bool HasDisabledPermit = false,
         int? ResidentZoneCode = null
     );
 

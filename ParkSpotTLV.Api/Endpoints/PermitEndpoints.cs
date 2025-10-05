@@ -163,12 +163,13 @@ namespace ParkSpotTLV.Api.Endpoints {
                         return GeneralProblems.InvalidRowVersion(ctx);
 
                     // Get the permit from DB, check for rights
-                    var permit = await db.Permits.Include(p => p.Id == id).SingleOrDefaultAsync(ct);
-                    if (permit is null || permit.Vehicle.Id != userId)
+                    var permit = await db.Permits.Where(p => p.Id == id).Include(p => p.Vehicle).ThenInclude(v => v.Permits).SingleOrDefaultAsync(ct); //
+
+                    if (permit is null || permit.Vehicle.OwnerId != userId) //
                         return PermitProblems.Forbidden(ctx);
 
                     // Check if the vehicle already has a permit of the 'want-to-change-to' type
-                    if (permit.Type != body.Type && (permit.Vehicle.Permits.Select(p => p.Type == body.Type) is not null))
+                    if (permit.Type != body.Type && (permit.Vehicle.Permits.Any(p => p.Type == body.Type))) //
                         return PermitProblems.MaxOne(ctx);
 
                     // Check for concurrency
@@ -178,8 +179,13 @@ namespace ParkSpotTLV.Api.Endpoints {
                     if (body.Type == PermitType.ZoneResident && !body.ZoneCode.HasValue)
                         return PermitProblems.MissingZoneCode(ctx);
 
+                    if (body.Type == PermitType.Disability && body.ZoneCode.HasValue)
+                        permit.ZoneCode = 0;
+                    else
+                        permit.ZoneCode = body.ZoneCode;
+
+
                     permit.Type = body.Type;
-                    permit.ZoneCode = body.ZoneCode;
                     permit.LastUpdated = DateTimeOffset.Now;
 
 
@@ -191,7 +197,8 @@ namespace ParkSpotTLV.Api.Endpoints {
                         VehicleId = p.VehicleId,
                         PermitType = EnumMappings.MapPermitType(p.Type),
                         ResidentZoneCode = p.ZoneCode,
-                        LastUpdated = p.LastUpdated
+                        LastUpdated = DateTimeOffset.UtcNow,
+                        RowVersion = Convert.ToBase64String(BitConverter.GetBytes(p.Xmin))
                     }).SingleAsync(ct);
 
                     return Results.Ok(dto);
