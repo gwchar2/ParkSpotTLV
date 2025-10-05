@@ -1,13 +1,14 @@
 using ParkSpotTLV.App.Services;
 using ParkSpotTLV.Core.Models;
 
+
 namespace ParkSpotTLV.App.Pages;
 
 public partial class EditCarPage : ContentPage, IQueryAttributable
 {
     private readonly CarService _carService;
     private string _carId = string.Empty;
-    private ParkSpotTLV.App.Services.Car? _currentCar;
+    private Car? _currentCar;
 
     public EditCarPage(CarService carService)
     {
@@ -42,8 +43,8 @@ public partial class EditCarPage : ContentPage, IQueryAttributable
 
             // Populate form with car data
             CarNameEntry.Text = _currentCar.Name;
-            PrivateRadio.IsChecked = _currentCar.Type == VehicleType.Private;
-            TruckRadio.IsChecked = _currentCar.Type == VehicleType.Truck;
+            PrivateRadio.IsChecked = _currentCar.Type == CarType.Private;
+            TruckRadio.IsChecked = _currentCar.Type == CarType.Truck;
             ResidentPermitCheck.IsChecked = _currentCar.HasResidentPermit;
             ZoneNumberEntry.IsVisible = _currentCar.HasResidentPermit;
             ZoneNumberEntry.Text = _currentCar.HasResidentPermit ? _currentCar.ResidentPermitNumber.ToString() : "";
@@ -79,7 +80,7 @@ public partial class EditCarPage : ContentPage, IQueryAttributable
             return;
         }
 
-        VehicleType vehicleType = PrivateRadio.IsChecked ? VehicleType.Private : VehicleType.Truck;
+        CarType carType = PrivateRadio.IsChecked ? CarType.Private : CarType.Truck;
         bool hasResidentPermit = ResidentPermitCheck.IsChecked;
         string zoneNumberText = ZoneNumberEntry.Text?.Trim() ?? "";
         bool hasDisabledPermit = DisabledPermitCheck.IsChecked;
@@ -97,7 +98,7 @@ public partial class EditCarPage : ContentPage, IQueryAttributable
 
         // Update the current car object
         _currentCar.Name = carName;
-        _currentCar.Type = vehicleType;
+        _currentCar.Type = carType;
         _currentCar.HasResidentPermit = hasResidentPermit;
         _currentCar.ResidentPermitNumber = residentPermitNumber;
         _currentCar.HasDisabledPermit = hasDisabledPermit;

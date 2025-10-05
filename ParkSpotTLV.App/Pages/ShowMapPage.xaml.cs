@@ -4,6 +4,7 @@ using Microsoft.Maui.Maps;
 using Microsoft.Maui.Devices.Sensors;
 using System.Threading.Tasks;
 using System.Text.Json;
+using ParkSpotTLV.Contracts.Enums;
 
 
 namespace ParkSpotTLV.App.Pages;

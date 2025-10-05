@@ -1,4 +1,5 @@
 using ParkSpotTLV.App.Data.Services;
+using ParkSpotTLV.Contracts.Enums;
 
 namespace ParkSpotTLV.App.Pages;
 

@@ -55,10 +55,10 @@ public partial class SignUpPage : ContentPage
                 // add a default car for the new user
                 try
                 {
-                    var defCar = new ParkSpotTLV.App.Services.Car
+                    var defCar = new Car
                         {
                             Name = "Default Car",
-                            Type = VehicleType.Private,
+                            Type = CarType.Private,
                             HasResidentPermit = false,
                             ResidentPermitNumber = 0,
                             HasDisabledPermit = false

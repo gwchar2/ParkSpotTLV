@@ -1,29 +1,10 @@
 using System.Text.Json;
 using System.Net.Http.Json;
-//using ParkSpotTLV.App.Data.Models;
 using ParkSpotTLV.Contracts.Vehicles;
+using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Core.Models;
-//using Xamarin.Google.Crypto.Tink.Proto;
 
 namespace ParkSpotTLV.App.Services;
-
-public class Car
-{
-    public string Id { get; set; } = Guid.NewGuid().ToString();
-    public string Name { get; set; } = string.Empty;
-    public VehicleType Type { get; set; } = VehicleType.Private;
-    public bool HasResidentPermit { get; set; } = false;
-    public int ResidentPermitNumber { get; set; } = 0;
-    public bool HasDisabledPermit { get; set; } = false;
-
-    public string TypeDisplayName => Type switch
-    {
-        VehicleType.Private => "Private",
-        VehicleType.Truck => "Truck",
-        _ => "Private"
-    };
-}
-
 
 public class CarService
 {
@@ -43,11 +24,14 @@ public class CarService
 
     private static Car MapVehicleResponseToCar(VehicleResponse vehicleResponse)
     {
+        // Parse the string Type to CarType enum
+        var carType = vehicleResponse.Type.ToLower() == "truck" ? CarType.Truck : CarType.Private;
+
         return new Car
         {
             Id = vehicleResponse.Id.ToString(),
             Name = vehicleResponse.Name,
-            Type = vehicleResponse.Type,
+            Type = carType,
             HasResidentPermit = vehicleResponse.ResidentZoneCode.HasValue,
             ResidentPermitNumber = vehicleResponse.ResidentZoneCode ?? 0,
             HasDisabledPermit = vehicleResponse.DisabledPermit
@@ -77,9 +61,12 @@ public class CarService
     {
         try
         {
+            // Convert CarType to VehicleType
+            var vehicleType = car.Type == CarType.Truck ? VehicleType.Truck : VehicleType.Private;
+
             var newCarPayload = new VehicleCreateRequest
             (
-            Type : car.Type, // Core.Models.VehicleType.(car.Type),
+            Type : vehicleType,
             Name : car.Name,
             ResidentZoneCode : car.HasResidentPermit && car.ResidentPermitNumber != 0 ? car.ResidentPermitNumber : null,
             HasDisabledPermit : car.HasDisabledPermit
@@ -177,14 +164,15 @@ public class CarService
             if (currentVehicle == null)
                 return false;
 
+            // Convert CarType to VehicleType
+            var vehicleType = updatedCar.Type == CarType.Truck ? VehicleType.Truck : VehicleType.Private;
+
             // Create update request with RowVersion and changes
             var updatePayload = new VehicleUpdateRequest
             (
                 RowVersion: currentVehicle.RowVersion,
-                Type: updatedCar.Type,
-                Name: updatedCar.Name,
-                ResidentZoneCode: updatedCar.HasResidentPermit && updatedCar.ResidentPermitNumber != 0 ? updatedCar.ResidentPermitNumber : null,
-                DisabledPermit: updatedCar.HasDisabledPermit
+                Type: vehicleType,
+                Name: updatedCar.Name
             );
 
             // Send PATCH request to update the vehicle
