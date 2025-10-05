@@ -1,6 +1,8 @@
 using System.Text.Json;
 using System.Net.Http.Json;
 using System.Net;
+using ParkSpotTLV.App.Data.Services;
+
 
 namespace ParkSpotTLV.App.Services;
 
@@ -13,12 +15,16 @@ public class AuthenticationService
     public bool IsAuthenticated { get; private set; }
     public string? CurrentUsername { get; private set; }
     private string? _refreshToken;
+    // private readonly LocalDataService _localDataService;
+
+
     
 
-    public AuthenticationService(HttpClient http, JsonSerializerOptions? options = null)
+    public AuthenticationService(HttpClient http, JsonSerializerOptions? options = null )
     {
         _http = http;    // same HttpClient instance as CarService
         _options = options ?? new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        // _localDataService = localDataService ;
     }
     public sealed class AuthResponse
     {
@@ -57,6 +63,7 @@ public class AuthenticationService
                 new System.Net.Http.Headers.AuthenticationHeaderValue(tokens.TokenType, tokens.AccessToken);
             _refreshToken = tokens.RefreshToken;
             IsAuthenticated = true;
+            // _localDataService.SaveUserAsync(_refreshToken, tokens.RefreshTokenExpiresAt);
         }
 
         return tokens;
@@ -82,6 +89,7 @@ public class AuthenticationService
             new System.Net.Http.Headers.AuthenticationHeaderValue(tokens.TokenType, tokens.AccessToken);
         _refreshToken = tokens.RefreshToken;
         IsAuthenticated = true;
+        // _localDataService.SaveUserAsync(_refreshToken, tokens.RefreshTokenExpiresAt) ;
     }
 
     return tokens;
@@ -93,6 +101,8 @@ public class AuthenticationService
         CurrentUsername = null;
         _refreshToken = null;
         _http.DefaultRequestHeaders.Authorization = null;
+        // _localDataService.LogoutAsync();
+
     }
 
     // method no ensure authentication of current session

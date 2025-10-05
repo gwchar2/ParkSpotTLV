@@ -32,47 +32,35 @@ public class LocalDataService : ILocalDataService
 
         try
         {
-            System.Diagnostics.Debug.WriteLine("Attempting to create database...");
 
             // Create database and tables if they don't exist (idempotent operation)
             var created = await context.Database.EnsureCreatedAsync();
-            System.Diagnostics.Debug.WriteLine($"Database creation result: {created}");
 
             // Ensure default preferences exist for app functionality
             var preferences = await context.UserPreferences.FirstOrDefaultAsync();
             if (preferences == null)
             {
-                System.Diagnostics.Debug.WriteLine("Creating default preferences...");
                 await context.UserPreferences.AddAsync(new UserPreferences());
                 await context.SaveChangesAsync();
-                System.Diagnostics.Debug.WriteLine("Default preferences created successfully");
             }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine($"Found existing preferences with ID: {preferences.Id}");
-            }
+            
         }
-        catch (Exception ex)
+        catch (Exception )
         {
-            System.Diagnostics.Debug.WriteLine($"Database initialization error: {ex}");
-            System.Diagnostics.Debug.WriteLine($"Full exception: {ex.Message}");
-            System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+           
 
             // Recovery strategy: Recreate corrupted database
             try
             {
-                System.Diagnostics.Debug.WriteLine("Attempting to recreate database...");
                 await context.Database.EnsureDeletedAsync(); // Nuclear option
                 await context.Database.EnsureCreatedAsync();
 
                 // Restore essential data
                 await context.UserPreferences.AddAsync(new UserPreferences());
                 await context.SaveChangesAsync();
-                System.Diagnostics.Debug.WriteLine("Database recreated successfully");
             }
-            catch (Exception ex2)
+            catch (Exception )
             {
-                System.Diagnostics.Debug.WriteLine($"Database recreation failed: {ex2}");
                 throw; // Can't recover - app will need to be reinstalled
             }
         }
@@ -136,19 +124,19 @@ public class LocalDataService : ILocalDataService
     }
 
     // Saves user data including authentication tokens and session info
-    public async Task SaveUserAsync(LocalUser user)
+    public async Task SaveUserAsync(String token, DateTimeOffset expiresAt)
     {
         using var context = new LocalDbContext();
-        var existing = await context.Users.FirstOrDefaultAsync(u => u.Id == user.Id);
-        if (existing != null)
+        var existing = await context.Users.FirstOrDefaultAsync();
+        if (existing is not null)
         {
             // Update existing user session
-            context.Entry(existing).CurrentValues.SetValues(user);
+            // context.Entry(existing).CurrentValues.SetValues(token, expiresAt, DateTimeOffset.Now);
         }
         else
         {
             // New user registration/login
-            await context.Users.AddAsync(user);
+            //await context.Users.AddAsync(token, expiresAt, DateTimeOffset.Now);
         }
         await context.SaveChangesAsync();
     }
@@ -164,12 +152,13 @@ public class LocalDataService : ILocalDataService
     public async Task LogoutAsync()
     {
         using var context = new LocalDbContext();
-        var users = await context.Users.Where(u => u.IsLoggedIn).ToListAsync();
-        foreach (var user in users)
-        {
-            user.IsLoggedIn = false;
-            user.AuthToken = null; // Clear JWT token
-        }
+        var existing = await context.Users.FirstOrDefaultAsync();
+        // if (existing is not null)
+        // {
+        //     // Update existing user session
+        //     // context.Entry(existing).CurrentValues.SetValues(null, null, null);
+        // }
+        
         await context.SaveChangesAsync();
     }
     #endregion
