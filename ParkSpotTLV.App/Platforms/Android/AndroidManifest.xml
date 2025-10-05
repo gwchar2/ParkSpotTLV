@@ -12,9 +12,15 @@
 		android:roundIcon="@mipmap/appicon_round"
 		android:supportsRtl="true">
 
-		
+
+		<!-- BELONGS TO TOMMER ! -->
 		<meta-data
 			android:name="com.google.android.geo.API_KEY"
-			android:value="AIzaSyC7dBzURpYQwnVMqgaMcL2cnA5IDs-VB58" />
+			android:value="AIzaSyBbMR9eVNQPEfJFiiwl0yo-63YwV-RgcqU"/>
+
+		<!-- BELONGS TO MICHAL ! -->
+		<!-- meta-data
+			android:name="com.google.android.geo.API_KEY"
+			android:value="AIzaSyC7dBzURpYQwnVMqgaMcL2cnA5IDs-VB58" />-->
 	</application>
 </manifest>
