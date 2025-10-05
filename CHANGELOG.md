@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.2-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.10.1-beta.0...v0.10.2-beta.0) (2025-10-05)
+
+
+### Bug Fixes
+
+* Hide google maps api ([1f2e3ea](https://github.com/gwchar2/ParkSpotTLV/commit/1f2e3eafda41609b32b1d98f7ae15e63c399c84d))
+
 ## [0.10.1-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.10.0-beta.0...v0.10.1-beta.0) (2025-10-05)
 
 
