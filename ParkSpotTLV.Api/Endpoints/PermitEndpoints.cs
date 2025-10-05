@@ -127,7 +127,8 @@ namespace ParkSpotTLV.Api.Endpoints {
                         VehicleId = permit.VehicleId,
                         PermitType = EnumMappings.MapPermitType(permit.Type),
                         ResidentZoneCode = permit.ZoneCode,
-                        LastUpdated = permit.LastUpdated
+                        LastUpdated = permit.LastUpdated,
+                        RowVersion = Convert.ToBase64String(BitConverter.GetBytes(permit.Xmin))
                     };
 
                     return Results.Ok(dto);
