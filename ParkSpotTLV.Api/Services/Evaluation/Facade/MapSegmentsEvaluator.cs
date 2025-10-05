@@ -22,7 +22,7 @@ namespace ParkSpotTLV.Api.Services.Evaluation.Facade {
 
         public async Task<IReadOnlyList<SegmentResult>> EvaluateAsync(MapSegmentsRequest request, CancellationToken ct) {
 
-            var rows = await _query.GetViewportAsync(request.MinLon, request.MinLat, request.MaxLon, request.MaxLat, request.CenterLon ,request.CenterLat, ct);
+            var rows = await _query.GetViewportAsync(request.MinLon, request.MaxLon, request.MinLat, request.MaxLat, request.CenterLon ,request.CenterLat, ct);
             var now = request.Now;
 
             var results = new List<SegmentResult>(rows.Count);

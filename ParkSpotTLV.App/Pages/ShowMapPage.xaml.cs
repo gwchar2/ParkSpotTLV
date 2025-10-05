@@ -5,6 +5,8 @@ using Microsoft.Maui.Devices.Sensors;
 using System.Threading.Tasks;
 using System.Text.Json;
 using ParkSpotTLV.Contracts.Enums;
+using ParkSpotTLV.Contracts.Map;
+using ParkSpotTLV.App.Data.Services;
 
 
 namespace ParkSpotTLV.App.Pages;
@@ -13,6 +15,7 @@ public partial class ShowMapPage : ContentPage
 {
     private bool isParked = false;
     private string? pickedCarName;
+    private string? pickedCarId;
     private string? pickedDay;
     private string? pickedTime;
     private bool showRed;
@@ -21,12 +24,16 @@ public partial class ShowMapPage : ContentPage
     private bool showYellow;
     private readonly CarService _carService;
     private readonly MapService _mapService;
+    private readonly ILocalDataService _localDataService;
+    private List<Core.Models.Car> _userCars = new();
 
-    public ShowMapPage(CarService carService,MapService mapService)
+
+    public ShowMapPage(CarService carService,MapService mapService,ILocalDataService localDataService )
     {
         InitializeComponent();
         _carService = carService;
         _mapService = mapService;
+        _localDataService = localDataService;
         LoadUserCars();
     }
 
@@ -34,12 +41,13 @@ public partial class ShowMapPage : ContentPage
     {
         base.OnAppearing();
         setSelectedSettings();
-        LoadMapAsync(pickedCarName,pickedDay,pickedTime, showRed , showBlue , showGreen , showYellow);
         LoadUserCars();
+        LoadMapAsync(pickedCarId,pickedDay,pickedTime, showRed , showBlue , showGreen , showYellow);
+        
     }
 
 
-    private async void LoadMapAsync(string? car, string? day, string? time, bool red, bool blue, bool green, bool yellow)
+    private async void LoadMapAsync(string? carId, string? day, string? time, bool red, bool blue, bool green, bool yellow)
     {
         // Enable showing user location on map
         MyMap.IsShowingUser = true;
@@ -59,35 +67,57 @@ public partial class ShowMapPage : ContentPage
             MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(center, Distance.FromKilometers(5)));
         }
 
-        // Get and draw parking segments
-        var geoJsonData = await _mapService.getSegmentsAsync();
-        var json = JsonSerializer.Serialize(geoJsonData);
-        using var doc = JsonDocument.Parse(json);
-        var root = doc.RootElement;
+        // Get active permit ID
+        var activePermitNullable = await _carService.getActivePermitAsync(carId);
+        var activePermit = activePermitNullable ?? Guid.Empty;
 
-        if (root.TryGetProperty("features", out var features))
+        // Get and draw parking segments
+        var preferences = await _localDataService.GetUserPreferencesAsync();
+        var segmentsResponse = await _mapService.getSegmentsAsync(preferences.ParkingThresholdMinutes, activePermit, null);
+
+        if (segmentsResponse == null || segmentsResponse.Segments == null)
+            return;
+
+        // Clear existing map elements
+        MyMap.MapElements.Clear();
+
+        // Draw each segment
+        foreach (var segment in segmentsResponse.Segments)
         {
-            foreach (var feature in features.EnumerateArray())
+            // Determine color based on Group
+            Color strokeColor = segment.Group switch
             {
-                if (feature.TryGetProperty("geometry", out var geometry) &&
-                    geometry.TryGetProperty("type", out var type) &&
-                    type.GetString() == "LineString")
+                "FREE" => Color.FromArgb("#40dd7c"),      // Green - Free parking
+                "PAID" => Color.FromArgb("#4769b9"),      // Blue - Paid parking
+                "LIMITED" => Color.FromArgb("#f2d158"),   // Yellow - Limited/Restricted
+                "RESTRICTED" => Color.FromArgb("#f15151"), // Red - No parking
+                _ => Color.FromArgb("#808080")            // Gray - Unknown
+            };
+
+            // Skip based on filter settings
+            if (segment.Group == "RESTRICTED" && !showRed) continue;
+            if (segment.Group == "PAID" && !showBlue) continue;
+            if (segment.Group == "FREE" && !showGreen) continue;
+            if (segment.Group == "LIMITED" && !showYellow) continue;
+
+            // Parse the GeoJSON geometry
+            var geometry = segment.Geometry;
+            if (geometry.TryGetProperty("type", out var geoType) && geoType.GetString() == "LineString")
+            {
+                if (geometry.TryGetProperty("coordinates", out var coordinates))
                 {
                     var line = new Polyline
                     {
-                        StrokeWidth = 4,
-                        StrokeColor = Color.FromArgb("#2E7D32")
+                        StrokeWidth = 6,
+                        StrokeColor = strokeColor
                     };
 
-                    if (geometry.TryGetProperty("coordinates", out var coordinates))
+                    foreach (var coordinate in coordinates.EnumerateArray())
                     {
-                        foreach (var coordinate in coordinates.EnumerateArray())
-                        {
-                            // GeoJSON format is [longitude, latitude]
-                            double longitude = coordinate[0].GetDouble();
-                            double latitude = coordinate[1].GetDouble();
-                            line.Geopath.Add(new Location(latitude, longitude));
-                        }
+                        // GeoJSON format is [longitude, latitude]
+                        double longitude = coordinate[0].GetDouble();
+                        double latitude = coordinate[1].GetDouble();
+                        line.Geopath.Add(new Location(latitude, longitude));
                     }
 
                     MyMap.MapElements.Add(line);
@@ -113,28 +143,29 @@ public partial class ShowMapPage : ContentPage
     private async void LoadUserCars()
     {
         // get user's list of cars from server
-        var userCars = await _carService.GetUserCarsAsync();
+        _userCars = await _carService.GetUserCarsAsync();
 
         // Clear existing items from UI
         CarPicker.Items.Clear();
 
         // Add user's cars to UI
-        foreach (var car in userCars)
+        foreach (var car in _userCars)
         {
             CarPicker.Items.Add(car.Name);
         }
 
         // Add "Add Car" option
-        if (userCars.Count < 5)
+        if (_userCars.Count < 5)
         {
             CarPicker.Items.Add("+ Add Car");
         }
 
-
         // Set default selection to first car if available
-        if (userCars.Count > 0)
+        if (_userCars.Count > 0)
         {
             CarPicker.SelectedIndex = 0;
+            pickedCarId = _userCars[0].Id;
+            pickedCarName = _userCars[0].Name;
         }
     }
 
@@ -168,10 +199,22 @@ public partial class ShowMapPage : ContentPage
         {
             await Shell.Current.GoToAsync("AddCarPage");
             // Reset to previous selection after navigation
-            var userCars = await _carService.GetUserCarsAsync();
-            if (userCars.Count > 0)
+            _userCars = await _carService.GetUserCarsAsync();
+            if (_userCars.Count > 0)
             {
                 picker.SelectedIndex = 0; // Back to first car
+                pickedCarId = _userCars[0].Id;
+                pickedCarName = _userCars[0].Name;
+            }
+        }
+        else
+        {
+            // Update the selected car ID and name
+            int selectedIndex = picker.SelectedIndex;
+            if (selectedIndex >= 0 && selectedIndex < _userCars.Count)
+            {
+                pickedCarId = _userCars[selectedIndex].Id;
+                pickedCarName = _userCars[selectedIndex].Name;
             }
         }
     }
@@ -183,8 +226,15 @@ public partial class ShowMapPage : ContentPage
     }
 
     private void setSelectedSettings(){
-        pickedCarName = CarPicker.SelectedItem?.ToString();
-        pickedDay = DatePicker.SelectedItem?.ToString(); 
+        // Update car selection
+        int selectedIndex = CarPicker.SelectedIndex;
+        if (selectedIndex >= 0 && selectedIndex < _userCars.Count)
+        {
+            pickedCarId = _userCars[selectedIndex].Id;
+            pickedCarName = _userCars[selectedIndex].Name;
+        }
+
+        pickedDay = DatePicker.SelectedItem?.ToString();
         pickedTime = TimePicker.SelectedItem?.ToString();
         showRed = NoParkingCheck.IsChecked ;
         showBlue  = PaidParkingCheck.IsChecked ;

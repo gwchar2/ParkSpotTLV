@@ -374,5 +374,27 @@ public class CarService
         }
     }
 
+    public async Task<Guid?> getActivePermitAsync(string? carId)
+    {
+        if (string.IsNullOrEmpty(carId))
+            return null;
+
+        try
+        {
+            var response = await _authService.ExecuteWithTokenRefreshAsync(() => _http.GetAsync($"/vehicles/{carId}"));
+            if (response.IsSuccessStatusCode)
+            {
+                var vehicleResponse = await response.Content.ReadFromJsonAsync<VehicleResponse>(_options);
+                return vehicleResponse?.ResidencyPermitId;
+            }
+            return null;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error fetching car: {ex.Message}");
+        }
+        return null;
+    } 
+
 
 }
