@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.4-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.9.3-beta.0...v0.9.4-beta.0) (2025-10-05)
+
+
+### Bug Fixes
+
+* Updated permit endpoints ([adf1f6f](https://github.com/gwchar2/ParkSpotTLV/commit/adf1f6f02898683ca8e06828ee5a3bae53ba0851))
+
 ## [0.9.3-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.9.2-beta.0...v0.9.3-beta.0) (2025-10-04)
 
 
