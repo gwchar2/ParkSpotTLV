@@ -25,22 +25,17 @@ public class MapService
     public async Task<GetMapSegmentsResponse?> getSegmentsAsync(int minParkingTime, Guid activePermit, Location? center)
     {
         // double centerLon = center.Longitude;
-        // double centerLat = center.Latitude;
-
+        // double centerLat = center.Latitude;, 
         var request = new GetMapSegmentsRequest(
             ActivePermitId: activePermit,
-            MinLon: 34.7841160,
-            MinLat: 32.0914800,
-            MaxLon: 34.7908710,
-            MaxLat: 32.0950490,
+            MinLon: 34.7799910,         // sw.Longitude
+            MinLat: 32.0835150,         // sw.Latitude
+            MaxLon: 34.7865450,         // ne.Longitude
+            MaxLat: 32.0867230,         // ne.Latitude
             CenterLon: 34.7877809,
             CenterLat: 32.0928775,
             Now: DateTimeOffset.Now,
-            MinParkingTime: minParkingTime,
-            ShowFree: true,
-            ShowPaid: true,
-            ShowLimited: true,
-            ShowAll: false
+            MinParkingTime: minParkingTime
         );
 
         try
