@@ -13,10 +13,6 @@ public class AuthenticationService
     private readonly JsonSerializerOptions _options;
     private readonly ILocalDataService _localDataService;
 
-    // public bool IsAuthenticated { get; private set; }
-    // public string? CurrentUsername { get; private set; }
-    // private string? _refreshToken;
-
     public AuthenticationService(HttpClient http, ILocalDataService localDataService , JsonSerializerOptions? options = null)
     {
         _http = http;    // same HttpClient instance as CarService
@@ -77,9 +73,6 @@ public class AuthenticationService
             _http.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue(tokens.TokenType, tokens.AccessToken);
 
-            // _refreshToken = tokens.RefreshToken;
-            // IsAuthenticated = true;
-
             // new session
             var newSession = new Session
             {
@@ -127,9 +120,7 @@ public class AuthenticationService
 
     public async Task Logout()
     {
-        // IsAuthenticated = false;
-        // CurrentUsername = null;
-        // _refreshToken = null;
+        
         _http.DefaultRequestHeaders.Authorization = null;
         await _localDataService.DeleteSessionAsync();
 
@@ -178,9 +169,6 @@ public class AuthenticationService
 
             if (!response.IsSuccessStatusCode)
             {
-                // Refresh token is invalid or expired
-                // IsAuthenticated = false;
-                // _refreshToken = null;
                 _http.DefaultRequestHeaders.Authorization = null;
                 return false;
             }
