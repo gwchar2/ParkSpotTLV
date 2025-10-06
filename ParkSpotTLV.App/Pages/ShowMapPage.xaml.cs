@@ -34,16 +34,18 @@ public partial class ShowMapPage : ContentPage
         _carService = carService;
         _mapService = mapService;
         _localDataService = localDataService;
+        
+        
         LoadUserCars();
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-        setSelectedSettings();
+        await LoadSessionPreferences();
         LoadUserCars();
         LoadMapAsync(pickedCarId,pickedDay,pickedTime, showRed , showBlue , showGreen , showYellow);
-        
+
     }
 
 
@@ -140,6 +142,24 @@ public partial class ShowMapPage : ContentPage
             return null;
         }
     }
+    private async Task LoadSessionPreferences()
+    {
+        var session = await _localDataService.GetSessionAsync();
+        if (session is not null)
+        {
+            showRed = session.ShowNoParking;
+            showBlue = session.ShowPaid;
+            showGreen = session.ShowFree;
+            showYellow = session.ShowRestricted;
+
+            // Update checkbox UI to match session values
+            NoParkingCheck.IsChecked = showRed;
+            PaidParkingCheck.IsChecked = showBlue;
+            FreeParkingCheck.IsChecked = showGreen;
+            RestrictedCheck.IsChecked = showYellow;
+        }
+    }
+
     private async void LoadUserCars()
     {
         // get user's list of cars from server
@@ -171,23 +191,23 @@ public partial class ShowMapPage : ContentPage
 
     private void OnNoParkingTapped(object sender, EventArgs e)
     {
-       showRed = !showRed ;
+       showRed = NoParkingCheck.IsChecked ;
     }
 
     private void OnPaidParkingTapped(object sender, EventArgs e)
     {
-        showBlue = !showBlue;
+        showBlue = PaidParkingCheck.IsChecked;
 
     }
 
     private void OnFreeParkingTapped(object sender, EventArgs e)
     {
-        showGreen = !showGreen;
+        showGreen = FreeParkingCheck.IsChecked;
     }
 
     private void OnRestrictedTapped(object sender, EventArgs e)
     {
-       showYellow = !showYellow;
+       showYellow = RestrictedCheck.IsChecked;
     }
 
     private async void OnCarPickerChanged(object sender, EventArgs e)
@@ -219,13 +239,14 @@ public partial class ShowMapPage : ContentPage
         }
     }
 
-    private void OnSettingsToggleClicked(object sender, EventArgs e)
+    private async void OnSettingsToggleClicked(object sender, EventArgs e)
     {
+        await SetSelectedSettings();
         SettingsPanel.IsVisible = !SettingsPanel.IsVisible;
         SettingsToggleBtn.Text = SettingsPanel.IsVisible ? "⚙️ ▲" : "⚙️ ▼";
     }
 
-    private void setSelectedSettings(){
+    private async Task SetSelectedSettings(){
         // Update car selection
         int selectedIndex = CarPicker.SelectedIndex;
         if (selectedIndex >= 0 && selectedIndex < _userCars.Count)
@@ -236,15 +257,19 @@ public partial class ShowMapPage : ContentPage
 
         pickedDay = DatePicker.SelectedItem?.ToString();
         pickedTime = TimePicker.SelectedItem?.ToString();
-        showRed = NoParkingCheck.IsChecked ;
-        showBlue  = PaidParkingCheck.IsChecked ;
-        showGreen = FreeParkingCheck.IsChecked ;
-        showYellow = RestrictedCheck.IsChecked ;
+        var session = await _localDataService.GetSessionAsync();
+        if (session is not null)
+        {
+            NoParkingCheck.IsChecked = session.ShowNoParking;
+            PaidParkingCheck.IsChecked = session.ShowPaid;
+            FreeParkingCheck.IsChecked = session.ShowFree;
+            RestrictedCheck.IsChecked = session.ShowRestricted;
+        }
     }
 
     private async void OnApplyClicked(object sender, EventArgs e)
     {
-        setSelectedSettings();
+        
         await _localDataService.UpdatePreferencesAsync(null,null,null,showGreen,showBlue,showYellow,showRed);
         LoadMapAsync(pickedCarName,pickedDay,pickedTime, showRed , showBlue , showGreen , showYellow);
         await DisplayAlert("Apply", "Changes applied successfully!", "OK");
