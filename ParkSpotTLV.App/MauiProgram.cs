@@ -51,7 +51,7 @@ namespace ParkSpotTLV.App
             {
                 var http = sp.GetRequiredService<HttpClient>();
                 var opts = sp.GetRequiredService<JsonSerializerOptions>();
-                var db = sp.GetRequiredService<LocalDataService>();
+                var db = sp.GetRequiredService<ILocalDataService>();
                 return new AuthenticationService(http,db, opts);
             });
 
@@ -68,7 +68,7 @@ namespace ParkSpotTLV.App
                 var http = sp.GetRequiredService<HttpClient>();
                 var auth = sp.GetRequiredService<AuthenticationService>();
                 var opts = sp.GetRequiredService<JsonSerializerOptions>();
-                var db = sp.GetRequiredService<LocalDataService>();
+                var db = sp.GetRequiredService<ILocalDataService>();
                 return new MapService(http, auth, db , opts);
             });
 
