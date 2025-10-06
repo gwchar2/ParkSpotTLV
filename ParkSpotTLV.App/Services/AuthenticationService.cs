@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Net.Http.Json;
 using System.Net;
 using ParkSpotTLV.App.Data.Services;
-
+using ParkSpotTLV.App.Data.Models;
 
 namespace ParkSpotTLV.App.Services;
 
@@ -11,20 +11,17 @@ public class AuthenticationService
 
     private readonly HttpClient _http;
     private readonly JsonSerializerOptions _options;
+    private readonly LocalDataService _localDataService;
 
-    public bool IsAuthenticated { get; private set; }
-    public string? CurrentUsername { get; private set; }
-    private string? _refreshToken;
-    // private readonly LocalDataService _localDataService;
+    // public bool IsAuthenticated { get; private set; }
+    // public string? CurrentUsername { get; private set; }
+    // private string? _refreshToken;
 
-
-    
-
-    public AuthenticationService(HttpClient http, JsonSerializerOptions? options = null )
+    public AuthenticationService(HttpClient http, LocalDataService localDataService , JsonSerializerOptions? options = null)
     {
         _http = http;    // same HttpClient instance as CarService
         _options = options ?? new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        // _localDataService = localDataService ;
+        _localDataService = localDataService ;
     }
     public sealed class AuthResponse
     {
@@ -61,47 +58,60 @@ public class AuthenticationService
         {
             _http.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue(tokens.TokenType, tokens.AccessToken);
-            _refreshToken = tokens.RefreshToken;
-            IsAuthenticated = true;
-            // _localDataService.SaveUserAsync(_refreshToken, tokens.RefreshTokenExpiresAt);
+            
+            // _refreshToken = tokens.RefreshToken;
+            // IsAuthenticated = true;
+
+            // new session
+            var newSession = new Session {
+                            RefreshToken = tokens.RefreshToken,
+                            TokenExpiresAt = tokens.RefreshTokenExpiresAt,
+                            UserName = username } ;
+            await _localDataService.AddSessionAsync(newSession);
         }
 
         return tokens;
     }
 
-    public async Task<AuthResponse?> SignUpAsync(string username, string password)
-    {
-    var payload = new { username, password };
-    var response = await _http.PostAsJsonAsync("auth/register", payload, _options);
+    public async Task<AuthResponse?> SignUpAsync(string username, string password) {
+        var payload = new { username, password };
+        var response = await _http.PostAsJsonAsync("auth/register", payload, _options);
 
-    if (!response.IsSuccessStatusCode)
-    {
-        var error = await response.Content.ReadAsStringAsync();
-        throw new HttpRequestException($"Sign-up failed: {response.StatusCode} {error}");
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Sign-up failed: {response.StatusCode} {error}");
+        }
+
+        var tokens = await response.Content.ReadFromJsonAsync<AuthResponse>(_options);
+
+        // store the tokens
+        if (tokens != null)
+        {
+            _http.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue(tokens.TokenType, tokens.AccessToken);
+            
+            // _refreshToken = tokens.RefreshToken;
+            // IsAuthenticated = true;
+
+            // new session
+            var newSession = new Session {
+                                RefreshToken = tokens.RefreshToken,
+                                TokenExpiresAt = tokens.RefreshTokenExpiresAt,
+                                UserName = username } ;
+            await _localDataService.AddSessionAsync(newSession);
+        }
+
+        return tokens;
     }
 
-    var tokens = await response.Content.ReadFromJsonAsync<AuthResponse>(_options);
-
-    // store the tokens
-    if (tokens != null)
+    public async Task Logout()
     {
-        _http.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue(tokens.TokenType, tokens.AccessToken);
-        _refreshToken = tokens.RefreshToken;
-        IsAuthenticated = true;
-        // _localDataService.SaveUserAsync(_refreshToken, tokens.RefreshTokenExpiresAt) ;
-    }
-
-    return tokens;
-    }
-
-    public void Logout()
-    {
-        IsAuthenticated = false;
-        CurrentUsername = null;
-        _refreshToken = null;
+        // IsAuthenticated = false;
+        // CurrentUsername = null;
+        // _refreshToken = null;
         _http.DefaultRequestHeaders.Authorization = null;
-        // _localDataService.LogoutAsync();
+        await _localDataService.DeleteSessionAsync();
 
     }
 
@@ -134,22 +144,23 @@ public class AuthenticationService
 
     public async Task<bool> RefreshTokenAsync()
     {
-        if (string.IsNullOrEmpty(_refreshToken))
+        var session = await _localDataService.GetSessionAsync();
+        if (string.IsNullOrEmpty(session?.RefreshToken))
         {
-            IsAuthenticated = false;
+            // IsAuthenticated = false;
             return false;
         }
 
         try
         {
-            var payload = new { refreshToken = _refreshToken };
+            var payload = new { refreshToken = session.RefreshToken };
             var response = await _http.PostAsJsonAsync("auth/refresh", payload, _options);
 
             if (!response.IsSuccessStatusCode)
             {
                 // Refresh token is invalid or expired
-                IsAuthenticated = false;
-                _refreshToken = null;
+                // IsAuthenticated = false;
+                // _refreshToken = null;
                 _http.DefaultRequestHeaders.Authorization = null;
                 return false;
             }
@@ -160,8 +171,11 @@ public class AuthenticationService
                 // Update the authorization header with new access token
                 _http.DefaultRequestHeaders.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue(tokens.TokenType, tokens.AccessToken);
-                _refreshToken = tokens.RefreshToken;
-                IsAuthenticated = true;
+
+                await _localDataService.UpdateTokenAsync(tokens.RefreshToken,tokens.RefreshTokenExpiresAt);
+
+                // _refreshToken = tokens.RefreshToken;
+                // IsAuthenticated = true;
                 return true;
             }
 
@@ -170,8 +184,8 @@ public class AuthenticationService
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Error refreshing token: {ex.Message}");
-            IsAuthenticated = false;
-            _refreshToken = null;
+            // IsAuthenticated = false;
+            // _refreshToken = null;
             _http.DefaultRequestHeaders.Authorization = null;
             return false;
         }
@@ -290,7 +304,6 @@ public class AuthenticationService
         }
     }
 
-    // Test helper methods
 
 
     

@@ -72,8 +72,8 @@ public partial class ShowMapPage : ContentPage
         var activePermit = activePermitNullable ?? Guid.Empty;
 
         // Get and draw parking segments
-        var preferences = await _localDataService.GetUserPreferencesAsync();
-        var segmentsResponse = await _mapService.getSegmentsAsync(preferences.ParkingThresholdMinutes, activePermit, null);
+        var session = await _localDataService.GetSessionAsync();
+        var segmentsResponse = await _mapService.getSegmentsAsync(session?.MinParkingTime ?? 30, activePermit, null);
 
         if (segmentsResponse == null || segmentsResponse.Segments == null)
             return;
@@ -245,6 +245,7 @@ public partial class ShowMapPage : ContentPage
     private async void OnApplyClicked(object sender, EventArgs e)
     {
         setSelectedSettings();
+        await _localDataService.UpdatePreferencesAsync(null,null,null,showGreen,showBlue,showYellow,showRed);
         LoadMapAsync(pickedCarName,pickedDay,pickedTime, showRed , showBlue , showGreen , showYellow);
         await DisplayAlert("Apply", "Changes applied successfully!", "OK");
 

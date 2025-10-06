@@ -35,11 +35,6 @@ public partial class AccountDetailsPage : ContentPage
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Error loading user data: {ex.Message}");
-            // Fallback to cached username if API call fails
-            if (!string.IsNullOrEmpty(_authService.CurrentUsername))
-            {
-                UsernameEntry.Text = _authService.CurrentUsername;
-            }
         }
         
     }

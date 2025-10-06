@@ -1,4 +1,5 @@
 using ParkSpotTLV.App.Services;
+using ParkSpotTLV.App.Data.Services;
 using System.Net.Http.Json;
 
 namespace ParkSpotTLV.App.Controls;
@@ -7,11 +8,13 @@ public partial class MenuOverlay : Grid{
 
     public record VersionResponse(string Version);
     private readonly AuthenticationService _authService;
+    private readonly LocalDataService _localDataService;
     private readonly HttpClient _http;
-    public MenuOverlay(AuthenticationService authService, IHttpClientFactory httpFactory)
+    public MenuOverlay(AuthenticationService authService, IHttpClientFactory httpFactory, LocalDataService localDataService)
     {
         InitializeComponent();
         _authService = authService;
+        _localDataService = localDataService ;
         _http = httpFactory.CreateClient("Api");
     }
 
@@ -68,7 +71,8 @@ public partial class MenuOverlay : Grid{
         await CloseMenu();
 
         //var authService = AuthenticationService.Instance;
-        string username = _authService.CurrentUsername ?? "User";
+        var session = await _localDataService.GetSessionAsync();
+        string username = session?.UserName ?? "User";
 
         if (Application.Current?.Windows.FirstOrDefault()?.Page is Page page)
         {
@@ -80,7 +84,7 @@ public partial class MenuOverlay : Grid{
             if (confirm)
             {
                 // Logout from authentication service
-                _authService.Logout();
+                await _authService.Logout();
 
                 // Navigate back to login page
                 await Shell.Current.GoToAsync("//MainPage");

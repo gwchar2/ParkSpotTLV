@@ -56,19 +56,19 @@ public partial class PreferencesPage : ContentPage
     {
         try
         {
-            var preferences = await _localDataService.GetUserPreferencesAsync();
+            var session = await _localDataService.GetSessionAsync();
 
             // Set parking threshold picker
-            var parkingIndex = GetParkingPickerIndex(preferences.ParkingThresholdMinutes);
+            var parkingIndex = GetParkingPickerIndex(session?.MinParkingTime ?? 30);
             MinutesPickerParking.SelectedIndex = parkingIndex;
 
             // Set notification picker
-            var notificationIndex = GetNotificationPickerIndex(preferences.NotificationMinutesBefore);
-            Console.WriteLine($"DEBUG: NotificationMinutesBefore = {preferences.NotificationMinutesBefore}, calculated index = {notificationIndex}");
+            var notificationIndex = GetNotificationPickerIndex(session?.NotificationMinutesBefore ?? 30);
+            Console.WriteLine($"DEBUG: NotificationMinutesBefore = {session?.NotificationMinutesBefore ?? 30}, calculated index = {notificationIndex}");
             MinutesPickerNotification.SelectedIndex = notificationIndex;
 
             // Set notifications toggle
-            NotificationsToggle.IsToggled = preferences.NotificationsEnabled;
+            NotificationsToggle.IsToggled = session?.NotificationsEnabled ?? true;
 
             UpdateExplanationTexts();
         }
@@ -128,13 +128,7 @@ public partial class PreferencesPage : ContentPage
             var notificationsEnabled = NotificationsToggle.IsToggled;
 
             // Save to database
-            var preferences = await _localDataService.GetUserPreferencesAsync();
-            preferences.ParkingThresholdMinutes = parkingMinutes;
-            preferences.NotificationMinutesBefore = notificationMinutes;
-            preferences.NotificationsEnabled = notificationsEnabled;
-            preferences.LastUpdated = DateTime.UtcNow;
-
-            await _localDataService.SaveUserPreferencesAsync(preferences);
+            await _localDataService.UpdatePreferencesAsync(parkingMinutes, notificationsEnabled, notificationMinutes,null,null,null,null);
 
             // Build confirmation message
             string message = $"Preferences saved!\n\n";
@@ -154,7 +148,6 @@ public partial class PreferencesPage : ContentPage
         catch (Exception ex)
         {
             Console.WriteLine($"PREFERENCES ERROR: {ex}");
-            System.Diagnostics.Debug.WriteLine($"PREFERENCES ERROR: {ex}");
             await DisplayAlert("Error", $"Failed to save preferences:\n\n{ex.Message}\n\nStack trace:\n{ex.StackTrace}", "OK");
         }
     }
