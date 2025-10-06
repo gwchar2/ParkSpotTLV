@@ -39,6 +39,24 @@ public class AuthenticationService
     public string[] Roles { get; set; } = Array.Empty<string>();
     }
 
+    public async Task<bool> TryAutoLoginAsync()
+    {
+        var session = await _localDataService.GetSessionAsync();
+
+        // No session exists
+        if (session is null || string.IsNullOrEmpty(session.RefreshToken))
+            return false;
+
+        // Session expired - clean it up
+        if (session.TokenExpiresAt <= DateTimeOffset.UtcNow)
+        {
+            await _localDataService.DeleteSessionAsync();
+            return false;
+        }
+
+        // Valid session - refresh the access token
+        return await RefreshTokenAsync();
+    }
 
     public async Task<AuthResponse?> LoginAsync(string username, string password)
     {
@@ -58,15 +76,17 @@ public class AuthenticationService
         {
             _http.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue(tokens.TokenType, tokens.AccessToken);
-            
+
             // _refreshToken = tokens.RefreshToken;
             // IsAuthenticated = true;
 
             // new session
-            var newSession = new Session {
-                            RefreshToken = tokens.RefreshToken,
-                            TokenExpiresAt = tokens.RefreshTokenExpiresAt,
-                            UserName = username } ;
+            var newSession = new Session
+            {
+                RefreshToken = tokens.RefreshToken,
+                TokenExpiresAt = tokens.RefreshTokenExpiresAt,
+                UserName = username
+            };
             await _localDataService.AddSessionAsync(newSession);
         }
 

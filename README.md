@@ -172,10 +172,19 @@ FROM street_segments s
 JOIN zones z ON s.zone_id = z.id
 ORDER BY z.code, s.name_english NULLS LAST;
 
+```
+- Inspect local db 
+```bash
+# Step 1: Pull the database file to your current directory
+adb exec-out run-as com.parkspot.tlv cat /data/user/0/com.parkspot.tlv/files/parkspot_local.db > parkspot_local.db
 
+# Step 2: Check if it was pulled successfully
+ls -lh parkspot_local.db
+
+# Step 3: Open it with sqlite3
+sqlite3 parkspot_local.db "SELECT * FROM Session;"
 
 ```
-
 ## Port reference
 
 - Host to DB: `localhost:5433`
