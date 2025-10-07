@@ -24,19 +24,25 @@ public class MapService
 
     }
 
-    public async Task<GetMapSegmentsResponse?> getSegmentsAsync(int minParkingTime, Guid activePermit, Location? center)
+    public async Task<GetMapSegmentsResponse?> getSegmentsAsync(Guid activePermit,
+                                                                double minLon,
+                                                                double minLat,
+                                                                double maxLon,
+                                                                double maxLat,
+                                                                double centerLon,
+                                                                double centerLat,
+                                                                DateTimeOffset dateTime,
+                                                                int minParkingTime)
     {
-        // double centerLon = center.Longitude;
-        // double centerLat = center.Latitude;, 
         var request = new GetMapSegmentsRequest(
             ActivePermitId: activePermit,
-            MinLon: 34.7799910,         // sw.Longitude
-            MinLat: 32.0835150,         // sw.Latitude
-            MaxLon: 34.7865450,         // ne.Longitude
-            MaxLat: 32.0867230,         // ne.Latitude
-            CenterLon: 34.7877809,
-            CenterLat: 32.0928775,
-            Now: DateTimeOffset.Now,
+            MinLon: minLon,
+            MinLat: minLat,
+            MaxLon: maxLon,
+            MaxLat: maxLat,
+            CenterLon: centerLon,
+            CenterLat: centerLat,
+            Now: dateTime,
             MinParkingTime: minParkingTime
         );
 

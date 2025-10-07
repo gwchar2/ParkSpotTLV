@@ -7,6 +7,8 @@ using System.Text.Json;
 using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Contracts.Map;
 using ParkSpotTLV.App.Data.Services;
+using System.ComponentModel;
+using System.Timers;
 
 
 namespace ParkSpotTLV.App.Pages;
@@ -22,10 +24,14 @@ public partial class ShowMapPage : ContentPage
     private bool showBlue;
     private bool showGreen;
     private bool showYellow;
+    private int minParkingTime = 30; // Default to 30 minutes
+    private Guid activePermit;
     private readonly CarService _carService;
     private readonly MapService _mapService;
     private readonly ILocalDataService _localDataService;
     private List<Core.Models.Car> _userCars = new();
+    private CancellationTokenSource? _mapMoveCts;
+    private System.Timers.Timer? _debounceTimer;
 
 
     public ShowMapPage(CarService carService,MapService mapService,ILocalDataService localDataService )
@@ -34,22 +40,253 @@ public partial class ShowMapPage : ContentPage
         _carService = carService;
         _mapService = mapService;
         _localDataService = localDataService;
-        
-        
+
+        // Hook up map movement detection
+        MyMap.PropertyChanged += MyMapOnPropertyChanged;
+
         LoadUserCars();
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await LoadSessionPreferences();
-        LoadUserCars();
-        LoadMapAsync(pickedCarId,pickedDay,pickedTime, showRed , showBlue , showGreen , showYellow);
 
+        try
+        {
+            await LoadSessionPreferences();
+            LoadUserCars();
+            await LoadMapAsync(); // load map, current location
+
+            // Wait for map to render and have a valid VisibleRegion
+            await Task.Delay(500);
+
+            var bounds = GetVisibleBounds();
+            if (bounds.HasValue)
+            {
+                await FetchAndRenderSegments(bounds);
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("OnAppearing: VisibleRegion not ready, skipping initial segment load");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error in OnAppearing: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            await DisplayAlert("Error", $"Failed to initialize map: {ex.Message}", "OK");
+        }
     }
 
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        MyMap.PropertyChanged -= MyMapOnPropertyChanged;
+        _debounceTimer?.Dispose();
+        _mapMoveCts?.Cancel();
+    }
 
-    private async void LoadMapAsync(string? carId, string? day, string? time, bool red, bool blue, bool green, bool yellow)
+    private void MyMapOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(Microsoft.Maui.Controls.Maps.Map.VisibleRegion))
+        {
+            // Debounce: cancel previous timer
+            _debounceTimer?.Stop();
+            _debounceTimer?.Dispose();
+
+            // Cancel any in-flight requests
+            _mapMoveCts?.Cancel();
+            _mapMoveCts = new CancellationTokenSource();
+
+            // Start new timer (500ms debounce)
+            _debounceTimer = new System.Timers.Timer(500);
+            _debounceTimer.Elapsed += async (s, args) =>
+            {
+                _debounceTimer?.Stop();
+
+                // Fetch segments on UI thread
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    try
+                    {
+                        var bounds = GetVisibleBounds();
+                        if (bounds.HasValue)
+                        {
+                            await FetchAndRenderSegments(bounds);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Error in MyMapOnPropertyChanged: {ex.Message}");
+                    }
+                });
+            };
+            _debounceTimer.AutoReset = false;
+            _debounceTimer.Start();
+        }
+    }
+    // calculate bounds of the current map view
+    private (double MinLat, double MaxLat, double MinLon, double MaxLon, double CenterLat, double CenterLon)? GetVisibleBounds()
+    {
+        if (MyMap == null)
+        {
+            System.Diagnostics.Debug.WriteLine("GetVisibleBounds: MyMap is null");
+            return null;
+        }
+
+        var visibleRegion = MyMap.VisibleRegion;
+
+        if (visibleRegion == null)
+        {
+            System.Diagnostics.Debug.WriteLine("GetVisibleBounds: VisibleRegion is null");
+            return null;
+        }
+
+        // VisibleRegion gives us the center and radius
+        // We need to calculate the bounding box from it
+        var center = visibleRegion.Center;
+        var latitudeDegrees = visibleRegion.LatitudeDegrees;
+        var longitudeDegrees = visibleRegion.LongitudeDegrees;
+
+        // Calculate bounds
+        double minLat = center.Latitude - (latitudeDegrees / 2);
+        double maxLat = center.Latitude + (latitudeDegrees / 2);
+        double minLon = center.Longitude - (longitudeDegrees / 2);
+        double maxLon = center.Longitude + (longitudeDegrees / 2);
+
+        return (minLat, maxLat, minLon, maxLon, center.Latitude, center.Longitude);
+    }
+
+    private async Task FetchAndRenderSegments((double MinLat, double MaxLat, double MinLon, double MaxLon, double CenterLat, double CenterLon)? bounds)
+    {
+        if (bounds is null)
+        {
+            System.Diagnostics.Debug.WriteLine("FetchAndRenderSegments: bounds is null");
+            return;
+        }
+
+        GetMapSegmentsResponse? segmentsResponse;
+
+        try
+        {
+            System.Diagnostics.Debug.WriteLine($"Fetching segments for bounds: MinLat={bounds.Value.MinLat}, MaxLat={bounds.Value.MaxLat}, MinLon={bounds.Value.MinLon}, MaxLon={bounds.Value.MaxLon}");
+
+            // fetch segments list using getSegmentsAsync(...)
+            segmentsResponse = await _mapService.getSegmentsAsync(activePermit,
+                                                                    bounds.Value.MinLon,
+                                                                    bounds.Value.MinLat,
+                                                                    bounds.Value.MaxLon,
+                                                                    bounds.Value.MaxLat,
+                                                                    bounds.Value.CenterLon,
+                                                                    bounds.Value.CenterLat,
+                                                                    DateTimeOffset.Now,
+                                                                    minParkingTime);
+
+            if (segmentsResponse == null || segmentsResponse.Segments == null)
+            {
+                System.Diagnostics.Debug.WriteLine("FetchAndRenderSegments: No segments returned from API");
+                return;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"Received {segmentsResponse.Segments.Count} segments");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error in FetchAndRenderSegments: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            await DisplayAlert("Error", $"Failed to load segments: {ex.Message}", "OK");
+            return;
+        }
+
+        // Clear existing map elements and force garbage collection
+        try
+        {
+            MyMap.MapElements.Clear();
+
+            // Force garbage collection to free up memory before loading new segments
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error clearing map elements: {ex.Message}");
+        }
+
+        // Limit number of segments to prevent OOM
+        int maxSegments = 500;
+        int renderedCount = 0;
+
+        // Draw each segment
+        foreach (var segment in segmentsResponse.Segments)
+        {
+            if (renderedCount >= maxSegments)
+            {
+                System.Diagnostics.Debug.WriteLine($"Reached max segment limit ({maxSegments}), stopping render");
+                break;
+            }
+
+            // Skip based on filter settings
+            if (segment.Group == "RESTRICTED" && !showRed) continue;
+            if (segment.Group == "PAID" && !showBlue) continue;
+            if (segment.Group == "FREE" && !showGreen) continue;
+            if (segment.Group == "LIMITED" && !showYellow) continue;
+
+            try
+            {
+                // Determine color based on Group
+                Color strokeColor = segment.Group switch
+                {
+                    "FREE" => Color.FromArgb("#40dd7c"),      // Green - Free parking
+                    "PAID" => Color.FromArgb("#4769b9"),      // Blue - Paid parking
+                    "LIMITED" => Color.FromArgb("#f2d158"),   // Yellow - Limited/Restricted
+                    "RESTRICTED" => Color.FromArgb("#f15151"), // Red - No parking
+                    _ => Color.FromArgb("#808080")            // Gray - Unknown
+                };
+
+                // Parse the GeoJSON geometry
+                var geometry = segment.Geometry;
+                if (geometry.TryGetProperty("type", out var geoType) && geoType.GetString() == "LineString")
+                {
+                    if (geometry.TryGetProperty("coordinates", out var coordinates))
+                    {
+                        var line = new Polyline
+                        {
+                            StrokeWidth = 5, // Reduced from 6 to save memory
+                            StrokeColor = strokeColor
+                        };
+
+                        foreach (var coordinate in coordinates.EnumerateArray())
+                        {
+                            // GeoJSON format is [longitude, latitude]
+                            double longitude = coordinate[0].GetDouble();
+                            double latitude = coordinate[1].GetDouble();
+                            line.Geopath.Add(new Location(latitude, longitude));
+                        }
+
+                        MyMap.MapElements.Add(line);
+                        renderedCount++;
+                    }
+                }
+            }
+            catch (OutOfMemoryException)
+            {
+                System.Diagnostics.Debug.WriteLine($"Out of memory after rendering {renderedCount} segments");
+                break;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error rendering segment: {ex.Message}");
+                // Continue to next segment
+            }
+        }
+
+        System.Diagnostics.Debug.WriteLine($"Successfully rendered {renderedCount} segments");
+
+
+    }
+    // loads the map, user location and calls the rendering of the segments
+    private async Task LoadMapAsync()
     {
         // Enable showing user location on map
         MyMap.IsShowingUser = true;
@@ -59,72 +296,13 @@ public partial class ShowMapPage : ContentPage
 
         if (location != null)
         {
-            MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(location, Distance.FromKilometers(1)));
-
+            MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(location, Distance.FromMeters(300)));
         }
         else
         {
             // Fallback to Tel Aviv if location unavailable
             var center = new Location(32.0853, 34.7818);
-            MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(center, Distance.FromKilometers(5)));
-        }
-
-        // Get active permit ID
-        var activePermitNullable = await _carService.getActivePermitAsync(carId);
-        var activePermit = activePermitNullable ?? Guid.Empty;
-
-        // Get and draw parking segments
-        var session = await _localDataService.GetSessionAsync();
-        var segmentsResponse = await _mapService.getSegmentsAsync(session?.MinParkingTime ?? 30, activePermit, null);
-
-        if (segmentsResponse == null || segmentsResponse.Segments == null)
-            return;
-
-        // Clear existing map elements
-        MyMap.MapElements.Clear();
-
-        // Draw each segment
-        foreach (var segment in segmentsResponse.Segments)
-        {
-            // Determine color based on Group
-            Color strokeColor = segment.Group switch
-            {
-                "FREE" => Color.FromArgb("#40dd7c"),      // Green - Free parking
-                "PAID" => Color.FromArgb("#4769b9"),      // Blue - Paid parking
-                "LIMITED" => Color.FromArgb("#f2d158"),   // Yellow - Limited/Restricted
-                "RESTRICTED" => Color.FromArgb("#f15151"), // Red - No parking
-                _ => Color.FromArgb("#808080")            // Gray - Unknown
-            };
-
-            // Skip based on filter settings
-            if (segment.Group == "RESTRICTED" && !showRed) continue;
-            if (segment.Group == "PAID" && !showBlue) continue;
-            if (segment.Group == "FREE" && !showGreen) continue;
-            if (segment.Group == "LIMITED" && !showYellow) continue;
-
-            // Parse the GeoJSON geometry
-            var geometry = segment.Geometry;
-            if (geometry.TryGetProperty("type", out var geoType) && geoType.GetString() == "LineString")
-            {
-                if (geometry.TryGetProperty("coordinates", out var coordinates))
-                {
-                    var line = new Polyline
-                    {
-                        StrokeWidth = 6,
-                        StrokeColor = strokeColor
-                    };
-
-                    foreach (var coordinate in coordinates.EnumerateArray())
-                    {
-                        // GeoJSON format is [longitude, latitude]
-                        double longitude = coordinate[0].GetDouble();
-                        double latitude = coordinate[1].GetDouble();
-                        line.Geopath.Add(new Location(latitude, longitude));
-                    }
-
-                    MyMap.MapElements.Add(line);
-                }
-            }
+            MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(center, Distance.FromKilometers(1)));
         }
     }
 
@@ -151,6 +329,7 @@ public partial class ShowMapPage : ContentPage
             showBlue = session.ShowPaid;
             showGreen = session.ShowFree;
             showYellow = session.ShowRestricted;
+            minParkingTime = session.MinParkingTime;
 
             // Update checkbox UI to match session values
             NoParkingCheck.IsChecked = showRed;
@@ -158,6 +337,9 @@ public partial class ShowMapPage : ContentPage
             FreeParkingCheck.IsChecked = showGreen;
             RestrictedCheck.IsChecked = showYellow;
         }
+        // Get active permit ID
+        var activePermitNullable = await _carService.getActivePermitAsync(pickedCarId);
+        activePermit = activePermitNullable ?? Guid.Empty;
     }
 
     private async void LoadUserCars()
@@ -269,9 +451,13 @@ public partial class ShowMapPage : ContentPage
 
     private async void OnApplyClicked(object sender, EventArgs e)
     {
-        
+
         await _localDataService.UpdatePreferencesAsync(null,null,null,showGreen,showBlue,showYellow,showRed);
-        LoadMapAsync(pickedCarName,pickedDay,pickedTime, showRed , showBlue , showGreen , showYellow);
+
+        // Re-fetch segments with updated filter preferences
+        var bounds = GetVisibleBounds();
+        await FetchAndRenderSegments(bounds);
+
         await DisplayAlert("Apply", "Changes applied successfully!", "OK");
 
         // Auto-hide settings panel after applying changes
