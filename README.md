@@ -140,12 +140,11 @@ docker start parkspot_db or docker compose up -d db
 dotnet ef migrations add UpdateSeed_20250927(or some other name) -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
 dotnet ef database update --project .\ParkSpotTLV.Infrastructure --startup-project .\ParkSpotTLV.Api
 /// for MAC
-dotnet ef database update \
-  --project ./ParkSpotTLV.Infrastructure \
-  --startup-project ./ParkSpotTLV.Api
+dotnet ef database update --project ./ParkSpotTLV.Infrastructure --startup-project ./ParkSpotTLV.Api
 Restart DB+API
 Verify
 ```
+
 
 - Updating information in the DB
 ```bash
@@ -163,6 +162,7 @@ SELECT * FROM "__EFMigrationsHistory";
 SELECT COUNT(*) AS zones FROM zones;
 SELECT COUNT(*) AS segments FROM street_segments;
 SELECT id, code, name FROM zones ORDER BY code LIMIT 10;
+SELECT * FROM daily_budgets LIMIT 10;
 
 SELECT DISTINCT ON (z.code)
        z.code        AS zone_code,

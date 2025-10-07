@@ -48,6 +48,7 @@ try {
     app.MapVehicles();
     app.MapPermits();
     app.MapSegments();
+    app.MapParking();
 
     app.Run();
 }

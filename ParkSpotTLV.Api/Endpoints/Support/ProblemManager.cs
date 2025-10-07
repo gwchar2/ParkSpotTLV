@@ -65,4 +65,23 @@ namespace ParkSpotTLV.Api.Endpoints.Support {
         public static ProblemHttpResult CantRemoveDef(HttpContext ctx) =>
           GlobalProblemManager.BadRequest("Can not remove default permit.", ctx);
     }
+
+    public static class SessionProblems {
+        public static ProblemHttpResult Exists(HttpContext ctx) =>
+          GlobalProblemManager.Conflict("Active session exists for this vehicle.", ctx);
+        public static ProblemHttpResult Unavailable(HttpContext ctx) =>
+         GlobalProblemManager.BadRequest("Street is unavailable for parking.", ctx);
+        public static ProblemHttpResult NotFound(HttpContext ctx) =>
+        GlobalProblemManager.NotFound("No active parking session found.", ctx);
+        public static ProblemHttpResult Invalid(HttpContext ctx) =>
+         GlobalProblemManager.BadRequest("Session has no start time.", ctx);
+
+
+
+    }
+
+
 }
+
+
+

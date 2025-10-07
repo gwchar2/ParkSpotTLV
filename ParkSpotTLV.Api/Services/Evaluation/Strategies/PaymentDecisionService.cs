@@ -1,5 +1,6 @@
 ﻿using ParkSpotTLV.Api.Services.Evaluation.Contracts;
 using ParkSpotTLV.Contracts.Enums;
+using ParkSpotTLV.Contracts.Budget;
 
 namespace ParkSpotTLV.Api.Services.Evaluation.Strategies {
     /*
@@ -28,11 +29,11 @@ namespace ParkSpotTLV.Api.Services.Evaluation.Strategies {
                         return new PaymentDecision(PaymentNow.Free, "PermitHomeZone");
 
                     // Else, We check if there is daily free parking budget
-                    if (pov.VehicleId is Guid uid) {
-                        var localDate = DateOnly.FromDateTime(now.Date);
-                        await _budget.EnsureResetAsync(uid, localDate, ct);
+                    if (pov.VehicleId is Guid vuid) {
+                        var localDate = ParkingBudgetTimeHandler.AnchorDateFor(now);
+                        await _budget.EnsureResetAsync(vuid, localDate, ct);
 
-                        var remaining = await _budget.GetRemainingMinutesAsync(uid, localDate, ct);
+                        var remaining = await _budget.GetRemainingMinutesAsync(vuid, localDate, ct);
 
                         if (remaining > 0)
                             return new PaymentDecision(PaymentNow.Free, "RemainingDailyBudget", remaining);

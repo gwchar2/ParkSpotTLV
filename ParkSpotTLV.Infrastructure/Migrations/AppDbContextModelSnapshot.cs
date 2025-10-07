@@ -24,6 +24,191 @@ namespace ParkSpotTLV.Infrastructure.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "postgis");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.ParkingDailyBudget", b =>
+                {
+                    b.Property<Guid>("VehicleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("vehicle_id");
+
+                    b.Property<DateOnly>("AnchorDate")
+                        .HasColumnType("date")
+                        .HasColumnName("anchor_date");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("MinutesUsed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("minutes_used");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("VehicleId", "AnchorDate")
+                        .HasName("pk_daily_budgets");
+
+                    b.ToTable("daily_budgets", (string)null);
+                });
+
+            modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.ParkingNotification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsSent")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_sent");
+
+                    b.Property<int>("NotificationMinutes")
+                        .HasColumnType("integer")
+                        .HasColumnName("notification_minutes");
+
+                    b.Property<DateTimeOffset>("NotifyAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("notify_at");
+
+                    b.Property<DateTimeOffset?>("SentAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_at");
+
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("session_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_parking_notifications");
+
+                    b.HasIndex("SessionId")
+                        .HasDatabaseName("ix_parking_notifications_session_id");
+
+                    b.HasIndex("NotifyAt", "IsSent")
+                        .HasDatabaseName("ix_parking_notifications_notify_at_is_sent");
+
+                    b.ToTable("parking_notifications", (string)null);
+                });
+
+            modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.ParkingSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("Group")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("group");
+
+                    b.Property<bool>("IsPayLater")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_pay_later");
+
+                    b.Property<bool>("IsPayNow")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_pay_now");
+
+                    b.Property<DateTimeOffset?>("NextChange")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("next_change");
+
+                    b.Property<int?>("NotificationMinutes")
+                        .HasColumnType("integer")
+                        .HasColumnName("notification_minutes");
+
+                    b.Property<int>("PaidMinutes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("paid_minutes");
+
+                    b.Property<int>("ParkingBudgetUsed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("parking_budget_used");
+
+                    b.Property<int>("ParkingType")
+                        .HasColumnType("integer")
+                        .HasColumnName("parking_type");
+
+                    b.Property<DateTimeOffset?>("PlannedEndLocal")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("planned_end_local");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid>("SegmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("segment_id");
+
+                    b.Property<DateTimeOffset?>("StartedLocal")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_local");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset?>("StoppedLocal")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("stopped_local");
+
+                    b.Property<int>("Tariff")
+                        .HasColumnType("integer")
+                        .HasColumnName("tariff");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<Guid>("VehicleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("vehicle_id");
+
+                    b.Property<int?>("ZoneCode")
+                        .HasColumnType("integer")
+                        .HasColumnName("zone_code");
+
+                    b.HasKey("Id")
+                        .HasName("pk_parking_sessions");
+
+                    b.HasIndex("StartedLocal")
+                        .HasDatabaseName("ix_parking_sessions_started_local");
+
+                    b.HasIndex("VehicleId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_parking_sessions_vehicle_active")
+                        .HasFilter("\"stopped_local\" IS NULL");
+
+                    b.HasIndex("VehicleId", "Status")
+                        .HasDatabaseName("ix_parking_sessions_vehicle_id_status");
+
+                    b.ToTable("parking_sessions", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_parking_sessions_paid_minutes", "\"paid_minutes\" >= 0");
+
+                            t.HasCheckConstraint("ck_parking_sessions_parking_budget_used", "\"parking_budget_used\" >= 0");
+                        });
+                });
+
             modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.Permit", b =>
                 {
                     b.Property<Guid>("Id")
@@ -324,6 +509,26 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Geom"), "GIST");
 
                     b.ToTable("zones", (string)null);
+                });
+
+            modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.ParkingDailyBudget", b =>
+                {
+                    b.HasOne("ParkSpotTLV.Infrastructure.Entities.Vehicle", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_daily_budgets_vehicles_vehicle_id");
+                });
+
+            modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.ParkingNotification", b =>
+                {
+                    b.HasOne("ParkSpotTLV.Infrastructure.Entities.ParkingSession", null)
+                        .WithMany()
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_parking_notifications_parking_session_session_id");
                 });
 
             modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.Permit", b =>

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ParkSpotTLV.Contracts.Enums;
+using ParkSpotTLV.Contracts.Budget;
 using ParkSpotTLV.Infrastructure.Entities;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -50,6 +51,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             await SeedStreetSegmentsAsync(db, ct);
             await SeedUsersAsync(db, ct);
             await SeedTariffWindowsAsync(db, ct);
+            await SeedParkingDailyBudgetAsync(db, TimeZoneInfo.FindSystemTimeZoneById("Asia/Jerusalem"), ct);
 
             _log.LogInformation("Seeding completed.");
         }
@@ -253,6 +255,39 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             await db.SaveChangesAsync(ct);
         }
 
+        // ---------------------- Daily Free Parking Budget ----------------------
+        public static async Task SeedParkingDailyBudgetAsync(AppDbContext db, TimeZoneInfo tz, CancellationToken ct = default) {
+            var nowLocal = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, tz);
+            var anchor = ParkingBudgetTimeHandler.AnchorDateFor(nowLocal);
+            var nowUtc = DateTimeOffset.UtcNow;
+
+            // Fetch vehicles once
+            var vehicleIds = await db.Vehicles
+                .AsNoTracking()
+                .Select(v => v.Id)
+                .ToListAsync(ct);
+
+            if (vehicleIds.Count == 0) return;
+
+            // Bulk insert missing rows
+            foreach (var vid in vehicleIds) {
+                var exists = await db.ParkingDailyBudget
+                    .AsNoTracking()
+                    .AnyAsync(x => x.VehicleId == vid && x.AnchorDate == anchor, ct);
+
+                if (!exists) {
+                    db.ParkingDailyBudget.Add(new ParkingDailyBudget {
+                        VehicleId = vid,
+                        AnchorDate = anchor,
+                        MinutesUsed = 0,
+                        CreatedAt = nowUtc,
+                        UpdatedAt = nowUtc
+                    });
+                }
+            }
+
+            await db.SaveChangesAsync(ct);
+        }
         // ---------------------- Helpers ----------------------
 
         private static NetTopologySuite.Geometries.MultiPolygon ToMultiPolygon(NetTopologySuite.Geometries.Geometry g)
@@ -319,8 +354,6 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             // If nothing matched (shouldn’t happen after your prefilter), default to Free/Both without zone.
             return (privileged ? ParkingType.Privileged : ParkingType.Free, SegmentSide.Both, null);
         }
-
-        
 
     }
 

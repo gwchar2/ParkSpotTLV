@@ -14,6 +14,9 @@ namespace ParkSpotTLV.Infrastructure {
         public DbSet<StreetSegment> StreetSegments => Set<StreetSegment>();
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
         public DbSet<TariffWindow> TariffWindows => Set<TariffWindow>();
+        public DbSet<ParkingDailyBudget> ParkingDailyBudget => Set<ParkingDailyBudget>();
+        public DbSet<ParkingSession> ParkingSession => Set<ParkingSession>();
+        public DbSet<ParkingNotification> ParkingNotification => Set<ParkingNotification>();
         protected override void OnModelCreating(ModelBuilder model) {
             model.HasPostgresExtension("postgis");
             model.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
