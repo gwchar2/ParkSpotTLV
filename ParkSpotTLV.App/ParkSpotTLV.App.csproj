@@ -75,7 +75,7 @@
 		<PackageReference Update="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
 		<PackageReference Update="Microsoft.CodeAnalysis.CSharp.Analyzers" PrivateAssets="all" />
 		<PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" PrivateAssets="all" />
-		
+
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.9" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.100" />
@@ -90,6 +90,15 @@
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
 		<PackageReference Include="System.Net.Http.Json" Version="9.0.8" />
 	</ItemGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+  <AndroidManifestPlaceholders>mapsApiKey=$(MAPS_API_KEY_DEBUG)</AndroidManifestPlaceholders>
+</PropertyGroup>
+
+<PropertyGroup Condition="'$(Configuration)'=='Release'">
+  <!-- In CI/CD, define MAPS_API_KEY_RELEASE as a secret variable -->
+  <AndroidManifestPlaceholders>mapsApiKey=$(MAPS_API_KEY_RELEASE)</AndroidManifestPlaceholders>
+</PropertyGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\ParkSpotTLV.Core\ParkSpotTLV.Core.csproj" />

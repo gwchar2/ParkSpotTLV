@@ -14,8 +14,9 @@ using System.Timers;
 
 namespace ParkSpotTLV.App.Pages;
 
-public partial class ShowMapPage : ContentPage
+public partial class ShowMapPage : ContentPage, IDisposable
 {
+    private bool _disposed = false;
     // Map rendering constants
     private const int MAP_RENDER_DELAY_MS = 500;
     private const int MAP_DEBOUNCE_DELAY_MS = 500;
@@ -90,9 +91,7 @@ public partial class ShowMapPage : ContentPage
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        MyMap.PropertyChanged -= MyMapOnPropertyChanged;
-        _debounceTimer?.Dispose();
-        _mapMoveCts?.Cancel();
+        Dispose();
     }
 
     private void MyMapOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -134,6 +133,7 @@ public partial class ShowMapPage : ContentPage
             _debounceTimer.Start();
         }
     }
+
     // calculate bounds of the current map view
     private (double MinLat, double MaxLat, double MinLon, double MaxLon, double CenterLat, double CenterLon)? GetVisibleBounds()
     {
@@ -686,4 +686,36 @@ public partial class ShowMapPage : ContentPage
         await Navigation.PushModalAsync(popup);
     }
 
+    // IDisposable implementation
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed)
+            return;
+
+        if (disposing)
+        {
+            // Dispose managed resources
+            _debounceTimer?.Stop();
+            _debounceTimer?.Dispose();
+            _debounceTimer = null;
+
+            _mapMoveCts?.Cancel();
+            _mapMoveCts?.Dispose();
+            _mapMoveCts = null;
+
+            // Unsubscribe from events
+            if (MyMap != null)
+            {
+                MyMap.PropertyChanged -= MyMapOnPropertyChanged;
+            }
+        }
+
+        _disposed = true;
+    }
 }
