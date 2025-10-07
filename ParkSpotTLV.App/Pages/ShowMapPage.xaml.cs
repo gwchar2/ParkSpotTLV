@@ -19,21 +19,12 @@ public partial class ShowMapPage : ContentPage
     // Map rendering constants
     private const int MAP_RENDER_DELAY_MS = 500;
     private const int MAP_DEBOUNCE_DELAY_MS = 500;
-    private const int MAX_SEGMENTS_TO_RENDER = 500;
-    private const int SEGMENT_STROKE_WIDTH = 5;
     private const int DEFAULT_MIN_PARKING_TIME_MINUTES = 30;
 
     // Map zoom constants
     private const double USER_LOCATION_ZOOM_METERS = 300;
     private const double FALLBACK_ZOOM_KILOMETERS = 1;
     private const double SEARCH_RESULT_ZOOM_METERS = 300;
-
-    // Color constants
-    private const string COLOR_FREE_PARKING = "#40dd7c";      // Green
-    private const string COLOR_PAID_PARKING = "#4769b9";      // Blue
-    private const string COLOR_LIMITED_PARKING = "#f2d158";   // Yellow
-    private const string COLOR_RESTRICTED_PARKING = "#f15151"; // Red
-    private const string COLOR_UNKNOWN = "#808080";            // Gray
 
     private bool isParked = false;
     private string? pickedCarName;
@@ -44,17 +35,19 @@ public partial class ShowMapPage : ContentPage
     private Session? _session; // Single source of truth
     private readonly CarService _carService;
     private readonly MapService _mapService;
+    private readonly MapSegmentRenderer _mapSegmentRenderer;
     private readonly ILocalDataService _localDataService;
     private List<Core.Models.Car> _userCars = new();
     private CancellationTokenSource? _mapMoveCts;
     private System.Timers.Timer? _debounceTimer;
 
 
-    public ShowMapPage(CarService carService,MapService mapService,ILocalDataService localDataService )
+    public ShowMapPage(CarService carService, MapService mapService, MapSegmentRenderer mapSegmentRenderer, ILocalDataService localDataService)
     {
         InitializeComponent();
         _carService = carService;
         _mapService = mapService;
+        _mapSegmentRenderer = mapSegmentRenderer;
         _localDataService = localDataService;
 
         // Hook up map movement detection
@@ -214,91 +207,8 @@ public partial class ShowMapPage : ContentPage
             return;
         }
 
-        // Clear existing map elements and force garbage collection
-        try
-        {
-            MyMap.MapElements.Clear();
-
-            // Force garbage collection to free up memory before loading new segments
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Error clearing map elements: {ex.Message}");
-        }
-
-        // Limit number of segments to prevent OOM
-        int renderedCount = 0;
-
-        // Draw each segment
-        foreach (var segment in segmentsResponse.Segments)
-        {
-            if (renderedCount >= MAX_SEGMENTS_TO_RENDER)
-            {
-                System.Diagnostics.Debug.WriteLine($"Reached max segment limit ({MAX_SEGMENTS_TO_RENDER}), stopping render");
-                break;
-            }
-
-            // Skip based on filter settings from session
-            if (segment.Group == "RESTRICTED" && !(_session?.ShowNoParking ?? true)) continue;
-            if (segment.Group == "PAID" && !(_session?.ShowPaid ?? true)) continue;
-            if (segment.Group == "FREE" && !(_session?.ShowFree ?? true)) continue;
-            if (segment.Group == "LIMITED" && !(_session?.ShowRestricted ?? true)) continue;
-
-            try
-            {
-                // Determine color based on Group
-                Color strokeColor = segment.Group switch
-                {
-                    "FREE" => Color.FromArgb(COLOR_FREE_PARKING),
-                    "PAID" => Color.FromArgb(COLOR_PAID_PARKING),
-                    "LIMITED" => Color.FromArgb(COLOR_LIMITED_PARKING),
-                    "RESTRICTED" => Color.FromArgb(COLOR_RESTRICTED_PARKING),
-                    _ => Color.FromArgb(COLOR_UNKNOWN)
-                };
-
-                // Parse the GeoJSON geometry
-                var geometry = segment.Geometry;
-                if (geometry.TryGetProperty("type", out var geoType) && geoType.GetString() == "LineString")
-                {
-                    if (geometry.TryGetProperty("coordinates", out var coordinates))
-                    {
-                        var line = new Polyline
-                        {
-                            StrokeWidth = SEGMENT_STROKE_WIDTH,
-                            StrokeColor = strokeColor
-                        };
-
-                        foreach (var coordinate in coordinates.EnumerateArray())
-                        {
-                            // GeoJSON format is [longitude, latitude]
-                            double longitude = coordinate[0].GetDouble();
-                            double latitude = coordinate[1].GetDouble();
-                            line.Geopath.Add(new Location(latitude, longitude));
-                        }
-
-                        MyMap.MapElements.Add(line);
-                        renderedCount++;
-                    }
-                }
-            }
-            catch (OutOfMemoryException)
-            {
-                System.Diagnostics.Debug.WriteLine($"Out of memory after rendering {renderedCount} segments");
-                break;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error rendering segment: {ex.Message}");
-                // Continue to next segment
-            }
-        }
-
-        System.Diagnostics.Debug.WriteLine($"Successfully rendered {renderedCount} segments");
-
-
+        // Render segments using the renderer
+        _mapSegmentRenderer.RenderSegments(MyMap, segmentsResponse, _session);
     }
     // loads the map, user location and calls the rendering of the segments
     private async Task LoadMapAsync()

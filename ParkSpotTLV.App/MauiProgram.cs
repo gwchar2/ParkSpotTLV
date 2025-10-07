@@ -72,6 +72,8 @@ namespace ParkSpotTLV.App
                 return new MapService(http, auth, db , opts);
             });
 
+            builder.Services.AddSingleton<MapSegmentRenderer>();
+
             // Core app services you already had
             builder.Services.AddTransient<Pages.PreferencesPage>();
             builder.Services.AddTransient<Pages.SignUpPage>();
