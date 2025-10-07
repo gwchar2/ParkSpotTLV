@@ -13,10 +13,6 @@ public class AuthenticationService
     private readonly JsonSerializerOptions _options;
     private readonly ILocalDataService _localDataService;
 
-    // public bool IsAuthenticated { get; private set; }
-    // public string? CurrentUsername { get; private set; }
-    // private string? _refreshToken;
-
     public AuthenticationService(HttpClient http, ILocalDataService localDataService , JsonSerializerOptions? options = null)
     {
         _http = http;    // same HttpClient instance as CarService
@@ -39,6 +35,24 @@ public class AuthenticationService
     public string[] Roles { get; set; } = Array.Empty<string>();
     }
 
+    public async Task<bool> TryAutoLoginAsync()
+    {
+        var session = await _localDataService.GetSessionAsync();
+
+        // No session exists
+        if (session is null || string.IsNullOrEmpty(session.RefreshToken))
+            return false;
+
+        // Session expired - clean it up
+        if (session.TokenExpiresAt <= DateTimeOffset.UtcNow)
+        {
+            await _localDataService.DeleteSessionAsync();
+            return false;
+        }
+
+        // Valid session - refresh the access token
+        return await RefreshTokenAsync();
+    }
 
     public async Task<AuthResponse?> LoginAsync(string username, string password)
     {
@@ -58,15 +72,14 @@ public class AuthenticationService
         {
             _http.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue(tokens.TokenType, tokens.AccessToken);
-            
-            // _refreshToken = tokens.RefreshToken;
-            // IsAuthenticated = true;
 
             // new session
-            var newSession = new Session {
-                            RefreshToken = tokens.RefreshToken,
-                            TokenExpiresAt = tokens.RefreshTokenExpiresAt,
-                            UserName = username } ;
+            var newSession = new Session
+            {
+                RefreshToken = tokens.RefreshToken,
+                TokenExpiresAt = tokens.RefreshTokenExpiresAt,
+                UserName = username
+            };
             await _localDataService.AddSessionAsync(newSession);
         }
 
@@ -107,9 +120,7 @@ public class AuthenticationService
 
     public async Task Logout()
     {
-        // IsAuthenticated = false;
-        // CurrentUsername = null;
-        // _refreshToken = null;
+        
         _http.DefaultRequestHeaders.Authorization = null;
         await _localDataService.DeleteSessionAsync();
 
@@ -158,9 +169,6 @@ public class AuthenticationService
 
             if (!response.IsSuccessStatusCode)
             {
-                // Refresh token is invalid or expired
-                // IsAuthenticated = false;
-                // _refreshToken = null;
                 _http.DefaultRequestHeaders.Authorization = null;
                 return false;
             }
