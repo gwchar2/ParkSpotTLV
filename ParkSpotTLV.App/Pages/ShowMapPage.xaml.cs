@@ -7,6 +7,7 @@ using System.Text.Json;
 using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Contracts.Map;
 using ParkSpotTLV.App.Data.Services;
+using ParkSpotTLV.App.Data.Models;
 using System.ComponentModel;
 using System.Timers;
 
@@ -15,17 +16,32 @@ namespace ParkSpotTLV.App.Pages;
 
 public partial class ShowMapPage : ContentPage
 {
+    // Map rendering constants
+    private const int MAP_RENDER_DELAY_MS = 500;
+    private const int MAP_DEBOUNCE_DELAY_MS = 500;
+    private const int MAX_SEGMENTS_TO_RENDER = 500;
+    private const int SEGMENT_STROKE_WIDTH = 5;
+    private const int DEFAULT_MIN_PARKING_TIME_MINUTES = 30;
+
+    // Map zoom constants
+    private const double USER_LOCATION_ZOOM_METERS = 300;
+    private const double FALLBACK_ZOOM_KILOMETERS = 1;
+    private const double SEARCH_RESULT_ZOOM_METERS = 300;
+
+    // Color constants
+    private const string COLOR_FREE_PARKING = "#40dd7c";      // Green
+    private const string COLOR_PAID_PARKING = "#4769b9";      // Blue
+    private const string COLOR_LIMITED_PARKING = "#f2d158";   // Yellow
+    private const string COLOR_RESTRICTED_PARKING = "#f15151"; // Red
+    private const string COLOR_UNKNOWN = "#808080";            // Gray
+
     private bool isParked = false;
     private string? pickedCarName;
     private string? pickedCarId;
     private string? pickedDay;
     private string? pickedTime;
-    private bool showRed;
-    private bool showBlue;
-    private bool showGreen;
-    private bool showYellow;
-    private int minParkingTime = 30; // Default to 30 minutes
     private Guid activePermit;
+    private Session? _session; // Single source of truth
     private readonly CarService _carService;
     private readonly MapService _mapService;
     private readonly ILocalDataService _localDataService;
@@ -58,7 +74,7 @@ public partial class ShowMapPage : ContentPage
             await LoadMapAsync(); // load map, current location
 
             // Wait for map to render and have a valid VisibleRegion
-            await Task.Delay(500);
+            await Task.Delay(MAP_RENDER_DELAY_MS);
 
             var bounds = GetVisibleBounds();
             if (bounds.HasValue)
@@ -98,8 +114,8 @@ public partial class ShowMapPage : ContentPage
             _mapMoveCts?.Cancel();
             _mapMoveCts = new CancellationTokenSource();
 
-            // Start new timer (500ms debounce)
-            _debounceTimer = new System.Timers.Timer(500);
+            // Start new timer (debounce)
+            _debounceTimer = new System.Timers.Timer(MAP_DEBOUNCE_DELAY_MS);
             _debounceTimer.Elapsed += async (s, args) =>
             {
                 _debounceTimer?.Stop();
@@ -180,7 +196,7 @@ public partial class ShowMapPage : ContentPage
                                                                     bounds.Value.CenterLon,
                                                                     bounds.Value.CenterLat,
                                                                     DateTimeOffset.Now,
-                                                                    minParkingTime);
+                                                                    _session?.MinParkingTime ?? DEFAULT_MIN_PARKING_TIME_MINUTES);
 
             if (segmentsResponse == null || segmentsResponse.Segments == null)
             {
@@ -214,34 +230,33 @@ public partial class ShowMapPage : ContentPage
         }
 
         // Limit number of segments to prevent OOM
-        int maxSegments = 500;
         int renderedCount = 0;
 
         // Draw each segment
         foreach (var segment in segmentsResponse.Segments)
         {
-            if (renderedCount >= maxSegments)
+            if (renderedCount >= MAX_SEGMENTS_TO_RENDER)
             {
-                System.Diagnostics.Debug.WriteLine($"Reached max segment limit ({maxSegments}), stopping render");
+                System.Diagnostics.Debug.WriteLine($"Reached max segment limit ({MAX_SEGMENTS_TO_RENDER}), stopping render");
                 break;
             }
 
-            // Skip based on filter settings
-            if (segment.Group == "RESTRICTED" && !showRed) continue;
-            if (segment.Group == "PAID" && !showBlue) continue;
-            if (segment.Group == "FREE" && !showGreen) continue;
-            if (segment.Group == "LIMITED" && !showYellow) continue;
+            // Skip based on filter settings from session
+            if (segment.Group == "RESTRICTED" && !(_session?.ShowNoParking ?? true)) continue;
+            if (segment.Group == "PAID" && !(_session?.ShowPaid ?? true)) continue;
+            if (segment.Group == "FREE" && !(_session?.ShowFree ?? true)) continue;
+            if (segment.Group == "LIMITED" && !(_session?.ShowRestricted ?? true)) continue;
 
             try
             {
                 // Determine color based on Group
                 Color strokeColor = segment.Group switch
                 {
-                    "FREE" => Color.FromArgb("#40dd7c"),      // Green - Free parking
-                    "PAID" => Color.FromArgb("#4769b9"),      // Blue - Paid parking
-                    "LIMITED" => Color.FromArgb("#f2d158"),   // Yellow - Limited/Restricted
-                    "RESTRICTED" => Color.FromArgb("#f15151"), // Red - No parking
-                    _ => Color.FromArgb("#808080")            // Gray - Unknown
+                    "FREE" => Color.FromArgb(COLOR_FREE_PARKING),
+                    "PAID" => Color.FromArgb(COLOR_PAID_PARKING),
+                    "LIMITED" => Color.FromArgb(COLOR_LIMITED_PARKING),
+                    "RESTRICTED" => Color.FromArgb(COLOR_RESTRICTED_PARKING),
+                    _ => Color.FromArgb(COLOR_UNKNOWN)
                 };
 
                 // Parse the GeoJSON geometry
@@ -252,7 +267,7 @@ public partial class ShowMapPage : ContentPage
                     {
                         var line = new Polyline
                         {
-                            StrokeWidth = 5, // Reduced from 6 to save memory
+                            StrokeWidth = SEGMENT_STROKE_WIDTH,
                             StrokeColor = strokeColor
                         };
 
@@ -296,13 +311,13 @@ public partial class ShowMapPage : ContentPage
 
         if (location != null)
         {
-            MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(location, Distance.FromMeters(300)));
+            MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(location, Distance.FromMeters(USER_LOCATION_ZOOM_METERS)));
         }
         else
         {
             // Fallback to Tel Aviv if location unavailable
             var center = new Location(32.0853, 34.7818);
-            MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(center, Distance.FromKilometers(1)));
+            MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(center, Distance.FromKilometers(FALLBACK_ZOOM_KILOMETERS)));
         }
     }
 
@@ -322,20 +337,14 @@ public partial class ShowMapPage : ContentPage
     }
     private async Task LoadSessionPreferences()
     {
-        var session = await _localDataService.GetSessionAsync();
-        if (session is not null)
+        _session = await _localDataService.GetSessionAsync();
+        if (_session is not null)
         {
-            showRed = session.ShowNoParking;
-            showBlue = session.ShowPaid;
-            showGreen = session.ShowFree;
-            showYellow = session.ShowRestricted;
-            minParkingTime = session.MinParkingTime;
-
             // Update checkbox UI to match session values
-            NoParkingCheck.IsChecked = showRed;
-            PaidParkingCheck.IsChecked = showBlue;
-            FreeParkingCheck.IsChecked = showGreen;
-            RestrictedCheck.IsChecked = showYellow;
+            NoParkingCheck.IsChecked = _session.ShowNoParking;
+            PaidParkingCheck.IsChecked = _session.ShowPaid;
+            FreeParkingCheck.IsChecked = _session.ShowFree;
+            RestrictedCheck.IsChecked = _session.ShowRestricted;
         }
         // Get active permit ID
         var activePermitNullable = await _carService.getActivePermitAsync(pickedCarId);
@@ -371,25 +380,26 @@ public partial class ShowMapPage : ContentPage
         }
     }
 
+    // Checkbox change handlers - just for UI feedback
+    // No need to store anything, values are read from checkboxes when Apply is clicked
     private void OnNoParkingTapped(object sender, EventArgs e)
     {
-       showRed = NoParkingCheck.IsChecked ;
+        // Checkbox state is automatically tracked by the CheckBox control
     }
 
     private void OnPaidParkingTapped(object sender, EventArgs e)
     {
-        showBlue = PaidParkingCheck.IsChecked;
-
+        // Checkbox state is automatically tracked by the CheckBox control
     }
 
     private void OnFreeParkingTapped(object sender, EventArgs e)
     {
-        showGreen = FreeParkingCheck.IsChecked;
+        // Checkbox state is automatically tracked by the CheckBox control
     }
 
     private void OnRestrictedTapped(object sender, EventArgs e)
     {
-       showYellow = RestrictedCheck.IsChecked;
+        // Checkbox state is automatically tracked by the CheckBox control
     }
 
     private async void OnCarPickerChanged(object sender, EventArgs e)
@@ -439,20 +449,36 @@ public partial class ShowMapPage : ContentPage
 
         pickedDay = DatePicker.SelectedItem?.ToString();
         pickedTime = TimePicker.SelectedItem?.ToString();
-        var session = await _localDataService.GetSessionAsync();
-        if (session is not null)
+
+        // Reload session to get latest values from DB
+        _session = await _localDataService.GetSessionAsync();
+        if (_session is not null)
         {
-            NoParkingCheck.IsChecked = session.ShowNoParking;
-            PaidParkingCheck.IsChecked = session.ShowPaid;
-            FreeParkingCheck.IsChecked = session.ShowFree;
-            RestrictedCheck.IsChecked = session.ShowRestricted;
+            NoParkingCheck.IsChecked = _session.ShowNoParking;
+            PaidParkingCheck.IsChecked = _session.ShowPaid;
+            FreeParkingCheck.IsChecked = _session.ShowFree;
+            RestrictedCheck.IsChecked = _session.ShowRestricted;
         }
     }
 
     private async void OnApplyClicked(object sender, EventArgs e)
     {
+        // Read current checkbox values (user's changes)
+        bool showFree = FreeParkingCheck.IsChecked;
+        bool showPaid = PaidParkingCheck.IsChecked;
+        bool showRestricted = RestrictedCheck.IsChecked;
+        bool showNoParking = NoParkingCheck.IsChecked;
 
-        await _localDataService.UpdatePreferencesAsync(null,null,null,showGreen,showBlue,showYellow,showRed);
+        // Save to database
+        await _localDataService.UpdatePreferencesAsync(
+            showFree: showFree,
+            showPaid: showPaid,
+            showRestricted: showRestricted,
+            showNoParking: showNoParking
+        );
+
+        // Reload session from DB to get updated values
+        _session = await _localDataService.GetSessionAsync();
 
         // Re-fetch segments with updated filter preferences
         var bounds = GetVisibleBounds();
@@ -649,7 +675,7 @@ public partial class ShowMapPage : ContentPage
 
             if (location != null)
             {
-                MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(location, Distance.FromKilometers(0.5)));
+                MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(location, Distance.FromMeters(SEARCH_RESULT_ZOOM_METERS)));
             }
             else
             {
