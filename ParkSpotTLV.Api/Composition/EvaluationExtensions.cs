@@ -23,6 +23,7 @@ public static class EvaluationExtensions {
         services.AddScoped<ITariffCalendarService, TariffCalendarService>();
         services.AddScoped<ILegalPolicyService, LegalPolicyService>();
         services.AddScoped<IPaymentDecisionService, PaymentDecisionService>();
+        services.AddScoped<IDailyBudgetService, DailyBudgetService>();
 
         // Budget
         services.AddScoped<IDailyBudgetService, DailyBudgetService>();
@@ -32,11 +33,11 @@ public static class EvaluationExtensions {
         services.AddScoped<IClassificationService, ClassificationService>();
 
         // Specs
+        services.AddSingleton(TimeZoneInfo.FindSystemTimeZoneById("Asia/Jerusalem"));
         services.AddSingleton<IRestrictedSpec, RestrictedSpec>();
 
         // Facade (starter)
         services.AddScoped<IMapSegmentsEvaluator, MapSegmentsEvaluator>();
-
 
 
         return services;

@@ -1,8 +1,6 @@
 ﻿using ParkSpotTLV.Api.Services.Evaluation.Contracts;
 using ParkSpotTLV.Api.Services.Evaluation.Strategies;
 using ParkSpotTLV.Contracts.Enums;
-using ParkSpotTLV.Infrastructure.Entities;
-using System;
 
 namespace ParkSpotTLV.Api.Services.Evaluation.Logic {
 

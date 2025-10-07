@@ -5,8 +5,8 @@ namespace ParkSpotTLV.Contracts.Enums {
 
         public static string MapTariff(Tariff t)
                         => t == Tariff.City_Outskirts
-                           ? "City Outskirts"
-                           : "City Center";
+                           ? "City_Outskirts"
+                           : "City_Center";
 
         public static string MapParkingType(ParkingType p) => p 
             switch {

@@ -6,8 +6,11 @@ namespace ParkSpotTLV.Api.Services.Evaluation.Strategies {
      */
     public interface IDailyBudgetService {
         Task EnsureResetAsync(Guid userId, DateOnly localDate, CancellationToken ct);
-
         Task<int> GetRemainingMinutesAsync(Guid userId, DateOnly localDate, CancellationToken ct);
+        Task ConsumeAsync(Guid vehicleId, DateTimeOffset startLocal, DateTimeOffset endLocal, CancellationToken ct);
+
 
     }
+
+   
 }
