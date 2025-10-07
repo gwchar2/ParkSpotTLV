@@ -26,7 +26,7 @@
   		<AndroidPackageFormat>apk</AndroidPackageFormat>
   		<AndroidPackageName>ParkSpotTLV</AndroidPackageName> <!-- overrides APK filename -->
   		<AndroidPackageFileName>ParkSpotTLV.apk</AndroidPackageFileName> <!-- custom output name -->
-		<AndroidManifestPlaceholders>mapsApiKey=$(GOOGLE_MAPS_API_KEY)</AndroidManifestPlaceholders>
+		<!-- <AndroidManifestPlaceholders>mapsApiKey=$(GOOGLE_MAPS_API_KEY)</AndroidManifestPlaceholders> -->
 		
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -94,9 +94,7 @@
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
   <AndroidManifestPlaceholders>mapsApiKey=$(MAPS_API_KEY_DEBUG)</AndroidManifestPlaceholders>
 </PropertyGroup>
-
 <PropertyGroup Condition="'$(Configuration)'=='Release'">
-  <!-- In CI/CD, define MAPS_API_KEY_RELEASE as a secret variable -->
   <AndroidManifestPlaceholders>mapsApiKey=$(MAPS_API_KEY_RELEASE)</AndroidManifestPlaceholders>
 </PropertyGroup>
 
@@ -112,6 +110,6 @@
 	</ItemGroup>
 	
 	<PropertyGroup>
-		<AndroidManifestPlaceholders>mapsApiKey=$(GOOGLE_MAPS_API_KEY)</AndroidManifestPlaceholders>
+		<!-- <AndroidManifestPlaceholders>mapsApiKey=$(GOOGLE_MAPS_API_KEY)</AndroidManifestPlaceholders> -->
 	</PropertyGroup>
 </Project>

@@ -27,6 +27,10 @@ public partial class ShowMapPage : ContentPage, IDisposable
     private const double FALLBACK_ZOOM_KILOMETERS = 1;
     private const double SEARCH_RESULT_ZOOM_METERS = 300;
 
+    // Map area limits to prevent loading too many segments
+    private const double MAX_LAT_DEGREES = 0.05;  // ~5.5km
+    private const double MAX_LON_DEGREES = 0.05;  // ~5.5km
+
     private bool isParked = false;
     private string? pickedCarName;
     private string? pickedCarId;
@@ -157,6 +161,14 @@ public partial class ShowMapPage : ContentPage, IDisposable
         var latitudeDegrees = visibleRegion.LatitudeDegrees;
         var longitudeDegrees = visibleRegion.LongitudeDegrees;
 
+        // Clamp to maximum area to prevent loading too many segments
+        if (latitudeDegrees > MAX_LAT_DEGREES || longitudeDegrees > MAX_LON_DEGREES)
+        {
+            System.Diagnostics.Debug.WriteLine($"Map area too large ({latitudeDegrees:F4} x {longitudeDegrees:F4}), clamping to center area");
+            latitudeDegrees = Math.Min(latitudeDegrees, MAX_LAT_DEGREES);
+            longitudeDegrees = Math.Min(longitudeDegrees, MAX_LON_DEGREES);
+        }
+
         // Calculate bounds
         double minLat = center.Latitude - (latitudeDegrees / 2);
         double maxLat = center.Latitude + (latitudeDegrees / 2);
@@ -207,8 +219,23 @@ public partial class ShowMapPage : ContentPage, IDisposable
             return;
         }
 
-        // Render segments using the renderer
-        _mapSegmentRenderer.RenderSegments(MyMap, segmentsResponse, _session);
+        try
+        {
+            // Render segments using the renderer
+            var renderedCount = _mapSegmentRenderer.RenderSegments(MyMap, segmentsResponse, _session);
+            System.Diagnostics.Debug.WriteLine($"Successfully rendered {renderedCount} segments on map");
+        }
+        catch (OutOfMemoryException ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Out of memory rendering segments: {ex.Message}");
+            await DisplayAlert("Memory Error", "Too many segments to display. Try zooming in further.", "OK");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error rendering segments: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            await DisplayAlert("Error", $"Failed to render segments: {ex.Message}", "OK");
+        }
     }
     // loads the map, user location and calls the rendering of the segments
     private async Task LoadMapAsync()
