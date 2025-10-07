@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.11.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.10.2-beta.0...v0.11.0-beta.0) (2025-10-07)
+
+
+### Features
+
+* **App:** auto login working! still some edge cases checks required ([194fbd1](https://github.com/gwchar2/ParkSpotTLV/commit/194fbd10acbff33fb2db26df131924e5b54ea090))
+* **localDB:** new local db - still some errors ([d5c0dd6](https://github.com/gwchar2/ParkSpotTLV/commit/d5c0dd6c752b075aaf62c79875a6bfce1053b068))
+* **Map:** key fetched securly ([25a5fbb](https://github.com/gwchar2/ParkSpotTLV/commit/25a5fbb0f633353ceb6a974b3f8bce88eaba288b))
+* **MapPref:** preferences loaded and updated from lical db ([f9152ba](https://github.com/gwchar2/ParkSpotTLV/commit/f9152bae8ff1fba7b75c688608cd24c2259f873f))
+* **Map:** segment load in map view borders ([d70f689](https://github.com/gwchar2/ParkSpotTLV/commit/d70f689d6f9a36e8045cd2f49d29fd05719d5534))
+
+
+### Bug Fixes
+
+* **App:** some fixes ([be7a051](https://github.com/gwchar2/ParkSpotTLV/commit/be7a051bd4b64cb8ac43651b14e688f3559ffadd))
+* **localDB:** running properly ([d3da34f](https://github.com/gwchar2/ParkSpotTLV/commit/d3da34ff9f1a83c3da0a12f1cefaec94e4a2554f))
+* **Map:** fixed pref structure ([1122d4f](https://github.com/gwchar2/ParkSpotTLV/commit/1122d4f5797573c07f1c8f3daa48d993d10ae89d))
+* **Map:** fixed rendering struture ([5ccde6f](https://github.com/gwchar2/ParkSpotTLV/commit/5ccde6f37610b2b972661ec85d81e063cfaefbbc))
+* **Map:** fixing key loading issues ([d7d7667](https://github.com/gwchar2/ParkSpotTLV/commit/d7d7667053d2d05de74743ea1b7c82b52b3d0649))
+
 ## [0.10.2-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.10.1-beta.0...v0.10.2-beta.0) (2025-10-05)
 
 
