@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.11.0-beta.0...v0.11.1-beta.0) (2025-10-08)
+
+
+### Bug Fixes
+
+* Fixed a few bugs with time calculations & daily budget distribution ([6ae267a](https://github.com/gwchar2/ParkSpotTLV/commit/6ae267a119a8462029d4f803e7974fb18c952fe6))
+
 ## [0.11.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.10.2-beta.0...v0.11.0-beta.0) (2025-10-07)
 
 
