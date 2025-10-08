@@ -10,4 +10,8 @@ stable contracts and domain logic without infrastructure details.
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Auth\" />
+  </ItemGroup>
+
 </Project>

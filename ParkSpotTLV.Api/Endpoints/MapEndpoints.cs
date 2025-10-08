@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.IO;
 using ParkSpotTLV.Api.Endpoints.Support;
-using ParkSpotTLV.Api.Services.Evaluation.Contracts;
-using ParkSpotTLV.Api.Services.Evaluation.Facade;
+using ParkSpotTLV.Api.Features.Parking.Models;
+using ParkSpotTLV.Api.Features.Parking.Services;
 using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Contracts.Map;
 using ParkSpotTLV.Infrastructure;
@@ -19,7 +19,7 @@ namespace ParkSpotTLV.Api.Endpoints {
 
 
             group.MapPost("/segments",
-                async ([FromBody] GetMapSegmentsRequest body, HttpContext ctx, AppDbContext db, TimeProvider clock, IMapSegmentsEvaluator evaluator, CancellationToken ct) => {
+                async ([FromBody] GetMapSegmentsRequest body, HttpContext ctx, AppDbContext db, TimeProvider clock, ISegmentEvaluationService evaluator, CancellationToken ct) => {
 
                     var userId = ctx.GetUserId();
 

@@ -31,8 +31,11 @@ try {
     // Auth (options, hashing, JWT, refresh)
     builder.Services.AddAuthFeature(builder.Configuration);
 
-    // Map segment services
-    builder.Services.AddEvaluation();
+    // Map segment evluation service
+    builder.Services.AddParking();
+
+    // Push Notification service
+    builder.Services.AddNotification(builder.Configuration);
 
     var app = builder.Build();
 
@@ -49,6 +52,7 @@ try {
     app.MapPermits();
     app.MapSegments();
     app.MapParking();
+    app.MapNotificationsTest();
 
     app.Run();
 }

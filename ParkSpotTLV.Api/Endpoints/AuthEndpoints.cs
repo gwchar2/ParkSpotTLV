@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ParkSpotTLV.Contracts.Auth;
-using ParkSpotTLV.Core.Auth;
-using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Infrastructure;
 using ParkSpotTLV.Infrastructure.Entities;
+using ParkSpotTLV.Infrastructure.Auth.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using ParkSpotTLV.Api.Endpoints.Support;

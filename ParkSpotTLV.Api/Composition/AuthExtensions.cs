@@ -2,8 +2,8 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using ParkSpotTLV.Core.Auth;
-using ParkSpotTLV.Infrastructure.Auth;
+using ParkSpotTLV.Infrastructure.Auth.Services;
+using ParkSpotTLV.Infrastructure.Auth.Models;
 using ParkSpotTLV.Infrastructure.Security;
 
 namespace ParkSpotTLV.Api.Composition {
@@ -30,10 +30,9 @@ namespace ParkSpotTLV.Api.Composition {
             /* ----------------------------------------------------------------------
              * AUTHENTICATION (JWT Bearer) + AUTHORIZATION
              * ---------------------------------------------------------------------- */
-            var authOpts = config.GetSection("Auth").Get<AuthOptions>()
-               ?? throw new InvalidOperationException("Auth configuration missing.");
+            var authOpts = config.GetSection("Auth").Get<AuthOptions>();
 
-            if (authOpts.Signing.Type.Equals("HMAC", StringComparison.OrdinalIgnoreCase)) {
+            if (authOpts!.Signing.Type.Equals("HMAC", StringComparison.OrdinalIgnoreCase)) {
                 var keyBytes = Encoding.UTF8.GetBytes(authOpts.Signing.HmacSecret!);
                 var signingKey = new SymmetricSecurityKey(keyBytes);
 
