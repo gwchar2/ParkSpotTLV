@@ -10,6 +10,7 @@ using ParkSpotTLV.App.Data.Services;
 using ParkSpotTLV.App.Data.Models;
 using System.ComponentModel;
 using System.Timers;
+using ParkSpotTLV.Core.Models;
 
 
 namespace ParkSpotTLV.App.Pages;
@@ -46,6 +47,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
     private List<Core.Models.Car> _userCars = new();
     private CancellationTokenSource? _mapMoveCts;
     private System.Timers.Timer? _debounceTimer;
+    private bool _isInitialized = false;
 
 
     public ShowMapPage(CarService carService, MapService mapService, MapSegmentRenderer mapSegmentRenderer, ILocalDataService localDataService)
@@ -63,6 +65,10 @@ public partial class ShowMapPage : ContentPage, IDisposable
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+
+        // Only run full initialization once
+        if (_isInitialized)
+            return;
 
         try
         {
@@ -82,6 +88,8 @@ public partial class ShowMapPage : ContentPage, IDisposable
             {
                 System.Diagnostics.Debug.WriteLine("OnAppearing: VisibleRegion not ready, skipping initial segment load");
             }
+
+            _isInitialized = true;
         }
         catch (Exception ex)
         {
@@ -293,12 +301,24 @@ public partial class ShowMapPage : ContentPage, IDisposable
             CarPicker.Items.Add("+ Add Car");
         }
 
-        // Set default selection to first car if available
+        // Restore previously selected car from session or default to first car
         if (_userCars.Count > 0)
         {
-            CarPicker.SelectedIndex = 0;
-            pickedCarId = _userCars[0].Id;
-            pickedCarName = _userCars[0].Name;
+            int selectedIndex = 0;
+
+            // Load session to get last picked car
+            var session = await _localDataService.GetSessionAsync();
+            if (session != null && !string.IsNullOrEmpty(session.LastPickedCarId))
+            {
+                int foundIndex = _userCars.FindIndex(c => c.Id == session.LastPickedCarId);
+                if (foundIndex >= 0)
+                    selectedIndex = foundIndex;
+            }
+
+            // Set the picker and update picked car details
+            CarPicker.SelectedIndex = selectedIndex;
+            pickedCarId = _userCars[selectedIndex].Id;
+            pickedCarName = _userCars[selectedIndex].Name;
         }
     }
 
@@ -329,6 +349,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
                 pickedCarName = _userCars[selectedIndex].Name;
             }
         }
+
     }
 
     private void OnDatePickerChanged(object sender, EventArgs e)
@@ -366,16 +387,11 @@ public partial class ShowMapPage : ContentPage, IDisposable
             FreeParkingCheck.IsChecked = _session.ShowFree;
             RestrictedCheck.IsChecked = _session.ShowRestricted;
         }
-        // Get active permit ID
-        var activePermitNullable = await _carService.getActivePermitAsync(pickedCarId);
-        activePermit = activePermitNullable ?? Guid.Empty;
 
-        // set car to default - first car in the list
-        if (_userCars.Count > 0)
-        {
-            pickedCarId = _userCars[0].Id;
-            pickedCarName = _userCars[0].Name;
-        }
+        // pickedCarId and pickedCarName are already set by LoadUserCars()
+        // Get active permit ID for the selected car
+        var activePermitNullable = await permitPopUp();
+        activePermit = activePermitNullable ?? Guid.Empty;
 
         // present day menu according to today
         DateTimeOffset now = DateTimeOffset.Now;
@@ -415,14 +431,6 @@ public partial class ShowMapPage : ContentPage, IDisposable
         bool showRestricted = RestrictedCheck.IsChecked;
         bool showNoParking = NoParkingCheck.IsChecked;
 
-        // Save to database 
-        await _localDataService.UpdatePreferencesAsync(
-            showFree: showFree,
-            showPaid: showPaid,
-            showRestricted: showRestricted,
-            showNoParking: showNoParking
-        );
-
         // update car picked
         int selectedIndex = CarPicker.SelectedIndex;
         if (selectedIndex >= 0 && selectedIndex < _userCars.Count)
@@ -431,8 +439,22 @@ public partial class ShowMapPage : ContentPage, IDisposable
             pickedCarName = _userCars[selectedIndex].Name;
         }
 
+        // Save to database
+        await _localDataService.UpdatePreferencesAsync(
+            showFree: showFree,
+            showPaid: showPaid,
+            showRestricted: showRestricted,
+            showNoParking: showNoParking,
+            lastPickedCarId: pickedCarId
+        );
+
         // update date time picked
         selectedDate = GetSelectedDateTime();
+
+        // if car picked has permit options
+        var activePermitNullable = await permitPopUp();
+        activePermit = activePermitNullable ?? Guid.Empty;
+
 
         // Re-fetch segments with updated filter preferences
         var bounds = GetVisibleBounds();
@@ -443,6 +465,58 @@ public partial class ShowMapPage : ContentPage, IDisposable
         // Auto-hide settings panel after applying changes
         SettingsPanel.IsVisible = false;
         SettingsToggleBtn.Text = "Settings ▼";
+    }
+
+    private async Task<Guid?> permitPopUp()
+    {
+        // check if pop up required
+        if (pickedCarId is null)
+            return null;
+
+        Car? currCar = await _carService.GetCarAsync(pickedCarId);
+
+        if (currCar == null)
+            return null;
+        
+        // If only has resident permit (no disabled permit)
+        if (!currCar.HasDisabledPermit) {
+            if (currCar.HasResidentPermit)
+                return await _carService.getPermitAsync(pickedCarId, 0); // get resident permit
+            // No permits - return default/empty permit
+            else
+                return await _carService.getPermitAsync(pickedCarId, 2); // get default permit
+        }
+
+        else { // If car has disabled permit, always ask user if they want to use it
+            // Use DisplayActionSheet instead of modal popup to avoid OnAppearing loop
+            var alternativeOptionText = "Don't use Disabled Permit";
+                
+
+            var action = await DisplayActionSheet(
+                $"{currCar.Name} has a disabled permit. Would you like to use it?",
+                null, // no cancel button
+                null, // no destruction button
+                "Use Disabled Permit",
+                alternativeOptionText
+            );
+
+            if (action == "Use Disabled Permit")
+            {
+                return await _carService.getPermitAsync(pickedCarId, 1); // disabled permit
+            }
+            else // alternative option selected
+            {
+                if (currCar.HasResidentPermit)
+                {
+                    return await _carService.getPermitAsync(pickedCarId, 0); // resident permit
+                }
+                else
+                {
+                    return Guid.Empty; // default permit
+                }
+            }
+        }
+        
     }
 
     private async void OnParkHereClicked(object sender, EventArgs e)

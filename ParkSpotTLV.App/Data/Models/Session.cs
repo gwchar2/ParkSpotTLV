@@ -20,6 +20,8 @@ public class Session
     public bool ShowRestricted {get; set; } = true ;
     public bool ShowNoParking {get; set; } = true ;
 
+    public string? LastPickedCarId { get; set; }
+
     // User Auth
     public string UserName { get; set; } = string.Empty;
 

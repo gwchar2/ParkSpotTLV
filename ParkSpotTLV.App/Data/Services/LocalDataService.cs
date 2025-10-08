@@ -73,7 +73,8 @@ public class LocalDataService : ILocalDataService
                                         bool? showFree = null,
                                         bool? showPaid = null,
                                         bool? showRestricted = null,
-                                        bool? showNoParking = null) {
+                                        bool? showNoParking = null,
+                                        string? lastPickedCarId = null) {
 
         using var context = new LocalDbContext();
         var existing = await context.Session.FirstOrDefaultAsync();
@@ -102,6 +103,9 @@ public class LocalDataService : ILocalDataService
 
         if (showNoParking.HasValue)
             existing.ShowNoParking = showNoParking.Value;
+
+        if (lastPickedCarId is not null)
+            existing.LastPickedCarId = lastPickedCarId;
 
         existing.LastUpdated = DateTime.UtcNow;
 
