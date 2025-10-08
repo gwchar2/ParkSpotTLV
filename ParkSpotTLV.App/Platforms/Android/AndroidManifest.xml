@@ -14,17 +14,9 @@
 		android:largeHeap="true">
 
 
-		<!-- BELONGS TO TOMMER ! -->
 		<meta-data
 			android:name="com.google.android.geo.API_KEY"
 			android:value="${mapsApiKey}"/>
 
-		<!-- meta-data
-			android:name="com.google.android.geo.API_KEY"
-			android:value="" />
-			מיכל אל תשימי פה את המפתח, זה מופיע לכולם באינטנרט ובסוף מישהו יגנוב את זה ויהיה לך חיוב של אלפי דולרים בגוגל 
-			תבדקי עם הצ'אט איך אפשר להסתיר את זה, בווינדוז אני שמתי את זה כמשתנה סביבה, אבל אני לא מכיר את הפעולות במאק
-			פשוט צריך לוודא שהמפתח לא מופיע באף קובץ
-			-->
 	</application>
 </manifest>

@@ -10,10 +10,8 @@ namespace ParkSpotTLV.Infrastructure.Config {
             e.HasKey(x => x.Id);
             e.HasIndex(x => x.OSMId);
 
-            e.Property(x => x.NameEnglish)
-             .HasMaxLength(128);
-            e.Property(x => x.NameHebrew)
-             .HasMaxLength(128);
+            e.Property(x => x.NameEnglish).HasMaxLength(128);
+            e.Property(x => x.NameHebrew).HasMaxLength(128);
 
             e.Property(x => x.Geom)
              .IsRequired()

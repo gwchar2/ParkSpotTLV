@@ -1,22 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ParkSpotTLV.Infrastructure.Entities;
-using ParkSpotTLV.Core.Auth;
+using ParkSpotTLV.Infrastructure.Auth.Models;
 
 namespace ParkSpotTLV.Infrastructure.Security {
 
-    public class EfRefreshTokenStore {
+    public class EfRefreshTokenStore(AppDbContext db, TimeProvider time) {
 
-        private readonly AppDbContext _db;
-        private readonly TimeProvider _time;
+        private readonly AppDbContext _db = db;
+        private readonly TimeProvider _time = time;
         public sealed record RefreshTokenValidationResult(
             RefreshTokenStatus Status,
             RefreshToken? Token
         );
-
-        public EfRefreshTokenStore(AppDbContext db, TimeProvider time) {
-            _db = db;
-            _time = time;
-        }
 
         /* Creates a new refresh token */
         public async Task<(string rawToken, RefreshToken record)> CreateAsync(Guid userId, TimeSpan ttl, CancellationToken ct = default) {
@@ -27,8 +22,8 @@ namespace ParkSpotTLV.Infrastructure.Security {
             var rec = new RefreshToken {
                 UserId = userId,
                 TokenHash = hash,
-                CreatedAtUtc = now,
-                ExpiresAtUtc = now.Add(ttl),
+                CreatedAt = now,
+                ExpiresAt = now.Add(ttl),
             };
 
             _db.RefreshTokens.Add(rec);
@@ -47,13 +42,13 @@ namespace ParkSpotTLV.Infrastructure.Security {
 
             var now = _time.GetUtcNow().UtcDateTime;
 
-            if (rec.RevokedAtUtc is not null) {
+            if (rec.RevokedAt is not null) {
                 return rec.ReplacedByTokenHash is not null
                     ? new(RefreshTokenStatus.Reused, rec)
                     : new(RefreshTokenStatus.Revoked, rec);
             }
 
-            if (rec.ExpiresAtUtc <= now) return new(RefreshTokenStatus.Expired, rec);
+            if (rec.ExpiresAt <= now) return new(RefreshTokenStatus.Expired, rec);
 
             return new(RefreshTokenStatus.Active, rec);
         }
@@ -67,8 +62,8 @@ namespace ParkSpotTLV.Infrastructure.Security {
 
             var old = await _db.RefreshTokens.FirstOrDefaultAsync(x => x.TokenHash == oldHash, ct);
             if (old is null) throw new InvalidOperationException("Refresh token not found");
-            if (old.RevokedAtUtc is not null) throw new InvalidOperationException("Refresh token already revoked");
-            if (old.ExpiresAtUtc <= now) throw new InvalidOperationException("Refresh token expired");
+            if (old.RevokedAt is not null) throw new InvalidOperationException("Refresh token already revoked");
+            if (old.ExpiresAt <= now) throw new InvalidOperationException("Refresh token expired");
 
             var newRaw = TokenHashing.GenerateBase64UrlToken(32);
             var newHash = TokenHashing.Sha256Hex(newRaw);
@@ -76,13 +71,13 @@ namespace ParkSpotTLV.Infrastructure.Security {
             var @new = new RefreshToken {
                 UserId = old.UserId,
                 TokenHash = newHash,
-                CreatedAtUtc = now,
-                ExpiresAtUtc = now.Add(ttl),
+                CreatedAt = now,
+                ExpiresAt = now.Add(ttl),
             };
 
             _db.RefreshTokens.Add(@new);
 
-            old.RevokedAtUtc = now;
+            old.RevokedAt = now;
             old.ReplacedByTokenHash = newHash;
 
             await _db.SaveChangesAsync(ct);
@@ -98,9 +93,9 @@ namespace ParkSpotTLV.Infrastructure.Security {
             var rec = await _db.RefreshTokens.FirstOrDefaultAsync(x => x.TokenHash == hash, ct);
 
             if (rec is null) return false;
-            if (rec.RevokedAtUtc is not null) return true;
+            if (rec.RevokedAt is not null) return true;
 
-            rec.RevokedAtUtc = _time.GetUtcNow().UtcDateTime;
+            rec.RevokedAt = _time.GetUtcNow().UtcDateTime;
             await _db.SaveChangesAsync(ct);
 
 
@@ -118,8 +113,8 @@ namespace ParkSpotTLV.Infrastructure.Security {
 
                 if (rec is null) break;
 
-                if (rec.RevokedAtUtc is null) {
-                    rec.RevokedAtUtc = now;
+                if (rec.RevokedAt is null) {
+                    rec.RevokedAt = now;
                     count++;
                     await _db.SaveChangesAsync(ct);
                 }

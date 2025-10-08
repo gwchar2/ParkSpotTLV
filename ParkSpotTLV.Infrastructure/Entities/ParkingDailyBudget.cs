@@ -4,7 +4,7 @@ namespace ParkSpotTLV.Infrastructure.Entities {
 
         public Guid VehicleId { get; set; }
         public DateOnly AnchorDate { get; set; }        // This is a daily window from 8am -> 8am 
-        public int MinutesUsed { get; set; }            // Max 120 minutes
+        public int MinutesUsed { get; set; } = 0;         // Max 120 minutes
         public DateTimeOffset CreatedAt { get; set; }
         public DateTimeOffset UpdatedAt { get; set; }
 

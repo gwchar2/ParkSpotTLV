@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ParkSpotTLV.Api.Endpoints.Support;
-using ParkSpotTLV.Api.Services.Evaluation.Strategies;
+using ParkSpotTLV.Api.Features.Parking.Services;
 using ParkSpotTLV.Contracts.Budget;
 using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Contracts.Parking;
@@ -222,8 +222,8 @@ namespace ParkSpotTLV.Api.Endpoints {
                         ParkingBudgetUsed = 0,
                         PaidMinutes = 0,
                         Status = ParkingSessionStatus.Active,
-                        CreatedAtUtc = DateTimeOffset.UtcNow,
-                        UpdatedAtUtc = DateTimeOffset.UtcNow
+                        CreatedAt = DateTimeOffset.UtcNow,
+                        UpdatedAt = DateTimeOffset.UtcNow
                     };
 
                     db.ParkingSession.Add(session);
@@ -303,7 +303,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                     if (localTime <= session.StartedLocal) {
                         session.StoppedLocal = localTime;           
                         session.Status = ParkingSessionStatus.Stopped;
-                        session.UpdatedAtUtc = localTime;
+                        session.UpdatedAt = localTime;
 
                         await CancelFutureNotificationsAsync(db, session.Id, ct);
                         await db.SaveChangesAsync(ct);
@@ -386,7 +386,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                     session.PaidMinutes += paidMinutes;
                     session.StoppedLocal = localTime;           // store UTC
                     session.Status = ParkingSessionStatus.Stopped;
-                    session.UpdatedAtUtc = localTime;
+                    session.UpdatedAt = localTime;
 
                     await CancelFutureNotificationsAsync(db, session.Id, ct);
                     await db.SaveChangesAsync(ct);

@@ -72,6 +72,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Platforms\Android\google-services.json" />
+	  <None Remove="Properties\google-services.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <GoogleServicesJson Include="Platforms\Android\google-services.json" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Update="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
 		<PackageReference Update="Microsoft.CodeAnalysis.CSharp.Analyzers" PrivateAssets="all" />
 		<PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" PrivateAssets="all" />
@@ -108,8 +117,4 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>
-	
-	<PropertyGroup>
-		<!-- <AndroidManifestPlaceholders>mapsApiKey=$(GOOGLE_MAPS_API_KEY)</AndroidManifestPlaceholders> -->
-	</PropertyGroup>
 </Project>
