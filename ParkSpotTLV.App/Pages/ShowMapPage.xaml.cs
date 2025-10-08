@@ -47,6 +47,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
     private List<Core.Models.Car> _userCars = new();
     private CancellationTokenSource? _mapMoveCts;
     private System.Timers.Timer? _debounceTimer;
+    private bool _isInitialized = false;
 
 
     public ShowMapPage(CarService carService, MapService mapService, MapSegmentRenderer mapSegmentRenderer, ILocalDataService localDataService)
@@ -64,6 +65,10 @@ public partial class ShowMapPage : ContentPage, IDisposable
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+
+        // Only run full initialization once
+        if (_isInitialized)
+            return;
 
         try
         {
@@ -83,6 +88,8 @@ public partial class ShowMapPage : ContentPage, IDisposable
             {
                 System.Diagnostics.Debug.WriteLine("OnAppearing: VisibleRegion not ready, skipping initial segment load");
             }
+
+            _isInitialized = true;
         }
         catch (Exception ex)
         {
@@ -294,15 +301,16 @@ public partial class ShowMapPage : ContentPage, IDisposable
             CarPicker.Items.Add("+ Add Car");
         }
 
-        // Restore previously selected car or default to first car
+        // Restore previously selected car from session or default to first car
         if (_userCars.Count > 0)
         {
             int selectedIndex = 0;
 
-            if (!string.IsNullOrEmpty(pickedCarId))
+            // Load session to get last picked car
+            var session = await _localDataService.GetSessionAsync();
+            if (session != null && !string.IsNullOrEmpty(session.LastPickedCarId))
             {
-                // Try to find previously selected car
-                int foundIndex = _userCars.FindIndex(c => c.Id == pickedCarId);
+                int foundIndex = _userCars.FindIndex(c => c.Id == session.LastPickedCarId);
                 if (foundIndex >= 0)
                     selectedIndex = foundIndex;
             }
@@ -380,14 +388,8 @@ public partial class ShowMapPage : ContentPage, IDisposable
             RestrictedCheck.IsChecked = _session.ShowRestricted;
         }
 
-        // set car to default - first car in the list
-        if (_userCars.Count > 0)
-        {
-            pickedCarId = _userCars[0].Id;
-            pickedCarName = _userCars[0].Name;
-        }
-
-        // Get active permit ID     // if car picked has permit options
+        // pickedCarId and pickedCarName are already set by LoadUserCars()
+        // Get active permit ID for the selected car
         var activePermitNullable = await permitPopUp();
         activePermit = activePermitNullable ?? Guid.Empty;
 
@@ -429,14 +431,6 @@ public partial class ShowMapPage : ContentPage, IDisposable
         bool showRestricted = RestrictedCheck.IsChecked;
         bool showNoParking = NoParkingCheck.IsChecked;
 
-        // Save to database 
-        await _localDataService.UpdatePreferencesAsync(
-            showFree: showFree,
-            showPaid: showPaid,
-            showRestricted: showRestricted,
-            showNoParking: showNoParking
-        );
-
         // update car picked
         int selectedIndex = CarPicker.SelectedIndex;
         if (selectedIndex >= 0 && selectedIndex < _userCars.Count)
@@ -444,6 +438,15 @@ public partial class ShowMapPage : ContentPage, IDisposable
             pickedCarId = _userCars[selectedIndex].Id;
             pickedCarName = _userCars[selectedIndex].Name;
         }
+
+        // Save to database
+        await _localDataService.UpdatePreferencesAsync(
+            showFree: showFree,
+            showPaid: showPaid,
+            showRestricted: showRestricted,
+            showNoParking: showNoParking,
+            lastPickedCarId: pickedCarId
+        );
 
         // update date time picked
         selectedDate = GetSelectedDateTime();
@@ -485,108 +488,33 @@ public partial class ShowMapPage : ContentPage, IDisposable
         }
 
         else { // If car has disabled permit, always ask user if they want to use it
-            // Show popup to choose permit
-            var popup = new ContentPage
+            // Use DisplayActionSheet instead of modal popup to avoid OnAppearing loop
+            var alternativeOptionText = "Don't use Disabled Permit";
+                
+
+            var action = await DisplayActionSheet(
+                $"{currCar.Name} has a disabled permit. Would you like to use it?",
+                null, // no cancel button
+                null, // no destruction button
+                "Use Disabled Permit",
+                alternativeOptionText
+            );
+
+            if (action == "Use Disabled Permit")
             {
-                Title = "Select Permit"
-            };
-
-            var mainLayout = new VerticalStackLayout
-            {
-                Spacing = 20,
-                Padding = 30,
-                VerticalOptions = LayoutOptions.Center
-            };
-
-            // Title
-            var titleLabel = new Label
-            {
-                Text = "Use Disabled Permit?",
-                FontSize = 22,
-                FontAttributes = FontAttributes.Bold,
-                HorizontalOptions = LayoutOptions.Center,
-                TextColor = Color.FromArgb("#2E7D32")
-            };
-
-            // Message
-            var messageLabel = new Label
-            {
-                Text = "This car has a disabled permit. Would you like to use it?",
-                FontSize = 16,
-                HorizontalOptions = LayoutOptions.Center,
-                HorizontalTextAlignment = TextAlignment.Center,
-                TextColor = Colors.Black
-            };
-
-            // Buttons
-            var buttonLayout = new VerticalStackLayout
-            {
-                Spacing = 10,
-                HorizontalOptions = LayoutOptions.Center
-            };
-
-            Guid? selectedPermit = null;
-            var tcs = new TaskCompletionSource<Guid?>();
-
-            var disabledButton = new Button
-            {
-                Text = "Use Disabled Permit",
-                BackgroundColor = Color.FromArgb("#2E7D32"),
-                TextColor = Colors.White,
-                WidthRequest = 200,
-                HeightRequest = 50,
-                CornerRadius = 5
-            };
-
-            // Button text depends on whether car also has resident permit
-            var alternativeButtonText = "Don't use Disabled Permit";
-
-            var alternativeButton = new Button
-            {
-                Text = alternativeButtonText,
-                BackgroundColor = Color.FromArgb("#1976D2"),
-                TextColor = Colors.White,
-                WidthRequest = 200,
-                HeightRequest = 50,
-                CornerRadius = 5
-            };
-
-            disabledButton.Clicked += async (s, e) =>
-            {
-                selectedPermit = await _carService.getPermitAsync(pickedCarId, 1); // disabled permit
-                await Navigation.PopModalAsync();
-                tcs.SetResult(selectedPermit);
-            };
-
-            alternativeButton.Clicked += async (s, e) =>
+                return await _carService.getPermitAsync(pickedCarId, 1); // disabled permit
+            }
+            else // alternative option selected
             {
                 if (currCar.HasResidentPermit)
                 {
-                    selectedPermit = await _carService.getPermitAsync(pickedCarId, 0); // resident permit
+                    return await _carService.getPermitAsync(pickedCarId, 0); // resident permit
                 }
                 else
                 {
-                    selectedPermit = Guid.Empty; // default permit
+                    return Guid.Empty; // default permit
                 }
-                await Navigation.PopModalAsync();
-                tcs.SetResult(selectedPermit);
-            };
-
-            buttonLayout.Children.Add(disabledButton);
-            buttonLayout.Children.Add(alternativeButton);
-
-            // Add all elements to main layout
-            mainLayout.Children.Add(titleLabel);
-            mainLayout.Children.Add(messageLabel);
-            mainLayout.Children.Add(buttonLayout);
-
-            popup.Content = new ScrollView { Content = mainLayout };
-
-            // Show as modal
-            await Navigation.PushModalAsync(popup);
-
-            // Wait for user selection
-            return await tcs.Task;
+            }
         }
         
     }

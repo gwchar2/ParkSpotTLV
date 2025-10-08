@@ -13,7 +13,8 @@ public interface ILocalDataService
                                     bool? showFree = null,
                                     bool? showPaid = null,
                                     bool? showRestricted = null,
-                                    bool? showNoParking = null);
+                                    bool? showNoParking = null,
+                                    String? lastPickedCarId = null);
     public Task UpdateTokenAsync(String token, DateTimeOffset expiresAt);
     public Task<Session?> GetSessionAsync();
 }
