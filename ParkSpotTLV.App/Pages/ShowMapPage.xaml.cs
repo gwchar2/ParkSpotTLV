@@ -346,36 +346,14 @@ public partial class ShowMapPage : ContentPage, IDisposable
     private void OnSettingsToggleClicked(object sender, EventArgs e)
     {
         SettingsPanel.IsVisible = !SettingsPanel.IsVisible;
-        String label = "⚙️ " + selectedDate.DayOfWeek.ToString() + " " + selectedDate.Hour.ToString() ;
+        String label = "Settings" ;
         if (SettingsPanel.IsVisible)
-            label += " ▼";
+            label += " ▲";
         else 
-            label += " ▲" ;
+            label += " ▼" ;
         SettingsToggleBtn.Text = label;
     }
 
-    // private async Task SetSelectedSettings(){
-    //     // Update car selection
-    //     int selectedIndex = CarPicker.SelectedIndex;
-    //     if (selectedIndex >= 0 && selectedIndex < _userCars.Count)
-    //     {
-    //         pickedCarId = _userCars[selectedIndex].Id;
-    //         pickedCarName = _userCars[selectedIndex].Name;
-    //     }
-
-    //     pickedDay = DatePicker.SelectedItem?.ToString();
-    //     pickedTime = TimePicker.SelectedItem?.ToString();
-
-    //     // Reload session to get latest values from DB
-    //     _session = await _localDataService.GetSessionAsync();
-    //     if (_session is not null)
-    //     {
-    //         NoParkingCheck.IsChecked = _session.ShowNoParking;
-    //         PaidParkingCheck.IsChecked = _session.ShowPaid;
-    //         FreeParkingCheck.IsChecked = _session.ShowFree;
-    //         RestrictedCheck.IsChecked = _session.ShowRestricted;
-    //     }
-    // }
     // load prefernces from session to UI
     private async Task LoadSessionPreferences()
     {
@@ -464,7 +442,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
         // Auto-hide settings panel after applying changes
         SettingsPanel.IsVisible = false;
-        SettingsToggleBtn.Text = "⚙️ " + selectedDate.DayOfWeek.ToString() + " " + selectedDate.Hour.ToString() + " ▼";
+        SettingsToggleBtn.Text = "Settings ▼";
     }
 
     private async void OnParkHereClicked(object sender, EventArgs e)
