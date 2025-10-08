@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.12.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.11.1-beta.0...v0.12.0-beta.0) (2025-10-08)
+
+
+### Features
+
+* **Map:** permit popup when having disabled permit ([cc5d946](https://github.com/gwchar2/ParkSpotTLV/commit/cc5d946e38caefaff784569be0ede056f85f5912))
+
+
+### Bug Fixes
+
+* **Map:** fixing permit popup style and logic ([3486546](https://github.com/gwchar2/ParkSpotTLV/commit/348654661cbc8dd611b3b3a7a228fc6c94ddbefc))
+* **Map:** map layout fix ([23a30a9](https://github.com/gwchar2/ParkSpotTLV/commit/23a30a98eebd2dcb96b9a5b98e6b2f67a4d491f0))
+
 ## [0.11.1-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.11.0-beta.0...v0.11.1-beta.0) (2025-10-08)
 
 
