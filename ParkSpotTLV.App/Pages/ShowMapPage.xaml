@@ -15,18 +15,32 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Settings Toggle Button -->
-        <Button Grid.Row="0"
-                x:Name="SettingsToggleBtn"
-                Text="Default car - Park now ▼"
-                BackgroundColor="LightGray"
-                TextColor="Black"
-                FontSize="14"
-                Clicked="OnSettingsToggleClicked"
-                HorizontalOptions="Start"
-                Margin="20,10"
-                WidthRequest="200"
-                HeightRequest="35" />
+        <!-- Top Row: Settings Toggle and Search Bar -->
+        <Grid Grid.Row="0" Padding="20,10" ColumnSpacing="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Settings Toggle Button -->
+            <Button Grid.Column="0"
+                    x:Name="SettingsToggleBtn"
+                    Text="Settings ▼"
+                    BackgroundColor="LightGray"
+                    TextColor="Black"
+                    FontSize="12"
+                    Clicked="OnSettingsToggleClicked"
+                    WidthRequest="100"
+                    HeightRequest="35" />
+
+            <!-- Search Bar -->
+            <SearchBar Grid.Column="1"
+                       x:Name="AddressSearchBar"
+                       Placeholder="Search address..."
+                       SearchButtonPressed="OnSearchAddress"
+                       BackgroundColor="White"
+                       VerticalOptions="Center" />
+        </Grid>        
 
         <!-- Collapsible Settings Panel -->
         <Border Grid.Row="1"
@@ -34,8 +48,8 @@
                 BackgroundColor="White"
                 Stroke="Gray"
                 StrokeThickness="1"
-                Padding="15"
-                Margin="10,0"
+                Padding="5"
+                Margin="5,0"
                 IsVisible="False"
                 StrokeShape="RoundRectangle 10">
             <Grid Padding="5">
@@ -45,11 +59,11 @@
             </Grid.ColumnDefinitions>
 
             <!-- Left Side - 3 Dropdowns -->
-            <VerticalStackLayout Grid.Column="0" Spacing="10" HorizontalOptions="Start">
+            <VerticalStackLayout Grid.Column="0" Spacing="5" HorizontalOptions="Start">
                 <Border BackgroundColor="White"
                         Stroke="Gray"
                         StrokeThickness="1"
-                        WidthRequest="150"
+                        WidthRequest="170"
                         HeightRequest="40">
                     <Grid>
                         <Picker x:Name="CarPicker"
@@ -59,19 +73,13 @@
                                 TitleColor="Gray"
                                 SelectedIndex="1"
                                 SelectedIndexChanged="OnCarPickerChanged">
-                            <Picker.Items>
-                                <x:String>BMW</x:String>
-                                <x:String>Toyota</x:String>
-                                <x:String>Honda</x:String>
-                                <x:String>Add Car</x:String>
-                            </Picker.Items>
                         </Picker>
                         <Label Text="▼"
                                FontSize="12"
                                TextColor="Gray"
                                HorizontalOptions="End"
                                VerticalOptions="Center"
-                               Margin="0,0,10,0"
+                               Margin="0,0,5,0"
                                InputTransparent="True" />
                     </Grid>
                 </Border>
@@ -79,7 +87,7 @@
                 <Border BackgroundColor="White"
                         Stroke="Gray"
                         StrokeThickness="1"
-                        WidthRequest="150"
+                        WidthRequest="170"
                         HeightRequest="40">
                     <Grid>
                         <Picker x:Name="DatePicker"
@@ -87,18 +95,14 @@
                                 BackgroundColor="Transparent"
                                 TextColor="Black"
                                 TitleColor="Gray"
-                                SelectedIndex="1">
-                            <Picker.Items>
-                                <x:String>Tomorrow</x:String>
-                                <x:String>This Week</x:String>
-                            </Picker.Items>
+                                SelectedIndexChanged="OnDatePickerChanged">
                         </Picker>
                         <Label Text="▼"
                                FontSize="12"
                                TextColor="Gray"
                                HorizontalOptions="End"
                                VerticalOptions="Center"
-                               Margin="0,0,10,0"
+                               Margin="0,0,5,0"
                                InputTransparent="True" />
                     </Grid>
                 </Border>
@@ -106,7 +110,7 @@
                 <Border BackgroundColor="White"
                         Stroke="Gray"
                         StrokeThickness="1"
-                        WidthRequest="150"
+                        WidthRequest="170"
                         HeightRequest="40">
                     <Grid>
                         <Picker x:Name="TimePicker"
@@ -114,19 +118,14 @@
                                 BackgroundColor="Transparent"
                                 TextColor="Black"
                                 TitleColor="Gray"
-                                SelectedIndex="1">
-                            <Picker.Items>
-                                <x:String>1 Hour</x:String>
-                                <x:String>2 Hours</x:String>
-                                <x:String>Evening</x:String>
-                            </Picker.Items>
+                                SelectedIndexChanged="OnTimePickerChanged">
                         </Picker>
                         <Label Text="▼"
                                FontSize="12"
                                TextColor="Gray"
                                HorizontalOptions="End"
                                VerticalOptions="Center"
-                               Margin="0,0,10,0"
+                               Margin="0,0,5,0"
                                InputTransparent="True" />
                     </Grid>
                 </Border>
@@ -136,64 +135,62 @@
                     Text="Apply Changes"
                     BackgroundColor="#D4DEFB"
                     TextColor="White"
-                    FontSize="16"
+                    FontSize="12"
                     Clicked="OnApplyClicked"
                     HorizontalOptions="Fill"
-                    HeightRequest="40"
                     Grid.Column="0"
-                    Grid.ColumnSpan="2"
-                    Margin="0,10,0,0" />    
+                    Margin="0,0,0,0" />    
             </VerticalStackLayout>
 
             <!-- Right Side - 4 CheckBoxes -->
             <VerticalStackLayout Grid.Column="1" Spacing="5" HorizontalOptions="End">
-                <HorizontalStackLayout Spacing="10">
+                <HorizontalStackLayout Spacing="5">
                     <CheckBox x:Name="NoParkingCheck"
                               IsChecked="True"
                               CheckedChanged="OnNoParkingTapped" />
                     <Label Text="No parking"
                            BackgroundColor="#f15151"
                            TextColor="White"
-                           Padding="10,5"
+                           Padding="5,5"
                            WidthRequest="120"
                            HorizontalTextAlignment="Center"
                            VerticalOptions="Center" />
                 </HorizontalStackLayout>
 
-                <HorizontalStackLayout Spacing="10">
+                <HorizontalStackLayout Spacing="5">
                     <CheckBox x:Name="PaidParkingCheck"
                               IsChecked="True"
                               CheckedChanged="OnPaidParkingTapped" />
                     <Label Text="Paid parking"
                            BackgroundColor="#4769b9"
                            TextColor="White"
-                           Padding="10,5"
+                           Padding="5,5"
                            WidthRequest="120"
                            HorizontalTextAlignment="Center"
                            VerticalOptions="Center" />
                 </HorizontalStackLayout>
 
-                <HorizontalStackLayout Spacing="10">
+                <HorizontalStackLayout Spacing="5">
                     <CheckBox x:Name="FreeParkingCheck"
                               IsChecked="True"
                               CheckedChanged="OnFreeParkingTapped" />
                     <Label Text="Free parking"
                            BackgroundColor="#40dd7c"
                            TextColor="Black"
-                           Padding="10,5"
+                           Padding="5,5"
                            WidthRequest="120"
                            HorizontalTextAlignment="Center"
                            VerticalOptions="Center" />
                 </HorizontalStackLayout>
 
-                <HorizontalStackLayout Spacing="10">
+                <HorizontalStackLayout Spacing="5">
                     <CheckBox x:Name="RestrictedCheck"
                               IsChecked="True"
                               CheckedChanged="OnRestrictedTapped" />
                     <Label Text="Restricted"
                            BackgroundColor="#f2d158"
                            TextColor="Black"
-                           Padding="10,5"
+                           Padding="5,5"
                            WidthRequest="120"
                            HorizontalTextAlignment="Center"
                            VerticalOptions="Center" />
@@ -202,21 +199,15 @@
         </Grid>
         </Border>
 
-        <!-- Search Bar -->
-        <SearchBar Grid.Row="2"
-                   x:Name="AddressSearchBar"
-                   Placeholder="Search address..."
-                   SearchButtonPressed="OnSearchAddress"
-                   Margin="20,10,20,0"
-                   BackgroundColor="White" />
+        
 
         <!-- Map Image -->
         <Border Grid.Row="3"
-                Padding="20"
+                Padding="0"
                 StrokeThickness="1"
                 Stroke="Gray"
                 StrokeShape="RoundRectangle 10"
-                Margin="20">
+                Margin="1">
             <maps:Map x:Name="MyMap" />
         </Border>
 
@@ -228,9 +219,8 @@
                 TextColor="White"
                 FontSize="16"
                 Clicked="OnParkHereClicked"
-                HorizontalOptions="Center"
-                Margin="20"
-                WidthRequest="150"
+                HorizontalOptions="Fill"
+                Margin="20,10"
                 HeightRequest="50" />
 
     </Grid>
