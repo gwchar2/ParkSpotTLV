@@ -34,8 +34,9 @@ public partial class ShowMapPage : ContentPage, IDisposable
     private bool isParked = false;
     private string? pickedCarName;
     private string? pickedCarId;
-    private string? pickedDay;
+    private int pickedDayOffset = 0; // Days from today (0 = today, 1 = tomorrow, etc.)
     private string? pickedTime;
+    DateTimeOffset selectedDate;
     private Guid activePermit;
     private Session? _session; // Single source of truth
     private readonly CarService _carService;
@@ -139,7 +140,8 @@ public partial class ShowMapPage : ContentPage, IDisposable
     }
 
     // calculate bounds of the current map view
-    private (double MinLat, double MaxLat, double MinLon, double MaxLon, double CenterLat, double CenterLon)? GetVisibleBounds()
+    private (double MinLat, double MaxLat, double MinLon, double MaxLon, double CenterLat, double CenterLon)?
+    GetVisibleBounds()
     {
         if (MyMap == null)
         {
@@ -200,7 +202,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
                                                                     bounds.Value.MaxLat,
                                                                     bounds.Value.CenterLon,
                                                                     bounds.Value.CenterLat,
-                                                                    DateTimeOffset.Now,
+                                                                    selectedDate,
                                                                     _session?.MinParkingTime ?? DEFAULT_MIN_PARKING_TIME_MINUTES);
 
             if (segmentsResponse == null || segmentsResponse.Segments == null)
@@ -272,22 +274,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
             return null;
         }
     }
-    private async Task LoadSessionPreferences()
-    {
-        _session = await _localDataService.GetSessionAsync();
-        if (_session is not null)
-        {
-            // Update checkbox UI to match session values
-            NoParkingCheck.IsChecked = _session.ShowNoParking;
-            PaidParkingCheck.IsChecked = _session.ShowPaid;
-            FreeParkingCheck.IsChecked = _session.ShowFree;
-            RestrictedCheck.IsChecked = _session.ShowRestricted;
-        }
-        // Get active permit ID
-        var activePermitNullable = await _carService.getActivePermitAsync(pickedCarId);
-        activePermit = activePermitNullable ?? Guid.Empty;
-    }
-
+    
     private async void LoadUserCars()
     {
         // get user's list of cars from server
@@ -315,28 +302,6 @@ public partial class ShowMapPage : ContentPage, IDisposable
             pickedCarId = _userCars[0].Id;
             pickedCarName = _userCars[0].Name;
         }
-    }
-
-    // Checkbox change handlers - just for UI feedback
-    // No need to store anything, values are read from checkboxes when Apply is clicked
-    private void OnNoParkingTapped(object sender, EventArgs e)
-    {
-        // Checkbox state is automatically tracked by the CheckBox control
-    }
-
-    private void OnPaidParkingTapped(object sender, EventArgs e)
-    {
-        // Checkbox state is automatically tracked by the CheckBox control
-    }
-
-    private void OnFreeParkingTapped(object sender, EventArgs e)
-    {
-        // Checkbox state is automatically tracked by the CheckBox control
-    }
-
-    private void OnRestrictedTapped(object sender, EventArgs e)
-    {
-        // Checkbox state is automatically tracked by the CheckBox control
     }
 
     private async void OnCarPickerChanged(object sender, EventArgs e)
@@ -368,36 +333,103 @@ public partial class ShowMapPage : ContentPage, IDisposable
         }
     }
 
-    private async void OnSettingsToggleClicked(object sender, EventArgs e)
+    private void OnDatePickerChanged(object sender, EventArgs e)
     {
-        await SetSelectedSettings();
-        SettingsPanel.IsVisible = !SettingsPanel.IsVisible;
-        SettingsToggleBtn.Text = SettingsPanel.IsVisible ? "⚙️ ▲" : "⚙️ ▼";
+        var picker = (Picker)sender;
+        pickedDayOffset = picker.SelectedIndex;
     }
 
-    private async Task SetSelectedSettings(){
-        // Update car selection
-        int selectedIndex = CarPicker.SelectedIndex;
-        if (selectedIndex >= 0 && selectedIndex < _userCars.Count)
-        {
-            pickedCarId = _userCars[selectedIndex].Id;
-            pickedCarName = _userCars[selectedIndex].Name;
-        }
+    private void OnTimePickerChanged(object sender, EventArgs e)
+    {
+        var picker = (Picker)sender;
+        pickedTime = picker.SelectedItem?.ToString();
+    }
 
-        pickedDay = DatePicker.SelectedItem?.ToString();
-        pickedTime = TimePicker.SelectedItem?.ToString();
+    private async void OnSettingsToggleClicked(object sender, EventArgs e)
+    {
+        // await SetSelectedSettings();
+        await LoadSessionPreferences();
+        SettingsPanel.IsVisible = !SettingsPanel.IsVisible;
+        String label = "⚙️ " + selectedDate.Day.ToString() + " " + selectedDate.Time.ToString() ;
+        if (SettingsPanel.IsVisible)
+            label += " ▼";
+        else 
+            label += " ▲" ;
+        SettingsToggleBtn.Text = label;
+    }
 
-        // Reload session to get latest values from DB
+    // private async Task SetSelectedSettings(){
+    //     // Update car selection
+    //     int selectedIndex = CarPicker.SelectedIndex;
+    //     if (selectedIndex >= 0 && selectedIndex < _userCars.Count)
+    //     {
+    //         pickedCarId = _userCars[selectedIndex].Id;
+    //         pickedCarName = _userCars[selectedIndex].Name;
+    //     }
+
+    //     pickedDay = DatePicker.SelectedItem?.ToString();
+    //     pickedTime = TimePicker.SelectedItem?.ToString();
+
+    //     // Reload session to get latest values from DB
+    //     _session = await _localDataService.GetSessionAsync();
+    //     if (_session is not null)
+    //     {
+    //         NoParkingCheck.IsChecked = _session.ShowNoParking;
+    //         PaidParkingCheck.IsChecked = _session.ShowPaid;
+    //         FreeParkingCheck.IsChecked = _session.ShowFree;
+    //         RestrictedCheck.IsChecked = _session.ShowRestricted;
+    //     }
+    // }
+    // load prefernces from session to UI
+    private async Task LoadSessionPreferences()
+    {
         _session = await _localDataService.GetSessionAsync();
         if (_session is not null)
         {
+            // Update checkbox UI to match session values
             NoParkingCheck.IsChecked = _session.ShowNoParking;
             PaidParkingCheck.IsChecked = _session.ShowPaid;
             FreeParkingCheck.IsChecked = _session.ShowFree;
             RestrictedCheck.IsChecked = _session.ShowRestricted;
         }
+        // Get active permit ID
+        var activePermitNullable = await _carService.getActivePermitAsync(pickedCarId);
+        activePermit = activePermitNullable ?? Guid.Empty;
+
+        // set car to default - first car in the list
+        pickedCarId = _userCars[0].Id;
+        pickedCarName = _userCars[0].Name;
+
+        // present day menu according to today
+        DateTimeOffset now = DateTimeOffset.Now;
+        DatePicker.Items.Clear();
+        // Add today through next 7 days
+        for (int i = 0; i < 8; i++) {
+            DateTimeOffset date = now.AddDays(i);
+            string label = date.DayOfWeek.ToString();
+
+            if (i == 0)
+                label += " (Today)";
+            else if (i == 1)
+                label += " (Tomorrow)";
+
+            DatePicker.Items.Add(label);
+        }
+        DatePicker.SelectedIndex = 0; // Default to today
+        pickedDayOffset = 0;
+
+        // set time picker
+        TimePicker.Items.Clear();
+        for (int i = 0; i < 24; i++)
+        {
+            string label = $"{i:D2}:00"; // D2 formats as 2-digit (00, 01, 02... 23)
+            TimePicker.Items.Add(label);
+        }
+        TimePicker.SelectedIndex = DateTimeOffset.Now.Hour; // Default to current hour
+        pickedTime = TimePicker.SelectedItem?.ToString();
     }
 
+    // save selected preferences to session and reload segments. 
     private async void OnApplyClicked(object sender, EventArgs e)
     {
         // Read current checkbox values (user's changes)
@@ -406,7 +438,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         bool showRestricted = RestrictedCheck.IsChecked;
         bool showNoParking = NoParkingCheck.IsChecked;
 
-        // Save to database
+        // Save to database 
         await _localDataService.UpdatePreferencesAsync(
             showFree: showFree,
             showPaid: showPaid,
@@ -414,8 +446,16 @@ public partial class ShowMapPage : ContentPage, IDisposable
             showNoParking: showNoParking
         );
 
-        // Reload session from DB to get updated values
-        _session = await _localDataService.GetSessionAsync();
+        // update car picked
+        int selectedIndex = CarPicker.SelectedIndex;
+        if (selectedIndex >= 0 && selectedIndex < _userCars.Count)
+        {
+            pickedCarId = _userCars[selectedIndex].Id;
+            pickedCarName = _userCars[selectedIndex].Name;
+        }
+
+        // update date time picked
+        selectedDate = GetSelectedDateTime();
 
         // Re-fetch segments with updated filter preferences
         var bounds = GetVisibleBounds();
@@ -425,7 +465,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
         // Auto-hide settings panel after applying changes
         SettingsPanel.IsVisible = false;
-        SettingsToggleBtn.Text = "⚙️ Settings";
+        SettingsToggleBtn.Text = "⚙️ " + selectedDate.Day.ToString() + " " + selectedDate.Time.ToString() + " ▼";
     }
 
     private async void OnParkHereClicked(object sender, EventArgs e)
@@ -713,6 +753,26 @@ public partial class ShowMapPage : ContentPage, IDisposable
         await Navigation.PushModalAsync(popup);
     }
 
+    
+
+    // Helper method to get selected DateTimeOffset
+    private DateTimeOffset GetSelectedDateTime()
+    {
+        DateTimeOffset selectedDate = DateTimeOffset.Now.Date.AddDays(pickedDayOffset);
+
+        // Parse pickedTime (format: "HH:00")
+        if (!string.IsNullOrEmpty(pickedTime) && pickedTime.Contains(":"))
+        {
+            var hourStr = pickedTime.Split(':')[0];
+            if (int.TryParse(hourStr, out int hour))
+            {
+                selectedDate = selectedDate.AddHours(hour);
+            }
+        }
+
+        return selectedDate;
+    }
+
     // IDisposable implementation
     public void Dispose()
     {
@@ -744,5 +804,27 @@ public partial class ShowMapPage : ContentPage, IDisposable
         }
 
         _disposed = true;
+    }
+
+    // Checkbox change handlers - just for UI feedback
+    // No need to store anything, values are read from checkboxes when Apply is clicked
+    private void OnNoParkingTapped(object sender, EventArgs e)
+    {
+        // Checkbox state is automatically tracked by the CheckBox control
+    }
+
+    private void OnPaidParkingTapped(object sender, EventArgs e)
+    {
+        // Checkbox state is automatically tracked by the CheckBox control
+    }
+
+    private void OnFreeParkingTapped(object sender, EventArgs e)
+    {
+        // Checkbox state is automatically tracked by the CheckBox control
+    }
+
+    private void OnRestrictedTapped(object sender, EventArgs e)
+    {
+        // Checkbox state is automatically tracked by the CheckBox control
     }
 }

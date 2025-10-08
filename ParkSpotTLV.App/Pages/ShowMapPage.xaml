@@ -87,10 +87,11 @@
                                 BackgroundColor="Transparent"
                                 TextColor="Black"
                                 TitleColor="Gray"
-                                SelectedIndex="1">
+                                SelectedIndex="1"
+                                SelectedIndexChanged="OnDatePickerChanged">
                             <Picker.Items>
-                                <x:String>Tomorrow</x:String>
-                                <x:String>This Week</x:String>
+                                <!-- <x:String>Today</x:String>
+                                <x:String>Tomorrow</x:String> -->
                             </Picker.Items>
                         </Picker>
                         <Label Text="▼"
@@ -114,11 +115,12 @@
                                 BackgroundColor="Transparent"
                                 TextColor="Black"
                                 TitleColor="Gray"
-                                SelectedIndex="1">
+                                SelectedIndex="1"
+                                SelectedIndexChanged="OnTimePickerChanged">
                             <Picker.Items>
-                                <x:String>1 Hour</x:String>
+                                <!-- <x:String>1 Hour</x:String>
                                 <x:String>2 Hours</x:String>
-                                <x:String>Evening</x:String>
+                                <x:String>Evening</x:String> -->
                             </Picker.Items>
                         </Picker>
                         <Label Text="▼"
