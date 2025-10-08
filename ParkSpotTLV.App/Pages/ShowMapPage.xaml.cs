@@ -10,6 +10,7 @@ using ParkSpotTLV.App.Data.Services;
 using ParkSpotTLV.App.Data.Models;
 using System.ComponentModel;
 using System.Timers;
+using ParkSpotTLV.Core.Models;
 
 
 namespace ParkSpotTLV.App.Pages;
@@ -293,12 +294,23 @@ public partial class ShowMapPage : ContentPage, IDisposable
             CarPicker.Items.Add("+ Add Car");
         }
 
-        // Set default selection to first car if available
+        // Restore previously selected car or default to first car
         if (_userCars.Count > 0)
         {
-            CarPicker.SelectedIndex = 0;
-            pickedCarId = _userCars[0].Id;
-            pickedCarName = _userCars[0].Name;
+            int selectedIndex = 0;
+
+            if (!string.IsNullOrEmpty(pickedCarId))
+            {
+                // Try to find previously selected car
+                int foundIndex = _userCars.FindIndex(c => c.Id == pickedCarId);
+                if (foundIndex >= 0)
+                    selectedIndex = foundIndex;
+            }
+
+            // Set the picker and update picked car details
+            CarPicker.SelectedIndex = selectedIndex;
+            pickedCarId = _userCars[selectedIndex].Id;
+            pickedCarName = _userCars[selectedIndex].Name;
         }
     }
 
@@ -329,6 +341,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
                 pickedCarName = _userCars[selectedIndex].Name;
             }
         }
+
     }
 
     private void OnDatePickerChanged(object sender, EventArgs e)
@@ -366,9 +379,6 @@ public partial class ShowMapPage : ContentPage, IDisposable
             FreeParkingCheck.IsChecked = _session.ShowFree;
             RestrictedCheck.IsChecked = _session.ShowRestricted;
         }
-        // Get active permit ID
-        var activePermitNullable = await _carService.getActivePermitAsync(pickedCarId);
-        activePermit = activePermitNullable ?? Guid.Empty;
 
         // set car to default - first car in the list
         if (_userCars.Count > 0)
@@ -376,6 +386,10 @@ public partial class ShowMapPage : ContentPage, IDisposable
             pickedCarId = _userCars[0].Id;
             pickedCarName = _userCars[0].Name;
         }
+
+        // Get active permit ID     // if car picked has permit options
+        var activePermitNullable = await permitPopUp();
+        activePermit = activePermitNullable ?? Guid.Empty;
 
         // present day menu according to today
         DateTimeOffset now = DateTimeOffset.Now;
@@ -434,6 +448,11 @@ public partial class ShowMapPage : ContentPage, IDisposable
         // update date time picked
         selectedDate = GetSelectedDateTime();
 
+        // if car picked has permit options
+        var activePermitNullable = await permitPopUp();
+        activePermit = activePermitNullable ?? Guid.Empty;
+
+
         // Re-fetch segments with updated filter preferences
         var bounds = GetVisibleBounds();
         await FetchAndRenderSegments(bounds);
@@ -443,6 +462,133 @@ public partial class ShowMapPage : ContentPage, IDisposable
         // Auto-hide settings panel after applying changes
         SettingsPanel.IsVisible = false;
         SettingsToggleBtn.Text = "Settings ▼";
+    }
+
+    private async Task<Guid?> permitPopUp()
+    {
+        // check if pop up required
+        if (pickedCarId is null)
+            return null;
+
+        Car? currCar = await _carService.GetCarAsync(pickedCarId);
+
+        if (currCar == null)
+            return null;
+        
+        // If only has resident permit (no disabled permit)
+        if (!currCar.HasDisabledPermit) {
+            if (currCar.HasResidentPermit)
+                return await _carService.getPermitAsync(pickedCarId, 0); // get resident permit
+            // No permits - return default/empty permit
+            else
+                return await _carService.getPermitAsync(pickedCarId, 2); // get default permit
+        }
+
+        else { // If car has disabled permit, always ask user if they want to use it
+            // Show popup to choose permit
+            var popup = new ContentPage
+            {
+                Title = "Select Permit"
+            };
+
+            var mainLayout = new VerticalStackLayout
+            {
+                Spacing = 20,
+                Padding = 30,
+                VerticalOptions = LayoutOptions.Center
+            };
+
+            // Title
+            var titleLabel = new Label
+            {
+                Text = "Use Disabled Permit?",
+                FontSize = 22,
+                FontAttributes = FontAttributes.Bold,
+                HorizontalOptions = LayoutOptions.Center,
+                TextColor = Color.FromArgb("#2E7D32")
+            };
+
+            // Message
+            var messageLabel = new Label
+            {
+                Text = "This car has a disabled permit. Would you like to use it?",
+                FontSize = 16,
+                HorizontalOptions = LayoutOptions.Center,
+                HorizontalTextAlignment = TextAlignment.Center,
+                TextColor = Colors.Black
+            };
+
+            // Buttons
+            var buttonLayout = new VerticalStackLayout
+            {
+                Spacing = 10,
+                HorizontalOptions = LayoutOptions.Center
+            };
+
+            Guid? selectedPermit = null;
+            var tcs = new TaskCompletionSource<Guid?>();
+
+            var disabledButton = new Button
+            {
+                Text = "Use Disabled Permit",
+                BackgroundColor = Color.FromArgb("#2E7D32"),
+                TextColor = Colors.White,
+                WidthRequest = 200,
+                HeightRequest = 50,
+                CornerRadius = 5
+            };
+
+            // Button text depends on whether car also has resident permit
+            var alternativeButtonText = "Don't use Disabled Permit";
+
+            var alternativeButton = new Button
+            {
+                Text = alternativeButtonText,
+                BackgroundColor = Color.FromArgb("#1976D2"),
+                TextColor = Colors.White,
+                WidthRequest = 200,
+                HeightRequest = 50,
+                CornerRadius = 5
+            };
+
+            disabledButton.Clicked += async (s, e) =>
+            {
+                selectedPermit = await _carService.getPermitAsync(pickedCarId, 1); // disabled permit
+                await Navigation.PopModalAsync();
+                tcs.SetResult(selectedPermit);
+            };
+
+            alternativeButton.Clicked += async (s, e) =>
+            {
+                if (currCar.HasResidentPermit)
+                {
+                    selectedPermit = await _carService.getPermitAsync(pickedCarId, 0); // resident permit
+                }
+                else
+                {
+                    selectedPermit = Guid.Empty; // default permit
+                }
+                await Navigation.PopModalAsync();
+                tcs.SetResult(selectedPermit);
+            };
+
+            buttonLayout.Children.Add(disabledButton);
+            buttonLayout.Children.Add(alternativeButton);
+
+            // Add all elements to main layout
+            mainLayout.Children.Add(titleLabel);
+            mainLayout.Children.Add(messageLabel);
+            mainLayout.Children.Add(buttonLayout);
+
+            popup.Content = new ScrollView { Content = mainLayout };
+
+            // Show as modal
+            await Navigation.PushModalAsync(popup);
+
+            // Wait for user selection
+            return await tcs.Task;
+        }
+        
     }
 
     private async void OnParkHereClicked(object sender, EventArgs e)

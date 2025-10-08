@@ -374,7 +374,7 @@ public class CarService
         }
     }
 
-    public async Task<Guid?> getActivePermitAsync(string? carId)
+    public async Task<Guid?> getPermitAsync(string? carId, int opt)
     {
         if (string.IsNullOrEmpty(carId))
             return null;
@@ -385,7 +385,16 @@ public class CarService
             if (response.IsSuccessStatusCode)
             {
                 var vehicleResponse = await response.Content.ReadFromJsonAsync<VehicleResponse>(_options);
-                return vehicleResponse?.ResidencyPermitId;
+                switch (opt)
+                {
+                    case 0:
+                        return vehicleResponse?.ResidencyPermitId;
+                    case 1:
+                        return vehicleResponse?.DisabilityPermitId;
+                    case 2:
+                        return vehicleResponse?.DefaultPermitId;
+                }
+                    
             }
             return null;
         }
