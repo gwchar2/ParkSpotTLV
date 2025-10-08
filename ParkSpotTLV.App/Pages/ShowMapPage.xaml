@@ -87,7 +87,6 @@
                                 BackgroundColor="Transparent"
                                 TextColor="Black"
                                 TitleColor="Gray"
-                                SelectedIndex="1"
                                 SelectedIndexChanged="OnDatePickerChanged">
                             <Picker.Items>
                                 <!-- <x:String>Today</x:String>
@@ -115,7 +114,6 @@
                                 BackgroundColor="Transparent"
                                 TextColor="Black"
                                 TitleColor="Gray"
-                                SelectedIndex="1"
                                 SelectedIndexChanged="OnTimePickerChanged">
                             <Picker.Items>
                                 <!-- <x:String>1 Hour</x:String>

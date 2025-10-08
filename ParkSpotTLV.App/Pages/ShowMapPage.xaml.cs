@@ -58,8 +58,6 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
         // Hook up map movement detection
         MyMap.PropertyChanged += MyMapOnPropertyChanged;
-
-        LoadUserCars();
     }
 
     protected override async void OnAppearing()
@@ -68,8 +66,8 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
         try
         {
+            await LoadUserCars();
             await LoadSessionPreferences();
-            LoadUserCars();
             await LoadMapAsync(); // load map, current location
 
             // Wait for map to render and have a valid VisibleRegion
@@ -275,7 +273,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         }
     }
     
-    private async void LoadUserCars()
+    private async Task LoadUserCars()
     {
         // get user's list of cars from server
         _userCars = await _carService.GetUserCarsAsync();
@@ -345,12 +343,10 @@ public partial class ShowMapPage : ContentPage, IDisposable
         pickedTime = picker.SelectedItem?.ToString();
     }
 
-    private async void OnSettingsToggleClicked(object sender, EventArgs e)
+    private void OnSettingsToggleClicked(object sender, EventArgs e)
     {
-        // await SetSelectedSettings();
-        await LoadSessionPreferences();
         SettingsPanel.IsVisible = !SettingsPanel.IsVisible;
-        String label = "⚙️ " + selectedDate.Day.ToString() + " " + selectedDate.Time.ToString() ;
+        String label = "⚙️ " + selectedDate.DayOfWeek.ToString() + " " + selectedDate.Hour.ToString() ;
         if (SettingsPanel.IsVisible)
             label += " ▼";
         else 
@@ -397,8 +393,11 @@ public partial class ShowMapPage : ContentPage, IDisposable
         activePermit = activePermitNullable ?? Guid.Empty;
 
         // set car to default - first car in the list
-        pickedCarId = _userCars[0].Id;
-        pickedCarName = _userCars[0].Name;
+        if (_userCars.Count > 0)
+        {
+            pickedCarId = _userCars[0].Id;
+            pickedCarName = _userCars[0].Name;
+        }
 
         // present day menu according to today
         DateTimeOffset now = DateTimeOffset.Now;
@@ -465,7 +464,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
         // Auto-hide settings panel after applying changes
         SettingsPanel.IsVisible = false;
-        SettingsToggleBtn.Text = "⚙️ " + selectedDate.Day.ToString() + " " + selectedDate.Time.ToString() + " ▼";
+        SettingsToggleBtn.Text = "⚙️ " + selectedDate.DayOfWeek.ToString() + " " + selectedDate.Hour.ToString() + " ▼";
     }
 
     private async void OnParkHereClicked(object sender, EventArgs e)

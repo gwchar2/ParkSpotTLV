@@ -5,9 +5,8 @@ using System.Text.Json;
 
 namespace ParkSpotTLV.App.Services;
 
-/// <summary>
-/// Handles rendering of parking segments on the map
-/// </summary>
+
+// Handles rendering of parking segments on the map
 public class MapSegmentRenderer
 {
     // Color constants
@@ -21,13 +20,8 @@ public class MapSegmentRenderer
     private const int MAX_SEGMENTS_TO_RENDER = 500;
     private const int SEGMENT_STROKE_WIDTH = 5;
 
-    /// <summary>
-    /// Renders segments on the map with filtering based on session preferences
-    /// </summary>
-    /// <param name="map">The map control to render on</param>
-    /// <param name="segmentsResponse">The segments data from API</param>
-    /// <param name="session">User session with filter preferences</param>
-    /// <returns>Number of segments rendered</returns>
+  
+    // Renders segments on the map with filtering based on session preferences
     public int RenderSegments(Microsoft.Maui.Controls.Maps.Map map, GetMapSegmentsResponse segmentsResponse, Session? session)
     {
         if (map == null || segmentsResponse?.Segments == null)
@@ -79,9 +73,8 @@ public class MapSegmentRenderer
         return renderedCount;
     }
 
-    /// <summary>
-    /// Clears all map elements and forces garbage collection
-    /// </summary>
+   
+    // Clears all map elements and forces garbage collection
     private void ClearMapElements(Microsoft.Maui.Controls.Maps.Map map)
     {
         try
@@ -99,9 +92,7 @@ public class MapSegmentRenderer
         }
     }
 
-    /// <summary>
-    /// Determines if a segment should be skipped based on session filters
-    /// </summary>
+    // Determines if a segment should be skipped based on session filters
     private bool ShouldSkipSegment(SegmentResponseDTO segment, Session? session)
     {
         if (session == null)
@@ -117,9 +108,7 @@ public class MapSegmentRenderer
         };
     }
 
-    /// <summary>
-    /// Creates a polyline from segment GeoJSON data
-    /// </summary>
+    // Creates a polyline from segment GeoJSON data
     private Polyline? CreatePolylineFromSegment(SegmentResponseDTO segment)
     {
         var strokeColor = GetColorForSegment(segment.Group);
@@ -149,9 +138,7 @@ public class MapSegmentRenderer
         return line;
     }
 
-    /// <summary>
-    /// Gets the color for a parking segment group
-    /// </summary>
+    // Gets the color for a parking segment group
     private Color GetColorForSegment(string group)
     {
         return group switch
