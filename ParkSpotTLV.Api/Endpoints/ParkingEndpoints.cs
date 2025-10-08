@@ -148,7 +148,8 @@ namespace ParkSpotTLV.Api.Endpoints {
                         return SessionProblems.Unavailable(ctx);
 
                     // Get the current time and set it according to correct time zone for table
-                    var nowLocal = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Asia/Jerusalem"));
+                    var timezone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Jerusalem");
+                    var nowLocal = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, timezone);
                     var anchor = ParkingBudgetTimeHandler.AnchorDateFor(nowLocal);
                     await budget.EnsureResetAsync(body.VehicleId, anchor, ct);
 
@@ -195,7 +196,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                     var notifyBy = body.NotificationMinutes.GetValueOrDefault();
                     if (notifyBy >= 30 && notifyBy < minParking) {
                         var notifyAtLocal = nowLocal.AddMinutes(minParking - notifyBy);
-                        notifyAtUtc = notifyAtLocal.ToUniversalTime();
+                        notifyAtUtc = notifyAtLocal;
                     }
 
                     // Create the sessions
@@ -212,7 +213,7 @@ namespace ParkSpotTLV.Api.Endpoints {
 
                         IsPayNow = seg.IsPayNow,
                         IsPayLater = seg.IsPaylater,
-                        NextChange = TimeZoneInfo.ConvertTime((DateTimeOffset)seg.NextChange!, TimeZoneInfo.FindSystemTimeZoneById("Asia/Jerusalem")).ToUniversalTime(),
+                        NextChange = seg.NextChange?.ToUniversalTime(),
                         StartedLocal = nowLocal.ToUniversalTime(),
                         StoppedLocal = null,
                         PlannedEndLocal = endParkingTime.ToUniversalTime(),
@@ -231,25 +232,26 @@ namespace ParkSpotTLV.Api.Endpoints {
                         var notification = new ParkingNotification {
                             Id = Guid.NewGuid(),
                             SessionId = session.Id,
-                            NotifyAt = (DateTimeOffset)notifyAtUtc,
+                            NotifyAt = (notifyAtUtc.Value).ToUniversalTime(),
                             NotificationMinutes = notifyBy,
                             IsSent = false,
-                            CreatedAt = DateTimeOffset.UtcNow
+                            CreatedAt = nowLocal.ToUniversalTime()
                         };
                         db.ParkingNotification.Add(notification);
+                        notificationId = notification.Id;
                     }
 
                     await db.SaveChangesAsync(ct);
                     return Results.Created($"/parking/{session.Id}", new StartParkingResponse {
-                        
+
                         NameEnglish = seg.NameEnglish is null ? "" : seg.NameEnglish,
                         NameHebrew = seg.NameHebrew is null ? "" : seg.NameHebrew,
                         ZoneCode = seg.ZoneCode,
                         Group = seg.Group!,
                         Tariff = seg.Tariff,
                         FreeBudgetRemaining = remaining,
-                        SessionStarted = nowLocal.ToUniversalTime(),
-                        SessionEnding = endParkingTime.ToUniversalTime(),
+                        SessionStarted = nowLocal,
+                        SessionEnding = endParkingTime,
                         NotifyAt = notifyAtUtc,
                         SegmentId = seg.SegmentId,
                         SessionId = session.Id,
