@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.12.0-beta.0...v0.13.0-beta.0) (2025-10-09)
+
+
+### Features
+
+* **Map:** location tracking works ([962259c](https://github.com/gwchar2/ParkSpotTLV/commit/962259ce791a6917b801c6a3c0d99f0959e928e8))
+
 ## [0.12.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.11.1-beta.0...v0.12.0-beta.0) (2025-10-08)
 
 
