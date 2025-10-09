@@ -5,6 +5,14 @@ using ParkSpotTLV.Contracts.Parking;
 
 namespace ParkSpotTLV.App.Services;
 
+public class ParkingStatusResponse
+{
+    public bool Status { get; set; }
+    public Guid SessionId { get; set; }
+    public DateTime ParkingStarted { get; set; }
+    public DateTime ParkingUntil { get; set; }
+}
+
 // Handles parking-related API operations
 public class ParkingService
 {
@@ -65,16 +73,16 @@ public class ParkingService
         }
     }
 
-    public async Task<StartParkingResponse?> GetParkingStatusAsync(Guid sessionId)
+    public async Task<ParkingStatusResponse?> GetParkingStatusAsync(Guid carId)
     {
         try
         {
             var response = await _authService.ExecuteWithTokenRefreshAsync(() =>
-                _http.GetAsync($"/parking/status/{sessionId}"));
+                _http.GetAsync($"/parking/status/{carId}"));
 
             if (response.IsSuccessStatusCode)
             {
-                return await response.Content.ReadFromJsonAsync<StartParkingResponse>(_options);
+                return await response.Content.ReadFromJsonAsync<ParkingStatusResponse>(_options);
             }
 
             return null;

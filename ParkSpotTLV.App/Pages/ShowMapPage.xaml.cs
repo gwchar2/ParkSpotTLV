@@ -12,7 +12,7 @@ using ParkSpotTLV.App.Data.Models;
 using System.ComponentModel;
 using System.Timers;
 using ParkSpotTLV.Core.Models;
-using Android.Gms.Common.Apis;
+// using Android.Gms.Common.Apis;
 
 
 namespace ParkSpotTLV.App.Pages;
@@ -261,6 +261,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
             CarPicker.SelectedIndex = selectedIndex;
             pickedCarId = _userCars[selectedIndex].Id;
             pickedCarName = _userCars[selectedIndex].Name;
+
         }
     }
 
@@ -328,7 +329,6 @@ public partial class ShowMapPage : ContentPage, IDisposable
             PaidParkingCheck.IsChecked = _session.ShowPaid;
             FreeParkingCheck.IsChecked = _session.ShowFree;
             RestrictedCheck.IsChecked = _session.ShowRestricted;
-            UpdateParkHereButtonState(_session.IsParking);
 
         }
 
@@ -337,6 +337,22 @@ public partial class ShowMapPage : ContentPage, IDisposable
         (var activePermitNullable,isResidentalPermit) = await _parkingPopUps.ShowPermitPopupAsync(pickedCarId,
             (title, cancel, destruction, buttons) => DisplayActionSheet(title, cancel, destruction, buttons));
         activePermit = activePermitNullable ?? Guid.Empty;
+
+        // set park here button to furrnet car state
+        bool isParking = false;
+        if (pickedCarId is not null)
+        {
+            var response = await _parkingService.GetParkingStatusAsync(Guid.Parse(pickedCarId));
+            if (response != null)
+            {
+                isParking = response.Status;
+                if (isParking)
+                {
+                    parkingSessionId = response.SessionId;
+                }
+            }
+        }
+        UpdateParkHereButtonState(isParking);
 
         // present day menu according to today
         DateTimeOffset now = DateTimeOffset.Now;
@@ -384,6 +400,22 @@ public partial class ShowMapPage : ContentPage, IDisposable
             pickedCarName = _userCars[selectedIndex].Name;
         }
         // add check - ative session -> update button parkhere/stopparking
+        // set park here button to furrnet car state
+        bool isParking = false;
+        if (pickedCarId is not null)
+        {
+            var response = await _parkingService.GetParkingStatusAsync(Guid.Parse(pickedCarId));
+            if (response != null)
+            {
+                isParking = response.Status;
+                if (isParking)
+                {
+                    parkingSessionId = response.SessionId;
+                }
+            }
+        }
+        UpdateParkHereButtonState(isParking);
+
 
         // Save to database
         await _localDataService.UpdatePreferencesAsync(
@@ -419,11 +451,27 @@ public partial class ShowMapPage : ContentPage, IDisposable
     {
         // instead of _session.IsParking check -> check Parking status od pickedCarId
         // _session = await _localDataService.GetSessionAsync();
-        bool isParking = false; // ******* change to actual status  
-        bool parkingAtResZone = false;
-        StartParkingResponse? startParkingResponse = null;
+        // set park here button to furrnet car state
         if (string.IsNullOrEmpty(pickedCarId) || _session is null)
             return;
+
+        // get current car session status    
+        bool isParking = false;
+        var response = await _parkingService.GetParkingStatusAsync(Guid.Parse(pickedCarId));
+        if (response != null)
+        {
+            isParking = response.Status;
+            if (isParking)
+            {
+                parkingSessionId = response.SessionId;
+                await DisplayAlert("debug", "parking session is active", "ok");
+            }
+            await DisplayAlert("debug", "parking session is NOT active", "ok");
+        }
+    
+        bool parkingAtResZone = false;
+        StartParkingResponse? startParkingResponse = null;
+        
         if (!isParking)
         {
             // let user choose street to park at in order to calculate free parking timer
