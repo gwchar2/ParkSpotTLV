@@ -10,16 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Properties\firebase-adminsdk.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Properties\firebase-adminsdk.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="EFCore.NamingConventions" Version="9.*" />
     <PackageReference Include="Google.Apis.Auth" Version="1.72.0" />
     <PackageReference Include="Hellang.Middleware.ProblemDetails" Version="6.5.1" />
