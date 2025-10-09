@@ -12,6 +12,7 @@ using ParkSpotTLV.App.Data.Models;
 using System.ComponentModel;
 using System.Timers;
 using ParkSpotTLV.Core.Models;
+using Android.Gms.Common.Apis;
 
 
 namespace ParkSpotTLV.App.Pages;
@@ -416,32 +417,38 @@ public partial class ShowMapPage : ContentPage, IDisposable
     private async void OnParkHereClicked(object sender, EventArgs e)
     {
         _session = await _localDataService.GetSessionAsync();
+        bool parkingAtResZone = false;
         if (string.IsNullOrEmpty(pickedCarId) || _session is null)
             return;
         if (!_session.IsParking)
         {
             // let user choose street to park at in order to calculate free parking timer
-            if (isResidentalPermit) {
+            if (isResidentalPermit)
+            {
                 var parkedStreet = await _parkingPopUps.ShowStreetsListPopUpAsync(segmentsInfo, Navigation);
                 if (parkedStreet.HasValue)
                 {
                     var (parkedStreetName, segmentResponse) = parkedStreet.Value;
-                    try
+                    parkingAtResZone = await parkingAtResidentalZone(segmentResponse);
+                    if (!parkingAtResZone)
                     {
-                        StartParkingResponse startParkingResponse = await _parkingService.StartParkingAsync(
-                            segmentResponse,
-                            Guid.Parse(pickedCarId),
-                            _session?.NotificationMinutesBefore ?? 30,
-                            _session?.MinParkingTime ?? 30);
-                        if (startParkingResponse is not null)
+                        try
                         {
-                            parkingSessionId = startParkingResponse.SessionId;
+                            StartParkingResponse startParkingResponse = await _parkingService.StartParkingAsync(
+                                segmentResponse,
+                                Guid.Parse(pickedCarId),
+                                _session?.NotificationMinutesBefore ?? 30,
+                                _session?.MinParkingTime ?? 30);
+                            if (startParkingResponse is not null)
+                            {
+                                parkingSessionId = startParkingResponse.SessionId;
+                            }
                         }
-                    }
-                    catch (HttpRequestException ex)
-                    {
-                        await DisplayAlert("Error", $"Failed to start parking: {ex.Message}", "OK");
-                        return;
+                        catch (HttpRequestException ex)
+                        {
+                            await DisplayAlert("Error", $"Failed to start parking: {ex.Message}", "OK");
+                            return;
+                        }
                     }
                 }
                 else
@@ -456,6 +463,10 @@ public partial class ShowMapPage : ContentPage, IDisposable
             if (result.Confirmed)
             {
                 string message = $"Parking started!";
+                if (parkingAtResZone)
+                    message += "\nParking at your zone";
+                else
+                    message += "\nParking outside your zone, you have up to 2h free parking.";
                 if (result.NotificationsEnabled)
                     message += $"\nYou'll be notified {result.Minutes} minutes before parking ends.";
                 else
@@ -488,6 +499,21 @@ public partial class ShowMapPage : ContentPage, IDisposable
             await _localDataService.UpdateParkingStatusAsync(false); // update status in session
             await DisplayAlert("Parking Ended", "Your parking session has ended.", "OK");
         }
+    }
+
+    // check if the parked street belongs to residenatl zone of current car
+    private async Task<bool> parkingAtResidentalZone(SegmentResponseDTO segmentResponse)
+    {
+        if (pickedCarId is null)
+            return false;
+        Car? car = await _carService.GetCarAsync(pickedCarId);
+        if (car is null)
+            return false;
+        int zone = car.ResidentPermitNumber;
+        if (segmentResponse.ZoneCode == zone)
+            return true;
+        else
+            return false;
     }
 
     private void UpdateParkHereButtonState(bool isParking)
