@@ -201,15 +201,61 @@
 
         
 
-        <!-- Map Image -->
-        <Border Grid.Row="3"
-                Padding="0"
-                StrokeThickness="1"
-                Stroke="Gray"
-                StrokeShape="RoundRectangle 10"
-                Margin="1">
-            <maps:Map x:Name="MyMap" />
-        </Border>
+        <!-- Map with Floating Track Button -->
+        <Grid Grid.Row="3">
+            <Border Padding="0"
+                    StrokeThickness="1"
+                    Stroke="Gray"
+                    StrokeShape="RoundRectangle 10"
+                    Margin="1">
+                <maps:Map x:Name="MyMap" />
+            </Border>
+
+            <!-- Floating Track Location Toggle (Top Left) -->
+            <VerticalStackLayout HorizontalOptions="Start"
+                                 VerticalOptions="Start"
+                                 Margin="10"
+                                 Spacing="5">
+                <Border BackgroundColor="White"
+                        StrokeThickness="0"
+                        Padding="5,2"
+                        StrokeShape="RoundRectangle 5"
+                        HorizontalOptions="Center">
+                    <Label Text="Follow Me"
+                           FontSize="10"
+                           TextColor="Black"
+                           HorizontalOptions="Center" />
+                </Border>
+
+                <!-- Toggle Switch Container -->
+                <Border BackgroundColor="#CCCCCC"
+                        StrokeThickness="0"
+                        WidthRequest="50"
+                        HeightRequest="30"
+                        StrokeShape="RoundRectangle 15"
+                        HorizontalOptions="Center">
+                    <Grid>
+                        <!-- Background -->
+                        <BoxView x:Name="TrackLocationToggleBg"
+                                 Color="#CCCCCC" />
+
+                        <Button Clicked="OnTrackLocationToggleClicked"
+                                BackgroundColor="Transparent"
+                                WidthRequest="50"
+                                HeightRequest="30" />
+
+                        <!-- Toggle Circle -->
+                        <Ellipse x:Name="TrackLocationToggleCircle"
+                                 Fill="White"
+                                 WidthRequest="26"
+                                 HeightRequest="26"
+                                 HorizontalOptions="Start"
+                                 VerticalOptions="Center"
+                                 Margin="2,0,0,0" />
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+        </Grid>
 
         <!-- "Park Here" button-->
         <Button Grid.Row="4"

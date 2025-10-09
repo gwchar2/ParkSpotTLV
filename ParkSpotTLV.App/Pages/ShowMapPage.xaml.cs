@@ -48,6 +48,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
     private CancellationTokenSource? _mapMoveCts;
     private System.Timers.Timer? _debounceTimer;
     private bool _isInitialized = false;
+    private bool _isTrackingUserLocation = false;
 
 
     public ShowMapPage(CarService carService, MapService mapService, MapSegmentRenderer mapSegmentRenderer, ILocalDataService localDataService)
@@ -102,6 +103,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
+        StopLocationTracking();
         Dispose();
     }
 
@@ -109,6 +111,13 @@ public partial class ShowMapPage : ContentPage, IDisposable
     {
         if (e.PropertyName == nameof(Microsoft.Maui.Controls.Maps.Map.VisibleRegion))
         {
+            // Skip debounce logic if we're tracking user location (to allow smooth following)
+            if (_isTrackingUserLocation)
+            {
+                System.Diagnostics.Debug.WriteLine("⏭️ Skipping map debounce (tracking user)");
+                return;
+            }
+
             // Debounce: cancel previous timer
             _debounceTimer?.Stop();
             _debounceTimer?.Dispose();
@@ -278,6 +287,105 @@ public partial class ShowMapPage : ContentPage, IDisposable
         {
             await DisplayAlert("Location Error", $"Unable to get location: {ex.Message}", "OK");
             return null;
+        }
+    }
+
+    private async Task StartLocationTrackingAsync()
+    {
+        if (_isTrackingUserLocation)
+            return; // Already tracking
+
+        try
+        {
+            _isTrackingUserLocation = true;
+            Geolocation.LocationChanged += OnLocationChanged;
+
+            // Use Best accuracy and smallest distance filter for responsive tracking
+            var request = new GeolocationListeningRequest(GeolocationAccuracy.Best)
+            {
+                DesiredAccuracy = GeolocationAccuracy.Best,
+                MinimumTime = TimeSpan.FromSeconds(1) // Update at most every 1 second
+            };
+            var result = await Geolocation.StartListeningForegroundAsync(request);
+
+            if (result)
+            {
+                System.Diagnostics.Debug.WriteLine(" Started location tracking successfully");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine(" Failed to start location tracking");
+                _isTrackingUserLocation = false;
+                Geolocation.LocationChanged -= OnLocationChanged;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error starting location tracking: {ex.Message}");
+            _isTrackingUserLocation = false;
+            Geolocation.LocationChanged -= OnLocationChanged;
+        }
+    }
+
+    private void StopLocationTracking()
+    {
+        if (!_isTrackingUserLocation)
+            return; // Not tracking
+
+        _isTrackingUserLocation = false;
+        Geolocation.LocationChanged -= OnLocationChanged;
+        Geolocation.StopListeningForeground();
+
+        System.Diagnostics.Debug.WriteLine("Stopped location tracking");
+    }
+
+    private void OnLocationChanged(object? sender, GeolocationLocationChangedEventArgs e)
+    {
+        var location = e.Location;
+        System.Diagnostics.Debug.WriteLine($" Location changed: {location?.Latitude}, {location?.Longitude}");
+
+        if (location != null && _isTrackingUserLocation)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                try
+                {
+                    // Re-center map on user's new location
+                    MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(
+                        location,
+                        Distance.FromMeters(USER_LOCATION_ZOOM_METERS)
+                    ));
+                    System.Diagnostics.Debug.WriteLine($"🗺️ Map centered on: {location.Latitude}, {location.Longitude}");
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error moving map: {ex.Message}");
+                }
+            });
+        }
+    }
+
+    private async void OnTrackLocationToggleClicked(object sender, EventArgs e)
+    {
+        if (_isTrackingUserLocation)
+        {
+            StopLocationTracking();
+            // Animate toggle to OFF position (left)
+            await Task.WhenAll(
+                TrackLocationToggleCircle.TranslateTo(0, 0, 200, Easing.CubicInOut),
+                TrackLocationToggleBg.FadeTo(1, 200)
+            );
+            TrackLocationToggleBg.Color = Color.FromArgb("#CCCCCC"); // Gray (off)
+        }
+        else
+        {
+            await StartLocationTrackingAsync();
+            // Animate toggle to ON position (right)
+            await Task.WhenAll(
+                TrackLocationToggleCircle.TranslateTo(20, 0, 200, Easing.CubicInOut),
+                TrackLocationToggleBg.FadeTo(1, 200)
+            );
+            TrackLocationToggleBg.Color = Color.FromArgb("#2E7D32"); // Green (on)
         }
     }
     
