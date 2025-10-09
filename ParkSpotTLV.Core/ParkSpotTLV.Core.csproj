@@ -11,7 +11,9 @@ stable contracts and domain logic without infrastructure details.
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Auth\" />
+    <Compile Remove="Auth\**" />
+    <EmbeddedResource Remove="Auth\**" />
+    <None Remove="Auth\**" />
   </ItemGroup>
 
 </Project>

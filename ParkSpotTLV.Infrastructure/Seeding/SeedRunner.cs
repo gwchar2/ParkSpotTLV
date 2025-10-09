@@ -261,7 +261,6 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             var anchor = ParkingBudgetTimeHandler.AnchorDateFor(nowLocal);
             var nowUtc = DateTimeOffset.UtcNow;
 
-            // Fetch vehicles once
             var vehicleIds = await db.Vehicles
                 .AsNoTracking()
                 .Select(v => v.Id)
@@ -306,7 +305,6 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
         // Json helpers
         private static string? GetString(JsonObject o, string key) => o[key]?.GetValue<string>();
         private static int? GetInt(JsonObject o, string key) => o[key] is null ? null : o[key]!.GetValue<int?>();
-        private static bool? GetBool(JsonObject o, string key) => o[key] is null ? null : o[key]!.GetValue<bool?>();
         private static Guid? ParseGuid(string? s) => Guid.TryParse(s, out var g) ? g : null;
 
         private static TEnum? ParseEnum<TEnum>(string? s) where TEnum : struct {

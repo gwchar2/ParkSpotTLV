@@ -16,7 +16,7 @@ namespace ParkSpotTLV.Api.Features.Parking.Query {
         private readonly AppDbContext _db = db;
         private readonly GeometryFactory _gf = NetTopologySuite.NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
 
-        const int MAX_SEGMENTS = 500;
+        const int MAX_SEGMENTS = 100;
         public async Task<IReadOnlyList<SegmentSnapshot>> GetViewportAsync(
             double minLon, double maxLon, double minLat, double maxLat, double centerLon, double centerLat, CancellationToken ct) {
 
@@ -25,7 +25,7 @@ namespace ParkSpotTLV.Api.Features.Parking.Query {
             var center = _gf.CreatePoint(new Coordinate(centerLon, centerLat));
 
 
-            // We grab a max of MAX_SEGMETNS rows from the street segments table, which are closes to the center.
+            // We grab a max of MAX_SEGMENTS rows from the street segments table, which are closes to the center.
             var rows = await _db.StreetSegments
                 .AsNoTracking()
                 .Where(s => s.Geom.Intersects(env))

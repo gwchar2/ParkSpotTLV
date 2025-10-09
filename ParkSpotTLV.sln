@@ -34,7 +34,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{03795D4A-6
 	ProjectSection(SolutionItems) = preProject
 		docs\api-reference.md = docs\api-reference.md
 		docs\git-workflow.md = docs\git-workflow.md
-		docs\לוז ומשימות.pdf = docs\לוז ומשימות.pdf
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Contracts", "Contracts", "{CCE95D7E-67EA-410B-AE08-32553058F5BA}"

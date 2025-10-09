@@ -1,8 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using ParkSpotTLV.Infrastructure;
-using ParkSpotTLV.Infrastructure.Entities;
-using System.Security.Claims;
+﻿
 
 namespace ParkSpotTLV.Api.Endpoints.Support;
 

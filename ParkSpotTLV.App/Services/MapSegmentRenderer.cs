@@ -145,8 +145,8 @@ public class MapSegmentRenderer
         {
             "FREE" => Color.FromArgb(COLOR_FREE_PARKING),
             "PAID" => Color.FromArgb(COLOR_PAID_PARKING),
-            "LIMITED" => Color.FromArgb(COLOR_LIMITED_PARKING),
-            "RESTRICTED" => Color.FromArgb(COLOR_RESTRICTED_PARKING),
+            "RESTRICTED" => Color.FromArgb(COLOR_LIMITED_PARKING),
+            "NOPARKING" => Color.FromArgb(COLOR_RESTRICTED_PARKING),
             _ => Color.FromArgb(COLOR_UNKNOWN)
         };
     }
