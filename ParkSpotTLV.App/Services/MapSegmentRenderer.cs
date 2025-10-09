@@ -22,12 +22,15 @@ public class MapSegmentRenderer
 
   
     // Renders segments on the map with filtering based on session preferences
-    public int RenderSegments(Microsoft.Maui.Controls.Maps.Map map, GetMapSegmentsResponse segmentsResponse, Session? session)
+    // Returns a dictionary mapping SegmentId -> StreetName for all rendered segments
+    public Dictionary<SegmentResponseDTO, string> RenderSegments(Microsoft.Maui.Controls.Maps.Map map, GetMapSegmentsResponse segmentsResponse, Session? session)
     {
+        var segmentToStreet = new Dictionary<SegmentResponseDTO, string>();
+
         if (map == null || segmentsResponse?.Segments == null)
         {
             System.Diagnostics.Debug.WriteLine("RenderSegments: Invalid parameters");
-            return 0;
+            return segmentToStreet;
         }
 
         // Clear existing map elements and force garbage collection
@@ -55,6 +58,13 @@ public class MapSegmentRenderer
                 {
                     map.MapElements.Add(polyline);
                     renderedCount++;
+
+                    // Add street name and segment ID to dictionary (prefer English, fallback to Hebrew)
+                    var streetName = !string.IsNullOrEmpty(segment.NameEnglish)
+                        ? segment.NameEnglish
+                        : segment.NameHebrew ?? "Unknown";
+
+                    segmentToStreet[segment] = streetName;
                 }
             }
             catch (OutOfMemoryException)
@@ -69,8 +79,9 @@ public class MapSegmentRenderer
             }
         }
 
-        System.Diagnostics.Debug.WriteLine($"Successfully rendered {renderedCount} segments");
-        return renderedCount;
+        var uniqueStreets = segmentToStreet.Values.Distinct().Count();
+        System.Diagnostics.Debug.WriteLine($"Successfully rendered {renderedCount} segments on {uniqueStreets} streets");
+        return segmentToStreet;
     }
 
    
@@ -100,10 +111,10 @@ public class MapSegmentRenderer
 
         return segment.Group switch
         {
-            "RESTRICTED" => !session.ShowNoParking,
+            "NOPARKING" => !session.ShowNoParking,
             "PAID" => !session.ShowPaid,
             "FREE" => !session.ShowFree,
-            "LIMITED" => !session.ShowRestricted,
+            "RESTRICTED" => !session.ShowRestricted,
             _ => false
         };
     }

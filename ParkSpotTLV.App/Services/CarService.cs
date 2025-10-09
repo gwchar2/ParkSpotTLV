@@ -4,6 +4,8 @@ using ParkSpotTLV.Contracts.Vehicles;
 using ParkSpotTLV.Contracts.Permits;
 using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Core.Models;
+using ParkSpotTLV.Contracts.Map;
+using ParkSpotTLV.Contracts.Parking;
 
 namespace ParkSpotTLV.App.Services;
 
@@ -67,10 +69,10 @@ public class CarService
 
             var newCarPayload = new VehicleCreateRequest
             (
-            Type : vehicleType,
-            Name : car.Name,
-            ResidentZoneCode : car.HasResidentPermit && car.ResidentPermitNumber != 0 ? car.ResidentPermitNumber : null,
-            HasDisabledPermit : car.HasDisabledPermit
+            Type: vehicleType,
+            Name: car.Name,
+            ResidentZoneCode: car.HasResidentPermit && car.ResidentPermitNumber != 0 ? car.ResidentPermitNumber : null,
+            HasDisabledPermit: car.HasDisabledPermit
             );
 
             var userCars = await GetUserCarsAsync();
@@ -162,7 +164,7 @@ public class CarService
         var currentPermit = await getPermitResponse.Content.ReadFromJsonAsync<PermitResponse>(_options);
         if (currentPermit == null)
             throw new InvalidOperationException("Failed to retrieve current permit data");
-        
+
         // Update the permit
         var updatePermitPayload = new PermitUpdateRequest(
             RowVersion: currentPermit.RowVersion,
@@ -365,7 +367,7 @@ public class CarService
             }
 
             return true;
-        
+
         }
         catch (Exception ex)
         {
@@ -374,7 +376,7 @@ public class CarService
         }
     }
 
-    public async Task<Guid?> getPermitAsync(string? carId, int opt)
+    public async Task<Guid?> GetPermitAsync(string? carId, int opt)
     {
         if (string.IsNullOrEmpty(carId))
             return null;
@@ -394,7 +396,7 @@ public class CarService
                     case 2:
                         return vehicleResponse?.DefaultPermitId;
                 }
-                    
+
             }
             return null;
         }
@@ -403,7 +405,6 @@ public class CarService
             System.Diagnostics.Debug.WriteLine($"Error fetching car: {ex.Message}");
         }
         return null;
-    } 
-
+    }
 
 }

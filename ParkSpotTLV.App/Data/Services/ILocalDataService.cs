@@ -16,5 +16,6 @@ public interface ILocalDataService
                                     bool? showNoParking = null,
                                     String? lastPickedCarId = null);
     public Task UpdateTokenAsync(String token, DateTimeOffset expiresAt);
+    // public Task UpdateParkingStatusAsync(bool isParking);
     public Task<Session?> GetSessionAsync();
 }
