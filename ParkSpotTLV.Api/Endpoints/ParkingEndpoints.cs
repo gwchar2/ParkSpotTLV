@@ -100,6 +100,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                     // 4) Return payload
                     return Results.Ok(new {
                         Status = true,
+                        SessionId = activeSession.Id,
                         ParkingStarted = activeSession.StartedLocal,
                         ParkingUntil = activeSession.PlannedEndLocal
                     });
@@ -355,8 +356,8 @@ namespace ParkSpotTLV.Api.Endpoints {
                         if (consumeStart is null || consumeEnd is null) break;
 
                         // Calculate the correct start and end times, and the amount of eligibile minutes for calculations
-                        var start = sliceStart > consumeStart.Value ? sliceStart : consumeStart.Value;
-                        var end = sliceEnd < consumeEnd.Value ? sliceEnd : consumeEnd.Value; 
+                        var start = sliceStart >= consumeStart.Value ? sliceStart : consumeStart.Value;
+                        var end = sliceEnd <= consumeEnd.Value ? sliceEnd : consumeEnd.Value; 
                         if (end <= start) continue;
 
                         var eligibleMinutes = (int)Math.Ceiling((end - start).TotalMinutes);
@@ -370,7 +371,6 @@ namespace ParkSpotTLV.Api.Endpoints {
                         // Calculate the consumption
                         var toConsume = Math.Min(remaining, eligibleMinutes);
                         if (toConsume > 0) {
-                            // Consume against this anchor day (your service splits correctly if needed)
                             await budget.ConsumeAsync(session.VehicleId, start, start.AddMinutes(toConsume), ct);
                             freeMinutesCharged += toConsume;
                         }
@@ -388,6 +388,10 @@ namespace ParkSpotTLV.Api.Endpoints {
                     session.Status = ParkingSessionStatus.Stopped;
                     session.UpdatedAt = localTime;
 
+
+
+
+                    //await budget.ConsumeAsync(session.VehicleId, (DateTimeOffset)session.StartedLocal, localTime, ct);
                     await CancelFutureNotificationsAsync(db, session.Id, ct);
                     await db.SaveChangesAsync(ct);
 

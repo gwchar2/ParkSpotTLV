@@ -9,8 +9,8 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
 
         /*
          * Restricted now, future doesnt matter             -> NOPARKING -> RED,   PayOnStart = X,     WillHaveToPayLater?: ILEGAL,   _restricted.IsRestrictedNow()
-         * Free now, turns RESTRICTED within Required       -> LIMITED -> ORANGE,   PayOnStart = false, WillHaveToPayLater?: FALSE,     
-         * PAID now, turns RESTRICTED within Required       -> LIMITED -> ORANGE,   PayOnStart = true,  WillHaveToPayLater?: TRUE,      
+         * Free now, turns RESTRICTED within Required       -> RESTRICTED -> ORANGE,   PayOnStart = false, WillHaveToPayLater?: FALSE,     
+         * PAID now, turns RESTRICTED within Required       -> RESTRICTED -> ORANGE,   PayOnStart = true,  WillHaveToPayLater?: TRUE,      
          * Free now, turns PAID within Required             -> PAID -> GREEN,         PayOnStart = false, WillHaveToPayLater?: !TRUE!,    
          * Free now, stays FREE within required             -> FREE -> GREEN,         PayOnStart = false, WillHaveToPayLater?: FALSE,      
          * PAID now, turns FREE within Required             -> PAID-> GREEN,         PayOnStart = true,  WillHaveToPayLater?: TRUE,     

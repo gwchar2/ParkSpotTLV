@@ -65,7 +65,7 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
                 startAnchor.Year, startAnchor.Month, startAnchor.Day,
                 ParkingBudgetTimeHandler.ResetTime.Hour, ParkingBudgetTimeHandler.ResetTime.Minute, 0,
                 DateTimeKind.Unspecified).AddDays(1);
-            var boundary = new DateTimeOffset(boundaryLocal, endLocal.Offset); // keep local offset
+            var boundary = new DateTimeOffset(boundaryLocal, endLocal.Offset); 
             var firstLeg = (int)Math.Ceiling((boundary - startLocal).TotalMinutes);
             await AddMinutesAsync(vehicleId, startAnchor, firstLeg, ct);
 
