@@ -20,17 +20,12 @@ public partial class ShowMapPage : ContentPage, IDisposable
     private bool _disposed = false;
     // Map rendering constants
     private const int MAP_RENDER_DELAY_MS = 500;
-    private const int MAP_DEBOUNCE_DELAY_MS = 500;
     private const int DEFAULT_MIN_PARKING_TIME_MINUTES = 30;
 
     // Map zoom constants
     private const double USER_LOCATION_ZOOM_METERS = 300;
-    private const double FALLBACK_ZOOM_KILOMETERS = 1;
+    private const double FALLBACK_ZOOM_METERS = 300;
     private const double SEARCH_RESULT_ZOOM_METERS = 300;
-
-    // Map area limits to prevent loading too many segments
-    private const double MAX_LAT_DEGREES = 0.05;  // ~5.5km
-    private const double MAX_LON_DEGREES = 0.05;  // ~5.5km
 
     private bool isParked = false;
     private string? pickedCarName;
@@ -44,23 +39,23 @@ public partial class ShowMapPage : ContentPage, IDisposable
     private readonly MapService _mapService;
     private readonly MapSegmentRenderer _mapSegmentRenderer;
     private readonly ILocalDataService _localDataService;
+    private readonly MapInteractionService _mapInteractionService;
+    private readonly ParkingService _parkingService;
     private List<Core.Models.Car> _userCars = new();
     private CancellationTokenSource? _mapMoveCts;
-    private System.Timers.Timer? _debounceTimer;
     private bool _isInitialized = false;
-    private bool _isTrackingUserLocation = false;
+    private Dictionary<Guid, string>? segmentsInfo;
 
 
-    public ShowMapPage(CarService carService, MapService mapService, MapSegmentRenderer mapSegmentRenderer, ILocalDataService localDataService)
+    public ShowMapPage(CarService carService, MapService mapService, MapSegmentRenderer mapSegmentRenderer, ILocalDataService localDataService, MapInteractionService mapInteractionService, ParkingService parkingService)
     {
         InitializeComponent();
         _carService = carService;
         _mapService = mapService;
         _mapSegmentRenderer = mapSegmentRenderer;
         _localDataService = localDataService;
-
-        // Hook up map movement detection
-        MyMap.PropertyChanged += MyMapOnPropertyChanged;
+        _mapInteractionService = mapInteractionService;
+        _parkingService = parkingService;
     }
 
     protected override async void OnAppearing()
@@ -73,6 +68,10 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
         try
         {
+            // Initialize MapInteractionService after map is ready
+            _mapInteractionService.Initialize(MyMap);
+            _mapInteractionService.VisibleBoundsChanged += OnVisibleBoundsChanged;
+
             await LoadUserCars();
             await LoadSessionPreferences();
             await LoadMapAsync(); // load map, current location
@@ -80,7 +79,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
             // Wait for map to render and have a valid VisibleRegion
             await Task.Delay(MAP_RENDER_DELAY_MS);
 
-            var bounds = GetVisibleBounds();
+            var bounds = _mapInteractionService.GetVisibleBounds();
             if (bounds.HasValue)
             {
                 await FetchAndRenderSegments(bounds);
@@ -103,96 +102,13 @@ public partial class ShowMapPage : ContentPage, IDisposable
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        StopLocationTracking();
+        _mapInteractionService.StopLocationTracking();
         Dispose();
     }
 
-    private void MyMapOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private async void OnVisibleBoundsChanged(object? sender, (double MinLat, double MaxLat, double MinLon, double MaxLon, double CenterLat, double CenterLon) bounds)
     {
-        if (e.PropertyName == nameof(Microsoft.Maui.Controls.Maps.Map.VisibleRegion))
-        {
-            // Skip debounce logic if we're tracking user location (to allow smooth following)
-            if (_isTrackingUserLocation)
-            {
-                System.Diagnostics.Debug.WriteLine("⏭️ Skipping map debounce (tracking user)");
-                return;
-            }
-
-            // Debounce: cancel previous timer
-            _debounceTimer?.Stop();
-            _debounceTimer?.Dispose();
-
-            // Cancel any in-flight requests
-            _mapMoveCts?.Cancel();
-            _mapMoveCts = new CancellationTokenSource();
-
-            // Start new timer (debounce)
-            _debounceTimer = new System.Timers.Timer(MAP_DEBOUNCE_DELAY_MS);
-            _debounceTimer.Elapsed += async (s, args) =>
-            {
-                _debounceTimer?.Stop();
-
-                // Fetch segments on UI thread
-                await MainThread.InvokeOnMainThreadAsync(async () =>
-                {
-                    try
-                    {
-                        var bounds = GetVisibleBounds();
-                        if (bounds.HasValue)
-                        {
-                            await FetchAndRenderSegments(bounds);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Error in MyMapOnPropertyChanged: {ex.Message}");
-                    }
-                });
-            };
-            _debounceTimer.AutoReset = false;
-            _debounceTimer.Start();
-        }
-    }
-
-    // calculate bounds of the current map view
-    private (double MinLat, double MaxLat, double MinLon, double MaxLon, double CenterLat, double CenterLon)?
-    GetVisibleBounds()
-    {
-        if (MyMap == null)
-        {
-            System.Diagnostics.Debug.WriteLine("GetVisibleBounds: MyMap is null");
-            return null;
-        }
-
-        var visibleRegion = MyMap.VisibleRegion;
-
-        if (visibleRegion == null)
-        {
-            System.Diagnostics.Debug.WriteLine("GetVisibleBounds: VisibleRegion is null");
-            return null;
-        }
-
-        // VisibleRegion gives us the center and radius
-        // We need to calculate the bounding box from it
-        var center = visibleRegion.Center;
-        var latitudeDegrees = visibleRegion.LatitudeDegrees;
-        var longitudeDegrees = visibleRegion.LongitudeDegrees;
-
-        // Clamp to maximum area to prevent loading too many segments
-        if (latitudeDegrees > MAX_LAT_DEGREES || longitudeDegrees > MAX_LON_DEGREES)
-        {
-            System.Diagnostics.Debug.WriteLine($"Map area too large ({latitudeDegrees:F4} x {longitudeDegrees:F4}), clamping to center area");
-            latitudeDegrees = Math.Min(latitudeDegrees, MAX_LAT_DEGREES);
-            longitudeDegrees = Math.Min(longitudeDegrees, MAX_LON_DEGREES);
-        }
-
-        // Calculate bounds
-        double minLat = center.Latitude - (latitudeDegrees / 2);
-        double maxLat = center.Latitude + (latitudeDegrees / 2);
-        double minLon = center.Longitude - (longitudeDegrees / 2);
-        double maxLon = center.Longitude + (longitudeDegrees / 2);
-
-        return (minLat, maxLat, minLon, maxLon, center.Latitude, center.Longitude);
+        await FetchAndRenderSegments(bounds);
     }
 
     private async Task FetchAndRenderSegments((double MinLat, double MaxLat, double MinLon, double MaxLon, double CenterLat, double CenterLon)? bounds)
@@ -227,6 +143,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
             }
 
             System.Diagnostics.Debug.WriteLine($"Received {segmentsResponse.Segments.Count} segments");
+            
         }
         catch (Exception ex)
         {
@@ -239,8 +156,9 @@ public partial class ShowMapPage : ContentPage, IDisposable
         try
         {
             // Render segments using the renderer
-            var renderedCount = _mapSegmentRenderer.RenderSegments(MyMap, segmentsResponse, _session);
-            System.Diagnostics.Debug.WriteLine($"Successfully rendered {renderedCount} segments on map");
+            segmentsInfo = _mapSegmentRenderer.RenderSegments(MyMap, segmentsResponse, _session);
+            // var uniqueStreets = segmentsInfo.Values.Distinct().ToList();
+            // System.Diagnostics.Debug.WriteLine($"Successfully rendered {segmentsInfo.Count} segments on {uniqueStreets.Count} streets: {string.Join(", ", uniqueStreets)}");
         }
         catch (OutOfMemoryException ex)
         {
@@ -261,7 +179,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         MyMap.IsShowingUser = true;
 
         // Get user location
-        var location = await GetCurrentLocationAsync();
+        var location = await _mapInteractionService.GetCurrentLocationAsync();
 
         if (location != null)
         {
@@ -271,105 +189,15 @@ public partial class ShowMapPage : ContentPage, IDisposable
         {
             // Fallback to Tel Aviv if location unavailable
             var center = new Location(32.0853, 34.7818);
-            MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(center, Distance.FromKilometers(FALLBACK_ZOOM_KILOMETERS)));
-        }
-    }
-
-    private async Task<Location?> GetCurrentLocationAsync()
-    {
-        try
-        {
-            var request = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(10));
-            var location = await Geolocation.GetLocationAsync(request);
-            return location;
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Location Error", $"Unable to get location: {ex.Message}", "OK");
-            return null;
-        }
-    }
-
-    private async Task StartLocationTrackingAsync()
-    {
-        if (_isTrackingUserLocation)
-            return; // Already tracking
-
-        try
-        {
-            _isTrackingUserLocation = true;
-            Geolocation.LocationChanged += OnLocationChanged;
-
-            // Use Best accuracy and smallest distance filter for responsive tracking
-            var request = new GeolocationListeningRequest(GeolocationAccuracy.Best)
-            {
-                DesiredAccuracy = GeolocationAccuracy.Best,
-                MinimumTime = TimeSpan.FromSeconds(1) // Update at most every 1 second
-            };
-            var result = await Geolocation.StartListeningForegroundAsync(request);
-
-            if (result)
-            {
-                System.Diagnostics.Debug.WriteLine(" Started location tracking successfully");
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine(" Failed to start location tracking");
-                _isTrackingUserLocation = false;
-                Geolocation.LocationChanged -= OnLocationChanged;
-            }
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Error starting location tracking: {ex.Message}");
-            _isTrackingUserLocation = false;
-            Geolocation.LocationChanged -= OnLocationChanged;
-        }
-    }
-
-    private void StopLocationTracking()
-    {
-        if (!_isTrackingUserLocation)
-            return; // Not tracking
-
-        _isTrackingUserLocation = false;
-        Geolocation.LocationChanged -= OnLocationChanged;
-        Geolocation.StopListeningForeground();
-
-        System.Diagnostics.Debug.WriteLine("Stopped location tracking");
-    }
-
-    private void OnLocationChanged(object? sender, GeolocationLocationChangedEventArgs e)
-    {
-        var location = e.Location;
-        System.Diagnostics.Debug.WriteLine($" Location changed: {location?.Latitude}, {location?.Longitude}");
-
-        if (location != null && _isTrackingUserLocation)
-        {
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                try
-                {
-                    // Re-center map on user's new location
-                    MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(
-                        location,
-                        Distance.FromMeters(USER_LOCATION_ZOOM_METERS)
-                    ));
-                    System.Diagnostics.Debug.WriteLine($"🗺️ Map centered on: {location.Latitude}, {location.Longitude}");
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Error moving map: {ex.Message}");
-                }
-            });
+            MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(center, Distance.FromMeters(FALLBACK_ZOOM_METERS)));
         }
     }
 
     private async void OnTrackLocationToggleClicked(object sender, EventArgs e)
     {
-        if (_isTrackingUserLocation)
+        if (_mapInteractionService.IsTrackingUserLocation)
         {
-            StopLocationTracking();
+            _mapInteractionService.StopLocationTracking();
             // Animate toggle to OFF position (left)
             await Task.WhenAll(
                 TrackLocationToggleCircle.TranslateTo(0, 0, 200, Easing.CubicInOut),
@@ -379,7 +207,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         }
         else
         {
-            await StartLocationTrackingAsync();
+            await _mapInteractionService.StartLocationTrackingAsync();
             // Animate toggle to ON position (right)
             await Task.WhenAll(
                 TrackLocationToggleCircle.TranslateTo(20, 0, 200, Easing.CubicInOut),
@@ -498,7 +326,8 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
         // pickedCarId and pickedCarName are already set by LoadUserCars()
         // Get active permit ID for the selected car
-        var activePermitNullable = await permitPopUp();
+        var activePermitNullable = await _parkingService.ShowPermitPopupAsync(pickedCarId,
+            (title, cancel, destruction, buttons) => DisplayActionSheet(title, cancel, destruction, buttons));
         activePermit = activePermitNullable ?? Guid.Empty;
 
         // present day menu according to today
@@ -560,12 +389,13 @@ public partial class ShowMapPage : ContentPage, IDisposable
         selectedDate = GetSelectedDateTime();
 
         // if car picked has permit options
-        var activePermitNullable = await permitPopUp();
+        var activePermitNullable = await _parkingService.ShowPermitPopupAsync(pickedCarId,
+            (title, cancel, destruction, buttons) => DisplayActionSheet(title, cancel, destruction, buttons));
         activePermit = activePermitNullable ?? Guid.Empty;
 
 
         // Re-fetch segments with updated filter preferences
-        var bounds = GetVisibleBounds();
+        var bounds = _mapInteractionService.GetVisibleBounds();
         await FetchAndRenderSegments(bounds);
 
         await DisplayAlert("Apply", "Changes applied successfully!", "OK");
@@ -575,63 +405,31 @@ public partial class ShowMapPage : ContentPage, IDisposable
         SettingsToggleBtn.Text = "Settings ▼";
     }
 
-    private async Task<Guid?> permitPopUp()
-    {
-        // check if pop up required
-        if (pickedCarId is null)
-            return null;
-
-        Car? currCar = await _carService.GetCarAsync(pickedCarId);
-
-        if (currCar == null)
-            return null;
-        
-        // If only has resident permit (no disabled permit)
-        if (!currCar.HasDisabledPermit) {
-            if (currCar.HasResidentPermit)
-                return await _carService.getPermitAsync(pickedCarId, 0); // get resident permit
-            // No permits - return default/empty permit
-            else
-                return await _carService.getPermitAsync(pickedCarId, 2); // get default permit
-        }
-
-        else { // If car has disabled permit, always ask user if they want to use it
-            // Use DisplayActionSheet instead of modal popup to avoid OnAppearing loop
-            var alternativeOptionText = "Don't use Disabled Permit";
-                
-
-            var action = await DisplayActionSheet(
-                $"{currCar.Name} has a disabled permit. Would you like to use it?",
-                null, // no cancel button
-                null, // no destruction button
-                "Use Disabled Permit",
-                alternativeOptionText
-            );
-
-            if (action == "Use Disabled Permit")
-            {
-                return await _carService.getPermitAsync(pickedCarId, 1); // disabled permit
-            }
-            else // alternative option selected
-            {
-                if (currCar.HasResidentPermit)
-                {
-                    return await _carService.getPermitAsync(pickedCarId, 0); // resident permit
-                }
-                else
-                {
-                    return Guid.Empty; // default permit
-                }
-            }
-        }
-        
-    }
 
     private async void OnParkHereClicked(object sender, EventArgs e)
     {
         if (!isParked)
         {
-            await ShowParkingNotificationPopup();
+            // let user choose street to park at in order to calculate free parking timer
+            var parkedStreet = await _parkingService.ShowStreetsListPopUpAsync(segmentsInfo,Navigation);
+            var result = await _parkingService.ShowParkingNotificationPopupAsync(Navigation);
+
+            if (result.Confirmed)
+            {
+                string message = $"Parking started!";
+                if (result.NotificationsEnabled)
+                    message += $"\nYou'll be notified {result.Minutes} minutes before parking ends.";
+                else
+                    message += "\nNotifications are disabled.";
+
+                // Update button state
+                isParked = true;
+                ParkHereBtn.Text = "End Parking";
+                ParkHereBtn.BackgroundColor = Color.FromArgb("#D32F2F");
+
+                // Show parking confirmed popup with Pango option
+                await _parkingService.ShowParkingConfirmedPopupAsync(message, Navigation, DisplayAlert);
+            }
         }
         else
         {
@@ -643,276 +441,18 @@ public partial class ShowMapPage : ContentPage, IDisposable
         }
     }
 
-    private async Task ShowParkingNotificationPopup()
-    {
-        // Create the popup content
-        var popup = new ContentPage
-        {
-            Title = "Parking Notification"
-        };
-
-        var mainLayout = new VerticalStackLayout
-        {
-            Spacing = 20,
-            Padding = 30
-        };
-
-        // Title
-        var titleLabel = new Label
-        {
-            Text = "Parking Notification",
-            FontSize = 22,
-            FontAttributes = FontAttributes.Bold,
-            HorizontalOptions = LayoutOptions.Center,
-            TextColor = Color.FromArgb("#2E7D32")
-        };
-
-        // Notification text with dropdown
-        var notificationLayout = new HorizontalStackLayout
-        {
-            Spacing = 10,
-            HorizontalOptions = LayoutOptions.Center
-        };
-
-        var notifyLabel1 = new Label
-        {
-            Text = "Notify me",
-            FontSize = 16,
-            VerticalOptions = LayoutOptions.Center
-        };
-
-        var minutesPicker = new Picker
-        {
-            Title = "10",
-            WidthRequest = 20,
-            BackgroundColor = Colors.White,
-            SelectedIndex = 1 // Default to 10 minutes
-        };
-        minutesPicker.Items.Add("5");
-        minutesPicker.Items.Add("10");
-        minutesPicker.Items.Add("15");
-        minutesPicker.Items.Add("20");
-        minutesPicker.Items.Add("30");
-        minutesPicker.Items.Add("45");
-        minutesPicker.Items.Add("60");
-
-        var notifyLabel2 = new Label
-        {
-            Text = "minutes before parking expires",
-            FontSize = 16,
-            VerticalOptions = LayoutOptions.Center
-        };
-
-        notificationLayout.Children.Add(notifyLabel1);
-        notificationLayout.Children.Add(minutesPicker);
-        notificationLayout.Children.Add(notifyLabel2);
-
-        // Checkbox
-        var checkboxLayout = new HorizontalStackLayout
-        {
-            Spacing = 10,
-            HorizontalOptions = LayoutOptions.Center
-        };
-
-        var enableCheckbox = new CheckBox
-        {
-            IsChecked = true
-        };
-
-        var checkboxLabel = new Label
-        {
-            Text = "Enable parking notifications",
-            FontSize = 16,
-            VerticalOptions = LayoutOptions.Center
-        };
-
-        checkboxLayout.Children.Add(enableCheckbox);
-        checkboxLayout.Children.Add(checkboxLabel);
-
-        // Buttons
-        var buttonLayout = new HorizontalStackLayout
-        {
-            Spacing = 15,
-            HorizontalOptions = LayoutOptions.Center
-        };
-
-        var confirmButton = new Button
-        {
-            Text = "Start Parking",
-            BackgroundColor = Color.FromArgb("#2E7D32"),
-            TextColor = Colors.White,
-            WidthRequest = 120,
-            HeightRequest = 45
-        };
-
-        var cancelButton = new Button
-        {
-            Text = "Cancel",
-            BackgroundColor = Colors.Transparent,
-            TextColor = Color.FromArgb("#2E7D32"),
-            WidthRequest = 100,
-            HeightRequest = 45
-        };
-
-        confirmButton.Clicked += async (s, e) =>
-        {
-            string minutes = minutesPicker.SelectedItem?.ToString() ?? "10";
-            bool isEnabled = enableCheckbox.IsChecked;
-
-            string message = $"Parking started!";
-            if (isEnabled)
-                message += $"\nYou'll be notified {minutes} minutes before parking ends.";
-            else
-                message += "\nNotifications are disabled.";
-
-            // Update button state
-            isParked = true;
-            ParkHereBtn.Text = "End Parking";
-            ParkHereBtn.BackgroundColor = Color.FromArgb("#D32F2F");
-
-            await Navigation.PopModalAsync();
-
-            // Show parking confirmed popup with Pango option
-            await ShowParkingConfirmedPopup(message);
-        };
-
-        cancelButton.Clicked += async (s, e) =>
-        {
-            await Navigation.PopModalAsync();
-        };
-
-        buttonLayout.Children.Add(confirmButton);
-        buttonLayout.Children.Add(cancelButton);
-
-        // Add all elements to main layout
-        mainLayout.Children.Add(titleLabel);
-        mainLayout.Children.Add(notificationLayout);
-        mainLayout.Children.Add(checkboxLayout);
-        mainLayout.Children.Add(buttonLayout);
-
-        popup.Content = new ScrollView { Content = mainLayout };
-
-        // Show as modal
-        await Navigation.PushModalAsync(popup);
-    }
-
     private async void OnSearchAddress(object sender, EventArgs e)
     {
         var searchBar = (SearchBar)sender;
         var address = searchBar.Text;
 
-        if (string.IsNullOrWhiteSpace(address))
-            return;
+        var result = await _mapInteractionService.SearchAndMoveToAddressAsync(address, SEARCH_RESULT_ZOOM_METERS);
 
-        try
+        if (!result.Success && result.ErrorMessage != null)
         {
-            var locations = await Geocoding.GetLocationsAsync(address);
-            var location = locations?.FirstOrDefault();
-
-            if (location != null)
-            {
-                MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(location, Distance.FromMeters(SEARCH_RESULT_ZOOM_METERS)));
-            }
-            else
-            {
-                await DisplayAlert("Not Found", "Address not found. Please try a different search.", "OK");
-            }
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Search Error", $"Unable to search: {ex.Message}", "OK");
+            await DisplayAlert(result.ErrorMessage.Contains("not found") ? "Not Found" : "Search Error", result.ErrorMessage, "OK");
         }
     }
-
-    private async Task ShowParkingConfirmedPopup(string message)
-    {
-        // Create the popup content
-        var popup = new ContentPage
-        {
-            Title = "Parking Confirmed"
-        };
-
-        var mainLayout = new VerticalStackLayout
-        {
-            Spacing = 20,
-            Padding = 30,
-            VerticalOptions = LayoutOptions.Center
-        };
-
-        // Title
-        var titleLabel = new Label
-        {
-            Text = "Parking Confirmed",
-            FontSize = 22,
-            FontAttributes = FontAttributes.Bold,
-            HorizontalOptions = LayoutOptions.Center,
-            TextColor = Color.FromArgb("#2E7D32")
-        };
-
-        // Message
-        var messageLabel = new Label
-        {
-            Text = message,
-            FontSize = 16,
-            HorizontalOptions = LayoutOptions.Center,
-            HorizontalTextAlignment = TextAlignment.Center,
-            TextColor = Colors.Black
-        };
-
-        // Buttons
-        var buttonLayout = new HorizontalStackLayout
-        {
-            Spacing = 15,
-            HorizontalOptions = LayoutOptions.Center
-        };
-
-        var okButton = new Button
-        {
-            Text = "OK",
-            BackgroundColor = Color.FromArgb("#2E7D32"),
-            TextColor = Colors.White,
-            WidthRequest = 100,
-            HeightRequest = 45,
-            CornerRadius = 5
-        };
-
-        var pangoButton = new Button
-        {
-            Text = "Pay with Pango",
-            BackgroundColor = Color.FromArgb("#FF6B35"),
-            TextColor = Colors.White,
-            WidthRequest = 140,
-            HeightRequest = 45,
-            CornerRadius = 5
-        };
-
-        okButton.Clicked += async (s, e) =>
-        {
-            await Navigation.PopModalAsync();
-        };
-
-        pangoButton.Clicked += async (s, e) =>
-        {
-            // TODO: Navigate to Pango app or show Pango integration
-            await DisplayAlert("Pango", "Pango integration coming soon!", "OK");
-            await Navigation.PopModalAsync();
-        };
-
-        buttonLayout.Children.Add(okButton);
-        buttonLayout.Children.Add(pangoButton);
-
-        // Add all elements to main layout
-        mainLayout.Children.Add(titleLabel);
-        mainLayout.Children.Add(messageLabel);
-        mainLayout.Children.Add(buttonLayout);
-
-        popup.Content = new ScrollView { Content = mainLayout };
-
-        // Show as modal
-        await Navigation.PushModalAsync(popup);
-    }
-
-    
 
     // Helper method to get selected DateTimeOffset
     private DateTimeOffset GetSelectedDateTime()
@@ -947,19 +487,12 @@ public partial class ShowMapPage : ContentPage, IDisposable
         if (disposing)
         {
             // Dispose managed resources
-            _debounceTimer?.Stop();
-            _debounceTimer?.Dispose();
-            _debounceTimer = null;
-
             _mapMoveCts?.Cancel();
             _mapMoveCts?.Dispose();
             _mapMoveCts = null;
 
-            // Unsubscribe from events
-            if (MyMap != null)
-            {
-                MyMap.PropertyChanged -= MyMapOnPropertyChanged;
-            }
+            // Unsubscribe from map interaction service events
+            _mapInteractionService.VisibleBoundsChanged -= OnVisibleBoundsChanged;
         }
 
         _disposed = true;

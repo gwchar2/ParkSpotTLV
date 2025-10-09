@@ -63,6 +63,8 @@ namespace ParkSpotTLV.App {
             });
 
             builder.Services.AddSingleton<MapSegmentRenderer>();
+            builder.Services.AddSingleton<MapInteractionService>();
+            builder.Services.AddSingleton<ParkingService>();
 
             // Core app services you already had
             builder.Services.AddTransient<Pages.PreferencesPage>();
