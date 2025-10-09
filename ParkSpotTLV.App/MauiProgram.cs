@@ -62,9 +62,19 @@ namespace ParkSpotTLV.App {
                 return new MapService(http, auth, db, opts);
             });
 
+            builder.Services.AddSingleton<ParkingService>(sp =>
+            {
+                var http = sp.GetRequiredService<HttpClient>();
+                var auth = sp.GetRequiredService<AuthenticationService>();
+                var opts = sp.GetRequiredService<JsonSerializerOptions>();
+                return new ParkingService(http, auth, opts);
+            });
+            
             builder.Services.AddSingleton<MapSegmentRenderer>();
             builder.Services.AddSingleton<MapInteractionService>();
-            builder.Services.AddSingleton<ParkingService>();
+            builder.Services.AddSingleton<ParkingPopUps>();
+
+            
 
             // Core app services you already had
             builder.Services.AddTransient<Pages.PreferencesPage>();

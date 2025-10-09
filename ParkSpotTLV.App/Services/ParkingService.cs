@@ -1,418 +1,88 @@
-using ParkSpotTLV.Core.Models;
+using System.Net.Http.Json;
+using System.Text.Json;
+using ParkSpotTLV.Contracts.Map;
+using ParkSpotTLV.Contracts.Parking;
 
 namespace ParkSpotTLV.App.Services;
 
-// Handles parking-related UI operations including popups and permits
+// Handles parking-related API operations
 public class ParkingService
 {
-    private readonly CarService _carService;
+    private readonly AuthenticationService _authService;
+    private readonly HttpClient _http;
+    private readonly JsonSerializerOptions _options;
 
-    public ParkingService(CarService carService)
+    public ParkingService(HttpClient http, AuthenticationService authService, JsonSerializerOptions? options = null)
     {
-        _carService = carService ?? throw new ArgumentNullException(nameof(carService));
+        _http = http;
+        _authService = authService;
+        _options = options ?? new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
     }
 
-    // Shows permit selection dialog and returns the selected permit ID
-    public async Task<Guid?> ShowPermitPopupAsync(string? pickedCarId, Func<string, string?, string?, string[], Task<string>> displayActionSheet)
+    public async Task<StartParkingResponse> StartParkingAsync(SegmentResponseDTO segResponse, Guid carId, int notificationMinutes, int minParkingTime)
     {
-        // check if pop up required
-        if (pickedCarId is null)
-            return null;
+        var startParkingPayload = new StartParkingRequest(
+            Segment: segResponse,
+            VehicleId: carId,
+            NotificationMinutes: notificationMinutes,
+            MinParkingTime: minParkingTime
+        );
 
-        Car? currCar = await _carService.GetCarAsync(pickedCarId);
 
-        if (currCar == null)
-            return null;
+        var response = await _authService.ExecuteWithTokenRefreshAsync(() =>
+            _http.PostAsJsonAsync("/parking/start", startParkingPayload, _options));
 
-        // If only has resident permit (no disabled permit)
-        if (!currCar.HasDisabledPermit)
+        if (!response.IsSuccessStatusCode)
         {
-            if (currCar.HasResidentPermit)
-                return await _carService.getPermitAsync(pickedCarId, 0); // get resident permit
-            // No permits - return default/empty permit
-            else
-                return await _carService.getPermitAsync(pickedCarId, 2); // get default permit
+            var body = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Failed to start parking: {(int)response.StatusCode} {body}");
         }
 
-        else
-        { // If car has disabled permit, always ask user if they want to use it
-            // Use DisplayActionSheet instead of modal popup to avoid OnAppearing loop
-            var action = await displayActionSheet(
-                $"{currCar.Name} has a disabled permit. Would you like to use it?",
-                null, // no cancel button
-                null, // no destruction button
-                new[] { "Use Disabled Permit", "Don't use Disabled Permit" }
-            );
+        var result = await response.Content.ReadFromJsonAsync<StartParkingResponse>(_options);
+        if (result == null)
+        {
+            throw new HttpRequestException("Failed to parse parking response");
+        }
 
-            if (action == "Use Disabled Permit")
+        return result;
+    }
+
+    public async Task StopParkingAsync(Guid sessionId, Guid carId)
+    {
+        var stopParkingPayload = new
+        {
+            SessionId = sessionId,
+            VehicleId = carId
+        };
+
+        var response = await _authService.ExecuteWithTokenRefreshAsync(() =>
+            _http.PostAsJsonAsync("/parking/stop", stopParkingPayload, _options));
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Failed to stop parking: {(int)response.StatusCode} {body}");
+        }
+    }
+
+    public async Task<StartParkingResponse?> GetParkingStatusAsync(Guid sessionId)
+    {
+        try
+        {
+            var response = await _authService.ExecuteWithTokenRefreshAsync(() =>
+                _http.GetAsync($"/parking/status/{sessionId}"));
+
+            if (response.IsSuccessStatusCode)
             {
-                return await _carService.getPermitAsync(pickedCarId, 1); // disabled permit
+                return await response.Content.ReadFromJsonAsync<StartParkingResponse>(_options);
             }
-            else // alternative option selected
-            {
-                if (currCar.HasResidentPermit)
-                {
-                    return await _carService.getPermitAsync(pickedCarId, 0); // resident permit
-                }
-                else
-                {
-                    return Guid.Empty; // default permit
-                }
-            }
-        }
-    }
 
-    // Shows parking notification popup and returns user's choices
-    public async Task<(bool Confirmed, int Minutes, bool NotificationsEnabled)> ShowParkingNotificationPopupAsync(
-        INavigation navigation)
-    {
-        var tcs = new TaskCompletionSource<(bool, int, bool)>();
-
-        // Create the popup content
-        var popup = new ContentPage
-        {
-            Title = "Parking Notification"
-        };
-
-        var mainLayout = new VerticalStackLayout
-        {
-            Spacing = 20,
-            Padding = 30
-        };
-
-        // Title
-        var titleLabel = new Label
-        {
-            Text = "Parking Notification",
-            FontSize = 22,
-            FontAttributes = FontAttributes.Bold,
-            HorizontalOptions = LayoutOptions.Center,
-            TextColor = Color.FromArgb("#2E7D32")
-        };
-
-        // Notification text with dropdown
-        var notificationLayout = new HorizontalStackLayout
-        {
-            Spacing = 10,
-            HorizontalOptions = LayoutOptions.Center
-        };
-
-        var notifyLabel1 = new Label
-        {
-            Text = "Notify me",
-            FontSize = 16,
-            VerticalOptions = LayoutOptions.Center
-        };
-
-        var minutesPicker = new Picker
-        {
-            Title = "10",
-            WidthRequest = 20,
-            BackgroundColor = Colors.White,
-            SelectedIndex = 1 // Default to 10 minutes
-        };
-        minutesPicker.Items.Add("5");
-        minutesPicker.Items.Add("10");
-        minutesPicker.Items.Add("15");
-        minutesPicker.Items.Add("20");
-        minutesPicker.Items.Add("30");
-        minutesPicker.Items.Add("45");
-        minutesPicker.Items.Add("60");
-
-        var notifyLabel2 = new Label
-        {
-            Text = "minutes before parking expires",
-            FontSize = 16,
-            VerticalOptions = LayoutOptions.Center
-        };
-
-        notificationLayout.Children.Add(notifyLabel1);
-        notificationLayout.Children.Add(minutesPicker);
-        notificationLayout.Children.Add(notifyLabel2);
-
-        // Checkbox
-        var checkboxLayout = new HorizontalStackLayout
-        {
-            Spacing = 10,
-            HorizontalOptions = LayoutOptions.Center
-        };
-
-        var enableCheckbox = new CheckBox
-        {
-            IsChecked = true
-        };
-
-        var checkboxLabel = new Label
-        {
-            Text = "Enable parking notifications",
-            FontSize = 16,
-            VerticalOptions = LayoutOptions.Center
-        };
-
-        checkboxLayout.Children.Add(enableCheckbox);
-        checkboxLayout.Children.Add(checkboxLabel);
-
-        // Buttons
-        var buttonLayout = new HorizontalStackLayout
-        {
-            Spacing = 15,
-            HorizontalOptions = LayoutOptions.Center
-        };
-
-        var confirmButton = new Button
-        {
-            Text = "Start Parking",
-            BackgroundColor = Color.FromArgb("#2E7D32"),
-            TextColor = Colors.White,
-            WidthRequest = 120,
-            HeightRequest = 45
-        };
-
-        var cancelButton = new Button
-        {
-            Text = "Cancel",
-            BackgroundColor = Colors.Transparent,
-            TextColor = Color.FromArgb("#2E7D32"),
-            WidthRequest = 100,
-            HeightRequest = 45
-        };
-
-        confirmButton.Clicked += async (s, e) =>
-        {
-            int minutes = int.Parse(minutesPicker.SelectedItem?.ToString() ?? "10");
-            bool isEnabled = enableCheckbox.IsChecked;
-
-            await navigation.PopModalAsync();
-            tcs.SetResult((true, minutes, isEnabled));
-        };
-
-        cancelButton.Clicked += async (s, e) =>
-        {
-            await navigation.PopModalAsync();
-            tcs.SetResult((false, 0, false));
-        };
-
-        buttonLayout.Children.Add(confirmButton);
-        buttonLayout.Children.Add(cancelButton);
-
-        // Add all elements to main layout
-        mainLayout.Children.Add(titleLabel);
-        mainLayout.Children.Add(notificationLayout);
-        mainLayout.Children.Add(checkboxLayout);
-        mainLayout.Children.Add(buttonLayout);
-
-        popup.Content = new ScrollView { Content = mainLayout };
-
-        // Show as modal
-        await navigation.PushModalAsync(popup);
-
-        return await tcs.Task;
-    }
-
-    // Shows parking confirmed popup with Pango option
-    public async Task ShowParkingConfirmedPopupAsync(string message, INavigation navigation, Func<string, string, string, Task> displayAlert)
-    {
-        // Create the popup content
-        var popup = new ContentPage
-        {
-            Title = "Parking Confirmed"
-        };
-
-        var mainLayout = new VerticalStackLayout
-        {
-            Spacing = 20,
-            Padding = 30,
-            VerticalOptions = LayoutOptions.Center
-        };
-
-        // Title
-        var titleLabel = new Label
-        {
-            Text = "Parking Confirmed",
-            FontSize = 22,
-            FontAttributes = FontAttributes.Bold,
-            HorizontalOptions = LayoutOptions.Center,
-            TextColor = Color.FromArgb("#2E7D32")
-        };
-
-        // Message
-        var messageLabel = new Label
-        {
-            Text = message,
-            FontSize = 16,
-            HorizontalOptions = LayoutOptions.Center,
-            HorizontalTextAlignment = TextAlignment.Center,
-            TextColor = Colors.Black
-        };
-
-        // Buttons
-        var buttonLayout = new HorizontalStackLayout
-        {
-            Spacing = 15,
-            HorizontalOptions = LayoutOptions.Center
-        };
-
-        var okButton = new Button
-        {
-            Text = "OK",
-            BackgroundColor = Color.FromArgb("#2E7D32"),
-            TextColor = Colors.White,
-            WidthRequest = 100,
-            HeightRequest = 45,
-            CornerRadius = 5
-        };
-
-        var pangoButton = new Button
-        {
-            Text = "Pay with Pango",
-            BackgroundColor = Color.FromArgb("#FF6B35"),
-            TextColor = Colors.White,
-            WidthRequest = 140,
-            HeightRequest = 45,
-            CornerRadius = 5
-        };
-
-        okButton.Clicked += async (s, e) =>
-        {
-            await navigation.PopModalAsync();
-        };
-
-        pangoButton.Clicked += async (s, e) =>
-        {
-            // TODO: Navigate to Pango app or show Pango integration
-            await displayAlert("Pango", "Pango integration coming soon!", "OK");
-            await navigation.PopModalAsync();
-        };
-
-        buttonLayout.Children.Add(okButton);
-        buttonLayout.Children.Add(pangoButton);
-
-        // Add all elements to main layout
-        mainLayout.Children.Add(titleLabel);
-        mainLayout.Children.Add(messageLabel);
-        mainLayout.Children.Add(buttonLayout);
-
-        popup.Content = new ScrollView { Content = mainLayout };
-
-        // Show as modal
-        await navigation.PushModalAsync(popup);
-    }
-
-    // Shows a popup with list of streets for user to select where they're parking
-    // Returns tuple of (StreetName, SegmentId) or null if cancelled
-    public async Task<(string StreetName, Guid SegmentId)?> ShowStreetsListPopUpAsync(
-        Dictionary<Guid, string>? segmentToStreet,
-        INavigation navigation)
-    {
-        if (segmentToStreet == null || segmentToStreet.Count == 0)
             return null;
-
-        var tcs = new TaskCompletionSource<(string, Guid)?>();
-
-        // Create the popup content
-        var popup = new ContentPage
-        {
-            Title = "Select Parking Street"
-        };
-
-        var mainLayout = new VerticalStackLayout
-        {
-            Spacing = 20,
-            Padding = 30
-        };
-
-        // Title
-        var titleLabel = new Label
-        {
-            Text = "Where are you parking?",
-            FontSize = 22,
-            FontAttributes = FontAttributes.Bold,
-            HorizontalOptions = LayoutOptions.Center,
-            TextColor = Color.FromArgb("#2E7D32")
-        };
-
-        var subtitleLabel = new Label
-        {
-            Text = "Select the street you're parking on:",
-            FontSize = 16,
-            HorizontalOptions = LayoutOptions.Center,
-            Margin = new Thickness(0, 0, 0, 10)
-        };
-
-        // Get unique streets with their segment IDs
-        var streetGroups = segmentToStreet
-            .GroupBy(kvp => kvp.Value)
-            .Select(g => new { StreetName = g.Key, SegmentId = g.First().Key })
-            .OrderBy(s => s.StreetName)
-            .ToList();
-
-        // Create scrollable list of streets
-        var scrollView = new ScrollView
-        {
-            HeightRequest = 400
-        };
-
-        var streetsList = new VerticalStackLayout
-        {
-            Spacing = 10
-        };
-
-        foreach (var street in streetGroups)
-        {
-            var streetButton = new Button
-            {
-                Text = street.StreetName,
-                BackgroundColor = Colors.White,
-                TextColor = Color.FromArgb("#2E7D32"),
-                BorderColor = Color.FromArgb("#2E7D32"),
-                BorderWidth = 2,
-                CornerRadius = 5,
-                Padding = new Thickness(15),
-                HorizontalOptions = LayoutOptions.Fill
-            };
-
-            streetButton.Clicked += async (s, e) =>
-            {
-                await navigation.PopModalAsync();
-                tcs.SetResult((street.StreetName, street.SegmentId));
-            };
-
-            streetsList.Children.Add(streetButton);
         }
-
-        scrollView.Content = streetsList;
-
-        // Cancel button
-        var cancelButton = new Button
+        catch (Exception ex)
         {
-            Text = "Cancel",
-            BackgroundColor = Colors.Transparent,
-            TextColor = Color.FromArgb("#666666"),
-            WidthRequest = 100,
-            HeightRequest = 45,
-            HorizontalOptions = LayoutOptions.Center,
-            Margin = new Thickness(0, 10, 0, 0)
-        };
-
-        cancelButton.Clicked += async (s, e) =>
-        {
-            await navigation.PopModalAsync();
-            tcs.SetResult(null);
-        };
-
-        // Add all elements to main layout
-        mainLayout.Children.Add(titleLabel);
-        mainLayout.Children.Add(subtitleLabel);
-        mainLayout.Children.Add(scrollView);
-        mainLayout.Children.Add(cancelButton);
-
-        popup.Content = mainLayout;
-
-        // Show as modal
-        await navigation.PushModalAsync(popup);
-
-        return await tcs.Task;
+            System.Diagnostics.Debug.WriteLine($"Error fetching parking status: {ex.Message}");
+            return null;
+        }
     }
 }
-
-    

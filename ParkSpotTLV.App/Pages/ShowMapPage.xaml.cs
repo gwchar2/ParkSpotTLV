@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Contracts.Map;
+using ParkSpotTLV.Contracts.Parking;
 using ParkSpotTLV.App.Data.Services;
 using ParkSpotTLV.App.Data.Models;
 using System.ComponentModel;
@@ -27,27 +28,29 @@ public partial class ShowMapPage : ContentPage, IDisposable
     private const double FALLBACK_ZOOM_METERS = 300;
     private const double SEARCH_RESULT_ZOOM_METERS = 300;
 
-    private bool isParked = false;
     private string? pickedCarName;
     private string? pickedCarId;
     private int pickedDayOffset = 0; // Days from today (0 = today, 1 = tomorrow, etc.)
     private string? pickedTime;
     DateTimeOffset selectedDate;
     private Guid activePermit;
+    private bool isResidentalPermit;
+    private Guid parkingSessionId;
     private Session? _session; // Single source of truth
     private readonly CarService _carService;
     private readonly MapService _mapService;
+    private readonly ParkingService _parkingService;
     private readonly MapSegmentRenderer _mapSegmentRenderer;
+    private readonly ParkingPopUps _parkingPopUps;
     private readonly ILocalDataService _localDataService;
     private readonly MapInteractionService _mapInteractionService;
-    private readonly ParkingService _parkingService;
     private List<Core.Models.Car> _userCars = new();
     private CancellationTokenSource? _mapMoveCts;
     private bool _isInitialized = false;
-    private Dictionary<Guid, string>? segmentsInfo;
+    private Dictionary<SegmentResponseDTO, string>? segmentsInfo;
 
 
-    public ShowMapPage(CarService carService, MapService mapService, MapSegmentRenderer mapSegmentRenderer, ILocalDataService localDataService, MapInteractionService mapInteractionService, ParkingService parkingService)
+    public ShowMapPage(CarService carService, MapService mapService, MapSegmentRenderer mapSegmentRenderer, ILocalDataService localDataService, MapInteractionService mapInteractionService, ParkingPopUps parkingPopUps, ParkingService parkingService)
     {
         InitializeComponent();
         _carService = carService;
@@ -56,6 +59,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         _localDataService = localDataService;
         _mapInteractionService = mapInteractionService;
         _parkingService = parkingService;
+        _parkingPopUps = parkingPopUps;
     }
 
     protected override async void OnAppearing()
@@ -90,6 +94,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
             }
 
             _isInitialized = true;
+
         }
         catch (Exception ex)
         {
@@ -322,11 +327,13 @@ public partial class ShowMapPage : ContentPage, IDisposable
             PaidParkingCheck.IsChecked = _session.ShowPaid;
             FreeParkingCheck.IsChecked = _session.ShowFree;
             RestrictedCheck.IsChecked = _session.ShowRestricted;
+            UpdateParkHereButtonState(_session.IsParking);
+
         }
 
         // pickedCarId and pickedCarName are already set by LoadUserCars()
         // Get active permit ID for the selected car
-        var activePermitNullable = await _parkingService.ShowPermitPopupAsync(pickedCarId,
+        (var activePermitNullable,isResidentalPermit) = await _parkingPopUps.ShowPermitPopupAsync(pickedCarId,
             (title, cancel, destruction, buttons) => DisplayActionSheet(title, cancel, destruction, buttons));
         activePermit = activePermitNullable ?? Guid.Empty;
 
@@ -389,7 +396,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         selectedDate = GetSelectedDateTime();
 
         // if car picked has permit options
-        var activePermitNullable = await _parkingService.ShowPermitPopupAsync(pickedCarId,
+        (var activePermitNullable,isResidentalPermit) = await _parkingPopUps.ShowPermitPopupAsync(pickedCarId,
             (title, cancel, destruction, buttons) => DisplayActionSheet(title, cancel, destruction, buttons));
         activePermit = activePermitNullable ?? Guid.Empty;
 
@@ -408,11 +415,43 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
     private async void OnParkHereClicked(object sender, EventArgs e)
     {
-        if (!isParked)
+        _session = await _localDataService.GetSessionAsync();
+        if (string.IsNullOrEmpty(pickedCarId) || _session is null)
+            return;
+        if (!_session.IsParking)
         {
             // let user choose street to park at in order to calculate free parking timer
-            var parkedStreet = await _parkingService.ShowStreetsListPopUpAsync(segmentsInfo,Navigation);
-            var result = await _parkingService.ShowParkingNotificationPopupAsync(Navigation);
+            if (isResidentalPermit) {
+                var parkedStreet = await _parkingPopUps.ShowStreetsListPopUpAsync(segmentsInfo, Navigation);
+                if (parkedStreet.HasValue)
+                {
+                    var (parkedStreetName, segmentResponse) = parkedStreet.Value;
+                    try
+                    {
+                        StartParkingResponse startParkingResponse = await _parkingService.StartParkingAsync(
+                            segmentResponse,
+                            Guid.Parse(pickedCarId),
+                            _session?.NotificationMinutesBefore ?? 30,
+                            _session?.MinParkingTime ?? 30);
+                        if (startParkingResponse is not null)
+                        {
+                            parkingSessionId = startParkingResponse.SessionId;
+                        }
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        await DisplayAlert("Error", $"Failed to start parking: {ex.Message}", "OK");
+                        return;
+                    }
+                }
+                else
+                {
+                    // User cancelled street selection
+                    return;
+                }
+            }
+
+            var result = await _parkingPopUps.ShowParkingNotificationPopupAsync(Navigation);
 
             if (result.Confirmed)
             {
@@ -422,25 +461,49 @@ public partial class ShowMapPage : ContentPage, IDisposable
                 else
                     message += "\nNotifications are disabled.";
 
-                // Update button state
-                isParked = true;
-                ParkHereBtn.Text = "End Parking";
-                ParkHereBtn.BackgroundColor = Color.FromArgb("#D32F2F");
+                UpdateParkHereButtonState(true); // update UI button            
+                await _localDataService.UpdateParkingStatusAsync(true); // update status in session
 
                 // Show parking confirmed popup with Pango option
-                await _parkingService.ShowParkingConfirmedPopupAsync(message, Navigation, DisplayAlert);
+                await _parkingPopUps.ShowParkingConfirmedPopupAsync(message, Navigation, DisplayAlert);
             }
         }
-        else
+        else // currently parking
         {
             // End parking
-            isParked = false;
-            ParkHereBtn.Text = "Park Here";
-            ParkHereBtn.BackgroundColor = Color.FromArgb("#2E7D32");
+            if (isResidentalPermit && parkingSessionId != Guid.Empty)
+            {
+                try
+                {
+                    await _parkingService.StopParkingAsync(parkingSessionId, Guid.Parse(pickedCarId));
+                }
+                catch (HttpRequestException ex)
+                {
+                    await DisplayAlert("Error", $"Failed to stop parking: {ex.Message}", "OK");
+                    return;
+                }
+            }
+
+            UpdateParkHereButtonState(false); // update UI button
+            await _localDataService.UpdateParkingStatusAsync(false); // update status in session
             await DisplayAlert("Parking Ended", "Your parking session has ended.", "OK");
         }
     }
 
+    private void UpdateParkHereButtonState(bool isParking)
+    {
+        if (isParking)
+        {
+            ParkHereBtn.Text = "End Parking";
+            ParkHereBtn.BackgroundColor = Color.FromArgb("#D32F2F");
+        }
+        else
+        {
+            ParkHereBtn.Text = "Park Here";
+            ParkHereBtn.BackgroundColor = Color.FromArgb("#2E7D32");
+        }
+
+    }
     private async void OnSearchAddress(object sender, EventArgs e)
     {
         var searchBar = (SearchBar)sender;

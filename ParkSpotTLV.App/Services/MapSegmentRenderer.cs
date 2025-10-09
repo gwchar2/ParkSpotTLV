@@ -23,9 +23,9 @@ public class MapSegmentRenderer
   
     // Renders segments on the map with filtering based on session preferences
     // Returns a dictionary mapping SegmentId -> StreetName for all rendered segments
-    public Dictionary<Guid, string> RenderSegments(Microsoft.Maui.Controls.Maps.Map map, GetMapSegmentsResponse segmentsResponse, Session? session)
+    public Dictionary<SegmentResponseDTO, string> RenderSegments(Microsoft.Maui.Controls.Maps.Map map, GetMapSegmentsResponse segmentsResponse, Session? session)
     {
-        var segmentToStreet = new Dictionary<Guid, string>();
+        var segmentToStreet = new Dictionary<SegmentResponseDTO, string>();
 
         if (map == null || segmentsResponse?.Segments == null)
         {
@@ -64,7 +64,7 @@ public class MapSegmentRenderer
                         ? segment.NameEnglish
                         : segment.NameHebrew ?? "Unknown";
 
-                    segmentToStreet[segment.SegmentId] = streetName;
+                    segmentToStreet[segment] = streetName;
                 }
             }
             catch (OutOfMemoryException)

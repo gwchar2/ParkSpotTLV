@@ -22,6 +22,8 @@ public class Session
 
     public string? LastPickedCarId { get; set; }
 
+    public bool IsParking { get; set; } = false;
+
     // User Auth
     public string UserName { get; set; } = string.Empty;
 

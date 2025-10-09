@@ -127,6 +127,20 @@ public class LocalDataService : ILocalDataService
         await context.SaveChangesAsync();
     }
 
+    public async Task UpdateParkingStatusAsync(bool isParking) {
+
+        using var context = new LocalDbContext();
+        var existing = await context.Session.FirstOrDefaultAsync();
+
+        if (existing is null)
+        return;
+
+        existing.IsParking = isParking;
+        existing.LastUpdated = DateTimeOffset.Now;
+
+        await context.SaveChangesAsync();
+    }
+
     public async Task<Session?> GetSessionAsync() {
 
         using var context = new LocalDbContext();
