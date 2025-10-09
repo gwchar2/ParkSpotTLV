@@ -383,6 +383,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
             pickedCarId = _userCars[selectedIndex].Id;
             pickedCarName = _userCars[selectedIndex].Name;
         }
+        // add check - ative session -> update button parkhere/stopparking
 
         // Save to database
         await _localDataService.UpdatePreferencesAsync(
@@ -416,11 +417,14 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
     private async void OnParkHereClicked(object sender, EventArgs e)
     {
-        _session = await _localDataService.GetSessionAsync();
+        // instead of _session.IsParking check -> check Parking status od pickedCarId
+        // _session = await _localDataService.GetSessionAsync();
+        bool isParking = false; // ******* change to actual status  
         bool parkingAtResZone = false;
+        StartParkingResponse? startParkingResponse = null;
         if (string.IsNullOrEmpty(pickedCarId) || _session is null)
             return;
-        if (!_session.IsParking)
+        if (!isParking)
         {
             // let user choose street to park at in order to calculate free parking timer
             if (isResidentalPermit)
@@ -434,7 +438,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
                     {
                         try
                         {
-                            StartParkingResponse startParkingResponse = await _parkingService.StartParkingAsync(
+                            startParkingResponse = await _parkingService.StartParkingAsync(
                                 segmentResponse,
                                 Guid.Parse(pickedCarId),
                                 _session?.NotificationMinutesBefore ?? 30,
@@ -462,21 +466,11 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
             if (result.Confirmed)
             {
-                string message = $"Parking started!";
-                if (parkingAtResZone)
-                    message += "\nParking at your zone";
-                else
-                    message += "\nParking outside your zone, you have up to 2h free parking.";
-                if (result.NotificationsEnabled)
-                    message += $"\nYou'll be notified {result.Minutes} minutes before parking ends.";
-                else
-                    message += "\nNotifications are disabled.";
-
                 UpdateParkHereButtonState(true); // update UI button            
-                await _localDataService.UpdateParkingStatusAsync(true); // update status in session
+                // await _localDataService.UpdateParkingStatusAsync(true); // update status in session
 
                 // Show parking confirmed popup with Pango option
-                await _parkingPopUps.ShowParkingConfirmedPopupAsync(message, Navigation, DisplayAlert);
+                await _parkingPopUps.ShowParkingConfirmedPopupAsync(startParkingResponse,parkingAtResZone, Navigation, DisplayAlert);
             }
         }
         else // currently parking
@@ -484,8 +478,10 @@ public partial class ShowMapPage : ContentPage, IDisposable
             // End parking
             if (isResidentalPermit && parkingSessionId != Guid.Empty)
             {
+                await DisplayAlert("Debug", "calling stopParkingAsync", "OK");
                 try
                 {
+                    
                     await _parkingService.StopParkingAsync(parkingSessionId, Guid.Parse(pickedCarId));
                 }
                 catch (HttpRequestException ex)
@@ -496,7 +492,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
             }
 
             UpdateParkHereButtonState(false); // update UI button
-            await _localDataService.UpdateParkingStatusAsync(false); // update status in session
+            // await _localDataService.UpdateParkingStatusAsync(false); // update status in session
             await DisplayAlert("Parking Ended", "Your parking session has ended.", "OK");
         }
     }

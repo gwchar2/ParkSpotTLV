@@ -1,4 +1,5 @@
 using ParkSpotTLV.Contracts.Map;
+using ParkSpotTLV.Contracts.Parking;
 using ParkSpotTLV.Core.Models;
 
 namespace ParkSpotTLV.App.Services;
@@ -211,7 +212,7 @@ public class ParkingPopUps
     }
 
     // Shows parking confirmed popup with Pango option
-    public async Task ShowParkingConfirmedPopupAsync(string message, INavigation navigation, Func<string, string, string, Task> displayAlert)
+    public async Task ShowParkingConfirmedPopupAsync(StartParkingResponse? startParkingResponse, bool isParkingAtZone ,INavigation navigation, Func<string, string, string, Task> displayAlert)
     {
         // Create the popup content
         var popup = new ContentPage
@@ -237,6 +238,18 @@ public class ParkingPopUps
         };
 
         // Message
+        string message = "Parking started!";
+        if (startParkingResponse is not null)
+        {
+            if (isParkingAtZone)
+                message += "\nParking at your zone";
+            else
+            {
+                message += "\nParking outside your zone.";
+                message += $"\nYou have {startParkingResponse.FreeBudgetRemaining} minutes of free parking.";
+            }
+        }
+        
         var messageLabel = new Label
         {
             Text = message,
