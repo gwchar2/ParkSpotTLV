@@ -9,7 +9,7 @@ namespace ParkSpotTLV.Infrastructure.Config {
             e.HasKey(z => z.Id);
 
 
-            e.Property(z => z.Name).HasMaxLength(64);
+            e.Property(z => z.Name).HasMaxLength(16);
 
             e.Property(z => z.Taarif).IsRequired();
 

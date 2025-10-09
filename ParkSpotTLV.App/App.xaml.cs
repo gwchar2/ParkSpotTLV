@@ -1,7 +1,6 @@
 ﻿using ParkSpotTLV.App.Data.Services;
 using ParkSpotTLV.App.Services;
 
-
 namespace ParkSpotTLV.App
 {
     public partial class App : Application
@@ -17,7 +16,6 @@ namespace ParkSpotTLV.App
             _shell = shell;
             _localData = localData;
             _authService = authService;
-
             _ = InitializeAppAsync();
         }
 
@@ -33,6 +31,7 @@ namespace ParkSpotTLV.App
             {
                 // Step 1: Initialize database first
                 await _localData.InitializeAsync();
+
 
                 // Step 2: Try auto-login
                 bool success = await _authService.TryAutoLoginAsync();

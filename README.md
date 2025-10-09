@@ -144,7 +144,7 @@ dotnet ef database update --project ./ParkSpotTLV.Infrastructure --startup-proje
 Restart DB+API
 Verify
 ```
-
+$b64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\path\to\your-project.json"))
 
 - Updating information in the DB
 ```bash

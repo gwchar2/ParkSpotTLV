@@ -12,7 +12,7 @@ namespace ParkSpotTLV.Infrastructure.Config {
             e.Property(x => x.OwnerId).IsRequired();
             e.HasIndex(x => x.OwnerId);
 
-            e.Property(x => x.Name).IsRequired();
+            e.Property(x => x.Name).HasMaxLength(60).IsRequired();
             e.HasIndex(v => new { 
                 v.OwnerId, 
                 v.Name 

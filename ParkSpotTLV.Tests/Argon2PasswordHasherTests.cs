@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using ParkSpotTLV.Core.Auth;
-using ParkSpotTLV.Infrastructure.Auth;
+using ParkSpotTLV.Infrastructure.Auth.Services;
 using Xunit;
 
 public class Argon2PasswordHasherTests {
