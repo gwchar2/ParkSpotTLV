@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.14.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.13.0-beta.0...v0.14.0-beta.0) (2025-10-10)
+
+
+### Features
+
+* **App:** adding pango navigation - needs to be tested on real device ([49a8d29](https://github.com/gwchar2/ParkSpotTLV/commit/49a8d29e048bd52a71397484fba7238d6bfafa05))
+
+
+### Bug Fixes
+
+* **App:** fixing services order ([fb5cbaa](https://github.com/gwchar2/ParkSpotTLV/commit/fb5cbaacc111a177be1b10509330e614d9e5da70))
+* **App:** fixong pages methods order ([eeb9800](https://github.com/gwchar2/ParkSpotTLV/commit/eeb9800c1f8f3ddb57e1649d9bfa95457bbcbb06))
+* **App:** removing notifications from App ([b8a94c9](https://github.com/gwchar2/ParkSpotTLV/commit/b8a94c91eb38bb572a50165f0c2a5c03d050cec7))
+* **App:** removing unused using statements ([cf0ca0e](https://github.com/gwchar2/ParkSpotTLV/commit/cf0ca0e7f55fc09206bc7e22f73cfad6fbd6cd64))
+* **App:** services unified structure ([e754f4c](https://github.com/gwchar2/ParkSpotTLV/commit/e754f4cd2f42fb798f13f6da7949ee1e70b9e912))
+* **App:** using contracts responses classes in api requests ([38e8aae](https://github.com/gwchar2/ParkSpotTLV/commit/38e8aae550b08c67523f1371d17ca06354327076))
+* **Parking:** getting isParking from status api call ([a5cd2e8](https://github.com/gwchar2/ParkSpotTLV/commit/a5cd2e84238cad257f478ef1743d3efb7050f672))
+* **Parking:** getting isParking from status api call ([3dda789](https://github.com/gwchar2/ParkSpotTLV/commit/3dda789a42f670ba646daa6e7239d519f3164f6e))
+
 ## [0.13.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.12.0-beta.0...v0.13.0-beta.0) (2025-10-09)
 
 
