@@ -14,13 +14,14 @@ public class ParkingPopUps
         _carService = carService ?? throw new ArgumentNullException(nameof(carService));
     }
 
+    // When user has disabled permit - he is allowed to choose to not use in this parking session
     // Shows permit selection dialog and returns the selected permit ID
     public async Task<(Guid? activePermitId, bool isResidential)> ShowPermitPopupAsync(string? pickedCarId, Func<string, string?, string?, string[], Task<string>> displayActionSheet)
     {
         // check if pop up required
         if (pickedCarId is null)
             return (null,false);
-
+        // get Car
         Car? currCar = await _carService.GetCarAsync(pickedCarId);
 
         if (currCar == null)
@@ -58,7 +59,7 @@ public class ParkingPopUps
                 }
                 else
                 {
-                    return (Guid.Empty,false); // default permit
+                    return (await _carService.GetPermitAsync(pickedCarId, 2),false); // get default permit
                 }
             }
         }
@@ -148,9 +149,24 @@ public class ParkingPopUps
 
         pangoButton.Clicked += async (s, e) =>
         {
-            // TODO: Navigate to Pango app or show Pango integration
-            await displayAlert("Pango", "Pango integration coming soon!", "OK");
-            await navigation.PopModalAsync();
+            // TODO: Test navigation to Pango app
+            // await displayAlert("Pango", "Pango integration coming soon!", "OK");
+            try
+            {
+                await Launcher.OpenAsync("pango://");
+            }
+            catch
+            {
+                // Fallback to app store
+                if (DeviceInfo.Platform == DevicePlatform.iOS)
+                    await Launcher.OpenAsync("https://apps.apple.com/app/pango");
+                else
+                    await Launcher.OpenAsync("https://play.google.com/store/apps/details?id=com.pango.android");
+            }
+            finally
+            {
+                await navigation.PopModalAsync();
+            }
         };
 
         buttonLayout.Children.Add(okButton);
