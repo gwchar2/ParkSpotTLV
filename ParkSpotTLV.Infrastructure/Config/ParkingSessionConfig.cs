@@ -28,7 +28,7 @@ namespace ParkSpotTLV.Infrastructure.Config {
              .IsUnique();
 
 
-            e.HasIndex(x => x.StartedLocal);
+            e.HasIndex(x => x.StartedUtc);
             e.HasIndex(x => new {
                 x.VehicleId,
                 x.Status

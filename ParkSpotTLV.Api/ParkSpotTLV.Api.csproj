@@ -37,6 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ParkSpotTLV.Contracts\ParkSpotTLV.Contracts.csproj" />
     <ProjectReference Include="..\ParkSpotTLV.Infrastructure\ParkSpotTLV.Infrastructure.csproj" />
   </ItemGroup>
 	

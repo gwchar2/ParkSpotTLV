@@ -14,30 +14,6 @@ namespace ParkSpotTLV.Contracts.Budget {
             var date = DateOnly.FromDateTime(localTime.Date);
 
             return today >= ResetTime ? date : date.AddDays(-1);
-
         }
-
-        public static IEnumerable<(DateTimeOffset Start, DateTimeOffset End)> SliceByAnchorBoundary(DateTimeOffset startLocal, DateTimeOffset endLocal) {
-
-            var reset = new TimeSpan(8, 0, 0);
-            var current = startLocal;
-
-            while (true) {
-                var baseDate = current.TimeOfDay >= reset
-                    ? DateOnly.FromDateTime(current.Date)
-                    : DateOnly.FromDateTime(current.Date).AddDays(-1);
-
-                var boundaryLocal = new DateTimeOffset(
-                    baseDate.AddDays(1).ToDateTime(ParkingBudgetTimeHandler.ResetTime),
-                    current.Offset);
-
-                var sliceEnd = boundaryLocal < endLocal ? boundaryLocal : endLocal;
-                yield return (current, sliceEnd);
-
-                if (sliceEnd >= endLocal) break;
-                current = sliceEnd;
-            }
-        }
-
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ParkSpotTLV.Infrastructure;
+using ParkSpotTLV.Contracts.Time;
 
 
 namespace ParkSpotTLV.Api.Endpoints {
@@ -14,7 +15,7 @@ namespace ParkSpotTLV.Api.Endpoints {
              *      200 with { status, version, uptimeSec, nowutc } if API is live.
              */
             group.MapGet("/health", 
-                (RuntimeHealth rh) => {
+                (RuntimeHealth rh, IClock clock) => {
                 var now = DateTimeOffset.UtcNow;
                 var uptime = now - rh.StartedAtUtc;
 
@@ -22,7 +23,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                     status = "ok",
                     version = rh.Version,
                     uptimeSec = (long)uptime.TotalSeconds,
-                    nowUtc = now
+                    nowLocal = clock.LocalNow
                 });
             })
             .WithName("Health")

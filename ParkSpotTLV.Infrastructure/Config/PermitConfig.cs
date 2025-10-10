@@ -31,7 +31,7 @@ namespace ParkSpotTLV.Infrastructure.Config {
              .ValueGeneratedOnAddOrUpdate()
              .HasColumnName("xmin");
 
-            e.Property(x => x.LastUpdated);
+            e.Property(x => x.LastUpdatedUtc);
         }
     }
 }

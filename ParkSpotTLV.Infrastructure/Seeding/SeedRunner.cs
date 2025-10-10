@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Contracts.Budget;
+using ParkSpotTLV.Contracts.Time;
 using ParkSpotTLV.Infrastructure.Entities;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -26,11 +27,13 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
         IServiceProvider sp,
         IHostEnvironment env,
         IOptions<SeedOptions> opts,
-        ILogger<SeedRunner> log) : IHostedService {
+        ILogger<SeedRunner> log,
+        IClock clock) : IHostedService {
         private readonly IServiceProvider _sp = sp;
         private readonly IHostEnvironment _env = env;
         private readonly ILogger<SeedRunner> _log = log;
         private readonly SeedOptions _opts = opts.Value;
+        private readonly IClock _clock = clock;
 
         public async Task StartAsync(CancellationToken ct) {
             if (!_opts.Enabled) {
@@ -51,7 +54,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             await SeedStreetSegmentsAsync(db, ct);
             await SeedUsersAsync(db, ct);
             await SeedTariffWindowsAsync(db, ct);
-            await SeedParkingDailyBudgetAsync(db, TimeZoneInfo.FindSystemTimeZoneById("Asia/Jerusalem"), ct);
+            await SeedParkingDailyBudgetAsync(db, ct);
 
             _log.LogInformation("Seeding completed.");
         }
@@ -73,7 +76,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                     Geom = ToMultiPolygon(geom),
                     Code = GetInt(props, "code"),
                     Name = GetString(props, "name"),
-                    LastUpdated = DateTimeOffset.UtcNow
+                    LastUpdatedUtc = _clock.UtcNow
                 };
                 var temp = GetInt(props, "tariff");
                 zone.Taarif = temp.HasValue ? (Tariff)temp.Value : Tariff.City_Center;
@@ -151,7 +154,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
         *  - Group B: Sun–Thu 08:00–21:00; Fri 08:00–17:00; Sat none
         *  - Outside paid windows -> FREE by definition.
         */
-        private static async Task SeedTariffWindowsAsync(AppDbContext db, CancellationToken ct) {
+        private async Task SeedTariffWindowsAsync(AppDbContext db, CancellationToken ct) {
             if (await db.TariffWindows.AnyAsync(ct))
                 return; 
 
@@ -169,7 +172,6 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                     });
                 }
             }
-
             // City_Center
             AddRange(Tariff.City_Center,[
                 (DayOfWeek.Sunday,    "08:00", "21:00"),
@@ -243,7 +245,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                         if (zoneCode is not null && zonesByCode.ContainsKey(zoneCode.Value)) 
                             permit.ZoneCode = zoneCode.Value;
 
-                        permit.LastUpdated = DateTimeOffset.UtcNow;
+                        permit.LastUpdatedUtc = _clock.UtcNow;
                         vehicle.Permits.Add(permit);
                     }
                     user.Vehicles.Add(vehicle);
@@ -256,10 +258,8 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
         }
 
         // ---------------------- Daily Free Parking Budget ----------------------
-        public static async Task SeedParkingDailyBudgetAsync(AppDbContext db, TimeZoneInfo tz, CancellationToken ct = default) {
-            var nowLocal = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, tz);
-            var anchor = ParkingBudgetTimeHandler.AnchorDateFor(nowLocal);
-            var nowUtc = DateTimeOffset.UtcNow;
+        private async Task SeedParkingDailyBudgetAsync(AppDbContext db,CancellationToken ct = default) {
+            var anchor = ParkingBudgetTimeHandler.AnchorDateFor(_clock.LocalNow);
 
             var vehicleIds = await db.Vehicles
                 .AsNoTracking()
@@ -279,8 +279,8 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                         VehicleId = vid,
                         AnchorDate = anchor,
                         MinutesUsed = 0,
-                        CreatedAt = nowUtc,
-                        UpdatedAt = nowUtc
+                        CreatedAtUtc = _clock.UtcNow,
+                        UpdatedAtUtc = _clock.UtcNow
                     });
                 }
             }

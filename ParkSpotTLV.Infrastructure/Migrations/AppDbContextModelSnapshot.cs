@@ -24,55 +24,6 @@ namespace ParkSpotTLV.Infrastructure.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "postgis");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.DevicePushToken", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<bool>("IsRevoked")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_revoked");
-
-                    b.Property<DateTimeOffset>("LastSeen")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_seen");
-
-                    b.Property<string>("Platform")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("platform");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("token");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_device_push_tokens");
-
-                    b.HasIndex("Token")
-                        .IsUnique()
-                        .HasDatabaseName("UX_DevicePushToken_Token");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_DevicePushToken_UserId");
-
-                    b.ToTable("device_push_tokens", (string)null);
-                });
-
             modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.ParkingDailyBudget", b =>
                 {
                     b.Property<Guid>("VehicleId")
@@ -83,9 +34,9 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .HasColumnType("date")
                         .HasColumnName("anchor_date");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnName("created_at_utc");
 
                     b.Property<int>("MinutesUsed")
                         .ValueGeneratedOnAdd()
@@ -93,92 +44,14 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .HasDefaultValue(0)
                         .HasColumnName("minutes_used");
 
-                    b.Property<DateTimeOffset>("UpdatedAt")
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnName("updated_at_utc");
 
                     b.HasKey("VehicleId", "AnchorDate")
                         .HasName("pk_daily_budgets");
 
                     b.ToTable("daily_budgets", (string)null);
-                });
-
-            modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.ParkingNotification", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<int>("AttemptCount")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("attempt_count");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Error")
-                        .HasColumnType("text")
-                        .HasColumnName("error");
-
-                    b.Property<bool>("IsSent")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_sent");
-
-                    b.Property<string>("JobId")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
-                        .HasColumnName("job_id");
-
-                    b.Property<DateTimeOffset?>("LastAttemptAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_attempt_at");
-
-                    b.Property<int>("NotificationMinutes")
-                        .HasColumnType("integer")
-                        .HasColumnName("notification_minutes");
-
-                    b.Property<DateTimeOffset>("NotifyAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("notify_at");
-
-                    b.Property<string>("ProviderMessageId")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
-                        .HasColumnName("provider_message_id");
-
-                    b.Property<Guid>("SessionId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("session_id");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasDefaultValue("Pending")
-                        .HasColumnName("status");
-
-                    b.Property<Guid?>("TokenIdSnapshot")
-                        .HasColumnType("uuid")
-                        .HasColumnName("token_id_snapshot");
-
-                    b.HasKey("Id")
-                        .HasName("pk_parking_notifications");
-
-                    b.HasIndex("SessionId")
-                        .HasDatabaseName("ix_parking_notifications_session_id");
-
-                    b.HasIndex("NotifyAt", "IsSent")
-                        .HasDatabaseName("ix_parking_notifications_notify_at_is_sent");
-
-                    b.HasIndex("NotifyAt", "Status")
-                        .HasDatabaseName("IX_notification_notify_at_status");
-
-                    b.ToTable("parking_notifications", (string)null);
                 });
 
             modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.ParkingSession", b =>
@@ -206,13 +79,9 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_pay_now");
 
-                    b.Property<DateTimeOffset?>("NextChange")
+                    b.Property<DateTimeOffset?>("NextChangeUtc")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("next_change");
-
-                    b.Property<int?>("NotificationMinutes")
-                        .HasColumnType("integer")
-                        .HasColumnName("notification_minutes");
+                        .HasColumnName("next_change_utc");
 
                     b.Property<int>("PaidMinutes")
                         .ValueGeneratedOnAdd()
@@ -230,9 +99,9 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("parking_type");
 
-                    b.Property<DateTimeOffset?>("PlannedEndLocal")
+                    b.Property<DateTimeOffset>("PlannedEndUtc")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("planned_end_local");
+                        .HasColumnName("planned_end_utc");
 
                     b.Property<string>("Reason")
                         .HasMaxLength(128)
@@ -243,17 +112,17 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("segment_id");
 
-                    b.Property<DateTimeOffset?>("StartedLocal")
+                    b.Property<DateTimeOffset>("StartedUtc")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("started_local");
+                        .HasColumnName("started_utc");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer")
                         .HasColumnName("status");
 
-                    b.Property<DateTimeOffset?>("StoppedLocal")
+                    b.Property<DateTimeOffset?>("StoppedUtc")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("stopped_local");
+                        .HasColumnName("stopped_utc");
 
                     b.Property<int>("Tariff")
                         .HasColumnType("integer")
@@ -274,8 +143,8 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_parking_sessions");
 
-                    b.HasIndex("StartedLocal")
-                        .HasDatabaseName("ix_parking_sessions_started_local");
+                    b.HasIndex("StartedUtc")
+                        .HasDatabaseName("ix_parking_sessions_started_utc");
 
                     b.HasIndex("VehicleId")
                         .IsUnique()
@@ -300,9 +169,9 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<DateTimeOffset?>("LastUpdated")
+                    b.Property<DateTimeOffset>("LastUpdatedUtc")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_updated");
+                        .HasColumnName("last_updated_utc");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer")
@@ -341,22 +210,22 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnName("created_at_utc");
 
-                    b.Property<DateTimeOffset>("ExpiresAt")
+                    b.Property<DateTimeOffset>("ExpiresAtUtc")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("expires_at");
+                        .HasColumnName("expires_at_utc");
 
                     b.Property<string>("ReplacedByTokenHash")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
                         .HasColumnName("replaced_by_token_hash");
 
-                    b.Property<DateTimeOffset?>("RevokedAt")
+                    b.Property<DateTimeOffset?>("RevokedAtUtc")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("revoked_at");
+                        .HasColumnName("revoked_at_utc");
 
                     b.Property<string>("TokenHash")
                         .IsRequired()
@@ -371,14 +240,14 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_refresh_tokens");
 
-                    b.HasIndex("ExpiresAt")
-                        .HasDatabaseName("ix_refresh_tokens_expires_at");
+                    b.HasIndex("ExpiresAtUtc")
+                        .HasDatabaseName("ix_refresh_tokens_expires_at_utc");
 
                     b.HasIndex("ReplacedByTokenHash")
                         .HasDatabaseName("ix_refresh_tokens_replaced_by_token_hash");
 
-                    b.HasIndex("RevokedAt")
-                        .HasDatabaseName("ix_refresh_tokens_revoked_at");
+                    b.HasIndex("RevokedAtUtc")
+                        .HasDatabaseName("ix_refresh_tokens_revoked_at_utc");
 
                     b.HasIndex("TokenHash")
                         .IsUnique()
@@ -565,9 +434,9 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .HasColumnType("geometry(MultiPolygon,4326)")
                         .HasColumnName("geom");
 
-                    b.Property<DateTimeOffset?>("LastUpdated")
+                    b.Property<DateTimeOffset>("LastUpdatedUtc")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_updated");
+                        .HasColumnName("last_updated_utc");
 
                     b.Property<string>("Name")
                         .HasMaxLength(16)
@@ -604,16 +473,6 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_daily_budgets_vehicles_vehicle_id");
-                });
-
-            modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.ParkingNotification", b =>
-                {
-                    b.HasOne("ParkSpotTLV.Infrastructure.Entities.ParkingSession", null)
-                        .WithMany()
-                        .HasForeignKey("SessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_parking_notifications_parking_session_session_id");
                 });
 
             modelBuilder.Entity("ParkSpotTLV.Infrastructure.Entities.Permit", b =>

@@ -2,13 +2,15 @@
 using Microsoft.EntityFrameworkCore;
 using ParkSpotTLV.Infrastructure;
 using ParkSpotTLV.Contracts.Budget;
+using ParkSpotTLV.Contracts.Time;
 using ParkSpotTLV.Infrastructure.Entities;
 
 namespace ParkSpotTLV.Api.Features.Parking.Services {
 
-    public sealed class DailyBudgetService(AppDbContext db) : IDailyBudgetService {
+    public sealed class DailyBudgetService(AppDbContext db, IClock clock) : IDailyBudgetService {
 
         private const int DailyAllowanceMinutes = 120;
+        private readonly IClock _clock = clock;
 
         /*
          * We ensure that the daily allownace was reset, it only creates the day row if missing.
@@ -22,8 +24,8 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
                     VehicleId = vehicleId,
                     AnchorDate = anchorDate,
                     MinutesUsed = 0,
-                    CreatedAt = DateTimeOffset.UtcNow,
-                    UpdatedAt = DateTimeOffset.UtcNow
+                    CreatedAtUtc = _clock.UtcNow,
+                    UpdatedAtUtc = _clock.UtcNow
                 });
 
                 await db.SaveChangesAsync(ct);
@@ -79,7 +81,7 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
             await EnsureResetAsync(vehicleId, anchorDate, ct);
 
             // UPDATE the minimum between 120 minutes (default) and the amount of time used
-            var now = DateTimeOffset.UtcNow;
+            var now = _clock.UtcNow;
             var sql = """
                         UPDATE "daily_budgets"
                         SET "minutes_used" = LEAST(120, "minutes_used" + {2}),
@@ -90,6 +92,28 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
             await db.Database.ExecuteSqlRawAsync(sql, [vehicleId, anchorDate, deltaMinutes, now], ct);
         }
 
-        
+        public IEnumerable<(DateTimeOffset Start, DateTimeOffset End)> SliceByAnchorBoundary(DateTimeOffset startLocal, DateTimeOffset endLocal) {
+
+            var reset = new TimeSpan(8, 0, 0);
+            var current = startLocal;
+
+            while (true) {
+                var baseDate = current.TimeOfDay >= reset
+                    ? DateOnly.FromDateTime(current.Date)
+                    : DateOnly.FromDateTime(current.Date).AddDays(-1);
+
+                var boundaryLocal = new DateTimeOffset(
+                    baseDate.AddDays(1).ToDateTime(ParkingBudgetTimeHandler.ResetTime),
+                    current.Offset);
+
+                var sliceEnd = boundaryLocal < endLocal ? boundaryLocal : endLocal;
+                yield return (current, sliceEnd);
+
+                if (sliceEnd >= endLocal) break;
+                current = sliceEnd;
+            }
+        }
+
+
     }
 }

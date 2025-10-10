@@ -23,7 +23,7 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
             bool isPayNow = paymentDecisionNow.PayNow == PaymentNow.Paid;                   // Is permit required to pay on start
             var horizonEnd = now.AddMinutes(Math.Min(MinParkingTime, 720));                 // The maximum amount to look ahead at is 12 hours
             DateTimeOffset? paidWindowStart = calNow.ActiveNow                              // The first time the user is required to pay
-                ? now : calNow.NextStart is DateTimeOffset ns && ns > now ? ns : null;
+                ? now : calNow.NextStart is DateTimeOffset nextStart && nextStart > now ? nextStart : null;
 
             // Restricted now, future doesnt matter -> RESTRICTED -> RED,                   PayOnStart = X,     WillHaveToPayLater?: X,
             if (IsRestrictedNow(availabilityNow, now))
