@@ -11,7 +11,7 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
 /*
- * Feature Extension Methods — Each feature exposes small IServiceCollection/IEndpointRouteBuilder extension methods 
+ * Feature Extension Methods ï¿½ Each feature exposes small IServiceCollection/IEndpointRouteBuilder extension methods 
  * (e.g., AddAuthFeature(), AddInfrastructure(), MapCustomOpenApi()). 
  * Program.cs becomes a short, readable script that composes features via one-liners. 
  * All detailed registrations, options binding, and endpoint wiring live inside their feature extensions, 
@@ -35,7 +35,7 @@ try {
     builder.Services.AddParking();
 
     // Push Notification service
-    builder.Services.AddNotification(builder.Configuration);
+    // builder.Services.AddNotification(builder.Configuration);
 
     var app = builder.Build();
 
@@ -52,7 +52,7 @@ try {
     app.MapPermits();
     app.MapSegments();
     app.MapParking();
-    app.MapNotificationsTest();
+    // app.MapNotificationsTest();
 
     app.Run();
 }
