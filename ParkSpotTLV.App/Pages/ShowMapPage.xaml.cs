@@ -122,16 +122,15 @@ public partial class ShowMapPage : ContentPage, IDisposable
         {
             System.Diagnostics.Debug.WriteLine($"Fetching segments for bounds: MinLat={bounds.Value.MinLat}, MaxLat={bounds.Value.MaxLat}, MinLon={bounds.Value.MinLon}, MaxLon={bounds.Value.MaxLon}");
 
-            // fetch segments list using getSegmentsAsync(...)
-            segmentsResponse = await _mapService.getSegmentsAsync(activePermit,
-                                                                    bounds.Value.MinLon,
-                                                                    bounds.Value.MinLat,
-                                                                    bounds.Value.MaxLon,
-                                                                    bounds.Value.MaxLat,
-                                                                    bounds.Value.CenterLon,
-                                                                    bounds.Value.CenterLat,
-                                                                    selectedDate,
-                                                                    _session?.MinParkingTime ?? DEFAULT_MIN_PARKING_TIME_MINUTES);
+            segmentsResponse = await _mapService.GetSegmentsAsync(activePermit,
+                                                                   bounds.Value.MinLon,
+                                                                   bounds.Value.MinLat,
+                                                                   bounds.Value.MaxLon,
+                                                                   bounds.Value.MaxLat,
+                                                                   bounds.Value.CenterLon,
+                                                                   bounds.Value.CenterLat,
+                                                                   selectedDate,
+                                                                   _session?.MinParkingTime ?? DEFAULT_MIN_PARKING_TIME_MINUTES);
 
             if (segmentsResponse == null || segmentsResponse.Segments == null)
             {
