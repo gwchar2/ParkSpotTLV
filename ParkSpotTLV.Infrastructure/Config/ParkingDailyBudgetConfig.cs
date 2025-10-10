@@ -19,8 +19,8 @@ namespace ParkSpotTLV.Infrastructure.Config {
 
             e.Property(p => p.MinutesUsed).IsRequired().HasDefaultValue(0);
 
-            e.Property(p => p.CreatedAt).IsRequired();
-            e.Property(p => p.UpdatedAt).IsRequired();
+            e.Property(p => p.CreatedAtUtc).IsRequired();
+            e.Property(p => p.UpdatedAtUtc).IsRequired();
 
             e.HasOne<Vehicle>().WithMany().HasForeignKey(p => p.VehicleId).OnDelete(DeleteBehavior.Cascade);
         }

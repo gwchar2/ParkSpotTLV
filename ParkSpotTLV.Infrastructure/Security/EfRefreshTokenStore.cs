@@ -1,13 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ParkSpotTLV.Contracts.Time;
 using ParkSpotTLV.Infrastructure.Entities;
 using ParkSpotTLV.Infrastructure.Auth.Models;
 
 namespace ParkSpotTLV.Infrastructure.Security {
 
-    public class EfRefreshTokenStore(AppDbContext db, TimeProvider time) {
+    public class EfRefreshTokenStore(AppDbContext db, TimeProvider time, IClock clock) {
 
         private readonly AppDbContext _db = db;
         private readonly TimeProvider _time = time;
+        private readonly IClock _clock = clock;
         public sealed record RefreshTokenValidationResult(
             RefreshTokenStatus Status,
             RefreshToken? Token
@@ -15,15 +17,15 @@ namespace ParkSpotTLV.Infrastructure.Security {
 
         /* Creates a new refresh token */
         public async Task<(string rawToken, RefreshToken record)> CreateAsync(Guid userId, TimeSpan ttl, CancellationToken ct = default) {
-            var now = _time.GetUtcNow().UtcDateTime;
+            var now = _clock.UtcNow.UtcDateTime;
             var raw = TokenHashing.GenerateBase64UrlToken(32);
             var hash = TokenHashing.Sha256Hex(raw);
 
             var rec = new RefreshToken {
                 UserId = userId,
                 TokenHash = hash,
-                CreatedAt = now,
-                ExpiresAt = now.Add(ttl),
+                CreatedAtUtc = now,
+                ExpiresAtUtc = now.Add(ttl),
             };
 
             _db.RefreshTokens.Add(rec);
@@ -40,30 +42,30 @@ namespace ParkSpotTLV.Infrastructure.Security {
 
             if (rec is null) return new(RefreshTokenStatus.NotFound, null);
 
-            var now = _time.GetUtcNow().UtcDateTime;
+            var now = _clock.UtcNow.UtcDateTime;
 
-            if (rec.RevokedAt is not null) {
+            if (rec.RevokedAtUtc is not null) {
                 return rec.ReplacedByTokenHash is not null
                     ? new(RefreshTokenStatus.Reused, rec)
                     : new(RefreshTokenStatus.Revoked, rec);
             }
 
-            if (rec.ExpiresAt <= now) return new(RefreshTokenStatus.Expired, rec);
+            if (rec.ExpiresAtUtc <= now) return new(RefreshTokenStatus.Expired, rec);
 
             return new(RefreshTokenStatus.Active, rec);
         }
 
         /* Renews an old (not-yet-expired) token */
         public async Task<(string rawToken, RefreshToken newRecord)> RotateAsync(string PresentedRawToken, TimeSpan ttl, CancellationToken ct = default) {
-            var now = _time.GetUtcNow().UtcDateTime;
+            var now = _clock.UtcNow.UtcDateTime;
             var oldHash = TokenHashing.Sha256Hex(PresentedRawToken);
 
             await using var tx = await _db.Database.BeginTransactionAsync(ct);
 
             var old = await _db.RefreshTokens.FirstOrDefaultAsync(x => x.TokenHash == oldHash, ct);
             if (old is null) throw new InvalidOperationException("Refresh token not found");
-            if (old.RevokedAt is not null) throw new InvalidOperationException("Refresh token already revoked");
-            if (old.ExpiresAt <= now) throw new InvalidOperationException("Refresh token expired");
+            if (old.RevokedAtUtc is not null) throw new InvalidOperationException("Refresh token already revoked");
+            if (old.ExpiresAtUtc <= now) throw new InvalidOperationException("Refresh token expired");
 
             var newRaw = TokenHashing.GenerateBase64UrlToken(32);
             var newHash = TokenHashing.Sha256Hex(newRaw);
@@ -71,13 +73,13 @@ namespace ParkSpotTLV.Infrastructure.Security {
             var @new = new RefreshToken {
                 UserId = old.UserId,
                 TokenHash = newHash,
-                CreatedAt = now,
-                ExpiresAt = now.Add(ttl),
+                CreatedAtUtc = now,
+                ExpiresAtUtc = now.Add(ttl),
             };
 
             _db.RefreshTokens.Add(@new);
 
-            old.RevokedAt = now;
+            old.RevokedAtUtc = now;
             old.ReplacedByTokenHash = newHash;
 
             await _db.SaveChangesAsync(ct);
@@ -93,9 +95,9 @@ namespace ParkSpotTLV.Infrastructure.Security {
             var rec = await _db.RefreshTokens.FirstOrDefaultAsync(x => x.TokenHash == hash, ct);
 
             if (rec is null) return false;
-            if (rec.RevokedAt is not null) return true;
+            if (rec.RevokedAtUtc is not null) return true;
 
-            rec.RevokedAt = _time.GetUtcNow().UtcDateTime;
+            rec.RevokedAtUtc = _clock.UtcNow.UtcDateTime;
             await _db.SaveChangesAsync(ct);
 
 
@@ -106,15 +108,15 @@ namespace ParkSpotTLV.Infrastructure.Security {
         public async Task<int> RevokeChainAsync (string startingRawToken, CancellationToken ct = default) {
             var count = 0;
             var hash = TokenHashing.Sha256Hex(startingRawToken);
-            var now = _time.GetUtcNow().UtcDateTime;
+            var now = _clock.UtcNow.UtcDateTime;
 
             while (true) {
                 var rec = await _db.RefreshTokens.FirstOrDefaultAsync(x => x.TokenHash == hash, ct);
 
                 if (rec is null) break;
 
-                if (rec.RevokedAt is null) {
-                    rec.RevokedAt = now;
+                if (rec.RevokedAtUtc is null) {
+                    rec.RevokedAtUtc = now;
                     count++;
                     await _db.SaveChangesAsync(ct);
                 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.IO;
 using ParkSpotTLV.Api.Endpoints.Support;
+using ParkSpotTLV.Contracts.Time;
 using ParkSpotTLV.Api.Features.Parking.Models;
 using ParkSpotTLV.Api.Features.Parking.Services;
 using ParkSpotTLV.Contracts.Enums;
@@ -19,7 +20,7 @@ namespace ParkSpotTLV.Api.Endpoints {
 
 
             group.MapPost("/segments",
-                async ([FromBody] GetMapSegmentsRequest body, HttpContext ctx, AppDbContext db, TimeProvider clock, ISegmentEvaluationService evaluator, CancellationToken ct) => {
+                async ([FromBody] GetMapSegmentsRequest body, HttpContext ctx, AppDbContext db, IClock clock, ISegmentEvaluationService evaluator, CancellationToken ct) => {
 
                     var userId = ctx.GetUserId();
 
@@ -33,7 +34,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                             );
 
                     // Set the default time, LimitedThresholdMinutes, and MinDurationMinutes
-                    var now = body.Now == default ? clock.GetLocalNow() : body.Now;
+                    var now = body.Now == default ? clock.LocalNow : body.Now;
                     var minDuration = body.MinParkingTime <= 0 ? 60 : body.MinParkingTime;
 
                     // Create a permit snapshot

@@ -16,13 +16,12 @@ namespace ParkSpotTLV.Infrastructure.Entities {
 
         public bool IsPayNow { get; set; }
         public bool IsPayLater { get; set; }
-        public DateTimeOffset? NextChange { get; set; }               
+        public DateTimeOffset? NextChangeUtc { get; set; }               
 
 
-        public DateTimeOffset? StartedLocal { get; set; }
-        public DateTimeOffset? StoppedLocal { get; set; }
-        public DateTimeOffset? PlannedEndLocal { get; set; }
-        public int? NotificationMinutes { get; set; }                          // < 30 -> Wont send notification
+        public DateTimeOffset StartedUtc { get; set; }
+        public DateTimeOffset? StoppedUtc { get; set; }
+        public DateTimeOffset PlannedEndUtc { get; set; }
 
 
         public int ParkingBudgetUsed { get; set; }

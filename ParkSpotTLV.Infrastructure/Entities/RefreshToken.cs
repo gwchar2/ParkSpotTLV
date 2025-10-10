@@ -20,9 +20,9 @@ namespace ParkSpotTLV.Infrastructure.Entities {
          * Concurrency 
          */
         public required string TokenHash { get; set; }  
-        public DateTimeOffset CreatedAt { get; set; }
-        public DateTimeOffset ExpiresAt { get; set; }
-        public DateTimeOffset? RevokedAt { get; set; }       // Set when user logs out or when token is changed.
+        public DateTimeOffset CreatedAtUtc { get; set; }
+        public DateTimeOffset ExpiresAtUtc { get; set; }
+        public DateTimeOffset? RevokedAtUtc { get; set; }       // Set when user logs out or when token is changed.
         public string? ReplacedByTokenHash { get; set; }        // Replace history - improved security.
         public User User { get; set; } = null!;
 

@@ -31,7 +31,6 @@ namespace ParkSpotTLV.Api.Endpoints.Support {
         public static ProblemHttpResult CantRemove(HttpContext ctx) =>
             GlobalProblemManager.BadRequest("Profile must have at least one vehicle.", ctx);
     }
-
     public static class AuthProblems {
         public static ProblemHttpResult MissingInfo(HttpContext ctx) =>
             GlobalProblemManager.BadRequest("Username and password are required.", ctx);
@@ -48,7 +47,6 @@ namespace ParkSpotTLV.Api.Endpoints.Support {
         public static ProblemHttpResult InvalidOldPass(HttpContext ctx) =>
             GlobalProblemManager.BadRequest("Invalid old password.", ctx);
     }
-
     public static class PermitProblems {
         public static ProblemHttpResult MaxHit(HttpContext ctx) =>
            GlobalProblemManager.BadRequest("Maximum of 2 permits per vehicle", ctx);
@@ -65,7 +63,6 @@ namespace ParkSpotTLV.Api.Endpoints.Support {
         public static ProblemHttpResult CantRemoveDef(HttpContext ctx) =>
           GlobalProblemManager.BadRequest("Can not remove default permit.", ctx);
     }
-
     public static class SessionProblems {
         public static ProblemHttpResult Exists(HttpContext ctx) =>
           GlobalProblemManager.Conflict("Active session exists for this vehicle.", ctx);

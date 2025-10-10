@@ -28,6 +28,6 @@ namespace ParkSpotTLV.Infrastructure.Entities {
          */
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)] 
         public uint Xmin { get; private set; }
-        public DateTimeOffset? LastUpdated { get; set; } = DateTimeOffset.Now;                 // Last update on user
+        public DateTimeOffset LastUpdatedUtc { get; set; } = DateTimeOffset.Now;                 // Last update on user
     }
 }

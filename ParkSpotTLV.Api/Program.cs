@@ -3,6 +3,7 @@ using Serilog;
 using System.Reflection;
 using ParkSpotTLV.Api.Composition;
 using ParkSpotTLV.Api.Endpoints;
+using ParkSpotTLV.Contracts.Time;
 
 /* --------------------------------------------------------------------------
  * BOOTSTRAP LOGGING
@@ -20,7 +21,9 @@ Log.Logger = new LoggerConfiguration()
 try {
     Log.Information("Starting Up");
 
-    var builder = WebApplication.CreateBuilder(args);
+    var builder = WebApplication.CreateBuilder(args); 
+    builder.Services.AddSingleton<IClock, SystemClock>(); 
+    //builder.Services.AddSingleton<TimeZoneInfo>(sp => sp.GetRequiredService<IClock>().TZ); FOR TIME ZONE ONLY 
 
     // Infrastructure (EF, Serilog host hook, seeding, helpers)
     builder.AddInfrastructure();
@@ -33,9 +36,6 @@ try {
 
     // Map segment evluation service
     builder.Services.AddParking();
-
-    // Push Notification service
-    builder.Services.AddNotification(builder.Configuration);
 
     var app = builder.Build();
 
@@ -52,7 +52,6 @@ try {
     app.MapPermits();
     app.MapSegments();
     app.MapParking();
-    app.MapNotificationsTest();
 
     app.Run();
 }

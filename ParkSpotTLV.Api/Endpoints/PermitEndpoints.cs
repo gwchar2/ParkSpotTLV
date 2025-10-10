@@ -6,7 +6,7 @@ using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Contracts.Permits;
 using ParkSpotTLV.Infrastructure;
 using ParkSpotTLV.Infrastructure.Entities;
-using System.Security.Claims;
+using ParkSpotTLV.Contracts.Time;
 
 namespace ParkSpotTLV.Api.Endpoints {
     public static class PermitEndpoints {
@@ -26,7 +26,7 @@ namespace ParkSpotTLV.Api.Endpoints {
              *      404 if no such vehicle exists.
              */
             group.MapPost("/",
-                async ([FromBody] PermitCreateRequest body, HttpContext ctx, AppDbContext db, CancellationToken ct) => {
+                async ([FromBody] PermitCreateRequest body, HttpContext ctx, AppDbContext db,IClock clock, CancellationToken ct) => {
 
                     var userId = ctx.GetUserId();
 
@@ -90,7 +90,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         VehicleId = p.VehicleId,
                         PermitType = EnumMappings.MapPermitType(p.Type),
                         ResidentZoneCode = p.ZoneCode,
-                        LastUpdated = p.LastUpdated
+                        LastUpdated = clock.ToLocal(p.LastUpdatedUtc)
                     }).SingleAsync(ct);
 
 
@@ -114,7 +114,7 @@ namespace ParkSpotTLV.Api.Endpoints {
              *      404 if no such permit exists.
              */
             group.MapGet("/{id:guid}",
-                async (Guid id, HttpContext ctx, AppDbContext db, CancellationToken ct) => {
+                async (Guid id, HttpContext ctx, AppDbContext db,IClock clock, CancellationToken ct) => {
 
                     var userId = ctx.GetUserId();
 
@@ -127,7 +127,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         VehicleId = permit.VehicleId,
                         PermitType = EnumMappings.MapPermitType(permit.Type),
                         ResidentZoneCode = permit.ZoneCode,
-                        LastUpdated = permit.LastUpdated,
+                        LastUpdated = clock.ToLocal(permit.LastUpdatedUtc),
                         RowVersion = Convert.ToBase64String(BitConverter.GetBytes(permit.Xmin))
                     };
 
@@ -153,7 +153,7 @@ namespace ParkSpotTLV.Api.Endpoints {
              *      409 Conflict - Race condition
              */
             group.MapPatch("/{id:guid}",
-                async (Guid id, [FromBody] PermitUpdateRequest body, HttpContext ctx, AppDbContext db, CancellationToken ct) => {
+                async (Guid id, [FromBody] PermitUpdateRequest body, HttpContext ctx, AppDbContext db,IClock clock,CancellationToken ct) => {
 
                     var userId = ctx.GetUserId();
 
@@ -186,7 +186,7 @@ namespace ParkSpotTLV.Api.Endpoints {
 
 
                     permit.Type = body.Type;
-                    permit.LastUpdated = DateTimeOffset.Now;
+                    permit.LastUpdatedUtc = clock.UtcNow;
 
 
                     await db.SaveChangesAsync(ct);
@@ -197,7 +197,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         VehicleId = p.VehicleId,
                         PermitType = EnumMappings.MapPermitType(p.Type),
                         ResidentZoneCode = p.ZoneCode,
-                        LastUpdated = DateTimeOffset.UtcNow,
+                        LastUpdated = clock.LocalNow,
                         RowVersion = Convert.ToBase64String(BitConverter.GetBytes(p.Xmin))
                     }).SingleAsync(ct);
 

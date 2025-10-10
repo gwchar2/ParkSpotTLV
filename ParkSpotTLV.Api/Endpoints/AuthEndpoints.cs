@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ParkSpotTLV.Contracts.Time;
 using ParkSpotTLV.Contracts.Auth;
 using ParkSpotTLV.Infrastructure;
 using ParkSpotTLV.Infrastructure.Entities;
@@ -22,7 +23,7 @@ namespace ParkSpotTLV.Api.Endpoints {
              *      409 if username is taken; 400 if policy fails.
              */
             auth.MapPost("/register",
-                async ([FromBody] RegisterRequest body,HttpContext ctx, AppDbContext db,IPasswordHasher hasher,IJwtService jwt,IRefreshTokenService refresh,CancellationToken ct) => {
+                async ([FromBody] RegisterRequest body,HttpContext ctx, AppDbContext db,IPasswordHasher hasher,IJwtService jwt,IRefreshTokenService refresh, IClock clock,CancellationToken ct) => {
 
                     if (string.IsNullOrWhiteSpace(body.Username) || string.IsNullOrWhiteSpace(body.Password))
                         return AuthProblems.MissingInfo(ctx);
@@ -52,9 +53,9 @@ namespace ParkSpotTLV.Api.Endpoints {
                     
                     return Results.Created("/auth/register", new TokenPairResponse(
                         access.AccessToken,
-                        access.ExpiresAtUtc,
+                        clock.ToLocal(access.ExpiresAtUtc),
                         issued.RefreshToken,
-                        issued.ExpiresAtUtc,
+                        clock.ToLocal(issued.ExpiresAtUtc),
                         "Bearer"
                         ));
                 })     
@@ -74,7 +75,7 @@ namespace ParkSpotTLV.Api.Endpoints {
              *      401 for bad creds; 400 if malformed.
              */
             auth.MapPost("/login",
-                async ([FromBody] RegisterRequest body, HttpContext ctx, AppDbContext db,IPasswordHasher hasher,IJwtService jwt,IRefreshTokenService refresh,CancellationToken ct) => {
+                async ([FromBody] RegisterRequest body, HttpContext ctx, AppDbContext db,IPasswordHasher hasher,IJwtService jwt,IRefreshTokenService refresh, IClock clock, CancellationToken ct) => {
                            
                     if (string.IsNullOrWhiteSpace(body.Username) || string.IsNullOrWhiteSpace(body.Password))
                         return AuthProblems.MissingInfo(ctx);
@@ -96,9 +97,9 @@ namespace ParkSpotTLV.Api.Endpoints {
                     
                     var response = new TokenPairResponse(
                         access.AccessToken,
-                        access.ExpiresAtUtc,
+                        clock.ToLocal(access.ExpiresAtUtc),
                         issued.RefreshToken,
-                        issued.ExpiresAtUtc,
+                        clock.ToLocal(issued.ExpiresAtUtc),
                         "Bearer"
                         );
                     
@@ -119,7 +120,7 @@ namespace ParkSpotTLV.Api.Endpoints {
              *      401 for invalid/expired/revoked/reused tokens; 400 if malformed.
              */
             auth.MapPost("/refresh",
-                ([FromBody] RefreshRequest body,HttpContext ctx, AppDbContext db, IRefreshTokenService refreshService, CancellationToken ct) => {
+                ([FromBody] RefreshRequest body,HttpContext ctx, AppDbContext db, IRefreshTokenService refreshService,IClock clock, CancellationToken ct) => {
 
                     if (body is null || string.IsNullOrWhiteSpace(body.RefreshToken))
                         return GeneralProblems.MissingRefresh(ctx);
@@ -133,9 +134,9 @@ namespace ParkSpotTLV.Api.Endpoints {
 
                         var response = new TokenPairResponse(
                             AccessToken: result.AccessToken,
-                            AccessTokenExpiresAt: result.AccessExpiresAtUtc,
+                            AccessTokenExpiresAt: clock.ToLocal(result.AccessExpiresAtUtc),
                             RefreshToken: result.RefreshToken,
-                            RefreshTokenExpiresAt: result.RefreshExpiresAtUtc,
+                            RefreshTokenExpiresAt: clock.ToLocal(result.RefreshExpiresAtUtc),
                             TokenType: "Bearer");
 
                         return Results.Ok(response);

@@ -5,6 +5,5 @@ namespace ParkSpotTLV.Contracts.Enums {
         Active = 1,
         Stopped = 2,
         AutoStopped = 3,
-        Cancelled = 4
     }
 }

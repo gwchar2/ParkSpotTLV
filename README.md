@@ -139,12 +139,10 @@ Verify
 docker start parkspot_db or docker compose up -d db
 dotnet ef migrations add UpdateSeed_20250927(or some other name) -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
 dotnet ef database update --project .\ParkSpotTLV.Infrastructure --startup-project .\ParkSpotTLV.Api
-/// for MAC
-dotnet ef database update --project ./ParkSpotTLV.Infrastructure --startup-project ./ParkSpotTLV.Api
 Restart DB+API
 Verify
 ```
-$b64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\path\to\your-project.json"))
+dotnet ef migrations add UpdateShitAgain2025_10_10 -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
 
 - Updating information in the DB
 ```bash
