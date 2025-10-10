@@ -32,30 +32,22 @@ public partial class PreferencesPage : ContentPage
     }
 
     // Event Handlers
-    private void OnMinutesPickerChanged(object sender, EventArgs e)
+    private async void OnMinutesPickerChanged(object sender, EventArgs e)
     {
         UpdateParkingExplanation();
-    }
-
-    private async void OnSaveClicked(object sender, EventArgs e)
-    {
         try
         {
             var parkingMinutes = GetMinutesFromPicker(MinutesPickerParking.SelectedItem?.ToString() ?? "30 minutes");
 
             await _localDataService.UpdatePreferencesAsync(parkingMinutes, null, null, null, null);
 
-            string message = $"Preferences saved!\n\nMinimum parking time: {parkingMinutes} minutes\n";
-            await DisplayAlert("Success", message, "OK");
-
-            await Shell.Current.GoToAsync("..");
         }
         catch (Exception ex)
         {
             Console.WriteLine($"PREFERENCES ERROR: {ex}");
-            await DisplayAlert("Error", $"Failed to save preferences:\n\n{ex.Message}\n\nStack trace:\n{ex.StackTrace}", "OK");
         }
     }
+
 
     private async void OnFindParkingClicked(object sender, EventArgs e)
     {

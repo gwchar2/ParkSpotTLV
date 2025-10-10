@@ -4,14 +4,14 @@
       x:Class="ParkSpotTLV.App.Controls.MenuOverlay"
       x:Name="MenuOverlayGrid"
       IsVisible="False"
-      BackgroundColor="#80000000">
+      BackgroundColor="Transparent">
 
     <Grid.GestureRecognizers>
         <TapGestureRecognizer Tapped="OnOverlayTapped" />
     </Grid.GestureRecognizers>
 
     <Border x:Name="MenuPanel"
-            BackgroundColor="White"
+            BackgroundColor="{StaticResource PrimaryTransperent}"
             WidthRequest="250"
             HorizontalOptions="End"
             VerticalOptions="Fill"
@@ -26,26 +26,27 @@
             <VerticalStackLayout Grid.Row="0" Spacing="20">
                 <Label Text="Menu"
                        FontSize="22"
+                       TextColor="White"
                        FontAttributes="Bold"
                        Margin="0,20,0,30" />
 
                 <Button Text="Account Details"
                         BackgroundColor="Transparent"
-                        TextColor="Black"
+                        TextColor="White"
                         FontSize="16"
                         HorizontalOptions="Start"
                         Clicked="OnAccountDetailsClicked" />
 
                 <Button Text="Preferences"
                         BackgroundColor="Transparent"
-                        TextColor="Black"
+                        TextColor="White"
                         FontSize="16"
                         HorizontalOptions="Start"
                         Clicked="OnPreferencesClicked" />
 
                 <Button Text="Logout"
                         BackgroundColor="Transparent"
-                        TextColor="Red"
+                        TextColor="{StaticResource Warning}"
                         FontSize="16"
                         HorizontalOptions="Start"
                         Clicked="OnLogoutClicked" />
@@ -54,7 +55,7 @@
             <Label x:Name="Credits"
                    Grid.Row="1"
                    Text="ParkSpotTLV By Tomer T. and Michal R."
-                   TextColor="Blue"
+                   TextColor="White"
                    FontSize="16"
                    HorizontalOptions="Start"
                    VerticalOptions="End"
@@ -63,7 +64,7 @@
            <Label x:Name="VersionLabel"
                    Grid.Row="2"
                    Text="Version: ..."
-                   TextColor="Blue"
+                   TextColor="White"
                    FontSize="16"
                    HorizontalOptions="Start"
                    VerticalOptions="End"

@@ -2,7 +2,8 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ParkSpotTLV.App.Pages.AddCarPage"
-             Title="Add Car">
+             Title="Add Car"
+             BackgroundColor="{StaticResource PageBackground}">
 
     <ScrollView>
         <VerticalStackLayout
@@ -15,19 +16,19 @@
                 FontSize="28"
                 FontAttributes="Bold"
                 HorizontalOptions="Center"
-                TextColor="#2E7D32" />
+                TextColor="{StaticResource PrimaryDarkText}" />
 
             <!-- Car Name -->
             <VerticalStackLayout Spacing="10">
                 <Label Text="Car Name"
                        FontSize="18"
                        FontAttributes="Bold"
-                       TextColor="Black" />
+                       TextColor="{StaticResource PrimaryDarkText}" />
                 <Entry
                     x:Name="CarNameEntry"
                     Placeholder="My Toyota"
                     FontSize="16"
-                    BackgroundColor="White" />
+                    BackgroundColor="{StaticResource InputFieldBackground}" />
             </VerticalStackLayout>
 
             <!-- Car Type -->
@@ -35,20 +36,20 @@
                 <Label Text="Car Type"
                        FontSize="18"
                        FontAttributes="Bold"
-                       TextColor="Black" />
+                       TextColor="{StaticResource PrimaryDarkText}" />
                 <VerticalStackLayout Spacing="5">
                     <HorizontalStackLayout Spacing="10">
                         <RadioButton x:Name="PrivateRadio"
                                      GroupName="CarType"
                                      IsChecked="True" />
-                        <Label Text="Private"
+                        <Label Text="🚗 Private"
                                FontSize="16"
                                VerticalOptions="Center" />
                     </HorizontalStackLayout>
                     <HorizontalStackLayout Spacing="10">
                         <RadioButton x:Name="TruckRadio"
                                      GroupName="CarType" />
-                        <Label Text="Truck"
+                        <Label Text="🚛 Truck"
                                FontSize="16"
                                VerticalOptions="Center" />
                     </HorizontalStackLayout>
@@ -60,7 +61,7 @@
                 <Label Text="Parking Permit"
                        FontSize="18"
                        FontAttributes="Bold"
-                       TextColor="Black" />
+                       TextColor="{StaticResource PrimaryDarkText}" />
 
                 <HorizontalStackLayout Spacing="10">
                     <CheckBox x:Name="ResidentPermitCheck"
@@ -74,14 +75,14 @@
                     x:Name="ZoneNumberEntry"
                     Placeholder="Zone number"
                     FontSize="16"
-                    BackgroundColor="White"
+                    BackgroundColor="{StaticResource InputFieldBackground}"
                     IsVisible="False" />
                 <HorizontalStackLayout Spacing="10">
                     <Entry
                         x:Name="FreeMinutesEntry"
                         Placeholder="120"
                         FontSize="16"
-                        BackgroundColor="White"
+                        BackgroundColor="{StaticResource InputFieldBackground}"
                         IsVisible="False" />
                     <Label  x:Name = "FreeMinutesLabel"
                             Text = "minutes left for free parking"
@@ -101,12 +102,13 @@
             <Button
                 x:Name="SaveCarBtn"
                 Text="Save &amp; Continue"
-                BackgroundColor="LightGray"
-                TextColor="Gray"
+                BackgroundColor="{StaticResource PrimaryAction}"
+                TextColor="{StaticResource White}"
                 FontSize="16"
                 Clicked="OnSaveCarClicked"
                 HorizontalOptions="Fill"
                 HeightRequest="50"
+                CornerRadius="25"
                 Margin="0,40,0,0" />
 
         </VerticalStackLayout>

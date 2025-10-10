@@ -67,120 +67,20 @@ public class ParkingPopUps
 
     
 
-    // Shows parking confirmed popup with Pango option
-    public async Task ShowParkingConfirmedPopupAsync(StartParkingResponse? startParkingResponse, bool isParkingAtZone ,INavigation navigation, Func<string, string, string, Task> displayAlert)
+    // Shows parking confirmed alert
+    public async Task ShowParkingConfirmedPopupAsync(StartParkingResponse? startParkingResponse,INavigation navigation, Func<string, string, string, Task> displayAlert)
     {
-        // Create the popup content
-        var popup = new ContentPage
-        {
-            Title = "Parking Confirmed"
-        };
-
-        var mainLayout = new VerticalStackLayout
-        {
-            Spacing = 20,
-            Padding = 30,
-            VerticalOptions = LayoutOptions.Center
-        };
-
-        // Title
-        var titleLabel = new Label
-        {
-            Text = "Parking Confirmed",
-            FontSize = 22,
-            FontAttributes = FontAttributes.Bold,
-            HorizontalOptions = LayoutOptions.Center,
-            TextColor = Color.FromArgb("#2E7D32")
-        };
-
-        // Message
+        // Build message
         string message = "Parking started!";
         if (startParkingResponse is not null)
         {
-            if (isParkingAtZone)
-                message += "\nParking at your zone";
-            else
-            {
-                message += "\nParking outside your zone.";
-                message += $"\nYou have {startParkingResponse.FreeBudgetRemaining} minutes of free parking.";
-            }
+            message += "\nParking outside your zone.";
+            message += $"\nYou have {startParkingResponse.FreeBudgetRemaining} minutes of free parking.";
+            
         }
-        
-        var messageLabel = new Label
-        {
-            Text = message,
-            FontSize = 16,
-            HorizontalOptions = LayoutOptions.Center,
-            HorizontalTextAlignment = TextAlignment.Center,
-            TextColor = Colors.Black
-        };
 
-        // Buttons
-        var buttonLayout = new HorizontalStackLayout
-        {
-            Spacing = 15,
-            HorizontalOptions = LayoutOptions.Center
-        };
-
-        var okButton = new Button
-        {
-            Text = "OK",
-            BackgroundColor = Color.FromArgb("#2E7D32"),
-            TextColor = Colors.White,
-            WidthRequest = 100,
-            HeightRequest = 45,
-            CornerRadius = 5
-        };
-
-        var pangoButton = new Button
-        {
-            Text = "Pay with Pango",
-            BackgroundColor = Color.FromArgb("#FF6B35"),
-            TextColor = Colors.White,
-            WidthRequest = 140,
-            HeightRequest = 45,
-            CornerRadius = 5
-        };
-
-        okButton.Clicked += async (s, e) =>
-        {
-            await navigation.PopModalAsync();
-        };
-
-        pangoButton.Clicked += async (s, e) =>
-        {
-            // TODO: Test navigation to Pango app
-            // await displayAlert("Pango", "Pango integration coming soon!", "OK");
-            try
-            {
-                await Launcher.OpenAsync("pango://");
-            }
-            catch
-            {
-                // Fallback to app store
-                if (DeviceInfo.Platform == DevicePlatform.iOS)
-                    await Launcher.OpenAsync("https://apps.apple.com/app/pango");
-                else
-                    await Launcher.OpenAsync("https://play.google.com/store/apps/details?id=com.pango.android");
-            }
-            finally
-            {
-                await navigation.PopModalAsync();
-            }
-        };
-
-        buttonLayout.Children.Add(okButton);
-        buttonLayout.Children.Add(pangoButton);
-
-        // Add all elements to main layout
-        mainLayout.Children.Add(titleLabel);
-        mainLayout.Children.Add(messageLabel);
-        mainLayout.Children.Add(buttonLayout);
-
-        popup.Content = new ScrollView { Content = mainLayout };
-
-        // Show as modal
-        await navigation.PushModalAsync(popup);
+        // Show simple alert
+        await displayAlert("Parking Confirmed", message, "OK");
     }
 
     // Shows a popup with list of streets for user to select where they're parking
@@ -213,7 +113,7 @@ public class ParkingPopUps
             FontSize = 22,
             FontAttributes = FontAttributes.Bold,
             HorizontalOptions = LayoutOptions.Center,
-            TextColor = Color.FromArgb("#2E7D32")
+            TextColor = Color.FromArgb("#FF2B3271") // Primary
         };
 
         var subtitleLabel = new Label
@@ -248,10 +148,10 @@ public class ParkingPopUps
             {
                 Text = street.StreetName,
                 BackgroundColor = Colors.White,
-                TextColor = Color.FromArgb("#2E7D32"),
-                BorderColor = Color.FromArgb("#2E7D32"),
+                TextColor = Color.FromArgb("#FF2B3271"), // Primary
+                BorderColor = Color.FromArgb("#FF2B3271"), // Primary
                 BorderWidth = 2,
-                CornerRadius = 5,
+                CornerRadius = 8,
                 Padding = new Thickness(15),
                 HorizontalOptions = LayoutOptions.Fill
             };
@@ -272,7 +172,7 @@ public class ParkingPopUps
         {
             Text = "Cancel",
             BackgroundColor = Colors.Transparent,
-            TextColor = Color.FromArgb("#666666"),
+            TextColor = Color.FromArgb("#FF757575"), // Secondary
             WidthRequest = 100,
             HeightRequest = 45,
             HorizontalOptions = LayoutOptions.Center,

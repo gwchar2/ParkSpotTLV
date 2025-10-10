@@ -2,7 +2,8 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ParkSpotTLV.App.Pages.SignUpPage"
-             Title="Create Account">
+             Title="Create Account"
+             BackgroundColor="{StaticResource PageBackground}">
     <VerticalStackLayout
         Padding="40"
         Spacing="30"
@@ -13,7 +14,7 @@
             FontSize="32"
             FontAttributes="Bold"
             HorizontalOptions="Center"
-            TextColor="#D4DEFB" />
+            TextColor="{StaticResource Primary}" />
 
             <VerticalStackLayout Spacing="20">
                 <Entry
@@ -32,8 +33,8 @@
                 <Button
                     x:Name="CreateAccountBtn"
                     Text="Create Account"
-                    BackgroundColor="#D4DEFB"
-                    TextColor="White"
+                    BackgroundColor="{StaticResource Primary}"
+                    TextColor="{StaticResource White}"
                     FontSize="16"
                     Clicked="OnCreateAccountClicked"
                     HorizontalOptions="Fill"

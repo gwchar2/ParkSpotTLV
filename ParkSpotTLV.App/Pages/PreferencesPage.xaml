@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ParkSpotTLV.App.Pages.PreferencesPage"
              Title="Preferences"
-             BackgroundColor="#E8E8F0">
+             BackgroundColor="{StaticResource PageBackground}">
 
     <ScrollView Padding="30">
         <VerticalStackLayout Spacing="30" VerticalOptions="Start">
@@ -12,18 +12,18 @@
             <Label Text="Map Preferences"
                    FontSize="24"
                    FontAttributes="Bold"
-                   TextColor="Black"
+                   TextColor="{StaticResource Primary}"
                    Margin="0,20,0,0" />
 
             <!-- Minimum Parking Time Section -->
             <VerticalStackLayout Spacing="15">
                 <Label Text="Minimum parking time"
                        FontSize="16"
-                       TextColor="Black" />
+                       TextColor="{StaticResource Black}" />
 
                 <!-- Minutes Dropdown -->
-                <Border BackgroundColor="White"
-                        Stroke="Gray"
+                <Border BackgroundColor="{StaticResource White}"
+                        Stroke="{StaticResource Secondary}"
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 5"
                         WidthRequest="150"
@@ -33,8 +33,8 @@
                         <Picker x:Name="MinutesPickerParking"
                                 Title="30 minutes"
                                 BackgroundColor="Transparent"
-                                TextColor="Black"
-                                TitleColor="Black"
+                                TextColor="{StaticResource Black}"
+                                TitleColor="{StaticResource Black}"
                                 FontSize="16"
                                 SelectedIndex="2"
                                 SelectedIndexChanged="OnMinutesPickerChanged">
@@ -50,7 +50,7 @@
                         </Picker>
                         <Label Text="▼"
                                FontSize="12"
-                               TextColor="Gray"
+                               TextColor="{StaticResource Secondary}"
                                HorizontalOptions="End"
                                VerticalOptions="Center"
                                Margin="0,0,10,0"
@@ -61,32 +61,17 @@
                 <Label x:Name="ParkingExplanationLabel"
                        Text="parking with less than 30 minutes will now be yellow."
                        FontSize="14"
-                       TextColor="Gray"
+                       TextColor="{StaticResource Secondary}"
                        HorizontalOptions="Start" />
             </VerticalStackLayout>
 
             <!-- Buttons Section -->
             <VerticalStackLayout Spacing="20" Margin="0,40,0,0">
-                <!-- Save Button -->
-                <Button x:Name="SaveBtn"
-                        Text="Save"
-                        BackgroundColor="White"
-                        TextColor="Gray"
-                        BorderColor="Gray"
-                        BorderWidth="2"
-                        FontSize="16"
-                        Clicked="OnSaveClicked"
-                        HorizontalOptions="Fill"
-                        HeightRequest="50"
-                        CornerRadius="25" />
-
                 <!-- Find Parking Button -->
                 <Button x:Name="FindParkingBtn"
                         Text="Find Parking"
-                        BackgroundColor="White"
-                        TextColor="Gray"
-                        BorderColor="Gray"
-                        BorderWidth="2"
+                        BackgroundColor="{StaticResource Primary}"
+                        TextColor="{StaticResource White}"
                         FontSize="16"
                         Clicked="OnFindParkingClicked"
                         HorizontalOptions="Fill"

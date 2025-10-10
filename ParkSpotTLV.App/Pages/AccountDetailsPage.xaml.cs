@@ -1,5 +1,6 @@
 using ParkSpotTLV.App.Services;
 using ParkSpotTLV.App.Data.Models;
+using Microsoft.Maui.Controls.Shapes;
 
 namespace ParkSpotTLV.App.Pages;
 
@@ -208,6 +209,7 @@ public partial class AccountDetailsPage : ContentPage
             BackgroundColor = Colors.White,
             Stroke = Color.FromArgb("#E0E0E0"),
             StrokeThickness = 1,
+            StrokeShape = new RoundRectangle { CornerRadius = 12 },
             Padding = 15,
             Margin = new Thickness(0, 0, 0, 10)
         };
@@ -229,7 +231,7 @@ public partial class AccountDetailsPage : ContentPage
 
         var nameLabel = new Label
         {
-            Text = $" {car.Name}",
+            Text = $"🚗 {car.Name}",
             FontSize = 16,
             FontAttributes = FontAttributes.Bold,
             TextColor = Colors.Black
@@ -257,7 +259,7 @@ public partial class AccountDetailsPage : ContentPage
             {
                 Text = string.Join(", ", permitsText),
                 FontSize = 12,
-                TextColor = Color.FromArgb("#2E7D32")
+                TextColor = Colors.Gray
             };
             infoLayout.Children.Add(permitsLabel);
         }
@@ -270,19 +272,21 @@ public partial class AccountDetailsPage : ContentPage
             {
                 Text = string.Join(", ", FreeParkingText),
                 FontSize = 12,
-                TextColor = Color.FromArgb("#2E7D32")
+                TextColor = Colors.Gray
             };
             infoLayout.Children.Add(FreeParkingLabel);
         }
 
         var removeButton = new Button
         {
-            Text = "Remove",
-            BackgroundColor = Color.FromArgb("#D32F2F"),
-            TextColor = Colors.White,
-            FontSize = 12,
-            Padding = new Thickness(8, 4),
-            CornerRadius = 5
+            Text = "—",
+            BackgroundColor = Colors.Transparent,
+            TextColor = Color.FromArgb("#C42E00"),
+            FontAttributes = FontAttributes.Bold,
+            FontSize = 28,
+            Padding = new Thickness(5, 2),
+            HorizontalOptions = LayoutOptions.End,
+            VerticalOptions = LayoutOptions.Start
         };
         removeButton.Clicked += (s, e) => OnRemoveCarClicked(car);
 
