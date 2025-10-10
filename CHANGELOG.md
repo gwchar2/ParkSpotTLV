@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.14.1-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.14.0-beta.0...v0.14.1-beta.0) (2025-10-10)
+
+
+### Features
+
+* Added auto-stop to parking sessions ([c4a42cd](https://github.com/gwchar2/ParkSpotTLV/commit/c4a42cd4da1a072f7b3de6dee5c613c69d02981e))
+
+
+### Bug Fixes
+
+* **Map:** fixes some UI and parking sesison for non-residentials ([ba80326](https://github.com/gwchar2/ParkSpotTLV/commit/ba803267f2f0adcae457861bf5223f9fa39d10e5))
+
 ## [0.14.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.13.0-beta.0...v0.14.0-beta.0) (2025-10-10)
 
 
