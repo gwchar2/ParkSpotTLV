@@ -24,8 +24,12 @@ namespace ParkSpotTLV.Infrastructure.Config {
             // For one active session only
             e.HasIndex(x => x.VehicleId)
              .HasDatabaseName("IX_parking_sessions_vehicle_active")
-             .HasFilter("\"stopped_local\" IS NULL")
+             .HasFilter("\"stopped_utc\" IS NULL")
              .IsUnique();
+
+            e.HasIndex(x => x.PlannedEndUtc)
+             .HasDatabaseName("idx_ps_due")
+             .HasFilter("\"stopped_utc\" IS NULL AND \"status\" = 1");
 
 
             e.HasIndex(x => x.StartedUtc);

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ParkSpotTLV.Api.Endpoints.Support;
 using ParkSpotTLV.Api.Features.Parking.Services;
-using ParkSpotTLV.Contracts.Budget;
 using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Contracts.Parking;
 using ParkSpotTLV.Infrastructure;
@@ -24,7 +23,7 @@ namespace ParkSpotTLV.Api.Endpoints {
              *      200 A list of all active sessions for a specific user
              */
             group.MapGet("/sessions/",
-                async (HttpContext ctx, AppDbContext db, IDailyBudgetService budget, CancellationToken ct) => {
+                async (HttpContext ctx, AppDbContext db, IDailyBudgetService budget,IClock clock, CancellationToken ct) => {
 
                     var userId = ctx.GetUserId();
 
@@ -40,8 +39,8 @@ namespace ParkSpotTLV.Api.Endpoints {
                         .Select(s => new {
                             SessionId = s.Id,
                             s.VehicleId,
-                            StartTime = s.StartedUtc,
-                            EndTime = s.PlannedEndUtc
+                            StartTime = clock.ToLocal(s.StartedUtc),
+                            EndTime = clock.ToLocal(s.PlannedEndUtc)
                         })
                         .ToListAsync(ct);
 
@@ -133,26 +132,17 @@ namespace ParkSpotTLV.Api.Endpoints {
                     var session = await db.ParkingSession.SingleOrDefaultAsync(s => s.VehicleId == Id && s.StoppedUtc == null, ct);
 
                     // daily remaining
-                    var timeLocal = clock.LocalNow;
-                    var today = DateOnly.FromDateTime(timeLocal.LocalDateTime);
+                    var nowLocal = clock.LocalNow;
+                    var today = DateOnly.FromDateTime(nowLocal.LocalDateTime);
                     var remaining = await budget.GetRemainingMinutesAsync(Id, today, ct);
-                    if (session is not null) {
-                        DateTimeOffset startedLocal = clock.ToLocal(session.StartedUtc);
-                        DateTimeOffset nextLocal = clock.ToLocal(session.NextChangeUtc!.Value);
 
-                        // If we pay now and later, the remaining budget is equal to the reduction of all the time so far.
-                        if (session.IsPayNow && session.IsPayLater)
-                            remaining -= MinutesBetween(timeLocal, startedLocal);
-                        // If the session is only pay now, we calculate the difference between current time and next local, deppending if we passed it or not.
-                        else if (session.IsPayNow && !session.IsPayLater)
-                            remaining -= MinutesBetween(timeLocal < nextLocal ? timeLocal : nextLocal, startedLocal);
-                        // If the session is only pay later, we make sure we passed the next change, and than we reduce the amount of time inbetween now and than. Otherwise just 0.
-                        else if (!session.IsPayNow && session.IsPayLater)
-                            remaining -= nextLocal < timeLocal ? MinutesBetween(timeLocal, nextLocal) : 0;
+                    if (session is not null) {
+                        var outcome = await budget.CalculateAsync(session, ct);
+                        remaining = outcome.RemainingToday;
                     }
 
                     return Results.Ok(new {
-                        TimeRemaining = remaining < 0 ? 0 : remaining   // If we are under 0 remaining, remaining is just 0.
+                        TimeRemaining = remaining   // If we are under 0 remaining, remaining is just 0.
                     });
 
                 })
@@ -203,7 +193,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         return SessionProblems.Unavailable(ctx);
 
                     // Get the current time and set it according to correct time zone for table
-                    var anchor = ToAnchor(nowLocal);
+                    var anchor = budget.ToAnchor(nowLocal);
                     await budget.EnsureResetAsync(body.VehicleId, anchor, ct);
 
                     // Calculate the minimum parking time compared to input & calculate end parking time
@@ -265,8 +255,8 @@ namespace ParkSpotTLV.Api.Endpoints {
                         ParkingBudgetUsed = 0,
                         PaidMinutes = 0,
                         Status = ParkingSessionStatus.Active,
-                        CreatedAt = clock.UtcNow,
-                        UpdatedAt = clock.UtcNow
+                        CreatedAtUtc = clock.UtcNow,
+                        UpdatedAtUtc = clock.UtcNow
                     };
 
                     db.ParkingSession.Add(session);
@@ -306,7 +296,6 @@ namespace ParkSpotTLV.Api.Endpoints {
         */
         group.MapPost("/stop/",
                 async ([FromBody] StopParkingRequest body, HttpContext ctx, AppDbContext db, IDailyBudgetService budget,IClock clock, CancellationToken ct) => {
-                    var tz = TimeZoneInfo.FindSystemTimeZoneById("Asia/Jerusalem");
 
                     var userId = ctx.GetUserId();
 
@@ -321,8 +310,6 @@ namespace ParkSpotTLV.Api.Endpoints {
                     if (session is null)
                         return SessionProblems.NotFound(ctx);
 
-                    // Basic checks that shouldnt even happen in the first case
-
                     DateTimeOffset timeLocal = clock.LocalNow;
                     DateTimeOffset startedLocal = clock.ToLocal(session.StartedUtc);
                     DateTimeOffset nextLocal = clock.ToLocal(session.NextChangeUtc);
@@ -331,7 +318,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                     if (timeLocal <= startedLocal) {
                         session.StoppedUtc = clock.UtcNow;           
                         session.Status = ParkingSessionStatus.Stopped;
-                        session.UpdatedAt = clock.UtcNow;
+                        session.UpdatedAtUtc = clock.UtcNow;
                         await db.SaveChangesAsync(ct);
 
                         return Results.Ok(
@@ -343,86 +330,30 @@ namespace ParkSpotTLV.Api.Endpoints {
                                 TotalMinutes = 0,
                                 FreeMinutesCharged = 0,
                                 PaidMinutes = 0,
-                                RemainingToday = await budget.GetRemainingMinutesAsync(session.VehicleId, ToAnchor(timeLocal), ct)
+                                RemainingBudgetToday = await budget.GetRemainingMinutesAsync(session.VehicleId, budget.ToAnchor(timeLocal), ct)
                             });
                     }
 
-                    // Now we calculate for legal sessions, the correct start/stop/consumption
-                    DateTimeOffset? consumeStart = null;
-                    DateTimeOffset? consumeEnd = timeLocal;
+                    var outcome = await budget.CalculateAsync(session, ct);
 
-                    // If Free -> dont start consuming at all
-                    // If Paid -> if pay now, start consuming from next change (if it is valid)
-                    // Either way, and consumptions end at min between DataTimeOffset.Now & next change
-                    var isFreeGroup = session.Group.Equals("FREE", StringComparison.OrdinalIgnoreCase);
-                    var isLimitedGroup = session.Group.Equals("LIMITED", StringComparison.OrdinalIgnoreCase);
-                    if (!isFreeGroup) {
-                        if (session.IsPayNow) {
-                            consumeStart = startedLocal;
-                            if (!session.IsPayLater) {
-                                consumeEnd = nextLocal;
-                            }
-                        } else if (session.IsPayLater && nextLocal < timeLocal) {
-                            consumeStart = nextLocal;
-                        }
-                    }
-                    // LIMITED never consumes beyond its boundary
-                    if (isLimitedGroup)
-                        consumeEnd = nextLocal;
-
-
-
-
-                    // The total parking minutes
-                    var totalLegalMinutes = (int)Math.Ceiling((timeLocal - startedLocal).TotalMinutes);
-                    var freeMinutesCharged = 0;
-                    var remainingToday = 0;
-
-                    // Since the daily budget is 8am-8pm, we need to 'cut' the parking session into 'slices' (before 8am and after)
-                    foreach (var (sliceStart, sliceEnd) in budget.SliceByAnchorBoundary(startedLocal, timeLocal)) {
-                        if (consumeStart is null || consumeEnd is null) continue; // break?
-
-                        var start = sliceStart >= consumeStart ? sliceStart : consumeStart.Value;
-                        var end = sliceEnd <= consumeEnd ? sliceEnd : consumeEnd.Value;
-                        if (end <= start) continue;
-
-                        var eligible = (int)Math.Ceiling((end - start).TotalMinutes);
-                        if (eligible <= 0) continue;
-
-                        var anchor = ToAnchor(sliceStart); // your 08:00 anchor (DateOnly)
-                        await budget.EnsureResetAsync(session.VehicleId, anchor, ct);
-                        var remaining = await budget.GetRemainingMinutesAsync(session.VehicleId, anchor, ct);
-
-                        var toConsume = Math.Min(remaining, eligible);
-                        if (toConsume > 0) {
-                            await budget.ConsumeAsync(session.VehicleId, start, start.AddMinutes(toConsume), ct);
-                            freeMinutesCharged += toConsume;
-                        }
-
-                        if (anchor == ToAnchor(timeLocal))
-                            remainingToday = await budget.GetRemainingMinutesAsync(session.VehicleId, anchor, ct);
-                    }
-
-                    // Update the session values
-                    var paidMinutes = isFreeGroup ? 0 : Math.Max(0, totalLegalMinutes - freeMinutesCharged);
-                    session.ParkingBudgetUsed += freeMinutesCharged;
-                    session.PaidMinutes +=  paidMinutes;
-                    session.StoppedUtc = clock.ToUtc(timeLocal);           
-                    session.Status = ParkingSessionStatus.Stopped;            
-                    session.UpdatedAt = clock.ToUtc(timeLocal);
-
+                    session.ParkingBudgetUsed += outcome.FreeMinutesCharged;
+                    session.PaidMinutes += outcome.PaidMinutes;
+                    session.StoppedUtc = clock.UtcNow;
+                    session.Status = ParkingSessionStatus.Stopped;
+                    session.UpdatedAtUtc = clock.UtcNow;
 
                     await db.SaveChangesAsync(ct);
 
                     return Results.Ok(new StopParkingResponse {
                         SessionId = session.Id,
                         VehicleId = session.VehicleId,
-                        StartedLocal = startedLocal,
-                        StoppedLocal = timeLocal,
-                        TotalMinutes = totalLegalMinutes,
-                        FreeMinutesCharged = freeMinutesCharged,
-                        PaidMinutes = paidMinutes,
-                        RemainingToday = remainingToday
+                        StartedLocal = clock.ToLocal(session.StartedUtc),
+                        StoppedLocal = clock.ToLocal(session.StoppedUtc),
+                        TotalMinutes = outcome.TotalMinutes,
+                        PaidMinutes = outcome.PaidMinutes,
+                        FreeMinutes = outcome.FreeMinutes,
+                        FreeMinutesCharged = outcome.FreeMinutesCharged,
+                        RemainingBudgetToday = outcome.RemainingToday
                     });
 
                 })
@@ -437,11 +368,6 @@ namespace ParkSpotTLV.Api.Endpoints {
             return group;
         }
 
-        static int MinutesBetween(DateTimeOffset end, DateTimeOffset start)
-            => (int)Math.Ceiling((end - start).TotalMinutes);
-
-        static DateOnly ToAnchor(DateTimeOffset t)
-            => ParkingBudgetTimeHandler.AnchorDateFor(t);
 
     }
 

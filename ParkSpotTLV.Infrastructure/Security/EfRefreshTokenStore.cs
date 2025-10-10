@@ -5,10 +5,9 @@ using ParkSpotTLV.Infrastructure.Auth.Models;
 
 namespace ParkSpotTLV.Infrastructure.Security {
 
-    public class EfRefreshTokenStore(AppDbContext db, TimeProvider time, IClock clock) {
+    public class EfRefreshTokenStore(AppDbContext db, IClock clock) {
 
         private readonly AppDbContext _db = db;
-        private readonly TimeProvider _time = time;
         private readonly IClock _clock = clock;
         public sealed record RefreshTokenValidationResult(
             RefreshTokenStatus Status,

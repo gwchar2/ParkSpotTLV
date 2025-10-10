@@ -23,7 +23,6 @@ try {
 
     var builder = WebApplication.CreateBuilder(args); 
     builder.Services.AddSingleton<IClock, SystemClock>(); 
-    //builder.Services.AddSingleton<TimeZoneInfo>(sp => sp.GetRequiredService<IClock>().TZ); FOR TIME ZONE ONLY 
 
     // Infrastructure (EF, Serilog host hook, seeding, helpers)
     builder.AddInfrastructure();

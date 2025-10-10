@@ -61,9 +61,9 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnName("created_at_utc");
 
                     b.Property<string>("Group")
                         .IsRequired()
@@ -128,9 +128,9 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("tariff");
 
-                    b.Property<DateTimeOffset>("UpdatedAt")
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnName("updated_at_utc");
 
                     b.Property<Guid>("VehicleId")
                         .HasColumnType("uuid")
@@ -143,13 +143,17 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_parking_sessions");
 
+                    b.HasIndex("PlannedEndUtc")
+                        .HasDatabaseName("idx_ps_due")
+                        .HasFilter("\"stopped_utc\" IS NULL AND \"status\" = 1");
+
                     b.HasIndex("StartedUtc")
                         .HasDatabaseName("ix_parking_sessions_started_utc");
 
                     b.HasIndex("VehicleId")
                         .IsUnique()
                         .HasDatabaseName("IX_parking_sessions_vehicle_active")
-                        .HasFilter("\"stopped_local\" IS NULL");
+                        .HasFilter("\"stopped_utc\" IS NULL");
 
                     b.HasIndex("VehicleId", "Status")
                         .HasDatabaseName("ix_parking_sessions_vehicle_id_status");
