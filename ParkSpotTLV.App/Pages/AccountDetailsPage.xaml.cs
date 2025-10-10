@@ -278,11 +278,13 @@ public partial class AccountDetailsPage : ContentPage
         var removeButton = new Button
         {
             Text = "Remove",
-            BackgroundColor = Color.FromArgb("#D32F2F"),
+            BackgroundColor = Color.FromArgb("#C42E00"),
             TextColor = Colors.White,
             FontSize = 12,
             Padding = new Thickness(8, 4),
-            CornerRadius = 5
+            CornerRadius = 5,
+            HorizontalOptions = LayoutOptions.End,
+            VerticalOptions = LayoutOptions.Start
         };
         removeButton.Clicked += (s, e) => OnRemoveCarClicked(car);
 

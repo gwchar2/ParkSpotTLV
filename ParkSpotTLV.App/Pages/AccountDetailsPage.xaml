@@ -11,33 +11,33 @@
                    FontSize="28"
                    FontAttributes="Bold"
                    HorizontalOptions="Center"
-                   TextColor="#2E7D32"
+                   TextColor="{StaticResource Primary}"
                    Margin="0,10,0,20" />
 
                 <!-- Username Section -->
-                <VerticalStackLayout Spacing="10">
+                <VerticalStackLayout Spacing="5">
                     <Label Text="Username"
                            FontSize="16"
                            FontAttributes="Bold"
-                           TextColor="Black" />
+                           TextColor="{StaticResource Black}" />
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                         <Entry x:Name="UsernameEntry"
                                Grid.Column="0"
                                Text="john_doe"
                                IsReadOnly="True"
-                               BackgroundColor="LightGray"
+                               BackgroundColor="{StaticResource InputFieldBackground}"
                                FontSize="16" />
                     </Grid>
                 </VerticalStackLayout>
 
                 <!-- Password Section -->
-                <VerticalStackLayout Spacing="10">
+                <VerticalStackLayout Spacing="5">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                         <Button x:Name="ChangePasswordBtn"
                                 Grid.Column="0"
                                 Text="Change Password"
-                                BackgroundColor="#2E7D32"
-                                TextColor="White"
+                                BackgroundColor="{StaticResource PrimaryAction}"
+                                TextColor="{StaticResource White}"
                                 FontSize="14"
                                 WidthRequest="260"
                                 HeightRequest="40"
@@ -46,7 +46,7 @@
 
                     <!-- Password Change Fields (initially hidden) -->
                     <VerticalStackLayout x:Name="PasswordChangeSection"
-                                        Spacing="10"
+                                        Spacing="5"
                                         IsVisible="False">
                         <Entry x:Name="OldPasswordEntry"
                                Placeholder="Current Password"
@@ -60,19 +60,19 @@
                                Placeholder="Confirm New Password"
                                IsPassword="True"
                                FontSize="16" />
-                        <HorizontalStackLayout Spacing="10" HorizontalOptions="End">
+                        <HorizontalStackLayout Spacing="5" HorizontalOptions="End">
                             <Button x:Name="CancelPasswordBtn"
                                     Text="Cancel"
-                                    BackgroundColor="Gray"
-                                    TextColor="White"
+                                    BackgroundColor="{StaticResource SecondaryAction}"
+                                    TextColor="{StaticResource White}"
                                     FontSize="14"
                                     WidthRequest="70"
                                     HeightRequest="35"
                                     Clicked="OnCancelPasswordClicked" />
                             <Button x:Name="SavePasswordBtn"
                                     Text="Save"
-                                    BackgroundColor="#4CAF50"
-                                    TextColor="White"
+                                    BackgroundColor="{StaticResource Success}"
+                                    TextColor="{StaticResource White}"
                                     FontSize="14"
                                     WidthRequest="70"
                                     HeightRequest="35"
@@ -82,7 +82,7 @@
                 </VerticalStackLayout>
 
             <!-- Divider -->
-            <BoxView BackgroundColor="LightGray"
+            <BoxView BackgroundColor="{StaticResource ContainerBackground}"
                      HeightRequest="1"
                      Margin="0,10" />
 
@@ -90,7 +90,7 @@
             <Label Text="My Cars"
                    FontSize="20"
                    FontAttributes="Bold"
-                   TextColor="#2E7D32" />
+                   TextColor="{StaticResource Primary}" />
         </VerticalStackLayout>
 
         <!-- Cars List Scrollable -->
@@ -105,8 +105,8 @@
             <Button x:Name="AddCarBtn"
                     Text="+ Add Car"
                     BackgroundColor="Transparent"
-                    TextColor="#2E7D32"
-                    BorderColor="#2E7D32"
+                    TextColor="{StaticResource Primary}"
+                    BorderColor="{StaticResource Primary}"
                     BorderWidth="2"
                     FontSize="16"
                     Clicked="OnAddCarClicked"
@@ -114,9 +114,9 @@
                     HeightRequest="50" />
             <Button x:Name="FindParkingBtn"
                     Text="Find Parking"
-                    BackgroundColor="White"
-                    TextColor="Gray"
-                    BorderColor="Gray"
+                    BackgroundColor="{StaticResource White}"
+                    TextColor="{StaticResource Secondary}"
+                    BorderColor="{StaticResource Secondary}"
                     BorderWidth="2"
                     FontSize="16"
                     Clicked="OnFindParkingClicked"

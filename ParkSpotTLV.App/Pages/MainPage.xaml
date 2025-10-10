@@ -16,7 +16,7 @@
                 FontSize="32"
                 FontAttributes="Bold"
                 HorizontalOptions="Center"
-                TextColor="#D4DEFB" />
+                TextColor="{StaticResource Primary}" />
 
             <VerticalStackLayout Spacing="20">
                 <Entry
@@ -35,8 +35,8 @@
                 <Button
                     x:Name="LoginBtn"
                     Text="Log In"
-                    BackgroundColor="#D4DEFB"
-                    TextColor="White"
+                    BackgroundColor="{StaticResource Primary}"
+                    TextColor="{StaticResource White}"
                     FontSize="16"
                     Clicked="OnLoginClicked"
                     HorizontalOptions="Fill"
@@ -46,8 +46,8 @@
                     x:Name="SignUpBtn"
                     Text="Sign Up"
                     BackgroundColor="Transparent"
-                    TextColor="#D4DEFB"
-                    BorderColor="#D4DEFB"
+                    TextColor="{StaticResource Primary}"
+                    BorderColor="{StaticResource Primary}"
                     BorderWidth="2"
                     FontSize="16"
                     Clicked="OnSignUpClicked"
