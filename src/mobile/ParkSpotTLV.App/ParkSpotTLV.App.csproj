@@ -103,8 +103,7 @@
 </PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\ParkSpotTLV.Core\ParkSpotTLV.Core.csproj" />
-	  <ProjectReference Include="..\ParkSpotTLV.Contracts\ParkSpotTLV.Contracts.csproj" />
+	  <ProjectReference Include="..\..\backend\ParkSpotTLV.Contracts\ParkSpotTLV.Contracts.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
