@@ -19,15 +19,10 @@ public partial class PreferencesPage : ContentPage
         UpdateParkingExplanation();
     }
 
-    private void OnNotificationMinutesChanged(object sender, EventArgs e)
-    {
-        UpdateNotificationExplanation();
-    }
 
     private void UpdateExplanationTexts()
     {
         UpdateParkingExplanation();
-        UpdateNotificationExplanation();
     }
 
     private void UpdateParkingExplanation()
@@ -41,17 +36,6 @@ public partial class PreferencesPage : ContentPage
         }
     }
 
-    private void UpdateNotificationExplanation()
-    {
-        var selectedItem = MinutesPickerNotification.SelectedItem?.ToString();
-        if (!string.IsNullOrEmpty(selectedItem))
-        {
-            // Extract just the number from "30 minutes"
-            var minutes = selectedItem.Replace(" minutes", "");
-            NotificationExplanationLabel.Text = $"notify me {minutes} minutes before parking expires.";
-        }
-    }
-
     private async void LoadPreferencesAsync()
     {
         try
@@ -61,15 +45,6 @@ public partial class PreferencesPage : ContentPage
             // Set parking threshold picker
             var parkingIndex = GetParkingPickerIndex(session?.MinParkingTime ?? 30);
             MinutesPickerParking.SelectedIndex = parkingIndex;
-
-            // Set notification picker
-            var notificationIndex = GetNotificationPickerIndex(session?.NotificationMinutesBefore ?? 30);
-            Console.WriteLine($"DEBUG: NotificationMinutesBefore = {session?.NotificationMinutesBefore ?? 30}, calculated index = {notificationIndex}");
-            MinutesPickerNotification.SelectedIndex = notificationIndex;
-
-            // Set notifications toggle
-            NotificationsToggle.IsToggled = session?.NotificationsEnabled ?? true;
-
             UpdateExplanationTexts();
         }
         catch (Exception ex)
@@ -95,21 +70,6 @@ public partial class PreferencesPage : ContentPage
         };
     }
 
-    private int GetNotificationPickerIndex(int minutes)
-    {
-        // Notification picker items: 5, 10, 15, 30, 45, 60 minutes
-        return minutes switch
-        {
-            5 => 0,
-            10 => 1,
-            15 => 2,
-            30 => 3,
-            45 => 4,
-            60 => 5,
-            _ => 3 // Default to 30 minutes (index 3)
-        };
-    }
-
     private int GetMinutesFromPicker(string pickerText)
     {
         if (string.IsNullOrEmpty(pickerText)) return 30;
@@ -124,21 +84,13 @@ public partial class PreferencesPage : ContentPage
         {
             // Get current settings
             var parkingMinutes = GetMinutesFromPicker(MinutesPickerParking.SelectedItem?.ToString() ?? "30 minutes");
-            var notificationMinutes = GetMinutesFromPicker(MinutesPickerNotification.SelectedItem?.ToString() ?? "30 minutes");
-            var notificationsEnabled = NotificationsToggle.IsToggled;
-
+           
             // Save to database
-            await _localDataService.UpdatePreferencesAsync(parkingMinutes, notificationsEnabled, notificationMinutes,null,null,null,null);
+            await _localDataService.UpdatePreferencesAsync(parkingMinutes,null,null,null,null);
 
             // Build confirmation message
             string message = $"Preferences saved!\n\n";
             message += $"Minimum parking time: {parkingMinutes} minutes\n";
-            message += $"Notifications: {(notificationsEnabled ? "Enabled" : "Disabled")}";
-
-            if (notificationsEnabled)
-            {
-                message += $"\nNotification time: {notificationMinutes} minutes before expiration";
-            }
 
             await DisplayAlert("Success", message, "OK");
 

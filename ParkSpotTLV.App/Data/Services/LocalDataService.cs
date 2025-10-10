@@ -68,8 +68,6 @@ public class LocalDataService : ILocalDataService
     }
 
     public async Task UpdatePreferencesAsync(int? minParkingTime = null,
-                                        bool? notificationsEnabled = null,
-                                        int? notificationMinutesBefore = null,
                                         bool? showFree = null,
                                         bool? showPaid = null,
                                         bool? showRestricted = null,
@@ -85,12 +83,6 @@ public class LocalDataService : ILocalDataService
         // Only update if a new value was provided
         if (minParkingTime.HasValue)
             existing. MinParkingTime = minParkingTime.Value;
-
-        if (notificationsEnabled.HasValue)
-            existing.NotificationsEnabled = notificationsEnabled.Value;
-
-        if (notificationMinutesBefore.HasValue)
-            existing.NotificationMinutesBefore = notificationMinutesBefore.Value;
 
         if (showFree.HasValue)
             existing.ShowFree = showFree.Value;

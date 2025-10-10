@@ -489,7 +489,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
                             startParkingResponse = await _parkingService.StartParkingAsync(
                                 segmentResponse,
                                 Guid.Parse(pickedCarId),
-                                _session?.NotificationMinutesBefore ?? 30,
+                                30, // soon to be removed
                                 _session?.MinParkingTime ?? 30);
                             if (startParkingResponse is not null)
                             {
@@ -510,16 +510,10 @@ public partial class ShowMapPage : ContentPage, IDisposable
                 }
             }
 
-            var result = await _parkingPopUps.ShowParkingNotificationPopupAsync(Navigation);
-
-            if (result.Confirmed)
-            {
+            
                 UpdateParkHereButtonState(true); // update UI button            
-                // await _localDataService.UpdateParkingStatusAsync(true); // update status in session
-
                 // Show parking confirmed popup with Pango option
                 await _parkingPopUps.ShowParkingConfirmedPopupAsync(startParkingResponse,parkingAtResZone, Navigation, DisplayAlert);
-            }
         }
         else // currently parking
         {

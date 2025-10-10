@@ -10,11 +10,6 @@ public class Session
 
     // Prefernces
     public int MinParkingTime { get; set; } = 30;
-
-    public bool NotificationsEnabled { get; set; } = true;
-
-    public int NotificationMinutesBefore { get; set; } = 30;
-
     public bool ShowFree {get; set; } = true ;
     public bool ShowPaid {get; set; } = true ;
     public bool ShowRestricted {get; set; } = true ;

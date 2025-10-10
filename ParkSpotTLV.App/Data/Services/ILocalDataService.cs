@@ -8,8 +8,6 @@ public interface ILocalDataService
     public Task AddSessionAsync(Session session);
     public Task DeleteSessionAsync();
     public Task UpdatePreferencesAsync(int? minParkingTime = null,
-                                    bool? notificationsEnabled = null,
-                                    int? notificationMinutesBefore = null,
                                     bool? showFree = null,
                                     bool? showPaid = null,
                                     bool? showRestricted = null,

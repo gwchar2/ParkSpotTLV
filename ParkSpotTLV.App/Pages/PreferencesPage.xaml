@@ -65,64 +65,6 @@
                        HorizontalOptions="Start" />
             </VerticalStackLayout>
 
-            <!-- Notifications Section -->
-            <VerticalStackLayout Spacing="15">
-                <Label Text="Notifications"
-                       FontSize="24"
-                       FontAttributes="Bold"
-                       TextColor="Black" />
-
-                <!-- Notification Settings -->
-                <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
-                    <!-- Minutes Dropdown for Notifications -->
-                    <Border BackgroundColor="White"
-                            Stroke="Gray"
-                            StrokeThickness="1"
-                            StrokeShape="RoundRectangle 5"
-                            WidthRequest="150"
-                            HeightRequest="40">
-                        <Grid>
-                            <Picker x:Name="MinutesPickerNotification"
-                                    Title="30 minutes"
-                                    BackgroundColor="Transparent"
-                                    TextColor="Black"
-                                    TitleColor="Black"
-                                    FontSize="16"
-                                    SelectedIndex="3"
-                                    SelectedIndexChanged="OnNotificationMinutesChanged">
-                                <Picker.Items>
-                                    <x:String>5 minutes</x:String>
-                                    <x:String>10 minutes</x:String>
-                                    <x:String>15 minutes</x:String>
-                                    <x:String>30 minutes</x:String>
-                                    <x:String>45 minutes</x:String>
-                                    <x:String>60 minutes</x:String>
-                                </Picker.Items>
-                            </Picker>
-                            <Label Text="▼"
-                                   FontSize="12"
-                                   TextColor="Gray"
-                                   HorizontalOptions="End"
-                                   VerticalOptions="Center"
-                                   Margin="0,0,10,0"
-                                   InputTransparent="True" />
-                        </Grid>
-                    </Border>
-
-                    <!-- Toggle Switch -->
-                    <Switch x:Name="NotificationsToggle"
-                            IsToggled="True"
-                            OnColor="#4CAF50"
-                            ThumbColor="White" />
-                </HorizontalStackLayout>
-
-                <Label x:Name="NotificationExplanationLabel"
-                       Text="notify me 30 minutes before parking expires."
-                       FontSize="14"
-                       TextColor="Gray"
-                       HorizontalOptions="Start" />
-            </VerticalStackLayout>
-
             <!-- Buttons Section -->
             <VerticalStackLayout Spacing="20" Margin="0,40,0,0">
                 <!-- Save Button -->
