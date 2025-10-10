@@ -20,6 +20,8 @@ public class ParkingService
     private readonly AuthenticationService _authService;
     private readonly JsonSerializerOptions _options;
 
+    private record BudgetRemainingResponse(int TimeRemaining);
+
     public ParkingService(HttpClient http, AuthenticationService authService, JsonSerializerOptions? options = null)
     {
         _http = http;
@@ -27,12 +29,11 @@ public class ParkingService
         _options = options ?? new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
     }
 
-    public async Task<StartParkingResponse> StartParkingAsync(SegmentResponseDTO segResponse, Guid carId, int notificationMinutes, int minParkingTime)
+    public async Task<StartParkingResponse> StartParkingAsync(SegmentResponseDTO segResponse, Guid carId, int minParkingTime)
     {
         var startParkingPayload = new StartParkingRequest(
             Segment: segResponse,
             VehicleId: carId,
-            NotificationMinutes: notificationMinutes,
             MinParkingTime: minParkingTime
         );
 
@@ -93,4 +94,21 @@ public class ParkingService
             throw new HttpRequestException($"Failed to stop parking: {(int)response.StatusCode} {body}");
         }
     }
+
+    public async Task<int?> GetParkingBudgetRemainingAsync(Guid carId)
+    {
+        var response = await _authService.ExecuteWithTokenRefreshAsync(() =>
+            _http.GetAsync($"/parking/budget-remaining/{carId}"));
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Failed to get budget remaining: {(int)response.StatusCode} {body}");
+        }
+
+        var result = await response.Content.ReadFromJsonAsync<BudgetRemainingResponse>(_options);
+        return result?.TimeRemaining;
+    }
+
+    
 }

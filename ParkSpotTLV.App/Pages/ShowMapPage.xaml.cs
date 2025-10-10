@@ -504,7 +504,6 @@ public partial class ShowMapPage : ContentPage, IDisposable
                 startParkingResponse = await _parkingService.StartParkingAsync(
                     segmentToUse,
                     Guid.Parse(pickedCarId),
-                    30, // soon to be removed
                     _session?.MinParkingTime ?? 30);
                 if (startParkingResponse is not null)
                 {
@@ -519,7 +518,8 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
             // if has residential permit and parking out of zone - show free minutes left today
             if (isResidentalPermit && !parkingAtResZone) {
-                await _parkingPopUps.ShowParkingConfirmedPopupAsync(startParkingResponse, Navigation, DisplayAlert);
+                int? budget = await _parkingService.GetParkingBudgetRemainingAsync(Guid.Parse(pickedCarId));
+                await _parkingPopUps.ShowParkingConfirmedPopupAsync(budget ?? 0, Navigation, DisplayAlert);
             }
             UpdateParkHereButtonState(true); // update UI button - this will also show the Pango button
         }

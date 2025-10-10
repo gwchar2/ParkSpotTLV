@@ -149,7 +149,7 @@ namespace ParkSpotTLV.Infrastructure.Migrations
                     b.HasIndex("VehicleId")
                         .IsUnique()
                         .HasDatabaseName("IX_parking_sessions_vehicle_active")
-                        .HasFilter("\"stopped_local\" IS NULL");
+                        .HasFilter("\"stopped_utc\" IS NULL");
 
                     b.HasIndex("VehicleId", "Status")
                         .HasDatabaseName("ix_parking_sessions_vehicle_id_status");
