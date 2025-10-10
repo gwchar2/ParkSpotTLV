@@ -52,6 +52,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         _parkingPopUps = parkingPopUps;
     }
 
+    // Lifecycle Methods
     protected override async void OnAppearing()
     {
         base.OnAppearing();
@@ -101,6 +102,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         Dispose();
     }
 
+    // Private Load Methods
     private async void OnVisibleBoundsChanged(object? sender, (double MinLat, double MaxLat, double MinLon, double MaxLon, double CenterLat, double CenterLon) bounds)
     {
         await FetchAndRenderSegments(bounds);
@@ -188,6 +190,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         }
     }
 
+    // Event Handlers
     private async void OnTrackLocationToggleClicked(object sender, EventArgs e)
     {
         if (_mapInteractionService.IsTrackingUserLocation)
@@ -415,6 +418,8 @@ public partial class ShowMapPage : ContentPage, IDisposable
             lastPickedCarId: pickedCarId
         );
 
+        _session = await _localDataService.GetSessionAsync();
+
         // update date time picked
         selectedDate = GetSelectedDateTime();
 
@@ -557,6 +562,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         }
 
     }
+
     private async void OnSearchAddress(object sender, EventArgs e)
     {
         var searchBar = (SearchBar)sender;
@@ -588,7 +594,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         return selectedDate;
     }
 
-    // IDisposable implementation
+    // Dispose Pattern
     public void Dispose()
     {
         Dispose(true);
@@ -614,25 +620,5 @@ public partial class ShowMapPage : ContentPage, IDisposable
         _disposed = true;
     }
 
-    // Checkbox change handlers - just for UI feedback
-    // No need to store anything, values are read from checkboxes when Apply is clicked
-    private void OnNoParkingTapped(object sender, EventArgs e)
-    {
-        // Checkbox state is automatically tracked by the CheckBox control
-    }
 
-    private void OnPaidParkingTapped(object sender, EventArgs e)
-    {
-        // Checkbox state is automatically tracked by the CheckBox control
-    }
-
-    private void OnFreeParkingTapped(object sender, EventArgs e)
-    {
-        // Checkbox state is automatically tracked by the CheckBox control
-    }
-
-    private void OnRestrictedTapped(object sender, EventArgs e)
-    {
-        // Checkbox state is automatically tracked by the CheckBox control
-    }
 }

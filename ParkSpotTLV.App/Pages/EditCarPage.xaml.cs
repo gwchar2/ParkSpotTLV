@@ -16,6 +16,7 @@ public partial class EditCarPage : ContentPage, IQueryAttributable
         _carService = carService;
     }
 
+    // Lifecycle Methods
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
         if (query.ContainsKey("carId"))
@@ -25,6 +26,7 @@ public partial class EditCarPage : ContentPage, IQueryAttributable
         }
     }
 
+    // Private Load Methods
     private async void LoadCarData()
     {
         if (string.IsNullOrEmpty(_carId))
@@ -41,7 +43,6 @@ public partial class EditCarPage : ContentPage, IQueryAttributable
                 return;
             }
 
-            // Populate form with car data
             CarNameEntry.Text = _currentCar.Name;
             PrivateRadio.IsChecked = _currentCar.Type == CarType.Private;
             TruckRadio.IsChecked = _currentCar.Type == CarType.Truck;
@@ -57,6 +58,7 @@ public partial class EditCarPage : ContentPage, IQueryAttributable
         }
     }
 
+    // Event Handlers
     private void OnResidentPermitChanged(object sender, CheckedChangedEventArgs e)
     {
         ZoneNumberEntry.IsVisible = e.Value;

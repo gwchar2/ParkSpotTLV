@@ -13,9 +13,9 @@ public partial class AccountDetailsPage : ContentPage
         InitializeComponent();
         _carService = carService;
         _authService = authService;
-        // LoadUserData();
     }
 
+    // Lifecycle Methods
     protected override void OnAppearing()
     {
         base.OnAppearing();
@@ -23,9 +23,9 @@ public partial class AccountDetailsPage : ContentPage
         LoadUserCars();
     }
 
+    // Private Load Methods
     private async void LoadUserData()
     {
-        // Load current user data from API
         try
         {
             var userMe = await _authService.AuthMeAsync();
@@ -35,7 +35,6 @@ public partial class AccountDetailsPage : ContentPage
         {
             System.Diagnostics.Debug.WriteLine($"Error loading user data: {ex.Message}");
         }
-        
     }
 
     private async void LoadUserCars()
@@ -63,16 +62,145 @@ public partial class AccountDetailsPage : ContentPage
             };
             CarsContainer.Children.Add(noCarsLabel);
         }
-        if (userCars.Count >=5){
+
+        if (userCars.Count >= 5)
+        {
             AddCarBtn.IsEnabled = false;
             AddCarBtn.Text = "You can have up to 5 cars";
         }
-        else {
+        else
+        {
             AddCarBtn.IsEnabled = true;
             AddCarBtn.Text = "Add car";
         }
     }
 
+    // Event Handlers
+    private async void OnAddCarClicked(object sender, EventArgs e)
+    {
+        await Shell.Current.GoToAsync("AddCarPage");
+    }
+
+    private async void OnFindParkingClicked(object sender, EventArgs e)
+    {
+        await Shell.Current.GoToAsync("ShowMapPage");
+    }
+
+    private async void OnCarTapped(string carId)
+    {
+        await Shell.Current.GoToAsync($"EditCarPage?carId={carId}");
+    }
+
+    private async void OnRemoveCarClicked(Car car)
+    {
+        bool confirm = await DisplayAlert("Remove Car",
+            $"Are you sure you want to remove car {car.Name}?",
+            "Yes", "No");
+
+        if (confirm)
+        {
+            bool success = await _carService.RemoveCarAsync(car.Id);
+
+            if (success)
+            {
+                await DisplayAlert("Success", $"Car {car.Name} has been removed.", "OK");
+                LoadUserCars();
+            }
+            else
+            {
+                await DisplayAlert("Error", "Failed to remove car. Please try again.", "OK");
+            }
+        }
+    }
+
+    private void OnChangePasswordClicked(object sender, EventArgs e)
+    {
+        PasswordChangeSection.IsVisible = true;
+        ChangePasswordBtn.IsVisible = false;
+
+        OldPasswordEntry.Text = "";
+        NewPasswordEntry.Text = "";
+        ConfirmPasswordEntry.Text = "";
+    }
+
+    private void OnCancelPasswordClicked(object sender, EventArgs e)
+    {
+        PasswordChangeSection.IsVisible = false;
+        ChangePasswordBtn.IsVisible = true;
+
+        OldPasswordEntry.Text = "";
+        NewPasswordEntry.Text = "";
+        ConfirmPasswordEntry.Text = "";
+    }
+
+    private async void OnSavePasswordClicked(object sender, EventArgs e)
+    {
+        string oldPassword = OldPasswordEntry.Text?.Trim() ?? "";
+        string newPassword = NewPasswordEntry.Text?.Trim() ?? "";
+        string confirmPassword = ConfirmPasswordEntry.Text?.Trim() ?? "";
+
+        if (string.IsNullOrEmpty(oldPassword))
+        {
+            await DisplayAlert("Error", "Please enter your current password.", "OK");
+            return;
+        }
+
+        if (string.IsNullOrEmpty(newPassword))
+        {
+            await DisplayAlert("Error", "Please enter a new password.", "OK");
+            return;
+        }
+
+        if (newPassword != confirmPassword)
+        {
+            await DisplayAlert("Error", "New passwords do not match.", "OK");
+            return;
+        }
+
+        if (!_authService.ValidatePassword(newPassword))
+        {
+            await DisplayAlert("Error", "Password must be at least 6 characters long and contain no whitespace characters.", "OK");
+            return;
+        }
+
+        SavePasswordBtn.IsEnabled = false;
+        CancelPasswordBtn.IsEnabled = false;
+        SavePasswordBtn.Text = "Saving...";
+
+        try
+        {
+            bool success = await _authService.UpdatePasswordAsync(newPassword, oldPassword);
+
+            if (success)
+            {
+                await DisplayAlert("Success", "Password updated successfully!", "OK");
+
+                PasswordChangeSection.IsVisible = false;
+                ChangePasswordBtn.IsVisible = true;
+
+                OldPasswordEntry.Text = "";
+                NewPasswordEntry.Text = "";
+                ConfirmPasswordEntry.Text = "";
+            }
+            else
+            {
+                await DisplayAlert("Error", "Failed to update password. Please check your current password and try again.", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "Failed to update password. Please try again later.", "OK");
+            System.Diagnostics.Debug.WriteLine($"Error updating password: {ex.Message}");
+        }
+        finally
+        {
+            SavePasswordBtn.IsEnabled = true;
+            CancelPasswordBtn.IsEnabled = true;
+            SavePasswordBtn.Text = "Save";
+        }
+    }
+
+    // Helper Methods
     private void CreateCarUI(Car car)
     {
         var carFrame = new Border
@@ -135,8 +263,9 @@ public partial class AccountDetailsPage : ContentPage
         }
 
         var FreeParkingText = new List<string>();
-        if (car.HasResidentPermit) {
-            FreeParkingText.Add("Free parking time left: 120 minutes.") ;
+        if (car.HasResidentPermit)
+        {
+            FreeParkingText.Add("Free parking time left: 120 minutes.");
             var FreeParkingLabel = new Label
             {
                 Text = string.Join(", ", FreeParkingText),
@@ -145,7 +274,7 @@ public partial class AccountDetailsPage : ContentPage
             };
             infoLayout.Children.Add(FreeParkingLabel);
         }
-        
+
         var removeButton = new Button
         {
             Text = "Remove",
@@ -165,142 +294,5 @@ public partial class AccountDetailsPage : ContentPage
 
         carFrame.Content = mainLayout;
         CarsContainer.Children.Add(carFrame);
-    }
-
-    
-
-    private void OnChangePasswordClicked(object sender, EventArgs e)
-    {
-        // Show the password change section
-        PasswordChangeSection.IsVisible = true;
-        ChangePasswordBtn.IsVisible = false;
-
-        // Clear any previous entries
-        OldPasswordEntry.Text = "";
-        NewPasswordEntry.Text = "";
-        ConfirmPasswordEntry.Text = "";
-    }
-
-    private void OnCancelPasswordClicked(object sender, EventArgs e)
-    {
-        // Hide the password change section
-        PasswordChangeSection.IsVisible = false;
-        ChangePasswordBtn.IsVisible = true;
-
-        // Clear the entries
-        OldPasswordEntry.Text = "";
-        NewPasswordEntry.Text = "";
-        ConfirmPasswordEntry.Text = "";
-    }
-
-    private async void OnSavePasswordClicked(object sender, EventArgs e)
-    {
-        string oldPassword = OldPasswordEntry.Text?.Trim() ?? "";
-        string newPassword = NewPasswordEntry.Text?.Trim() ?? "";
-        string confirmPassword = ConfirmPasswordEntry.Text?.Trim() ?? "";
-
-        // Validate inputs
-        if (string.IsNullOrEmpty(oldPassword))
-        {
-            await DisplayAlert("Error", "Please enter your current password.", "OK");
-            return;
-        }
-
-        if (string.IsNullOrEmpty(newPassword))
-        {
-            await DisplayAlert("Error", "Please enter a new password.", "OK");
-            return;
-        }
-
-        if (newPassword != confirmPassword)
-        {
-            await DisplayAlert("Error", "New passwords do not match.", "OK");
-            return;
-        }
-
-        // Validate new password using auth service
-        if (!_authService.ValidatePassword(newPassword))
-        {
-            await DisplayAlert("Error", "Password must be at least 6 characters long and contain no whitespace characters.", "OK");
-            return;
-        }
-
-        // Disable buttons during update
-        SavePasswordBtn.IsEnabled = false;
-        CancelPasswordBtn.IsEnabled = false;
-        SavePasswordBtn.Text = "Saving...";
-
-        try
-        {
-            bool success = await _authService.UpdatePasswordAsync(newPassword, oldPassword);
-
-            if (success)
-            {
-                await DisplayAlert("Success", "Password updated successfully!", "OK");
-
-                // Hide the password change section
-                PasswordChangeSection.IsVisible = false;
-                ChangePasswordBtn.IsVisible = true;
-
-                // Clear the entries
-                OldPasswordEntry.Text = "";
-                NewPasswordEntry.Text = "";
-                ConfirmPasswordEntry.Text = "";
-            }
-            else
-            {
-                await DisplayAlert("Error", "Failed to update password. Please check your current password and try again.", "OK");
-            }
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Error", "Failed to update password. Please try again later.", "OK");
-            System.Diagnostics.Debug.WriteLine($"Error updating password: {ex.Message}");
-        }
-        finally
-        {
-            SavePasswordBtn.IsEnabled = true;
-            CancelPasswordBtn.IsEnabled = true;
-            SavePasswordBtn.Text = "Save";
-        }
-    }
-
-    private async void OnCarTapped(string carId)
-    {
-        // Navigate to edit car page with car ID
-        await Shell.Current.GoToAsync($"EditCarPage?carId={carId}");
-    }
-
-    private async void OnRemoveCarClicked(Car car)
-    {
-        bool confirm = await DisplayAlert("Remove Car",
-            $"Are you sure you want to remove car {car.Name}?",
-            "Yes", "No");
-
-        if (confirm)
-        {
-            bool success = await _carService.RemoveCarAsync(car.Id);
-
-            if (success)
-            {
-                await DisplayAlert("Success", $"Car {car.Name} has been removed.", "OK");
-                LoadUserCars(); // Refresh the UI
-            }
-            else
-            {
-                await DisplayAlert("Error", "Failed to remove car. Please try again.", "OK");
-            }
-        }
-    }
-
-    private async void OnAddCarClicked(object sender, EventArgs e)
-    {
-        await Shell.Current.GoToAsync("AddCarPage");
-    }
-
-    private async void OnFindParkingClicked(object sender, EventArgs e)
-    {
-        // Navigate to ShowMapPage
-        await Shell.Current.GoToAsync("ShowMapPage");
     }
 }
