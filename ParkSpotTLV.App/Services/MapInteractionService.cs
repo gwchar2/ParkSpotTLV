@@ -11,7 +11,8 @@ public class MapInteractionService : IDisposable
 {
     private bool _disposed = false;
     private const int MAP_DEBOUNCE_DELAY_MS = 500;
-    private const double USER_LOCATION_ZOOM_METERS = 300;
+    private const double USER_LOCATION_ZOOM_METERS = 150;
+    private const double SEGMENT_RELOAD_DISTANCE_METERS = 150;
 
     // Map area limits to prevent loading too many segments
     private const double MAX_LAT_DEGREES = 0.05;  // ~5.5km
@@ -20,6 +21,7 @@ public class MapInteractionService : IDisposable
     private Microsoft.Maui.Controls.Maps.Map? _map;
     private System.Timers.Timer? _debounceTimer;
     private bool _isTrackingUserLocation = false;
+    private Location? _lastSegmentLoadLocation = null;
 
     public event EventHandler<(double MinLat, double MaxLat, double MinLon, double MaxLon, double CenterLat, double CenterLon)>? VisibleBoundsChanged;
 
@@ -43,11 +45,24 @@ public class MapInteractionService : IDisposable
     {
         if (e.PropertyName == nameof(Microsoft.Maui.Controls.Maps.Map.VisibleRegion))
         {
-            // Skip debounce logic if we're tracking user location (to allow smooth following)
+            // If tracking user location, check if moved far enough to reload segments
             if (_isTrackingUserLocation)
             {
-                System.Diagnostics.Debug.WriteLine("Skipping map debounce (tracking user)");
-                return;
+                var bounds = GetVisibleBounds();
+                if (bounds.HasValue)
+                {
+                    var currentCenter = new Location(bounds.Value.CenterLat, bounds.Value.CenterLon);
+
+                    // Check if moved far enough to reload segments
+                    if (_lastSegmentLoadLocation == null ||
+                        currentCenter.CalculateDistance(_lastSegmentLoadLocation, DistanceUnits.Kilometers) * 1000 > SEGMENT_RELOAD_DISTANCE_METERS)
+                    {
+                        _lastSegmentLoadLocation = currentCenter;
+                        System.Diagnostics.Debug.WriteLine($"User moved {currentCenter.CalculateDistance(_lastSegmentLoadLocation ?? currentCenter, DistanceUnits.Kilometers) * 1000:F0}m - reloading segments");
+                        VisibleBoundsChanged?.Invoke(this, bounds.Value);
+                    }
+                }
+                return; // Still skip debounce timer during tracking
             }
 
             // Debounce: cancel previous timer
@@ -139,9 +154,7 @@ public class MapInteractionService : IDisposable
         }
     }
 
-    /// <summary>
-    /// Searches for an address and moves the map to that location
-    /// </summary>
+    // Searches for an address and moves the map to that location
     public async Task<(bool Success, string? ErrorMessage)> SearchAndMoveToAddressAsync(string address, double zoomMeters)
     {
         if (string.IsNullOrWhiteSpace(address))
@@ -171,9 +184,7 @@ public class MapInteractionService : IDisposable
         }
     }
 
-    /// <summary>
-    /// Starts tracking user location and following it on the map
-    /// </summary>
+    // Starts tracking user location and following it on the map
     public async Task<bool> StartLocationTrackingAsync()
     {
         if (_isTrackingUserLocation)
@@ -182,6 +193,7 @@ public class MapInteractionService : IDisposable
         try
         {
             _isTrackingUserLocation = true;
+            _lastSegmentLoadLocation = null; // Reset segment load tracking
             Geolocation.LocationChanged += OnLocationChanged;
 
             // Use Best accuracy and smallest distance filter for responsive tracking

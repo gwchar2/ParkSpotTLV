@@ -11,7 +11,6 @@ using ParkSpotTLV.App.Data.Services;
 using ParkSpotTLV.App.Data.Models;
 using System.ComponentModel;
 using System.Timers;
-using ParkSpotTLV.Core.Models;
 // using Android.Gms.Common.Apis;
 
 
@@ -43,15 +42,15 @@ public partial class ShowMapPage : ContentPage, IDisposable
     private readonly ParkingService _parkingService;
     private readonly MapSegmentRenderer _mapSegmentRenderer;
     private readonly ParkingPopUps _parkingPopUps;
-    private readonly ILocalDataService _localDataService;
+    private readonly LocalDataService _localDataService;
     private readonly MapInteractionService _mapInteractionService;
-    private List<Core.Models.Car> _userCars = new();
+    private List<Data.Models.Car> _userCars = new();
     private CancellationTokenSource? _mapMoveCts;
     private bool _isInitialized = false;
     private Dictionary<SegmentResponseDTO, string>? segmentsInfo;
 
 
-    public ShowMapPage(CarService carService, MapService mapService, MapSegmentRenderer mapSegmentRenderer, ILocalDataService localDataService, MapInteractionService mapInteractionService, ParkingPopUps parkingPopUps, ParkingService parkingService)
+    public ShowMapPage(CarService carService, MapService mapService, MapSegmentRenderer mapSegmentRenderer, LocalDataService localDataService, MapInteractionService mapInteractionService, ParkingPopUps parkingPopUps, ParkingService parkingService)
     {
         InitializeComponent();
         _carService = carService;

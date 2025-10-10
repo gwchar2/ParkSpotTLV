@@ -11,9 +11,9 @@ public class AuthenticationService
 
     private readonly HttpClient _http;
     private readonly JsonSerializerOptions _options;
-    private readonly ILocalDataService _localDataService;
+    private readonly LocalDataService _localDataService;
 
-    public AuthenticationService(HttpClient http, ILocalDataService localDataService , JsonSerializerOptions? options = null)
+    public AuthenticationService(HttpClient http, LocalDataService localDataService , JsonSerializerOptions? options = null)
     {
         _http = http;    // same HttpClient instance as CarService
         _options = options ?? new JsonSerializerOptions { PropertyNameCaseInsensitive = true };

@@ -1,6 +1,6 @@
 using ParkSpotTLV.Contracts.Map;
 using ParkSpotTLV.Contracts.Parking;
-using ParkSpotTLV.Core.Models;
+using ParkSpotTLV.App.Data.Models;
 
 namespace ParkSpotTLV.App.Services;
 
@@ -226,9 +226,9 @@ public class ParkingPopUps
 
         // Get unique streets with their segment IDs
         var streetGroups = segmentToStreet
-            .GroupBy(kvp => kvp.Value)
-            .Select(g => new { StreetName = g.Key, SegmentResponse = g.First().Key })
-            .OrderBy(s => s.StreetName)
+            .GroupBy(segmentStreetPair => segmentStreetPair.Value)
+            .Select(streetGroup => new { StreetName = streetGroup.Key, SegmentResponse = streetGroup.First().Key })
+            .OrderBy(street => street.StreetName)
             .ToList();
 
         // Create scrollable list of streets

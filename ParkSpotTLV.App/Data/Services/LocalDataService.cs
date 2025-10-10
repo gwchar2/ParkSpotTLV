@@ -4,7 +4,7 @@ using ParkSpotTLV.App.Data.Models;
 namespace ParkSpotTLV.App.Data.Services;
 
 
-public class LocalDataService : ILocalDataService
+public class LocalDataService
 {
     /*
      * Database initialization - ensures SQLite database exists with proper schema

@@ -4,18 +4,18 @@ using System.Net.Http.Json;
 using Microsoft.Maui.Devices.Sensors;
 using ParkSpotTLV.Contracts.Vehicles;
 using ParkSpotTLV.Contracts.Map;
-using ParkSpotTLV.Core.Models;
+using ParkSpotTLV.App.Data.Models;
 using ParkSpotTLV.App.Data.Services;
 namespace ParkSpotTLV.App.Services;
 
 public class MapService
 {
     private readonly AuthenticationService _authService;
-    private readonly ILocalDataService _localDataService;
+    private readonly LocalDataService _localDataService;
     private readonly HttpClient _http;
     private readonly JsonSerializerOptions _options;
 
-    public MapService(HttpClient http, AuthenticationService authService,ILocalDataService localDataService, JsonSerializerOptions? options = null)
+    public MapService(HttpClient http, AuthenticationService authService, LocalDataService localDataService, JsonSerializerOptions? options = null)
     {
         _http = http;                            // already has BaseAddress + Authorization
         _authService = authService;

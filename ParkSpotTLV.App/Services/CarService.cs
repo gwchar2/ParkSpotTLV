@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using ParkSpotTLV.Contracts.Vehicles;
 using ParkSpotTLV.Contracts.Permits;
 using ParkSpotTLV.Contracts.Enums;
-using ParkSpotTLV.Core.Models;
+using ParkSpotTLV.App.Data.Models;
 using ParkSpotTLV.Contracts.Map;
 using ParkSpotTLV.Contracts.Parking;
 
