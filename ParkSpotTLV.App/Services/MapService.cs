@@ -1,33 +1,33 @@
-using System.Text.Json;
 using System.Net.Http.Json;
+using System.Text.Json;
 using ParkSpotTLV.Contracts.Map;
+
 namespace ParkSpotTLV.App.Services;
 
 public class MapService
 {
+    private readonly HttpClient _http;
     private readonly AuthenticationService _authService;
     private readonly LocalDataService _localDataService;
-    private readonly HttpClient _http;
     private readonly JsonSerializerOptions _options;
 
     public MapService(HttpClient http, AuthenticationService authService, LocalDataService localDataService, JsonSerializerOptions? options = null)
     {
-        _http = http;                            // already has BaseAddress + Authorization
+        _http = http;
         _authService = authService;
         _localDataService = localDataService;
         _options = options ?? new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-
     }
 
-    public async Task<GetMapSegmentsResponse?> getSegmentsAsync(Guid activePermit,
-                                                                double minLon,
-                                                                double minLat,
-                                                                double maxLon,
-                                                                double maxLat,
-                                                                double centerLon,
-                                                                double centerLat,
-                                                                DateTimeOffset dateTime,
-                                                                int minParkingTime)
+    public async Task<GetMapSegmentsResponse?> GetSegmentsAsync(Guid activePermit,
+                                                                 double minLon,
+                                                                 double minLat,
+                                                                 double maxLon,
+                                                                 double maxLat,
+                                                                 double centerLon,
+                                                                 double centerLat,
+                                                                 DateTimeOffset dateTime,
+                                                                 int minParkingTime)
     {
         var request = new GetMapSegmentsRequest(
             ActivePermitId: activePermit,

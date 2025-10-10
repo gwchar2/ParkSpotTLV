@@ -16,8 +16,8 @@ public class ParkingStatusResponse
 // Handles parking-related API operations
 public class ParkingService
 {
-    private readonly AuthenticationService _authService;
     private readonly HttpClient _http;
+    private readonly AuthenticationService _authService;
     private readonly JsonSerializerOptions _options;
 
     public ParkingService(HttpClient http, AuthenticationService authService, JsonSerializerOptions? options = null)
@@ -55,24 +55,6 @@ public class ParkingService
         return result;
     }
 
-    public async Task StopParkingAsync(Guid sessionId, Guid carId)
-    {
-        var stopParkingPayload = new
-        {
-            SessionId = sessionId,
-            VehicleId = carId
-        };
-
-        var response = await _authService.ExecuteWithTokenRefreshAsync(() =>
-            _http.PostAsJsonAsync("/parking/stop", stopParkingPayload, _options));
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var body = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Failed to stop parking: {(int)response.StatusCode} {body}");
-        }
-    }
-
     public async Task<ParkingStatusResponse?> GetParkingStatusAsync(Guid carId)
     {
         try
@@ -91,6 +73,24 @@ public class ParkingService
         {
             System.Diagnostics.Debug.WriteLine($"Error fetching parking status: {ex.Message}");
             return null;
+        }
+    }
+
+    public async Task StopParkingAsync(Guid sessionId, Guid carId)
+    {
+        var stopParkingPayload = new
+        {
+            SessionId = sessionId,
+            VehicleId = carId
+        };
+
+        var response = await _authService.ExecuteWithTokenRefreshAsync(() =>
+            _http.PostAsJsonAsync("/parking/stop", stopParkingPayload, _options));
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Failed to stop parking: {(int)response.StatusCode} {body}");
         }
     }
 }

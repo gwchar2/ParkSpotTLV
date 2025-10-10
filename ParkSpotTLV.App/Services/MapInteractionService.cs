@@ -1,5 +1,5 @@
-using Microsoft.Maui.Maps;
 using System.ComponentModel;
+using Microsoft.Maui.Maps;
 
 namespace ParkSpotTLV.App.Services;
 
@@ -24,12 +24,10 @@ public class MapInteractionService : IDisposable
 
     public bool IsTrackingUserLocation => _isTrackingUserLocation;
 
-    // Initializes the service with a map instance and hooks up event handlers
     public void Initialize(Microsoft.Maui.Controls.Maps.Map map)
     {
         if (_map != null)
         {
-            // Cleanup previous map if exists
             _map.PropertyChanged -= MyMapOnPropertyChanged;
         }
 
@@ -37,12 +35,10 @@ public class MapInteractionService : IDisposable
         _map.PropertyChanged += MyMapOnPropertyChanged;
     }
 
-    // Handles map property changes and triggers debounced viewport updates
     public void MyMapOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(Microsoft.Maui.Controls.Maps.Map.VisibleRegion))
         {
-            // If tracking user location, check if moved far enough to reload segments
             if (_isTrackingUserLocation)
             {
                 var bounds = GetVisibleBounds();
@@ -50,7 +46,6 @@ public class MapInteractionService : IDisposable
                 {
                     var currentCenter = new Location(bounds.Value.CenterLat, bounds.Value.CenterLon);
 
-                    // Check if moved far enough to reload segments
                     if (_lastSegmentLoadLocation == null ||
                         currentCenter.CalculateDistance(_lastSegmentLoadLocation, DistanceUnits.Kilometers) * 1000 > SEGMENT_RELOAD_DISTANCE_METERS)
                     {
@@ -59,20 +54,17 @@ public class MapInteractionService : IDisposable
                         VisibleBoundsChanged?.Invoke(this, bounds.Value);
                     }
                 }
-                return; // Still skip debounce timer during tracking
+                return;
             }
 
-            // Debounce: cancel previous timer
             _debounceTimer?.Stop();
             _debounceTimer?.Dispose();
 
-            // Start new timer (debounce)
             _debounceTimer = new System.Timers.Timer(MAP_DEBOUNCE_DELAY_MS);
             _debounceTimer.Elapsed += async (s, args) =>
             {
                 _debounceTimer?.Stop();
 
-                // Fire event on UI thread
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
                     try
@@ -94,9 +86,7 @@ public class MapInteractionService : IDisposable
         }
     }
 
-    // Calculates the visible bounds of the current map view
-    public (double MinLat, double MaxLat, double MinLon, double MaxLon, double CenterLat, double CenterLon)?
-        GetVisibleBounds()
+    public (double MinLat, double MaxLat, double MinLon, double MaxLon, double CenterLat, double CenterLon)? GetVisibleBounds()
     {
         if (_map == null)
         {
