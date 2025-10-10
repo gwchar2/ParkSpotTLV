@@ -4,15 +4,14 @@
              xmlns:controls="clr-namespace:ParkSpotTLV.App.Controls"
              xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
              x:Class="ParkSpotTLV.App.Pages.ShowMapPage"
-             Title="Map">
+             Title="Map"
+             BackgroundColor="{StaticResource PageBackground}">
 
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!-- Top Row: Settings Toggle and Search Bar -->
@@ -26,9 +25,13 @@
             <Button Grid.Column="0"
                     x:Name="SettingsToggleBtn"
                     Text="Settings ▼"
-                    BackgroundColor="LightGray"
-                    TextColor="Black"
-                    FontSize="12"
+                    BackgroundColor="Transparent"
+                    TextColor="{StaticResource Secondary}"
+                    BorderColor="{StaticResource Secondary}"
+                    BorderWidth="1"
+                    FontSize="14"
+                    Padding="10,5"
+                    VerticalOptions="Center"
                     Clicked="OnSettingsToggleClicked"
                     WidthRequest="100"
                     HeightRequest="35" />
@@ -38,15 +41,15 @@
                        x:Name="AddressSearchBar"
                        Placeholder="Search address..."
                        SearchButtonPressed="OnSearchAddress"
-                       BackgroundColor="White"
+                       BackgroundColor="{StaticResource White}"
                        VerticalOptions="Center" />
         </Grid>        
 
         <!-- Collapsible Settings Panel -->
         <Border Grid.Row="1"
                 x:Name="SettingsPanel"
-                BackgroundColor="White"
-                Stroke="Gray"
+                BackgroundColor="{StaticResource White}"
+                Stroke="{StaticResource Secondary}"
                 StrokeThickness="1"
                 Padding="5"
                 Margin="5,0"
@@ -60,23 +63,24 @@
 
             <!-- Left Side - 3 Dropdowns -->
             <VerticalStackLayout Grid.Column="0" Spacing="5" HorizontalOptions="Start">
-                <Border BackgroundColor="White"
-                        Stroke="Gray"
+                <Border BackgroundColor="{StaticResource White}"
+                        Stroke="{StaticResource Secondary}"
                         StrokeThickness="1"
+                        StrokeShape="RoundRectangle 8"
                         WidthRequest="170"
                         HeightRequest="40">
                     <Grid>
                         <Picker x:Name="CarPicker"
                                 Title="Pick Car"
                                 BackgroundColor="Transparent"
-                                TextColor="Black"
-                                TitleColor="Gray"
+                                TextColor="{StaticResource Secondary}"
+                                TitleColor="{StaticResource Secondary}"
                                 SelectedIndex="1"
                                 SelectedIndexChanged="OnCarPickerChanged">
                         </Picker>
                         <Label Text="▼"
                                FontSize="12"
-                               TextColor="Gray"
+                               TextColor="{StaticResource Secondary}"
                                HorizontalOptions="End"
                                VerticalOptions="Center"
                                Margin="0,0,5,0"
@@ -84,22 +88,23 @@
                     </Grid>
                 </Border>
 
-                <Border BackgroundColor="White"
-                        Stroke="Gray"
+                <Border BackgroundColor="{StaticResource White}"
+                        Stroke="{StaticResource Secondary}"
                         StrokeThickness="1"
+                        StrokeShape="RoundRectangle 8"
                         WidthRequest="170"
                         HeightRequest="40">
                     <Grid>
                         <Picker x:Name="DatePicker"
                                 Title="Today"
                                 BackgroundColor="Transparent"
-                                TextColor="Black"
-                                TitleColor="Gray"
+                                TextColor="{StaticResource Secondary}"
+                                TitleColor="{StaticResource Secondary}"
                                 SelectedIndexChanged="OnDatePickerChanged">
                         </Picker>
                         <Label Text="▼"
                                FontSize="12"
-                               TextColor="Gray"
+                               TextColor="{StaticResource Secondary}"
                                HorizontalOptions="End"
                                VerticalOptions="Center"
                                Margin="0,0,5,0"
@@ -107,22 +112,23 @@
                     </Grid>
                 </Border>
 
-                <Border BackgroundColor="White"
-                        Stroke="Gray"
+                <Border BackgroundColor="{StaticResource White}"
+                        Stroke="{StaticResource Secondary}"
                         StrokeThickness="1"
+                        StrokeShape="RoundRectangle 8"
                         WidthRequest="170"
                         HeightRequest="40">
                     <Grid>
                         <Picker x:Name="TimePicker"
                                 Title="Now"
                                 BackgroundColor="Transparent"
-                                TextColor="Black"
-                                TitleColor="Gray"
+                                TextColor="{StaticResource Secondary}"
+                                TitleColor="{StaticResource Secondary}"
                                 SelectedIndexChanged="OnTimePickerChanged">
                         </Picker>
                         <Label Text="▼"
                                FontSize="12"
-                               TextColor="Gray"
+                               TextColor="{StaticResource Secondary}"
                                HorizontalOptions="End"
                                VerticalOptions="Center"
                                Margin="0,0,5,0"
@@ -133,9 +139,10 @@
                 <Button
                     x:Name="ApplyBtn"
                     Text="Apply Changes"
-                    BackgroundColor="#D4DEFB"
-                    TextColor="White"
+                    BackgroundColor="{StaticResource PrimaryAction}"
+                    TextColor="{StaticResource White}"
                     FontSize="12"
+                    CornerRadius="8"
                     Clicked="OnApplyClicked"
                     HorizontalOptions="Fill"
                     Grid.Column="0"
@@ -147,49 +154,61 @@
                 <HorizontalStackLayout Spacing="5">
                     <CheckBox x:Name="NoParkingCheck"
                               IsChecked="True" />
-                    <Label Text="No parking"
-                           BackgroundColor="#f15151"
-                           TextColor="White"
-                           Padding="5,5"
-                           WidthRequest="120"
-                           HorizontalTextAlignment="Center"
-                           VerticalOptions="Center" />
+                    <Border BackgroundColor="{StaticResource NoParking}"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 5"
+                            WidthRequest="120">
+                        <Label Text="No parking"
+                               TextColor="{StaticResource White}"
+                               Padding="5,5"
+                               HorizontalTextAlignment="Center"
+                               VerticalOptions="Center" />
+                    </Border>
                 </HorizontalStackLayout>
 
                 <HorizontalStackLayout Spacing="5">
                     <CheckBox x:Name="PaidParkingCheck"
                               IsChecked="True" />
-                    <Label Text="Paid parking"
-                           BackgroundColor="#4769b9"
-                           TextColor="White"
-                           Padding="5,5"
-                           WidthRequest="120"
-                           HorizontalTextAlignment="Center"
-                           VerticalOptions="Center" />
+                    <Border BackgroundColor="{StaticResource PaidParking}"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 5"
+                            WidthRequest="120">
+                        <Label Text="Paid parking"
+                               TextColor="{StaticResource White}"
+                               Padding="5,5"
+                               HorizontalTextAlignment="Center"
+                               VerticalOptions="Center" />
+                    </Border>
                 </HorizontalStackLayout>
 
                 <HorizontalStackLayout Spacing="5">
                     <CheckBox x:Name="FreeParkingCheck"
                               IsChecked="True" />
-                    <Label Text="Free parking"
-                           BackgroundColor="#40dd7c"
-                           TextColor="Black"
-                           Padding="5,5"
-                           WidthRequest="120"
-                           HorizontalTextAlignment="Center"
-                           VerticalOptions="Center" />
+                    <Border BackgroundColor="{StaticResource FreeParking}"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 5"
+                            WidthRequest="120">
+                        <Label Text="Free parking"
+                               TextColor="{StaticResource Black}"
+                               Padding="5,5"
+                               HorizontalTextAlignment="Center"
+                               VerticalOptions="Center" />
+                    </Border>
                 </HorizontalStackLayout>
 
                 <HorizontalStackLayout Spacing="5">
                     <CheckBox x:Name="RestrictedCheck"
                               IsChecked="True" />
-                    <Label Text="Restricted"
-                           BackgroundColor="#f2d158"
-                           TextColor="Black"
-                           Padding="5,5"
-                           WidthRequest="120"
-                           HorizontalTextAlignment="Center"
-                           VerticalOptions="Center" />
+                    <Border BackgroundColor="{StaticResource RestrictedParking}"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 5"
+                            WidthRequest="120">
+                        <Label Text="Restricted"
+                               TextColor="{StaticResource Black}"
+                               Padding="5,5"
+                               HorizontalTextAlignment="Center"
+                               VerticalOptions="Center" />
+                    </Border>
                 </HorizontalStackLayout>
             </VerticalStackLayout>
         </Grid>
@@ -197,11 +216,11 @@
 
         
 
-        <!-- Map with Floating Track Button -->
-        <Grid Grid.Row="3">
+        <!-- Map with Floating Track Button and Park Here Button -->
+        <Grid Grid.Row="2">
             <Border Padding="0"
                     StrokeThickness="1"
-                    Stroke="Gray"
+                    Stroke="{StaticResource Secondary}"
                     StrokeShape="RoundRectangle 10"
                     Margin="1">
                 <maps:Map x:Name="MyMap" />
@@ -212,14 +231,14 @@
                                  VerticalOptions="Start"
                                  Margin="10"
                                  Spacing="5">
-                <Border BackgroundColor="White"
+                <Border BackgroundColor="{StaticResource White}"
                         StrokeThickness="0"
                         Padding="5,2"
                         StrokeShape="RoundRectangle 5"
                         HorizontalOptions="Center">
                     <Label Text="Follow Me"
                            FontSize="10"
-                           TextColor="Black"
+                           TextColor="{StaticResource Secondary}"
                            HorizontalOptions="Center" />
                 </Border>
 
@@ -233,7 +252,7 @@
                     <Grid>
                         <!-- Background -->
                         <BoxView x:Name="TrackLocationToggleBg"
-                                 Color="#CCCCCC" />
+                                 Color="#FFF5F5F5" />
 
                         <Button Clicked="OnTrackLocationToggleClicked"
                                 BackgroundColor="Transparent"
@@ -251,19 +270,23 @@
                     </Grid>
                 </Border>
             </VerticalStackLayout>
-        </Grid>
 
-        <!-- "Park Here" button-->
-        <Button Grid.Row="4"
-                x:Name="ParkHereBtn"
-                Text="Park Here"
-                BackgroundColor="#2E7D32"
-                TextColor="White"
-                FontSize="16"
-                Clicked="OnParkHereClicked"
-                HorizontalOptions="Fill"
-                Margin="20,10"
-                HeightRequest="50" />
+            <!-- "Park Here" button - Floating at Bottom -->
+            <Button x:Name="ParkHereBtn"
+                    Text="Park Here"
+                    BackgroundColor="{StaticResource White}"
+                    BorderColor="{StaticResource Primary}"
+                    BorderWidth="3"
+                    TextColor="{StaticResource Primary}"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    Clicked="OnParkHereClicked"
+                    HorizontalOptions="Center"
+                    VerticalOptions="End"
+                    CornerRadius="25"
+                    Margin="20,10,20,20"
+                    HeightRequest="50" />
+        </Grid>
 
     </Grid>
 </ContentPage>

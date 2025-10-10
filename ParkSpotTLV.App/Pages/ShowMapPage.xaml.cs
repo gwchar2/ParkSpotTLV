@@ -210,7 +210,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
                 TrackLocationToggleCircle.TranslateTo(20, 0, 200, Easing.CubicInOut),
                 TrackLocationToggleBg.FadeTo(1, 200)
             );
-            TrackLocationToggleBg.Color = Color.FromArgb("#2E7D32"); // Green (on)
+            TrackLocationToggleBg.Color = Color.FromArgb("#FF2B3271"); // Green (on)
         }
     }
     
@@ -552,12 +552,14 @@ public partial class ShowMapPage : ContentPage, IDisposable
         if (isParking)
         {
             ParkHereBtn.Text = "End Parking";
-            ParkHereBtn.BackgroundColor = Color.FromArgb("#D32F2F");
+            ParkHereBtn.BorderColor = Color.FromArgb("#FFF15151");
+            ParkHereBtn.TextColor = Color.FromArgb("#FFF15151");
         }
         else
         {
             ParkHereBtn.Text = "Park Here";
-            ParkHereBtn.BackgroundColor = Color.FromArgb("#2E7D32");
+            ParkHereBtn.BorderColor = Color.FromArgb("#FF2B3271");
+            ParkHereBtn.TextColor = Color.FromArgb("#FF2B3271");
         }
 
     }
