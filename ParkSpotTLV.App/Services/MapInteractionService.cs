@@ -1,8 +1,5 @@
-using Microsoft.Maui.Controls.Maps;
-using Microsoft.Maui.Devices.Sensors;
-using Microsoft.Maui.Maps;
 using System.ComponentModel;
-using System.Timers;
+using Microsoft.Maui.Maps;
 
 namespace ParkSpotTLV.App.Services;
 
@@ -11,7 +8,8 @@ public class MapInteractionService : IDisposable
 {
     private bool _disposed = false;
     private const int MAP_DEBOUNCE_DELAY_MS = 500;
-    private const double USER_LOCATION_ZOOM_METERS = 300;
+    private const double USER_LOCATION_ZOOM_METERS = 150;
+    private const double SEGMENT_RELOAD_DISTANCE_METERS = 150;
 
     // Map area limits to prevent loading too many segments
     private const double MAX_LAT_DEGREES = 0.05;  // ~5.5km
@@ -20,17 +18,16 @@ public class MapInteractionService : IDisposable
     private Microsoft.Maui.Controls.Maps.Map? _map;
     private System.Timers.Timer? _debounceTimer;
     private bool _isTrackingUserLocation = false;
+    private Location? _lastSegmentLoadLocation = null;
 
     public event EventHandler<(double MinLat, double MaxLat, double MinLon, double MaxLon, double CenterLat, double CenterLon)>? VisibleBoundsChanged;
 
     public bool IsTrackingUserLocation => _isTrackingUserLocation;
 
-    // Initializes the service with a map instance and hooks up event handlers
     public void Initialize(Microsoft.Maui.Controls.Maps.Map map)
     {
         if (_map != null)
         {
-            // Cleanup previous map if exists
             _map.PropertyChanged -= MyMapOnPropertyChanged;
         }
 
@@ -38,29 +35,36 @@ public class MapInteractionService : IDisposable
         _map.PropertyChanged += MyMapOnPropertyChanged;
     }
 
-    // Handles map property changes and triggers debounced viewport updates
     public void MyMapOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(Microsoft.Maui.Controls.Maps.Map.VisibleRegion))
         {
-            // Skip debounce logic if we're tracking user location (to allow smooth following)
             if (_isTrackingUserLocation)
             {
-                System.Diagnostics.Debug.WriteLine("Skipping map debounce (tracking user)");
+                var bounds = GetVisibleBounds();
+                if (bounds.HasValue)
+                {
+                    var currentCenter = new Location(bounds.Value.CenterLat, bounds.Value.CenterLon);
+
+                    if (_lastSegmentLoadLocation == null ||
+                        currentCenter.CalculateDistance(_lastSegmentLoadLocation, DistanceUnits.Kilometers) * 1000 > SEGMENT_RELOAD_DISTANCE_METERS)
+                    {
+                        _lastSegmentLoadLocation = currentCenter;
+                        System.Diagnostics.Debug.WriteLine($"User moved {currentCenter.CalculateDistance(_lastSegmentLoadLocation ?? currentCenter, DistanceUnits.Kilometers) * 1000:F0}m - reloading segments");
+                        VisibleBoundsChanged?.Invoke(this, bounds.Value);
+                    }
+                }
                 return;
             }
 
-            // Debounce: cancel previous timer
             _debounceTimer?.Stop();
             _debounceTimer?.Dispose();
 
-            // Start new timer (debounce)
             _debounceTimer = new System.Timers.Timer(MAP_DEBOUNCE_DELAY_MS);
             _debounceTimer.Elapsed += async (s, args) =>
             {
                 _debounceTimer?.Stop();
 
-                // Fire event on UI thread
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
                     try
@@ -82,9 +86,7 @@ public class MapInteractionService : IDisposable
         }
     }
 
-    // Calculates the visible bounds of the current map view
-    public (double MinLat, double MaxLat, double MinLon, double MaxLon, double CenterLat, double CenterLon)?
-        GetVisibleBounds()
+    public (double MinLat, double MaxLat, double MinLon, double MaxLon, double CenterLat, double CenterLon)? GetVisibleBounds()
     {
         if (_map == null)
         {
@@ -139,9 +141,7 @@ public class MapInteractionService : IDisposable
         }
     }
 
-    /// <summary>
-    /// Searches for an address and moves the map to that location
-    /// </summary>
+    // Searches for an address and moves the map to that location
     public async Task<(bool Success, string? ErrorMessage)> SearchAndMoveToAddressAsync(string address, double zoomMeters)
     {
         if (string.IsNullOrWhiteSpace(address))
@@ -171,9 +171,7 @@ public class MapInteractionService : IDisposable
         }
     }
 
-    /// <summary>
-    /// Starts tracking user location and following it on the map
-    /// </summary>
+    // Starts tracking user location and following it on the map
     public async Task<bool> StartLocationTrackingAsync()
     {
         if (_isTrackingUserLocation)
@@ -182,6 +180,7 @@ public class MapInteractionService : IDisposable
         try
         {
             _isTrackingUserLocation = true;
+            _lastSegmentLoadLocation = null; // Reset segment load tracking
             Geolocation.LocationChanged += OnLocationChanged;
 
             // Use Best accuracy and smallest distance filter for responsive tracking

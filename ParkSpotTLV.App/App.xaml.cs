@@ -1,16 +1,15 @@
-﻿using ParkSpotTLV.App.Data.Services;
-using ParkSpotTLV.App.Services;
+﻿using ParkSpotTLV.App.Services;
 
 namespace ParkSpotTLV.App
 {
     public partial class App : Application
     {
         private readonly AppShell _shell;
-        private readonly ILocalDataService _localData;
+        private readonly LocalDataService _localData;
         private readonly AuthenticationService _authService;
 
-        // AppShell and ILocalDataService come from DI
-        public App(AppShell shell, ILocalDataService localData, AuthenticationService authService)
+        // AppShell and LocalDataService come from DI
+        public App(AppShell shell, LocalDataService localData, AuthenticationService authService)
         {
             InitializeComponent();
             _shell = shell;

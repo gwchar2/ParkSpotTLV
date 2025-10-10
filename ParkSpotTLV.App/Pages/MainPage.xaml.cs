@@ -1,5 +1,4 @@
 using ParkSpotTLV.App.Services;
-using System.Net;
 
 namespace ParkSpotTLV.App.Pages {
     public partial class MainPage : ContentPage {

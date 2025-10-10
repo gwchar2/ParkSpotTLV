@@ -1,19 +1,8 @@
 using ParkSpotTLV.App.Services;
-using Microsoft.Maui.Controls.Maps;
 using Microsoft.Maui.Maps;
-using Microsoft.Maui.Devices.Sensors;
-using System.Threading.Tasks;
-using System.Text.Json;
-using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Contracts.Map;
 using ParkSpotTLV.Contracts.Parking;
-using ParkSpotTLV.App.Data.Services;
 using ParkSpotTLV.App.Data.Models;
-using System.ComponentModel;
-using System.Timers;
-using ParkSpotTLV.Core.Models;
-// using Android.Gms.Common.Apis;
-
 
 namespace ParkSpotTLV.App.Pages;
 
@@ -43,15 +32,15 @@ public partial class ShowMapPage : ContentPage, IDisposable
     private readonly ParkingService _parkingService;
     private readonly MapSegmentRenderer _mapSegmentRenderer;
     private readonly ParkingPopUps _parkingPopUps;
-    private readonly ILocalDataService _localDataService;
+    private readonly LocalDataService _localDataService;
     private readonly MapInteractionService _mapInteractionService;
-    private List<Core.Models.Car> _userCars = new();
+    private List<Data.Models.Car> _userCars = new();
     private CancellationTokenSource? _mapMoveCts;
     private bool _isInitialized = false;
     private Dictionary<SegmentResponseDTO, string>? segmentsInfo;
 
 
-    public ShowMapPage(CarService carService, MapService mapService, MapSegmentRenderer mapSegmentRenderer, ILocalDataService localDataService, MapInteractionService mapInteractionService, ParkingPopUps parkingPopUps, ParkingService parkingService)
+    public ShowMapPage(CarService carService, MapService mapService, MapSegmentRenderer mapSegmentRenderer, LocalDataService localDataService, MapInteractionService mapInteractionService, ParkingPopUps parkingPopUps, ParkingService parkingService)
     {
         InitializeComponent();
         _carService = carService;
@@ -63,6 +52,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         _parkingPopUps = parkingPopUps;
     }
 
+    // Lifecycle Methods
     protected override async void OnAppearing()
     {
         base.OnAppearing();
@@ -112,6 +102,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         Dispose();
     }
 
+    // Private Load Methods
     private async void OnVisibleBoundsChanged(object? sender, (double MinLat, double MaxLat, double MinLon, double MaxLon, double CenterLat, double CenterLon) bounds)
     {
         await FetchAndRenderSegments(bounds);
@@ -131,16 +122,15 @@ public partial class ShowMapPage : ContentPage, IDisposable
         {
             System.Diagnostics.Debug.WriteLine($"Fetching segments for bounds: MinLat={bounds.Value.MinLat}, MaxLat={bounds.Value.MaxLat}, MinLon={bounds.Value.MinLon}, MaxLon={bounds.Value.MaxLon}");
 
-            // fetch segments list using getSegmentsAsync(...)
-            segmentsResponse = await _mapService.getSegmentsAsync(activePermit,
-                                                                    bounds.Value.MinLon,
-                                                                    bounds.Value.MinLat,
-                                                                    bounds.Value.MaxLon,
-                                                                    bounds.Value.MaxLat,
-                                                                    bounds.Value.CenterLon,
-                                                                    bounds.Value.CenterLat,
-                                                                    selectedDate,
-                                                                    _session?.MinParkingTime ?? DEFAULT_MIN_PARKING_TIME_MINUTES);
+            segmentsResponse = await _mapService.GetSegmentsAsync(activePermit,
+                                                                   bounds.Value.MinLon,
+                                                                   bounds.Value.MinLat,
+                                                                   bounds.Value.MaxLon,
+                                                                   bounds.Value.MaxLat,
+                                                                   bounds.Value.CenterLon,
+                                                                   bounds.Value.CenterLat,
+                                                                   selectedDate,
+                                                                   _session?.MinParkingTime ?? DEFAULT_MIN_PARKING_TIME_MINUTES);
 
             if (segmentsResponse == null || segmentsResponse.Segments == null)
             {
@@ -199,6 +189,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         }
     }
 
+    // Event Handlers
     private async void OnTrackLocationToggleClicked(object sender, EventArgs e)
     {
         if (_mapInteractionService.IsTrackingUserLocation)
@@ -426,6 +417,8 @@ public partial class ShowMapPage : ContentPage, IDisposable
             lastPickedCarId: pickedCarId
         );
 
+        _session = await _localDataService.GetSessionAsync();
+
         // update date time picked
         selectedDate = GetSelectedDateTime();
 
@@ -489,7 +482,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
                             startParkingResponse = await _parkingService.StartParkingAsync(
                                 segmentResponse,
                                 Guid.Parse(pickedCarId),
-                                _session?.NotificationMinutesBefore ?? 30,
+                                30, // soon to be removed
                                 _session?.MinParkingTime ?? 30);
                             if (startParkingResponse is not null)
                             {
@@ -510,16 +503,10 @@ public partial class ShowMapPage : ContentPage, IDisposable
                 }
             }
 
-            var result = await _parkingPopUps.ShowParkingNotificationPopupAsync(Navigation);
-
-            if (result.Confirmed)
-            {
+            
                 UpdateParkHereButtonState(true); // update UI button            
-                // await _localDataService.UpdateParkingStatusAsync(true); // update status in session
-
                 // Show parking confirmed popup with Pango option
                 await _parkingPopUps.ShowParkingConfirmedPopupAsync(startParkingResponse,parkingAtResZone, Navigation, DisplayAlert);
-            }
         }
         else // currently parking
         {
@@ -574,6 +561,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         }
 
     }
+
     private async void OnSearchAddress(object sender, EventArgs e)
     {
         var searchBar = (SearchBar)sender;
@@ -605,7 +593,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         return selectedDate;
     }
 
-    // IDisposable implementation
+    // Dispose Pattern
     public void Dispose()
     {
         Dispose(true);
@@ -631,25 +619,5 @@ public partial class ShowMapPage : ContentPage, IDisposable
         _disposed = true;
     }
 
-    // Checkbox change handlers - just for UI feedback
-    // No need to store anything, values are read from checkboxes when Apply is clicked
-    private void OnNoParkingTapped(object sender, EventArgs e)
-    {
-        // Checkbox state is automatically tracked by the CheckBox control
-    }
 
-    private void OnPaidParkingTapped(object sender, EventArgs e)
-    {
-        // Checkbox state is automatically tracked by the CheckBox control
-    }
-
-    private void OnFreeParkingTapped(object sender, EventArgs e)
-    {
-        // Checkbox state is automatically tracked by the CheckBox control
-    }
-
-    private void OnRestrictedTapped(object sender, EventArgs e)
-    {
-        // Checkbox state is automatically tracked by the CheckBox control
-    }
 }

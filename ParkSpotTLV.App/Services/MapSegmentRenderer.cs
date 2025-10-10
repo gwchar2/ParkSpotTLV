@@ -1,7 +1,6 @@
 using Microsoft.Maui.Controls.Maps;
 using ParkSpotTLV.App.Data.Models;
 using ParkSpotTLV.Contracts.Map;
-using System.Text.Json;
 
 namespace ParkSpotTLV.App.Services;
 
