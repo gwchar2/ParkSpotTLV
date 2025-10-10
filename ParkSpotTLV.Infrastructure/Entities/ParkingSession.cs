@@ -27,8 +27,8 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         public int ParkingBudgetUsed { get; set; }
         public int PaidMinutes { get; set; }
         public ParkingSessionStatus Status { get; set; }
-        public DateTimeOffset CreatedAt { get; set; }
-        public DateTimeOffset UpdatedAt { get; set; }
+        public DateTimeOffset CreatedAtUtc { get; set; }
+        public DateTimeOffset UpdatedAtUtc { get; set; }
 
     }
 }

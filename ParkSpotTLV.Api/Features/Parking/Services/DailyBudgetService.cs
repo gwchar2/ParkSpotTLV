@@ -4,13 +4,14 @@ using ParkSpotTLV.Infrastructure;
 using ParkSpotTLV.Contracts.Budget;
 using ParkSpotTLV.Contracts.Time;
 using ParkSpotTLV.Infrastructure.Entities;
+using ParkSpotTLV.Api.Features.Parking.Models;
+
 
 namespace ParkSpotTLV.Api.Features.Parking.Services {
 
     public sealed class DailyBudgetService(AppDbContext db, IClock clock) : IDailyBudgetService {
 
         private const int DailyAllowanceMinutes = 120;
-        private readonly IClock _clock = clock;
 
         /*
          * We ensure that the daily allownace was reset, it only creates the day row if missing.
@@ -24,8 +25,8 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
                     VehicleId = vehicleId,
                     AnchorDate = anchorDate,
                     MinutesUsed = 0,
-                    CreatedAtUtc = _clock.UtcNow,
-                    UpdatedAtUtc = _clock.UtcNow
+                    CreatedAtUtc = clock.UtcNow,
+                    UpdatedAtUtc = clock.UtcNow
                 });
 
                 await db.SaveChangesAsync(ct);
@@ -43,6 +44,7 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
 
             var used = row?.MinutesUsed ?? 0;
             var remaining = DailyAllowanceMinutes - used;
+
             return remaining > 0 ? remaining : 0;
         }
 
@@ -81,11 +83,11 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
             await EnsureResetAsync(vehicleId, anchorDate, ct);
 
             // UPDATE the minimum between 120 minutes (default) and the amount of time used
-            var now = _clock.UtcNow;
+            var now = clock.UtcNow;
             var sql = """
                         UPDATE "daily_budgets"
                         SET "minutes_used" = LEAST(120, "minutes_used" + {2}),
-                        "updated_at" = {3}
+                        "updated_at_utc" = {3}
                         WHERE "vehicle_id" = {0} AND "anchor_date" = {1};
                         """;
 
@@ -114,6 +116,77 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
             }
         }
 
+        public async Task<BudgetCalculationDTO> CalculateAsync(ParkingSession session, CancellationToken ct) {
+            DateTimeOffset timeLocal = clock.LocalNow;
+            DateTimeOffset startedLocal = clock.ToLocal(session.StartedUtc);
+            DateTimeOffset nextLocal = clock.ToLocal(session.NextChangeUtc);
 
+            DateTimeOffset? consumeStart = null;
+            DateTimeOffset? consumeEnd = timeLocal;
+
+            var isFreeGroup = session.Group.Equals("FREE", StringComparison.OrdinalIgnoreCase);
+            var isLimitedGroup = session.Group.Equals("LIMITED", StringComparison.OrdinalIgnoreCase);
+
+            if (!isFreeGroup) {
+                if (session.IsPayNow) {
+                    consumeStart = startedLocal;
+                    if (!session.IsPayLater) {
+                        consumeEnd = nextLocal;
+                    }
+                } else if (session.IsPayLater && nextLocal < timeLocal) {
+                    consumeStart = nextLocal;
+                }
+            }
+
+            if (isLimitedGroup)
+                consumeEnd = nextLocal;
+
+            var totalLegalMinutes = (int)Math.Ceiling((timeLocal - startedLocal).TotalMinutes);
+            var freeMinutesCharged = 0;
+            var remainingToday = 0;
+
+            foreach (var (sliceStart, sliceEnd) in SliceByAnchorBoundary(startedLocal, timeLocal)) {
+                if (consumeStart is null || consumeEnd is null) continue;
+
+                var start = sliceStart >= consumeStart ? sliceStart : consumeStart.Value;
+                var end = sliceEnd <= consumeEnd ? sliceEnd : consumeEnd.Value;
+                if (end <= start) continue;
+
+                var eligible = (int)Math.Ceiling((end - start).TotalMinutes);
+                if (eligible <= 0) continue;
+
+                var anchor = ToAnchor(sliceStart);
+                await EnsureResetAsync(session.VehicleId, anchor, ct);
+                var remaining = await GetRemainingMinutesAsync(session.VehicleId, anchor, ct);
+
+                var toConsume = Math.Min(remaining, eligible);
+                if (toConsume > 0) {
+                    await ConsumeAsync(session.VehicleId, start, start.AddMinutes(toConsume), ct);
+                    freeMinutesCharged += toConsume;
+                }
+
+                if (anchor == ToAnchor(timeLocal))
+                    remainingToday = await GetRemainingMinutesAsync(session.VehicleId, anchor, ct);
+            }
+
+            var freeMinutes = 0;
+            if (!isFreeGroup && !session.IsPayLater && session.NextChangeUtc is not null && nextLocal < timeLocal) {
+                freeMinutes = (int)Math.Ceiling((timeLocal - nextLocal).TotalMinutes);
+            }
+            freeMinutes = isFreeGroup ? totalLegalMinutes :  freeMinutes;
+            var paidMinutes = isFreeGroup ? 0 : Math.Max(0, totalLegalMinutes - freeMinutesCharged - freeMinutes);
+
+            return new BudgetCalculationDTO(
+                TotalMinutes: totalLegalMinutes,
+                PaidMinutes: paidMinutes,
+                FreeMinutes: freeMinutes,
+                FreeMinutesCharged: freeMinutesCharged,
+                RemainingToday: remainingToday
+            );
+        }
+
+
+        public DateOnly ToAnchor(DateTimeOffset t)
+            => ParkingBudgetTimeHandler.AnchorDateFor(t);
     }
 }
