@@ -146,8 +146,7 @@
             <VerticalStackLayout Grid.Column="1" Spacing="5" HorizontalOptions="End">
                 <HorizontalStackLayout Spacing="5">
                     <CheckBox x:Name="NoParkingCheck"
-                              IsChecked="True"
-                              CheckedChanged="OnNoParkingTapped" />
+                              IsChecked="True" />
                     <Label Text="No parking"
                            BackgroundColor="#f15151"
                            TextColor="White"
@@ -159,8 +158,7 @@
 
                 <HorizontalStackLayout Spacing="5">
                     <CheckBox x:Name="PaidParkingCheck"
-                              IsChecked="True"
-                              CheckedChanged="OnPaidParkingTapped" />
+                              IsChecked="True" />
                     <Label Text="Paid parking"
                            BackgroundColor="#4769b9"
                            TextColor="White"
@@ -172,8 +170,7 @@
 
                 <HorizontalStackLayout Spacing="5">
                     <CheckBox x:Name="FreeParkingCheck"
-                              IsChecked="True"
-                              CheckedChanged="OnFreeParkingTapped" />
+                              IsChecked="True" />
                     <Label Text="Free parking"
                            BackgroundColor="#40dd7c"
                            TextColor="Black"
@@ -185,8 +182,7 @@
 
                 <HorizontalStackLayout Spacing="5">
                     <CheckBox x:Name="RestrictedCheck"
-                              IsChecked="True"
-                              CheckedChanged="OnRestrictedTapped" />
+                              IsChecked="True" />
                     <Label Text="Restricted"
                            BackgroundColor="#f2d158"
                            TextColor="Black"

@@ -1,7 +1,6 @@
 ﻿
 using Microsoft.Extensions.Logging;
 using ParkSpotTLV.App.Controls; // if you DI MenuOverlay or other controls
-using ParkSpotTLV.App.Data.Services;
 using ParkSpotTLV.App.Services;
 
 using System.Text.Json;
@@ -38,12 +37,12 @@ namespace ParkSpotTLV.App {
                 return sp.GetRequiredService<IHttpClientFactory>().CreateClient("Api");
             });
 
-            builder.Services.AddSingleton<ILocalDataService, LocalDataService>();
+            builder.Services.AddSingleton<LocalDataService>();
 
             builder.Services.AddSingleton<AuthenticationService>(sp => {
                 var http = sp.GetRequiredService<HttpClient>();
                 var opts = sp.GetRequiredService<JsonSerializerOptions>();
-                var db = sp.GetRequiredService<ILocalDataService>();
+                var db = sp.GetRequiredService<LocalDataService>();
                 return new AuthenticationService(http, db, opts);
             });
 
@@ -58,11 +57,23 @@ namespace ParkSpotTLV.App {
                 var http = sp.GetRequiredService<HttpClient>();
                 var auth = sp.GetRequiredService<AuthenticationService>();
                 var opts = sp.GetRequiredService<JsonSerializerOptions>();
-                var db = sp.GetRequiredService<ILocalDataService>();
+                var db = sp.GetRequiredService<LocalDataService>();
                 return new MapService(http, auth, db, opts);
             });
 
+            builder.Services.AddSingleton<ParkingService>(sp =>
+            {
+                var http = sp.GetRequiredService<HttpClient>();
+                var auth = sp.GetRequiredService<AuthenticationService>();
+                var opts = sp.GetRequiredService<JsonSerializerOptions>();
+                return new ParkingService(http, auth, opts);
+            });
+            
             builder.Services.AddSingleton<MapSegmentRenderer>();
+            builder.Services.AddSingleton<MapInteractionService>();
+            builder.Services.AddSingleton<ParkingPopUps>();
+
+            
 
             // Core app services you already had
             builder.Services.AddTransient<Pages.PreferencesPage>();

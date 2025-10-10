@@ -12,7 +12,7 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
 /*
- * Feature Extension Methods — Each feature exposes small IServiceCollection/IEndpointRouteBuilder extension methods 
+ * Feature Extension Methods ï¿½ Each feature exposes small IServiceCollection/IEndpointRouteBuilder extension methods 
  * (e.g., AddAuthFeature(), AddInfrastructure(), MapCustomOpenApi()). 
  * Program.cs becomes a short, readable script that composes features via one-liners. 
  * All detailed registrations, options binding, and endpoint wiring live inside their feature extensions, 

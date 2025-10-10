@@ -1,38 +1,22 @@
-using System.Text.Json;
-using System.Net.Http.Json;
 using System.Net;
-using ParkSpotTLV.App.Data.Services;
+using System.Net.Http.Json;
+using System.Text.Json;
 using ParkSpotTLV.App.Data.Models;
+using ParkSpotTLV.Contracts.Auth;
 
 namespace ParkSpotTLV.App.Services;
 
 public class AuthenticationService
 {
-
     private readonly HttpClient _http;
+    private readonly LocalDataService _localDataService;
     private readonly JsonSerializerOptions _options;
-    private readonly ILocalDataService _localDataService;
 
-    public AuthenticationService(HttpClient http, ILocalDataService localDataService , JsonSerializerOptions? options = null)
+    public AuthenticationService(HttpClient http, LocalDataService localDataService, JsonSerializerOptions? options = null)
     {
-        _http = http;    // same HttpClient instance as CarService
+        _http = http;
+        _localDataService = localDataService;
         _options = options ?? new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        _localDataService = localDataService ;
-    }
-    public sealed class AuthResponse
-    {
-    public string AccessToken { get; set; } = "";
-    public DateTime AccessTokenExpiresAt { get; set; }
-    public string RefreshToken { get; set; } = "";
-    public DateTime RefreshTokenExpiresAt { get; set; }
-    public string TokenType { get; set; } = "Bearer";
-    }
-
-    public sealed class MeResponse
-    {
-    public string Username { get; set; } = "";
-    public string Id { get; set; } = "";
-    public string[] Roles { get; set; } = Array.Empty<string>();
     }
 
     public async Task<bool> TryAutoLoginAsync()
@@ -54,7 +38,7 @@ public class AuthenticationService
         return await RefreshTokenAsync();
     }
 
-    public async Task<AuthResponse?> LoginAsync(string username, string password)
+    public async Task<TokenPairResponse?> LoginAsync(string username, string password)
     {
         var payload = new { username, password };
         var response = await _http.PostAsJsonAsync("auth/login", payload, _options);
@@ -65,7 +49,7 @@ public class AuthenticationService
             throw new HttpRequestException($"Login failed: {response.StatusCode} {error}");
         }
 
-        var tokens = await response.Content.ReadFromJsonAsync<AuthResponse>(_options);
+        var tokens = await response.Content.ReadFromJsonAsync<TokenPairResponse>(_options);
 
         // store the tokens for later requests
         if (tokens != null)
@@ -86,7 +70,8 @@ public class AuthenticationService
         return tokens;
     }
 
-    public async Task<AuthResponse?> SignUpAsync(string username, string password) {
+    public async Task<TokenPairResponse?> SignUpAsync(string username, string password)
+    {
         var payload = new { username, password };
         var response = await _http.PostAsJsonAsync("auth/register", payload, _options);
 
@@ -96,38 +81,28 @@ public class AuthenticationService
             throw new HttpRequestException($"Sign-up failed: {response.StatusCode} {error}");
         }
 
-        var tokens = await response.Content.ReadFromJsonAsync<AuthResponse>(_options);
+        var tokens = await response.Content.ReadFromJsonAsync<TokenPairResponse>(_options);
 
         // store the tokens
         if (tokens != null)
         {
             _http.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue(tokens.TokenType, tokens.AccessToken);
-            
-            // _refreshToken = tokens.RefreshToken;
-            // IsAuthenticated = true;
 
             // new session
-            var newSession = new Session {
-                                RefreshToken = tokens.RefreshToken,
-                                TokenExpiresAt = tokens.RefreshTokenExpiresAt,
-                                UserName = username } ;
+            var newSession = new Session
+            {
+                RefreshToken = tokens.RefreshToken,
+                TokenExpiresAt = tokens.RefreshTokenExpiresAt,
+                UserName = username
+            };
             await _localDataService.AddSessionAsync(newSession);
         }
 
         return tokens;
     }
 
-    public async Task Logout()
-    {
-        
-        _http.DefaultRequestHeaders.Authorization = null;
-        await _localDataService.DeleteSessionAsync();
-
-    }
-
-    // method no ensure authentication of current session
-    public async Task<MeResponse> AuthMeAsync()
+    public async Task<UserMeResponse> AuthMeAsync()
     {
         // Ensure we even have a token attached
         if (_http.DefaultRequestHeaders.Authorization == null)
@@ -146,11 +121,17 @@ public class AuthenticationService
             throw new HttpRequestException($"Failed to call /auth/me: {(int)response.StatusCode} {body}");
         }
 
-        var me = await response.Content.ReadFromJsonAsync<MeResponse>(_options);
+        var me = await response.Content.ReadFromJsonAsync<UserMeResponse>(_options);
         if (me == null)
             throw new InvalidOperationException("Empty response from /auth/me.");
 
         return me;
+    }
+
+    public async Task Logout()
+    {
+        _http.DefaultRequestHeaders.Authorization = null;
+        await _localDataService.DeleteSessionAsync();
     }
 
     public async Task<bool> RefreshTokenAsync()
@@ -158,7 +139,6 @@ public class AuthenticationService
         var session = await _localDataService.GetSessionAsync();
         if (string.IsNullOrEmpty(session?.RefreshToken))
         {
-            // IsAuthenticated = false;
             return false;
         }
 
@@ -173,17 +153,15 @@ public class AuthenticationService
                 return false;
             }
 
-            var tokens = await response.Content.ReadFromJsonAsync<AuthResponse>(_options);
+            var tokens = await response.Content.ReadFromJsonAsync<TokenPairResponse>(_options);
             if (tokens != null)
             {
                 // Update the authorization header with new access token
                 _http.DefaultRequestHeaders.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue(tokens.TokenType, tokens.AccessToken);
 
-                await _localDataService.UpdateTokenAsync(tokens.RefreshToken,tokens.RefreshTokenExpiresAt);
+                await _localDataService.UpdateTokenAsync(tokens.RefreshToken, tokens.RefreshTokenExpiresAt);
 
-                // _refreshToken = tokens.RefreshToken;
-                // IsAuthenticated = true;
                 return true;
             }
 
@@ -192,8 +170,6 @@ public class AuthenticationService
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Error refreshing token: {ex.Message}");
-            // IsAuthenticated = false;
-            // _refreshToken = null;
             _http.DefaultRequestHeaders.Authorization = null;
             return false;
         }
@@ -244,22 +220,6 @@ public class AuthenticationService
         return default(T);
     }
 
-    public bool ValidatePassword(string password)
-    {
-        // Password validation: at least 6 characters, no whitespace characters
-        if (string.IsNullOrWhiteSpace(password))
-            return false;
-
-        if (password.Length < 6)
-            return false;
-
-        // Check for whitespace characters (space, tab, newline, etc.)
-        if (password.Any(char.IsWhiteSpace))
-            return false;
-
-        return true;
-    }
-    // get username - check - not empty , mlonger than 3 , only ASCII , alphanumeric
     public bool ValidateUsername(string username)
     {
         // Username validation: at least 3 characters, alphanumeric + underscore only, must contain at least one alphanumeric
@@ -280,10 +240,21 @@ public class AuthenticationService
         return true;
     }
 
-    // public async Task<bool> UpdateUsernameAsync(string newUsername)
-    // {
-    
-    // }
+    public bool ValidatePassword(string password)
+    {
+        // Password validation: at least 6 characters, no whitespace characters
+        if (string.IsNullOrWhiteSpace(password))
+            return false;
+
+        if (password.Length < 6)
+            return false;
+
+        // Check for whitespace characters (space, tab, newline, etc.)
+        if (password.Any(char.IsWhiteSpace))
+            return false;
+
+        return true;
+    }
 
     public async Task<bool> UpdatePasswordAsync(string newPassword, string oldPassword)
     {
@@ -311,8 +282,4 @@ public class AuthenticationService
             return false;
         }
     }
-
-
-
-    
 }

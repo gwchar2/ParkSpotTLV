@@ -1,4 +1,4 @@
-namespace ParkSpotTLV.Core.Models;
+namespace ParkSpotTLV.App.Data.Models;
 
 public class Car
 {
