@@ -7,7 +7,7 @@
     <!-- Note: For Android please see also Platforms\Android\Resources\values\colors.xml -->
 
     <Color x:Key="Primary">#FF2B3271</Color>
-    <Color x:Key="PrimaryTransperent">#CC2B3271</Color>
+    <Color x:Key="PrimaryTransperent">#EE2B3271</Color>
     <Color x:Key="PrimaryDark">#FF2B3271</Color>
     <Color x:Key="PrimaryDarkText">#FF212121</Color>
     <Color x:Key="Secondary">#FF757575</Color>

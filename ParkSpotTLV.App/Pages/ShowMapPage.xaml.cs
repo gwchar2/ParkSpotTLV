@@ -38,6 +38,23 @@ public partial class ShowMapPage : ContentPage, IDisposable
     private CancellationTokenSource? _mapMoveCts;
     private bool _isInitialized = false;
     private Dictionary<SegmentResponseDTO, string>? segmentsInfo;
+    private SegmentResponseDTO defSegment = new SegmentResponseDTO(
+        SegmentId: Guid.Parse("439225be-502b-4832-9c35-2d0342292df1"),
+        Tariff: "City_Center",
+        ZoneCode: 10,
+        NameEnglish: "Weizmann",
+        NameHebrew: "ויצמן",
+        Group: "PAID",
+        Reason: "Will become paid parking at 10/08/2025 10:00:00 +03:00",
+        ParkingType: "Paid",
+        IsPayNow: false,
+        IsPaylater: true,
+        AvailableFrom: DateTimeOffset.Now,
+        AvailableUntil: DateTimeOffset.Now,
+        NextChange: DateTimeOffset.Now,
+        FreeBudgetRemaining: 120,
+        Geometry: default
+    );
 
 
     public ShowMapPage(CarService carService, MapService mapService, MapSegmentRenderer mapSegmentRenderer, LocalDataService localDataService, MapInteractionService mapInteractionService, ParkingPopUps parkingPopUps, ParkingService parkingService)
@@ -432,7 +449,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         var bounds = _mapInteractionService.GetVisibleBounds();
         await FetchAndRenderSegments(bounds);
 
-        await DisplayAlert("Apply", "Changes applied successfully!", "OK");
+        // await DisplayAlert("Apply", "Changes applied successfully!", "OK");
 
         // Auto-hide settings panel after applying changes
         SettingsPanel.IsVisible = false;
@@ -442,8 +459,6 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
     private async void OnParkHereClicked(object sender, EventArgs e)
     {
-        // instead of _session.IsParking check -> check Parking status od pickedCarId
-        // _session = await _localDataService.GetSessionAsync();
         // set park here button to furrnet car state
         if (string.IsNullOrEmpty(pickedCarId) || _session is null)
             return;
@@ -457,63 +472,63 @@ public partial class ShowMapPage : ContentPage, IDisposable
             if (isParking)
             {
                 parkingSessionId = response.SessionId;
-                await DisplayAlert("debug", "parking session is active", "ok");
+                // await DisplayAlert("debug", "parking session is active", "ok");
             }
-            await DisplayAlert("debug", "parking session is NOT active", "ok");
+            // await DisplayAlert("debug", "parking session is NOT active", "ok");
         }
     
         bool parkingAtResZone = false;
         StartParkingResponse? startParkingResponse = null;
-        
+        SegmentResponseDTO segmentToUse = defSegment;
+
         if (!isParking)
         {
             // let user choose street to park at in order to calculate free parking timer
-            if (isResidentalPermit)
-            {
+            if (isResidentalPermit){
                 var parkedStreet = await _parkingPopUps.ShowStreetsListPopUpAsync(segmentsInfo, Navigation);
-                if (parkedStreet.HasValue)
-                {
+                if (parkedStreet.HasValue) {
                     var (parkedStreetName, segmentResponse) = parkedStreet.Value;
+                    segmentToUse = segmentResponse;
                     parkingAtResZone = await parkingAtResidentalZone(segmentResponse);
-                    if (!parkingAtResZone)
-                    {
-                        try
-                        {
-                            startParkingResponse = await _parkingService.StartParkingAsync(
-                                segmentResponse,
-                                Guid.Parse(pickedCarId),
-                                30, // soon to be removed
-                                _session?.MinParkingTime ?? 30);
-                            if (startParkingResponse is not null)
-                            {
-                                parkingSessionId = startParkingResponse.SessionId;
-                            }
-                        }
-                        catch (HttpRequestException ex)
-                        {
-                            await DisplayAlert("Error", $"Failed to start parking: {ex.Message}", "OK");
-                            return;
-                        }
-                    }
                 }
-                else
-                {
-                    // User cancelled street selection
-                    return;
+            }
+            else {
+                // For non-residential permits, use the first segment from the list
+                if (segmentsInfo != null && segmentsInfo.Count > 0) {
+                    segmentToUse = segmentsInfo.First().Key;
                 }
             }
 
-            
-                UpdateParkHereButtonState(true); // update UI button            
-                // Show parking confirmed popup with Pango option
-                await _parkingPopUps.ShowParkingConfirmedPopupAsync(startParkingResponse,parkingAtResZone, Navigation, DisplayAlert);
+            try
+            {
+                startParkingResponse = await _parkingService.StartParkingAsync(
+                    segmentToUse,
+                    Guid.Parse(pickedCarId),
+                    30, // soon to be removed
+                    _session?.MinParkingTime ?? 30);
+                if (startParkingResponse is not null)
+                {
+                    parkingSessionId = startParkingResponse.SessionId;
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                await DisplayAlert("Error", $"Failed to start parking: {ex.Message}", "OK");
+                return;
+            }
+
+            // if has residential permit and parking out of zone - show free minutes left today
+            if (isResidentalPermit && !parkingAtResZone) {
+                await _parkingPopUps.ShowParkingConfirmedPopupAsync(startParkingResponse, Navigation, DisplayAlert);
+            }
+            UpdateParkHereButtonState(true); // update UI button - this will also show the Pango button
         }
         else // currently parking
         {
             // End parking
             if (isResidentalPermit && parkingSessionId != Guid.Empty)
             {
-                await DisplayAlert("Debug", "calling stopParkingAsync", "OK");
+                // await DisplayAlert("Debug", "calling stopParkingAsync", "OK");
                 try
                 {
                     
@@ -528,7 +543,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
             UpdateParkHereButtonState(false); // update UI button
             // await _localDataService.UpdateParkingStatusAsync(false); // update status in session
-            await DisplayAlert("Parking Ended", "Your parking session has ended.", "OK");
+            // await DisplayAlert("Parking Ended", "Your parking session has ended.", "OK");
         }
     }
 
@@ -554,14 +569,32 @@ public partial class ShowMapPage : ContentPage, IDisposable
             ParkHereBtn.Text = "End Parking";
             ParkHereBtn.BorderColor = Color.FromArgb("#FFF15151");
             ParkHereBtn.TextColor = Color.FromArgb("#FFF15151");
+            PayWithPangoBtn.IsVisible = true; // Show Pango button when parking
         }
         else
         {
             ParkHereBtn.Text = "Park Here";
             ParkHereBtn.BorderColor = Color.FromArgb("#FF2B3271");
             ParkHereBtn.TextColor = Color.FromArgb("#FF2B3271");
+            PayWithPangoBtn.IsVisible = false; // Hide Pango button when not parking
         }
 
+    }
+
+    private async void OnPayWithPangoClicked(object sender, EventArgs e)
+    {
+        try
+        {
+            await Launcher.OpenAsync("pango://");
+        }
+        catch
+        {
+            // Fallback to app store
+            if (DeviceInfo.Platform == DevicePlatform.iOS)
+                await Launcher.OpenAsync("https://apps.apple.com/app/pango");
+            else
+                await Launcher.OpenAsync("https://play.google.com/store/apps/details?id=com.pango.android");
+        }
     }
 
     private async void OnSearchAddress(object sender, EventArgs e)

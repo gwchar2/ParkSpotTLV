@@ -271,21 +271,39 @@
                 </Border>
             </VerticalStackLayout>
 
-            <!-- "Park Here" button - Floating at Bottom -->
-            <Button x:Name="ParkHereBtn"
-                    Text="Park Here"
-                    BackgroundColor="{StaticResource White}"
-                    BorderColor="{StaticResource Primary}"
-                    BorderWidth="3"
-                    TextColor="{StaticResource Primary}"
-                    FontSize="16"
-                    FontAttributes="Bold"
-                    Clicked="OnParkHereClicked"
-                    HorizontalOptions="Center"
-                    VerticalOptions="End"
-                    CornerRadius="25"
-                    Margin="20,10,20,20"
-                    HeightRequest="50" />
+            <!-- Parking Buttons - Floating at Bottom -->
+            <HorizontalStackLayout x:Name="ParkingButtonsContainer"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="End"
+                                   Spacing="10"
+                                   Margin="20,10,20,20">
+                <Button x:Name="ParkHereBtn"
+                        Text="Park Here"
+                        BackgroundColor="{StaticResource White}"
+                        BorderColor="{StaticResource Primary}"
+                        BorderWidth="3"
+                        TextColor="{StaticResource Primary}"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        Clicked="OnParkHereClicked"
+                        HorizontalOptions="Center"
+                        CornerRadius="25"
+                        HeightRequest="50" />
+
+                <Button x:Name="PayWithPangoBtn"
+                        Text="Pay with Pango"
+                        BackgroundColor="{StaticResource White}"
+                        TextColor="Blue"
+                        BorderColor="Blue"
+                        BorderWidth="3"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        Clicked="OnPayWithPangoClicked"
+                        HorizontalOptions="FillAndExpand"
+                        CornerRadius="25"
+                        HeightRequest="50"
+                        IsVisible="False" />
+            </HorizontalStackLayout>
         </Grid>
 
     </Grid>
