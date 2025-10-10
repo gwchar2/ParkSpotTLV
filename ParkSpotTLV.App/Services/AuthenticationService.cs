@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Net;
 using ParkSpotTLV.App.Data.Services;
 using ParkSpotTLV.App.Data.Models;
+using ParkSpotTLV.Contracts.Auth;
 
 namespace ParkSpotTLV.App.Services;
 
@@ -18,21 +19,6 @@ public class AuthenticationService
         _http = http;    // same HttpClient instance as CarService
         _options = options ?? new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         _localDataService = localDataService ;
-    }
-    public sealed class AuthResponse
-    {
-    public string AccessToken { get; set; } = "";
-    public DateTime AccessTokenExpiresAt { get; set; }
-    public string RefreshToken { get; set; } = "";
-    public DateTime RefreshTokenExpiresAt { get; set; }
-    public string TokenType { get; set; } = "Bearer";
-    }
-
-    public sealed class MeResponse
-    {
-    public string Username { get; set; } = "";
-    public string Id { get; set; } = "";
-    public string[] Roles { get; set; } = Array.Empty<string>();
     }
 
     public async Task<bool> TryAutoLoginAsync()
@@ -54,7 +40,7 @@ public class AuthenticationService
         return await RefreshTokenAsync();
     }
 
-    public async Task<AuthResponse?> LoginAsync(string username, string password)
+    public async Task<TokenPairResponse?> LoginAsync(string username, string password)
     {
         var payload = new { username, password };
         var response = await _http.PostAsJsonAsync("auth/login", payload, _options);
@@ -65,7 +51,7 @@ public class AuthenticationService
             throw new HttpRequestException($"Login failed: {response.StatusCode} {error}");
         }
 
-        var tokens = await response.Content.ReadFromJsonAsync<AuthResponse>(_options);
+        var tokens = await response.Content.ReadFromJsonAsync<TokenPairResponse>(_options);
 
         // store the tokens for later requests
         if (tokens != null)
@@ -86,7 +72,7 @@ public class AuthenticationService
         return tokens;
     }
 
-    public async Task<AuthResponse?> SignUpAsync(string username, string password) {
+    public async Task<TokenPairResponse?> SignUpAsync(string username, string password) {
         var payload = new { username, password };
         var response = await _http.PostAsJsonAsync("auth/register", payload, _options);
 
@@ -96,7 +82,7 @@ public class AuthenticationService
             throw new HttpRequestException($"Sign-up failed: {response.StatusCode} {error}");
         }
 
-        var tokens = await response.Content.ReadFromJsonAsync<AuthResponse>(_options);
+        var tokens = await response.Content.ReadFromJsonAsync<TokenPairResponse>(_options);
 
         // store the tokens
         if (tokens != null)
@@ -127,7 +113,7 @@ public class AuthenticationService
     }
 
     // method no ensure authentication of current session
-    public async Task<MeResponse> AuthMeAsync()
+    public async Task<UserMeResponse> AuthMeAsync()
     {
         // Ensure we even have a token attached
         if (_http.DefaultRequestHeaders.Authorization == null)
@@ -146,7 +132,7 @@ public class AuthenticationService
             throw new HttpRequestException($"Failed to call /auth/me: {(int)response.StatusCode} {body}");
         }
 
-        var me = await response.Content.ReadFromJsonAsync<MeResponse>(_options);
+        var me = await response.Content.ReadFromJsonAsync<UserMeResponse>(_options);
         if (me == null)
             throw new InvalidOperationException("Empty response from /auth/me.");
 
@@ -173,14 +159,14 @@ public class AuthenticationService
                 return false;
             }
 
-            var tokens = await response.Content.ReadFromJsonAsync<AuthResponse>(_options);
+            var tokens = await response.Content.ReadFromJsonAsync<TokenPairResponse>(_options);
             if (tokens != null)
             {
                 // Update the authorization header with new access token
                 _http.DefaultRequestHeaders.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue(tokens.TokenType, tokens.AccessToken);
 
-                await _localDataService.UpdateTokenAsync(tokens.RefreshToken,tokens.RefreshTokenExpiresAt);
+                await _localDataService.UpdateTokenAsync(tokens.RefreshToken, tokens.RefreshTokenExpiresAt);
 
                 // _refreshToken = tokens.RefreshToken;
                 // IsAuthenticated = true;
