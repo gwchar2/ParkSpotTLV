@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using ParkSpotTLV.App.Data.Models;
+using ParkSpotTLV.App.Data;
 
-namespace ParkSpotTLV.App.Data.Services;
+namespace ParkSpotTLV.App.Services;
 
-
+// 
 public class LocalDataService
 {
     /*

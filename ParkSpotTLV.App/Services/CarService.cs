@@ -4,8 +4,6 @@ using ParkSpotTLV.Contracts.Vehicles;
 using ParkSpotTLV.Contracts.Permits;
 using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.App.Data.Models;
-using ParkSpotTLV.Contracts.Map;
-using ParkSpotTLV.Contracts.Parking;
 
 namespace ParkSpotTLV.App.Services;
 

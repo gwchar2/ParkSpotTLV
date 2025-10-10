@@ -1,5 +1,4 @@
-﻿using ParkSpotTLV.App.Data.Services;
-using ParkSpotTLV.App.Services;
+﻿using ParkSpotTLV.App.Services;
 
 namespace ParkSpotTLV.App
 {

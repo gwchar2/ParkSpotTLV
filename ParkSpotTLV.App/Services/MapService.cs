@@ -1,11 +1,6 @@
-using System.Net;
 using System.Text.Json;
 using System.Net.Http.Json;
-using Microsoft.Maui.Devices.Sensors;
-using ParkSpotTLV.Contracts.Vehicles;
 using ParkSpotTLV.Contracts.Map;
-using ParkSpotTLV.App.Data.Models;
-using ParkSpotTLV.App.Data.Services;
 namespace ParkSpotTLV.App.Services;
 
 public class MapService

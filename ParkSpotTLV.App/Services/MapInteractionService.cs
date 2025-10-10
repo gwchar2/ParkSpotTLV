@@ -1,8 +1,5 @@
-using Microsoft.Maui.Controls.Maps;
-using Microsoft.Maui.Devices.Sensors;
 using Microsoft.Maui.Maps;
 using System.ComponentModel;
-using System.Timers;
 
 namespace ParkSpotTLV.App.Services;
 

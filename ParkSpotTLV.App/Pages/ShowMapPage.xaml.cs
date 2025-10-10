@@ -1,18 +1,8 @@
 using ParkSpotTLV.App.Services;
-using Microsoft.Maui.Controls.Maps;
 using Microsoft.Maui.Maps;
-using Microsoft.Maui.Devices.Sensors;
-using System.Threading.Tasks;
-using System.Text.Json;
-using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Contracts.Map;
 using ParkSpotTLV.Contracts.Parking;
-using ParkSpotTLV.App.Data.Services;
 using ParkSpotTLV.App.Data.Models;
-using System.ComponentModel;
-using System.Timers;
-// using Android.Gms.Common.Apis;
-
 
 namespace ParkSpotTLV.App.Pages;
 

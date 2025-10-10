@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Net.Http.Json;
 using System.Net;
-using ParkSpotTLV.App.Data.Services;
 using ParkSpotTLV.App.Data.Models;
 using ParkSpotTLV.Contracts.Auth;
 
