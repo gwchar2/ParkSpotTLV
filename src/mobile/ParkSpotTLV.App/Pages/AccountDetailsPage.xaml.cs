@@ -100,16 +100,20 @@ public partial class AccountDetailsPage : ContentPage
 
         if (confirm)
         {
-            bool success = await _carService.RemoveCarAsync(car.Id);
+            try
+            {
+                bool success = await _carService.RemoveCarAsync(car.Id);
 
-            if (success)
-            {
-                await DisplayAlert("Success", $"Car {car.Name} has been removed.", "OK");
-                LoadUserCars();
+                if (success)
+                {
+                    await DisplayAlert("Success", $"Car {car.Name} has been removed.", "OK");
+                    LoadUserCars();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                await DisplayAlert("Error", "Failed to remove car. Please try again.", "OK");
+                await DisplayAlert("Error", $"Failed to remove car: {ex.Message}", "OK");
+                System.Diagnostics.Debug.WriteLine($"Error removing car: {ex.Message}");
             }
         }
     }
