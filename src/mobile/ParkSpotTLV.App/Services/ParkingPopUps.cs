@@ -68,16 +68,13 @@ public class ParkingPopUps
     
 
     // Shows parking confirmed alert
-    public async Task ShowParkingConfirmedPopupAsync(StartParkingResponse? startParkingResponse,INavigation navigation, Func<string, string, string, Task> displayAlert)
+    public async Task ShowParkingConfirmedPopupAsync(int budgetRemaining,INavigation navigation, Func<string, string, string, Task> displayAlert)
     {
         // Build message
         string message = "Parking started!";
-        if (startParkingResponse is not null)
-        {
-            message += "\nParking outside your zone.";
-            message += $"\nYou have {startParkingResponse.FreeBudgetRemaining} minutes of free parking.";
-            
-        }
+        
+        message += "\nParking outside your zone.";
+        message += $"\nYou have {budgetRemaining} minutes of free parking.";
 
         // Show simple alert
         await displayAlert("Parking Confirmed", message, "OK");

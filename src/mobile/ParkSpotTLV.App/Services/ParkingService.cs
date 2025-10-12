@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using ParkSpotTLV.Contracts.Map;
 using ParkSpotTLV.Contracts.Parking;
 
@@ -19,23 +20,29 @@ public class ParkingService
     private readonly HttpClient _http;
     private readonly AuthenticationService _authService;
     private readonly JsonSerializerOptions _options;
+    private readonly ILogger<ParkingService> _log;
 
-    public ParkingService(HttpClient http, AuthenticationService authService, JsonSerializerOptions? options = null)
+
+    private record BudgetRemainingResponse(int TimeRemaining);
+
+    public ParkingService(ILogger<ParkingService> log, HttpClient http, AuthenticationService authService, JsonSerializerOptions? options = null)
     {
+        _log = log;
         _http = http;
         _authService = authService;
         _options = options ?? new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
     }
 
-    public async Task<StartParkingResponse> StartParkingAsync(SegmentResponseDTO segResponse, Guid carId, int notificationMinutes, int minParkingTime)
+    public async Task<StartParkingResponse> StartParkingAsync(SegmentResponseDTO segResponse, Guid carId, int minParkingTime)
     {
         var startParkingPayload = new StartParkingRequest(
             Segment: segResponse,
             VehicleId: carId,
-            NotificationMinutes: notificationMinutes,
             MinParkingTime: minParkingTime
         );
 
+        System.Diagnostics.Debug.WriteLine($"Segment {segResponse}\nCarID = {carId}\nminPArking: {minParkingTime}");
+        _log.LogInformation("!!!!!!{startParkingPayload}", startParkingPayload);
 
         var response = await _authService.ExecuteWithTokenRefreshAsync(() =>
             _http.PostAsJsonAsync("/parking/start", startParkingPayload, _options));
@@ -93,4 +100,21 @@ public class ParkingService
             throw new HttpRequestException($"Failed to stop parking: {(int)response.StatusCode} {body}");
         }
     }
+
+    public async Task<int?> GetParkingBudgetRemainingAsync(Guid carId)
+    {
+        var response = await _authService.ExecuteWithTokenRefreshAsync(() =>
+            _http.GetAsync($"/parking/budget-remaining/{carId}"));
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Failed to get budget remaining: {(int)response.StatusCode} {body}");
+        }
+
+        var result = await response.Content.ReadFromJsonAsync<BudgetRemainingResponse>(_options);
+        return result?.TimeRemaining;
+    }
+
+    
 }

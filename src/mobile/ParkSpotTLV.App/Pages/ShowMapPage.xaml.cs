@@ -74,6 +74,10 @@ public partial class ShowMapPage : ContentPage, IDisposable
     {
         base.OnAppearing();
 
+        // Always re-subscribe to event handler when page appears
+        _mapInteractionService.VisibleBoundsChanged -= OnVisibleBoundsChanged; // Remove old subscription if exists
+        _mapInteractionService.VisibleBoundsChanged += OnVisibleBoundsChanged;
+
         // Only run full initialization once
         if (_isInitialized)
             return;
@@ -82,7 +86,6 @@ public partial class ShowMapPage : ContentPage, IDisposable
         {
             // Initialize MapInteractionService after map is ready
             _mapInteractionService.Initialize(MyMap);
-            _mapInteractionService.VisibleBoundsChanged += OnVisibleBoundsChanged;
 
             await LoadUserCars();
             await LoadSessionPreferences();
@@ -459,7 +462,6 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
     private async void OnParkHereClicked(object sender, EventArgs e)
     {
-        // set park here button to furrnet car state
         if (string.IsNullOrEmpty(pickedCarId) || _session is null)
             return;
 
@@ -469,6 +471,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         if (response != null)
         {
             isParking = response.Status;
+            await DisplayAlert("debug", $"picked car id {pickedCarId} and status isParking = {isParking}", "ok");
             if (isParking)
             {
                 parkingSessionId = response.SessionId;
@@ -481,6 +484,10 @@ public partial class ShowMapPage : ContentPage, IDisposable
         StartParkingResponse? startParkingResponse = null;
         SegmentResponseDTO segmentToUse = defSegment;
 
+        // Re-fetch segments for updated time -> segmentsInfo updated in FetachAndRender
+        var bounds = _mapInteractionService.GetVisibleBounds();
+        await FetchAndRenderSegments(bounds);
+
         if (!isParking)
         {
             // let user choose street to park at in order to calculate free parking timer
@@ -489,6 +496,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
                 if (parkedStreet.HasValue) {
                     var (parkedStreetName, segmentResponse) = parkedStreet.Value;
                     segmentToUse = segmentResponse;
+                    await DisplayAlert("debug", $"Parked street as chosen: {parkedStreetName}", "ok");
                     parkingAtResZone = await parkingAtResidentalZone(segmentResponse);
                 }
             }
@@ -501,13 +509,14 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
             try
             {
+                await DisplayAlert("debug", $"permitid: {activePermit}, segmentUsed: {segmentToUse}, carID: {pickedCarId}, min: {_session?.MinParkingTime ?? 120}", "ok");
                 startParkingResponse = await _parkingService.StartParkingAsync(
                     segmentToUse,
                     Guid.Parse(pickedCarId),
-                    30, // soon to be removed
-                    _session?.MinParkingTime ?? 30);
+                    120); //_session?.MinParkingTime ?? 
                 if (startParkingResponse is not null)
                 {
+                    await DisplayAlert("debug", $"new parking session started at street {segmentToUse.NameEnglish}", "ok");
                     parkingSessionId = startParkingResponse.SessionId;
                 }
             }
@@ -519,7 +528,8 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
             // if has residential permit and parking out of zone - show free minutes left today
             if (isResidentalPermit && !parkingAtResZone) {
-                await _parkingPopUps.ShowParkingConfirmedPopupAsync(startParkingResponse, Navigation, DisplayAlert);
+                int? budget = await _parkingService.GetParkingBudgetRemainingAsync(Guid.Parse(pickedCarId));
+                await _parkingPopUps.ShowParkingConfirmedPopupAsync(budget ?? 0, Navigation, DisplayAlert);
             }
             UpdateParkHereButtonState(true); // update UI button - this will also show the Pango button
         }
@@ -531,8 +541,9 @@ public partial class ShowMapPage : ContentPage, IDisposable
                 // await DisplayAlert("Debug", "calling stopParkingAsync", "OK");
                 try
                 {
-                    
                     await _parkingService.StopParkingAsync(parkingSessionId, Guid.Parse(pickedCarId));
+                    int? budget = await _parkingService.GetParkingBudgetRemainingAsync(Guid.Parse(pickedCarId));
+                    await DisplayAlert("Debug", $"you have: {budget} minutes of free parking left in budget.", "OK");
                 }
                 catch (HttpRequestException ex)
                 {
@@ -604,6 +615,10 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
         var result = await _mapInteractionService.SearchAndMoveToAddressAsync(address, SEARCH_RESULT_ZOOM_METERS);
 
+        // Re-fetch segments with updated filter preferences
+        var bounds = _mapInteractionService.GetVisibleBounds();
+        await FetchAndRenderSegments(bounds);
+        
         if (!result.Success && result.ErrorMessage != null)
         {
             await DisplayAlert(result.ErrorMessage.Contains("not found") ? "Not Found" : "Search Error", result.ErrorMessage, "OK");

@@ -16,19 +16,20 @@
                 FontSize="28"
                 FontAttributes="Bold"
                 HorizontalOptions="Center"
-                TextColor="#2E7D32" />
+                TextColor="{StaticResource Primary}" />
 
             <!-- Car Name -->
             <VerticalStackLayout Spacing="10">
                 <Label Text="Car Name"
                        FontSize="18"
                        FontAttributes="Bold"
-                       TextColor="Black" />
+                       TextColor="{StaticResource Primary}" />
                 <Entry
                     x:Name="CarNameEntry"
                     Placeholder="My Toyota"
                     FontSize="16"
-                    BackgroundColor="White" />
+                    TextColor="{StaticResource PrimaryDarkText}"
+                    BackgroundColor="{StaticResource InputFieldBackground}" />
             </VerticalStackLayout>
 
             <!-- Car Type -->
@@ -36,20 +37,20 @@
                 <Label Text="Car Type"
                        FontSize="18"
                        FontAttributes="Bold"
-                       TextColor="Black" />
+                       TextColor="{StaticResource Primary}" />
                 <VerticalStackLayout Spacing="5">
                     <HorizontalStackLayout Spacing="10">
                         <RadioButton x:Name="PrivateRadio"
                                      GroupName="CarType"
                                      IsChecked="True" />
-                        <Label Text="Private"
+                        <Label Text="🚗 Private"
                                FontSize="16"
                                VerticalOptions="Center" />
                     </HorizontalStackLayout>
                     <HorizontalStackLayout Spacing="10">
                         <RadioButton x:Name="TruckRadio"
                                      GroupName="CarType" />
-                        <Label Text="Truck"
+                        <Label Text="🚛 Truck"
                                FontSize="16"
                                VerticalOptions="Center" />
                     </HorizontalStackLayout>
@@ -61,11 +62,12 @@
                 <Label Text="Parking Permit"
                        FontSize="18"
                        FontAttributes="Bold"
-                       TextColor="Black" />
+                       TextColor="{StaticResource Primary}" />
 
                 <HorizontalStackLayout Spacing="10">
                     <CheckBox x:Name="ResidentPermitCheck"
-                              CheckedChanged="OnResidentPermitChanged" />
+                              CheckedChanged="OnResidentPermitChanged"
+                              Color="{StaticResource Primary}" />
                     <Label Text="I have a resident permit"
                            FontSize="16"
                            VerticalOptions="Center" />
@@ -75,14 +77,16 @@
                     x:Name="ZoneNumberEntry"
                     Placeholder="Zone number"
                     FontSize="16"
-                    BackgroundColor="White"
+                    TextColor="{StaticResource PrimaryDarkText}"
+                    BackgroundColor="{StaticResource InputFieldBackground}"
                     IsVisible="False" />
                 <HorizontalStackLayout Spacing="10">
                     <Entry
                         x:Name="FreeMinutesEntry"
                         Placeholder="120"
                         FontSize="16"
-                        BackgroundColor="White"
+                        TextColor="{StaticResource PrimaryDarkText}"
+                        BackgroundColor="{StaticResource InputFieldBackground}"
                         IsVisible="False" />
                     <Label  x:Name = "FreeMinutesLabel"
                             Text = "minutes left for free parking"
@@ -92,7 +96,8 @@
                 </HorizontalStackLayout>
 
                 <HorizontalStackLayout Spacing="10">
-                    <CheckBox x:Name="DisabledPermitCheck" />
+                    <CheckBox x:Name="DisabledPermitCheck"
+                              Color="{StaticResource Primary}" />
                     <Label Text="I have a disabled parking permit"
                            FontSize="16"
                            VerticalOptions="Center" />
@@ -103,12 +108,13 @@
             <Button
                 x:Name="SaveCarBtn"
                 Text="Save Changes"
-                BackgroundColor="#2E7D32"
-                TextColor="White"
+                BackgroundColor="{StaticResource PrimaryAction}"
+                TextColor="{StaticResource White}"
                 FontSize="16"
                 Clicked="OnSaveCarClicked"
                 HorizontalOptions="Fill"
                 HeightRequest="50"
+                CornerRadius="25"
                 Margin="0,40,0,0" />
 
         </VerticalStackLayout>
