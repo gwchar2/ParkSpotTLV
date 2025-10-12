@@ -74,6 +74,10 @@ public partial class ShowMapPage : ContentPage, IDisposable
     {
         base.OnAppearing();
 
+        // Always re-subscribe to event handler when page appears
+        _mapInteractionService.VisibleBoundsChanged -= OnVisibleBoundsChanged; // Remove old subscription if exists
+        _mapInteractionService.VisibleBoundsChanged += OnVisibleBoundsChanged;
+
         // Only run full initialization once
         if (_isInitialized)
             return;
@@ -82,7 +86,6 @@ public partial class ShowMapPage : ContentPage, IDisposable
         {
             // Initialize MapInteractionService after map is ready
             _mapInteractionService.Initialize(MyMap);
-            _mapInteractionService.VisibleBoundsChanged += OnVisibleBoundsChanged;
 
             await LoadUserCars();
             await LoadSessionPreferences();
@@ -481,6 +484,10 @@ public partial class ShowMapPage : ContentPage, IDisposable
         StartParkingResponse? startParkingResponse = null;
         SegmentResponseDTO segmentToUse = defSegment;
 
+        // Re-fetch segments for updated time -> segmentsInfo updated in FetachAndRender
+        var bounds = _mapInteractionService.GetVisibleBounds();
+        await FetchAndRenderSegments(bounds);
+
         if (!isParking)
         {
             // let user choose street to park at in order to calculate free parking timer
@@ -608,6 +615,10 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
         var result = await _mapInteractionService.SearchAndMoveToAddressAsync(address, SEARCH_RESULT_ZOOM_METERS);
 
+        // Re-fetch segments with updated filter preferences
+        var bounds = _mapInteractionService.GetVisibleBounds();
+        await FetchAndRenderSegments(bounds);
+        
         if (!result.Success && result.ErrorMessage != null)
         {
             await DisplayAlert(result.ErrorMessage.Contains("not found") ? "Not Found" : "Search Error", result.ErrorMessage, "OK");
