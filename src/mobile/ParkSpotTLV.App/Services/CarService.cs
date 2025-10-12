@@ -231,12 +231,12 @@ public class CarService
         if (!getResponse.IsSuccessStatusCode)
         {
             var body = await getResponse.Content.ReadAsStringAsync();
-            return false;
+            throw new HttpRequestException($"Failed to retrieve vehicle: {(int)getResponse.StatusCode} {body}");
         }
 
         var vehicle = await getResponse.Content.ReadFromJsonAsync<VehicleResponse>(_options);
         if (vehicle is null)
-            return false;
+            throw new InvalidOperationException("Vehicle not found or response body was empty.");
 
         var deletePayload = new VehicleDeleteRequest
         (
@@ -251,7 +251,7 @@ public class CarService
         if (!response.IsSuccessStatusCode)
         {
             var body = await response.Content.ReadAsStringAsync();
-            return false;
+            throw new HttpRequestException($"Failed to delete vehicle: {(int)response.StatusCode} {body}");
         }
 
         return true;
@@ -321,7 +321,6 @@ public class CarService
             throw new InvalidOperationException("Failed to retrieve current permit data");
 
         var deletePermitPayload = new PermitDeleteRequest(
-            Id: currentPermit.PermitId,
             RowVersion: currentPermit.RowVersion
         );
 
@@ -370,7 +369,6 @@ public class CarService
             throw new InvalidOperationException("Failed to retrieve current permit data");
 
         var deletePermitPayload = new PermitDeleteRequest(
-            Id: currentPermit.PermitId,
             RowVersion: currentPermit.RowVersion
         );
 
