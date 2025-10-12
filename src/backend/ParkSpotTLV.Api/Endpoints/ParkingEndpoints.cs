@@ -5,9 +5,10 @@ using ParkSpotTLV.Api.Endpoints.Support;
 using ParkSpotTLV.Api.Features.Parking.Services;
 using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Contracts.Parking;
+using ParkSpotTLV.Contracts.Time;
 using ParkSpotTLV.Infrastructure;
 using ParkSpotTLV.Infrastructure.Entities;
-using ParkSpotTLV.Contracts.Time;
+using Serilog;
 
 namespace ParkSpotTLV.Api.Endpoints {
 
@@ -258,7 +259,6 @@ namespace ParkSpotTLV.Api.Endpoints {
                         CreatedAtUtc = clock.UtcNow,
                         UpdatedAtUtc = clock.UtcNow
                     };
-
                     db.ParkingSession.Add(session);
 
                     await db.SaveChangesAsync(ct);
