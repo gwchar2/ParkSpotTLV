@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.14.2-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.14.1-beta.0...v0.14.2-beta.0) (2025-10-12)
+
+
+### Bug Fixes
+
+* Fixed delete endpoints ([c809ca2](https://github.com/gwchar2/ParkSpotTLV/commit/c809ca267c6b0431c83351adbf70241daf36238a))
+* **Map:** fixing reloading of map segments when scrolling ([83939a3](https://github.com/gwchar2/ParkSpotTLV/commit/83939a36d23049efa35d61bcef84e3bbee632dd0))
+
 ## [0.14.1-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.14.0-beta.0...v0.14.1-beta.0) (2025-10-10)
 
 

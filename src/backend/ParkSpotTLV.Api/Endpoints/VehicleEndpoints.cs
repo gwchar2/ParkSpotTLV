@@ -265,20 +265,19 @@ namespace ParkSpotTLV.Api.Endpoints {
                     if (!Guards.TryBase64ToUInt32(body.RowVersion, out uint expectedXmin))
                         return GeneralProblems.InvalidRowVersion(ctx);
 
-                    // We load the vehicle from the DB
-                    var vehicle = await db.Vehicles.SingleOrDefaultAsync(v => v.Id == id, ct);
-                    if (vehicle == null) return VehicleProblems.NotFound(ctx);
+                    // We need to make sure the permit belongs to specified user
+                    var vehicle = await db.Vehicles.AsNoTracking().Where(p => p.Id == id && p.OwnerId == userId).SingleOrDefaultAsync(ct);
 
-                    // We check if the person requesting is truely the owner
-                    if (vehicle.OwnerId != userId) return VehicleProblems.Forbidden(ctx);
+                    if (vehicle is null || vehicle.OwnerId != userId) return VehicleProblems.Forbidden(ctx);
 
-                    // We check there are no race conditions
                     if (vehicle.Xmin != expectedXmin) return GeneralProblems.ConcurrencyError(ctx);
 
-                    // Cant remove last vehicle, account must have one at least.
-                    if (vehicle.Owner.Vehicles.Count == 1) return VehicleProblems.CantRemove(ctx);
+                    var userVehicles = await db.Vehicles.AsNoTracking().Where(p => p.OwnerId == userId).ToListAsync(ct);
 
-                    // Delete 
+                    // Check if we leave the vehicle with 0 permits (NOT POSSIBLE)
+                    if (userVehicles is not null && userVehicles.Count <= 1) return VehicleProblems.CantRemove(ctx);
+
+
                     db.Vehicles.Remove(vehicle);
                     await db.SaveChangesAsync(ct);
 
