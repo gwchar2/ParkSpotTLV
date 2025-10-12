@@ -67,7 +67,7 @@
                                 BackgroundColor="{StaticResource SecondaryAction}"
                                 TextColor="{StaticResource White}"
                                 FontSize="14"
-                                WidthRequest="70"
+                                WidthRequest="80"
                                 HeightRequest="35"
                                 Clicked="OnCancelPasswordClicked" />
                         <Button x:Name="SavePasswordBtn"
@@ -75,7 +75,7 @@
                                 BackgroundColor="{StaticResource Success}"
                                 TextColor="{StaticResource White}"
                                 FontSize="14"
-                                WidthRequest="70"
+                                WidthRequest="80"
                                 HeightRequest="35"
                                 Clicked="OnSavePasswordClicked" />
                     </HorizontalStackLayout>

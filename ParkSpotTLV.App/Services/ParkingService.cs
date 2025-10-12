@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using ParkSpotTLV.Contracts.Map;
 using ParkSpotTLV.Contracts.Parking;
 
@@ -19,11 +20,14 @@ public class ParkingService
     private readonly HttpClient _http;
     private readonly AuthenticationService _authService;
     private readonly JsonSerializerOptions _options;
+    private readonly ILogger<ParkingService> _log;
+
 
     private record BudgetRemainingResponse(int TimeRemaining);
 
-    public ParkingService(HttpClient http, AuthenticationService authService, JsonSerializerOptions? options = null)
+    public ParkingService(ILogger<ParkingService> log, HttpClient http, AuthenticationService authService, JsonSerializerOptions? options = null)
     {
+        _log = log;
         _http = http;
         _authService = authService;
         _options = options ?? new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
@@ -37,6 +41,8 @@ public class ParkingService
             MinParkingTime: minParkingTime
         );
 
+        System.Diagnostics.Debug.WriteLine($"Segment {segResponse}\nCarID = {carId}\nminPArking: {minParkingTime}");
+        _log.LogInformation("!!!!!!{startParkingPayload}", startParkingPayload);
 
         var response = await _authService.ExecuteWithTokenRefreshAsync(() =>
             _http.PostAsJsonAsync("/parking/start", startParkingPayload, _options));

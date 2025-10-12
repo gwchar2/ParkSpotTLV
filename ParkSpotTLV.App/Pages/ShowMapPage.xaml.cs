@@ -459,7 +459,6 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
     private async void OnParkHereClicked(object sender, EventArgs e)
     {
-        // set park here button to furrnet car state
         if (string.IsNullOrEmpty(pickedCarId) || _session is null)
             return;
 
@@ -469,6 +468,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         if (response != null)
         {
             isParking = response.Status;
+            await DisplayAlert("debug", $"picked car id {pickedCarId} and status isParking = {isParking}", "ok");
             if (isParking)
             {
                 parkingSessionId = response.SessionId;
@@ -489,6 +489,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
                 if (parkedStreet.HasValue) {
                     var (parkedStreetName, segmentResponse) = parkedStreet.Value;
                     segmentToUse = segmentResponse;
+                    await DisplayAlert("debug", $"Parked street as chosen: {parkedStreetName}", "ok");
                     parkingAtResZone = await parkingAtResidentalZone(segmentResponse);
                 }
             }
@@ -501,12 +502,14 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
             try
             {
+                await DisplayAlert("debug", $"permitid: {activePermit}, segmentUsed: {segmentToUse}, carID: {pickedCarId}, min: {_session?.MinParkingTime ?? 120}", "ok");
                 startParkingResponse = await _parkingService.StartParkingAsync(
                     segmentToUse,
                     Guid.Parse(pickedCarId),
-                    _session?.MinParkingTime ?? 30);
+                    120); //_session?.MinParkingTime ?? 
                 if (startParkingResponse is not null)
                 {
+                    await DisplayAlert("debug", $"new parking session started at street {segmentToUse.NameEnglish}", "ok");
                     parkingSessionId = startParkingResponse.SessionId;
                 }
             }
@@ -531,8 +534,9 @@ public partial class ShowMapPage : ContentPage, IDisposable
                 // await DisplayAlert("Debug", "calling stopParkingAsync", "OK");
                 try
                 {
-                    
                     await _parkingService.StopParkingAsync(parkingSessionId, Guid.Parse(pickedCarId));
+                    int? budget = await _parkingService.GetParkingBudgetRemainingAsync(Guid.Parse(pickedCarId));
+                    await DisplayAlert("Debug", $"you have: {budget} minutes of free parking left in budget.", "OK");
                 }
                 catch (HttpRequestException ex)
                 {
