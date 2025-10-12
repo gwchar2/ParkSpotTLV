@@ -22,7 +22,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: ParkSpotTLV.Api/Dockerfile
+      dockerfile: src/backend/ParkSpotTLV.Api/Dockerfile
     container_name: parkspot_api
     environment:
       ASPNETCORE_ENVIRONMENT: Development
@@ -47,7 +47,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./ParkSpotTLV.Infrastructure/db/Seed:/app/db/Seed:ro
+      - ./src/backend/ParkSpotTLV.Infrastructure/db/Seed:/app/db/Seed:ro
     depends_on:
       db:
         condition: service_healthy

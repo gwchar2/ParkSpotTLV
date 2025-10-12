@@ -9,12 +9,12 @@
       "extra-files": [
         {
           "type": "json",
-          "path": "ParkSpotTLV.Api/appsettings.json",
+          "path": "src/backend/ParkSpotTLV.Api/appsettings.json",
           "jsonpath": "$.App.Version"
         },
         {
           "type": "json",
-          "path": "ParkSpotTLV.Api/appsettings.Development.json",
+          "path": "src/backend/ParkSpotTLV.Api/appsettings.Development.json",
           "jsonpath": "$.App.Version"
         }
       ]
