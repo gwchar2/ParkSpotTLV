@@ -42,7 +42,6 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
                     var calAtStart = _calendar.GetStatus(row.Tariff, payStart);   
                     decisionAtPaidStart = await _pricing.DecideAsync( row.ParkingType, row.ZoneCode, row.Tariff, payStart, request.Pov, calAtStart.ActiveNow, ct);
                 }
-
                 // Classification (string Group (Free / Paid / Limited / Restricted) , string Reason, bool IsLegalNow)
                 var (group, reason, payNow, payLater) = _classification.Classify(row.ParkingType, availabilityNow, 
                     paymentDecisionNow, decisionAtPaidStart, calNow, now, request.MinParkingTime);

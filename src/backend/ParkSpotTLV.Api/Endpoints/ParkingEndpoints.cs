@@ -202,37 +202,15 @@ namespace ParkSpotTLV.Api.Endpoints {
                     if (minParking <= 0) minParking = 120;
                     var endParkingTime = nowLocal.AddMinutes(minParking);
 
-                    // FREE -> DOES NOT CONSUME BUDGET
-                    // PAYED -> if isPayNow true  -> starts consuming.
-                    // PAYED -> if isPayNow false -> starts consuming after change (NextChange).
+                    // FREE -> CONSUMES ONLY IF ACTIVE + StreeType == PAID
+                    // PAID -> if isPayNow true  -> starts consuming.
+                    // PAID -> if isPayNow false -> starts consuming after change (NextChange).
                     // LIMITED -> according to isPayNow now. same as PAYED fields, just for limited. Furthermore, if nextChange < endParkingTime, than endParkingTime = nextChange
                     if (group is "LIMITED" && seg.NextChange is not null && seg.NextChange > nowLocal && seg.NextChange < endParkingTime)
                         endParkingTime = (DateTimeOffset)seg.NextChange;
 
-                    DateTimeOffset? budgetTimeLimit = null;
                     var remaining = await budget.GetRemainingMinutesAsync(body.VehicleId, anchor, ct);
-                    // If we do not have any remaining budget, we don't have anything to estimate
-                    if (remaining > 0) {
-                        if (group is "PAID" or "LIMITED") {
-                            DateTimeOffset consumeStart = nowLocal;
 
-                            if (seg.IsPayNow is bool isPayNowFlag) {
-                                if (!isPayNowFlag)
-                                    consumeStart = (DateTimeOffset)seg.NextChange!;
-                                else
-                                    consumeStart = nowLocal;
-                            } 
-                            else 
-                                consumeStart = nowLocal;
-
-                            if (consumeStart < endParkingTime) {
-                                var estimate = consumeStart.AddMinutes(remaining);
-
-                                budgetTimeLimit = estimate <= endParkingTime ? estimate : endParkingTime;
-                            }
-                        }
-                        // group FREE -> no consumption ->  budgetLeft stays null
-                    }
 
                     // Create the sessions
                     var session = new ParkingSession {
@@ -270,7 +248,8 @@ namespace ParkSpotTLV.Api.Endpoints {
                         Group = seg.Group!,
                         Tariff = seg.Tariff,
                         FreeBudgetRemaining = remaining,
-                        SessionStarted = nowLocal, 
+                        SessionStarted = DateTime.Today.AddHours(21).AddMinutes(00),
+                        //SessionStarted = nowLocal, 
                         SessionEnding = endParkingTime,
                         SegmentId = seg.SegmentId,
                         SessionId = session.Id,

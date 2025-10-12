@@ -234,13 +234,13 @@ namespace ParkSpotTLV.Api.Endpoints {
                         return GeneralProblems.InvalidRowVersion(ctx);
 
                     // We need to make sure the permit belongs to specified user
-                    var permit = await db.Permits.AsNoTracking().Include(p => p.Vehicle).SingleOrDefaultAsync(p => p.Id == id, ct);
+                    var permit = await db.Permits.AsNoTracking().Where(p => p.Id == id && p.Vehicle.OwnerId == userId).SingleOrDefaultAsync(ct);
 
-                    if (permit is null || permit.Vehicle.OwnerId != userId)  return PermitProblems.Forbidden(ctx);
+                    if (permit is null)  return PermitProblems.Forbidden(ctx);
 
                     if (permit.Xmin != expectedXmin) return GeneralProblems.ConcurrencyError(ctx);
 
-                    // Check if we leave the vehicle with 0 permits (NOT POSSIBLE)
+                    // Cant remove default permit!!! Can hide it on UI if want.
                     if (permit.Type == PermitType.Default) return PermitProblems.CantRemoveDef(ctx);
 
                     // Delete the permit
