@@ -1,16 +1,18 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
-using ParkSpotTLV.Infrastructure;
-using ParkSpotTLV.Contracts.Budget;
-using ParkSpotTLV.Contracts.Time;
-using ParkSpotTLV.Infrastructure.Entities;
 using ParkSpotTLV.Api.Features.Parking.Models;
+using ParkSpotTLV.Contracts.Budget;
+using ParkSpotTLV.Contracts.Enums;
+using ParkSpotTLV.Contracts.Time;
+using ParkSpotTLV.Infrastructure;
+using ParkSpotTLV.Infrastructure.Entities;
 
 
 namespace ParkSpotTLV.Api.Features.Parking.Services {
 
-    public sealed class DailyBudgetService(AppDbContext db, IClock clock) : IDailyBudgetService {
-
+    public sealed class DailyBudgetService(AppDbContext db, IClock clock, ITariffCalendarService calendar) : IDailyBudgetService {
+        
+        private readonly ITariffCalendarService _calendar = calendar;
         private const int DailyAllowanceMinutes = 120;
 
         /*
@@ -126,8 +128,12 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
 
             var isFreeGroup = session.Group.Equals("FREE", StringComparison.OrdinalIgnoreCase);
             var isLimitedGroup = session.Group.Equals("LIMITED", StringComparison.OrdinalIgnoreCase);
+            var isPaidGroup = session.Group.Equals("PAID", StringComparison.OrdinalIgnoreCase);
 
-            if (!isFreeGroup) {
+            /* 
+             * If its a paid group, configure the start / stop times of payment
+             */
+            if (isPaidGroup) {
                 if (session.IsPayNow) {
                     consumeStart = startedLocal;
                     if (!session.IsPayLater) {
@@ -137,10 +143,19 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
                     consumeStart = nextLocal;
                 }
             }
-
+            /*
+             * If its a limited group, the end time is always the time it turns to restricted
+             */
             if (isLimitedGroup)
                 consumeEnd = nextLocal;
-
+            /*
+             * If its a free group, we charge budget ONLY if parking street is of PAID type, and we are in ACTIVE hours! (According to tariff zone, either 8-19 or 8-21)
+             */
+            if (isFreeGroup && session.ParkingType == ParkingType.Paid) {
+                var calNow = _calendar.GetStatus(session.Tariff, startedLocal);
+                if (calNow.ActiveNow)
+                    consumeStart = startedLocal;
+            }
             var totalLegalMinutes = (int)Math.Ceiling((timeLocal - startedLocal).TotalMinutes);
             var freeMinutesCharged = 0;
             var remainingToday = 0;
@@ -173,6 +188,7 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
             if (!isFreeGroup && !session.IsPayLater && session.NextChangeUtc is not null && nextLocal < timeLocal) {
                 freeMinutes = (int)Math.Ceiling((timeLocal - nextLocal).TotalMinutes);
             }
+
             freeMinutes = isFreeGroup ? totalLegalMinutes :  freeMinutes;
             var paidMinutes = isFreeGroup ? 0 : Math.Max(0, totalLegalMinutes - freeMinutesCharged - freeMinutes);
 

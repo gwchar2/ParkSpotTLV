@@ -79,7 +79,7 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
                 }
                 // Free now, turns PAID within Required             -> OK -> GREEN,         PayOnStart = false, WillHaveToPayLater ?: !TRUE!,
                 return ("PAID", $"Will become paid parking at {paidWindowStart}", PayNow: false, PayLater: true);
-            }// PAID now branch:   
+            } // PAID now branch:   
             else {
                 // PAID now, turns RESTRICTED later             -> LIMITED->ORANGE,     PayOnStart = true,  WillHaveToPayLater ?: X,  
                 // Its deffinetly not a disability permit OR home zone permit... 
