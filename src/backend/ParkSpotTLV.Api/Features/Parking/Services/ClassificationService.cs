@@ -38,8 +38,9 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
                     && privilegedStart < horizonEnd
                     && !calNow.ActiveNow
                     && paymentDecisionNow.Reason != "DisabilityPermitHolder"
-                    && paymentDecisionNow.Reason != "PermitHomeZone")
+                    && paymentDecisionNow.Reason != "PermitHomeZone") {
                     return ("RESTRICTED", $"Will become privileged-zone parking at {privilegedStart}", PayNow: false, PayLater: false);
+                }
 
                 // If I dont need to pay now because im a disability permit holder or zone permit (of same zone), I wont need to pay later as well.
                 if (paymentDecisionNow.Reason is "DisabilityPermitHolder" or "PermitHomeZone") {
@@ -73,6 +74,8 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
 
                     // Free now, stays FREE within required             -> OK -> GREEN,         PayOnStart = false, WillHaveToPayLater?: FALSE, 
                     return ("FREE", $"Stays free parking until {horizonEnd}",  PayNow: false, PayLater: false);
+
+
                 }
                 // Free now, turns PAID within Required             -> OK -> GREEN,         PayOnStart = false, WillHaveToPayLater ?: !TRUE!,
                 return ("PAID", $"Will become paid parking at {paidWindowStart}", PayNow: false, PayLater: true);
