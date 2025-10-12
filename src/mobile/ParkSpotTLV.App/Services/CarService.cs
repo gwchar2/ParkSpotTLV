@@ -321,7 +321,6 @@ public class CarService
             throw new InvalidOperationException("Failed to retrieve current permit data");
 
         var deletePermitPayload = new PermitDeleteRequest(
-            Id: currentPermit.PermitId,
             RowVersion: currentPermit.RowVersion
         );
 
@@ -370,7 +369,6 @@ public class CarService
             throw new InvalidOperationException("Failed to retrieve current permit data");
 
         var deletePermitPayload = new PermitDeleteRequest(
-            Id: currentPermit.PermitId,
             RowVersion: currentPermit.RowVersion
         );
 
