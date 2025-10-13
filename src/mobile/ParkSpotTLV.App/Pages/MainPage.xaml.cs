@@ -1,15 +1,25 @@
 using ParkSpotTLV.App.Services;
 
 namespace ParkSpotTLV.App.Pages {
+    /*
+    * Main login page for user authentication.
+    * Entry point for returning users to log in.
+    */
     public partial class MainPage : ContentPage {
-        private readonly AuthenticationService _authService ; // = AuthenticationService.Instance
+        private readonly AuthenticationService _authService ;
 
+        /*
+        * Initializes the MainPage with required services.
+        */
         public MainPage(AuthenticationService authService)
         {
             InitializeComponent();
             _authService = authService;
         }
 
+        /*
+        * Handles login button click. Authenticates user and navigates to map page.
+        */
         private async void OnLoginClicked(object? sender, EventArgs e) {
             string username = UsernameEntry.Text?.Trim() ?? "";
             string password = PasswordEntry.Text?.Trim() ?? "";
@@ -55,6 +65,9 @@ namespace ParkSpotTLV.App.Pages {
             }
         }
 
+        /*
+        * Handles sign up button click. Navigates to SignUpPage.
+        */
         private async void OnSignUpClicked(object? sender, EventArgs e) {
             await Shell.Current.GoToAsync("SignUpPage");
         }

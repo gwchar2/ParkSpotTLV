@@ -1,5 +1,7 @@
 namespace ParkSpotTLV.App.Data.Models;
-
+/*
+* Local object to represent a Viehcle 
+*/
 public class Car
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();

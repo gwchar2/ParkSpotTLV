@@ -3,7 +3,23 @@ using Microsoft.Maui.Maps;
 
 namespace ParkSpotTLV.App.Services;
 
-// Handles map interaction, location tracking, and viewport management
+/*
+* Handles map interaction, location tracking, and viewport management.
+*
+* Debouncing Strategy:
+* The service implements debouncing to prevent excessive API calls when the map is being panned or zoomed.
+* When the map's VisibleRegion changes, a timer is started/restarted. Only after 500ms of no changes
+* does the service fire the VisibleBoundsChanged event to fetch new parking segments.
+* This prevents firing multiple API requests during continuous user interaction.
+*
+* Dispose Pattern:
+* Implements IDisposable to properly clean up resources including:
+* - Stopping location tracking services
+* - Disposing the debounce timer
+* - Unsubscribing from map property change events
+* - Preventing memory leaks from event handlers and timers
+* The _disposed flag prevents multiple disposal attempts.
+*/
 public class MapInteractionService : IDisposable
 {
     private bool _disposed = false;
@@ -24,6 +40,9 @@ public class MapInteractionService : IDisposable
 
     public bool IsTrackingUserLocation => _isTrackingUserLocation;
 
+    /*
+    * Initializes the service with a map instance. Sets up property change listeners.
+    */
     public void Initialize(Microsoft.Maui.Controls.Maps.Map map)
     {
         if (_map != null)
@@ -35,6 +54,10 @@ public class MapInteractionService : IDisposable
         _map.PropertyChanged += MyMapOnPropertyChanged;
     }
 
+    /*
+    * Handles map property changes. Debounces bounds changes and triggers segment reload.
+    * During location tracking, reloads segments when user moves beyond threshold distance.
+    */
     public void MyMapOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(Microsoft.Maui.Controls.Maps.Map.VisibleRegion))
@@ -86,6 +109,10 @@ public class MapInteractionService : IDisposable
         }
     }
 
+    /*
+    * Gets the visible map bounds as a tuple of coordinates.
+    * Returns null if map or visible region is not available. Clamps large areas to prevent overload.
+    */
     public (double MinLat, double MaxLat, double MinLon, double MaxLon, double CenterLat, double CenterLon)? GetVisibleBounds()
     {
         if (_map == null)
@@ -125,7 +152,10 @@ public class MapInteractionService : IDisposable
         return (minLat, maxLat, minLon, maxLon, center.Latitude, center.Longitude);
     }
 
-    // Gets the current device location
+    /*
+    * Gets the current device location using geolocation services.
+    * Returns location if available, null otherwise.
+    */
     public async Task<Location?> GetCurrentLocationAsync()
     {
         try
@@ -141,7 +171,10 @@ public class MapInteractionService : IDisposable
         }
     }
 
-    // Searches for an address and moves the map to that location
+    /*
+    * Searches for an address and moves the map to that location.
+    * Returns tuple with success status and optional error message.
+    */
     public async Task<(bool Success, string? ErrorMessage)> SearchAndMoveToAddressAsync(string address, double zoomMeters)
     {
         if (string.IsNullOrWhiteSpace(address))
@@ -171,7 +204,10 @@ public class MapInteractionService : IDisposable
         }
     }
 
-    // Starts tracking user location and following it on the map
+    /*
+    * Starts tracking user location and continuously updates map to follow user movement.
+    * Returns true if tracking started successfully, false otherwise.
+    */
     public async Task<bool> StartLocationTrackingAsync()
     {
         if (_isTrackingUserLocation)
@@ -213,7 +249,9 @@ public class MapInteractionService : IDisposable
         }
     }
 
-    // Stops tracking user location
+    /*
+    * Stops tracking user location and location updates.
+    */
     public void StopLocationTracking()
     {
         if (!_isTrackingUserLocation)
@@ -226,7 +264,9 @@ public class MapInteractionService : IDisposable
         System.Diagnostics.Debug.WriteLine("Stopped location tracking");
     }
 
-    // Handles location changes and updates map position
+    /*
+    * Handles location changes and re-centers map on user's new position.
+    */
     private void OnLocationChanged(object? sender, GeolocationLocationChangedEventArgs e)
     {
         var location = e.Location;
@@ -253,12 +293,18 @@ public class MapInteractionService : IDisposable
         }
     }
 
+    /*
+    * Disposes resources used by the service.
+    */
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
 
+    /*
+    * Protected dispose method for releasing managed and unmanaged resources.
+    */
     protected virtual void Dispose(bool disposing)
     {
         if (_disposed)

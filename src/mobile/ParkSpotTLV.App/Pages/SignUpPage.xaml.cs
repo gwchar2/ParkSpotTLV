@@ -3,12 +3,18 @@ using ParkSpotTLV.App.Data.Models;
 
 namespace ParkSpotTLV.App.Pages;
 
+/*
+* Sign up page for new user registration.
+* Creates user account and default car, then navigates to map.
+*/
 public partial class SignUpPage : ContentPage
 {
-    private readonly AuthenticationService _authService ; // = AuthenticationService.Instance
-    private readonly CarService _carService; //  = CarService.Instance
+    private readonly AuthenticationService _authService ;
+    private readonly CarService _carService;
 
-
+    /*
+    * Initializes the SignUpPage with required services.
+    */
     public SignUpPage(CarService carService, AuthenticationService authService)
     {
         InitializeComponent();
@@ -16,6 +22,9 @@ public partial class SignUpPage : ContentPage
         _authService = authService;
     }
 
+    /*
+    * Handles create account button click. Validates input, creates account and default car.
+    */
     private async void OnCreateAccountClicked(object? sender, EventArgs e)
     {
         string username = UsernameEntry.Text?.Trim() ?? "";

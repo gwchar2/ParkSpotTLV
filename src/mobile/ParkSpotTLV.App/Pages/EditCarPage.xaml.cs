@@ -4,6 +4,10 @@ using ParkSpotTLV.App.Data.Models;
 
 namespace ParkSpotTLV.App.Pages;
 
+/*
+* Page for editing an existing car's details.
+* Allows updating car name, type, and permit information.
+*/
 public partial class EditCarPage : ContentPage, IQueryAttributable
 {
     private readonly CarService _carService;
@@ -11,6 +15,9 @@ public partial class EditCarPage : ContentPage, IQueryAttributable
     private string _carId = string.Empty;
     private Car? _currentCar;
 
+    /*
+    * Initializes the EditCarPage with required services.
+    */
     public EditCarPage(CarService carService,ParkingService parkingService)
     {
         InitializeComponent();
@@ -18,7 +25,9 @@ public partial class EditCarPage : ContentPage, IQueryAttributable
         _parkingService = parkingService;
     }
 
-    // Lifecycle Methods
+    /*
+    * Applies query attributes from navigation. Extracts car ID and loads car data.
+    */
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
         if (query.ContainsKey("carId"))
@@ -28,7 +37,9 @@ public partial class EditCarPage : ContentPage, IQueryAttributable
         }
     }
 
-    // Private Load Methods
+    /*
+    * Loads car data from service and populates form fields.
+    */
     private async void LoadCarData()
     {
         if (string.IsNullOrEmpty(_carId))
@@ -61,12 +72,17 @@ public partial class EditCarPage : ContentPage, IQueryAttributable
         }
     }
 
-    // Event Handlers
+    /*
+    * Handles resident permit checkbox change. Shows/hides zone number field.
+    */
     private void OnResidentPermitChanged(object sender, CheckedChangedEventArgs e)
     {
         ZoneNumberEntry.IsVisible = e.Value;
     }
 
+    /*
+    * Handles save car button click. Validates input and updates car details.
+    */
     private async void OnSaveCarClicked(object sender, EventArgs e)
     {
         if (_currentCar == null)
