@@ -74,6 +74,11 @@ public partial class ShowMapPage : ContentPage, IDisposable
     {
         base.OnAppearing();
 
+        Shell.SetBackButtonBehavior(this, new BackButtonBehavior
+        {
+            IsVisible = false
+        });
+
         // Always re-subscribe to event handler when page appears
         _mapInteractionService.VisibleBoundsChanged -= OnVisibleBoundsChanged; // Remove old subscription if exists
         _mapInteractionService.VisibleBoundsChanged += OnVisibleBoundsChanged;
