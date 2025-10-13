@@ -6,14 +6,16 @@ namespace ParkSpotTLV.App.Pages;
 
 public partial class AccountDetailsPage : ContentPage
 {
-    private readonly AuthenticationService _authService ; // = AuthenticationService.Instance
-    private readonly CarService _carService ; // = CarService.Instance
+    private readonly AuthenticationService _authService ;
+    private readonly CarService _carService; 
+    private readonly ParkingService _parkingService;
 
-    public AccountDetailsPage(CarService carService, AuthenticationService authService)
+    public AccountDetailsPage(CarService carService, AuthenticationService authService,ParkingService parkingService)
     {
         InitializeComponent();
         _carService = carService;
         _authService = authService;
+        _parkingService = parkingService;
     }
 
     // Lifecycle Methods
@@ -47,7 +49,7 @@ public partial class AccountDetailsPage : ContentPage
 
         foreach (var car in userCars)
         {
-            CreateCarUI(car);
+            await CreateCarUIAsync(car);
         }
 
         // Show message if no cars
@@ -206,7 +208,8 @@ public partial class AccountDetailsPage : ContentPage
     }
 
     // Helper Methods
-    private void CreateCarUI(Car car)
+
+    private async Task CreateCarUIAsync(Car car)
     {
         var carFrame = new Border
         {
@@ -271,7 +274,8 @@ public partial class AccountDetailsPage : ContentPage
         var FreeParkingText = new List<string>();
         if (car.HasResidentPermit)
         {
-            FreeParkingText.Add("Free parking time left: 120 minutes.");
+            int? budget = await _parkingService.GetParkingBudgetRemainingAsync(Guid.Parse(car.Id));
+            FreeParkingText.Add($"Free parking time left: {budget} minutes.");
             var FreeParkingLabel = new Label
             {
                 Text = string.Join(", ", FreeParkingText),
