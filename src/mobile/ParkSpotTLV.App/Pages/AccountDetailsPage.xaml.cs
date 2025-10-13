@@ -114,8 +114,8 @@ public partial class AccountDetailsPage : ContentPage
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Error", $"Failed to remove car: {ex.Message}", "OK");
                 System.Diagnostics.Debug.WriteLine($"Error removing car: {ex.Message}");
+                await DisplayAlert("Error", "Failed to remove car. Please try again.", "OK");
             }
         }
     }
@@ -196,8 +196,8 @@ public partial class AccountDetailsPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", "Failed to update password. Please try again later.", "OK");
             System.Diagnostics.Debug.WriteLine($"Error updating password: {ex.Message}");
+            await DisplayAlert("Error", "Failed to update password. Please try again later.", "OK");
         }
         finally
         {

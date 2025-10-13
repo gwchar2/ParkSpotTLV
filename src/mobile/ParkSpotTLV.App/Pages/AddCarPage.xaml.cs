@@ -80,7 +80,8 @@ public partial class AddCarPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", ex.Message, "OK");
+            System.Diagnostics.Debug.WriteLine($"Failed to add car: {ex.Message}");
+            await DisplayAlert("Error", "Failed to add car. Please try again.", "OK");
         }
         
     }

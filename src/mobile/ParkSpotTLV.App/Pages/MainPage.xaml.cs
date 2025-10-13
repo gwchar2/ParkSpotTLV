@@ -34,16 +34,17 @@ namespace ParkSpotTLV.App.Pages {
                 }
             }
             catch (HttpRequestException ex) {
-                // You can map common cases by checking ex.Message or wrapping extra info in the service
-                // e.g., if it contains "401" -> invalid credentials, "400" -> missing fields, etc.
+                System.Diagnostics.Debug.WriteLine($"Login failed: {ex.Message}");
+
                 var msg = ex.Message.Contains("401") ? "Invalid username or password."
                         : ex.Message.Contains("400") ? "Missing username or password."
-                        : "Login failed. Please try again.";
+                        : "Login failed. Please check your connection and try again.";
                 await DisplayAlert("Error", msg, "OK");
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Error", $"Login failed: {ex.Message}", "OK");
+                System.Diagnostics.Debug.WriteLine($"Unexpected login error: {ex.Message}");
+                await DisplayAlert("Error", "Login failed. Please try again later.", "OK");
             }
 
             finally

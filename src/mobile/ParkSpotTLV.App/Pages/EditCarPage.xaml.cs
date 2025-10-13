@@ -55,7 +55,8 @@ public partial class EditCarPage : ContentPage, IQueryAttributable
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", $"Failed to load car data: {ex.Message}", "OK");
+            System.Diagnostics.Debug.WriteLine($"Failed to load car data: {ex.Message}");
+            await DisplayAlert("Error", "Failed to load car data. Please try again.", "OK");
             await Shell.Current.GoToAsync("..");
         }
     }
@@ -127,7 +128,8 @@ public partial class EditCarPage : ContentPage, IQueryAttributable
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", ex.Message, "OK");
+            System.Diagnostics.Debug.WriteLine($"Failed to update car: {ex.Message}");
+            await DisplayAlert("Error", "Failed to update car. Please try again.", "OK");
         }
     }
 }

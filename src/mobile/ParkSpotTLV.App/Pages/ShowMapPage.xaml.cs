@@ -114,9 +114,8 @@ public partial class ShowMapPage : ContentPage, IDisposable
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error in OnAppearing: {ex.Message}");
-            System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
-            await DisplayAlert("Error", $"Failed to initialize map: {ex.Message}", "OK");
+            System.Diagnostics.Debug.WriteLine($"Failed to initialize map: {ex.Message}");
+            await DisplayAlert("Error", "Failed to load the map. Please try again.", "OK");
         }
     }
 
@@ -168,9 +167,8 @@ public partial class ShowMapPage : ContentPage, IDisposable
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error in FetchAndRenderSegments: {ex.Message}");
-            System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
-            await DisplayAlert("Error", $"Failed to load segments: {ex.Message}", "OK");
+            System.Diagnostics.Debug.WriteLine($"Failed to load segments: {ex.Message}");
+            await DisplayAlert("Error", "Unable to load parking data. Please check your connection.", "OK");
             return;
         }
 
@@ -183,14 +181,13 @@ public partial class ShowMapPage : ContentPage, IDisposable
         }
         catch (OutOfMemoryException ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Out of memory rendering segments: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Memory error rendering segments: {ex.Message}");
             await DisplayAlert("Memory Error", "Too many segments to display. Try zooming in further.", "OK");
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error rendering segments: {ex.Message}");
-            System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
-            await DisplayAlert("Error", $"Failed to render segments: {ex.Message}", "OK");
+            System.Diagnostics.Debug.WriteLine($"Failed to render segments: {ex.Message}");
+            await DisplayAlert("Error", "Unable to display parking segments. Please try again.", "OK");
         }
     }
     // loads the map, user location and calls the rendering of the segments
@@ -457,8 +454,6 @@ public partial class ShowMapPage : ContentPage, IDisposable
         var bounds = _mapInteractionService.GetVisibleBounds();
         await FetchAndRenderSegments(bounds);
 
-        // await DisplayAlert("Apply", "Changes applied successfully!", "OK");
-
         // Auto-hide settings panel after applying changes
         SettingsPanel.IsVisible = false;
         SettingsToggleBtn.Text = "Settings ▼";
@@ -476,13 +471,10 @@ public partial class ShowMapPage : ContentPage, IDisposable
         if (response != null)
         {
             isParking = response.Status;
-            await DisplayAlert("debug", $"picked car id {pickedCarId} and status isParking = {isParking}", "ok");
             if (isParking)
             {
                 parkingSessionId = response.SessionId;
-                // await DisplayAlert("debug", "parking session is active", "ok");
             }
-            // await DisplayAlert("debug", "parking session is NOT active", "ok");
         }
     
         bool parkingAtResZone = false;
@@ -501,7 +493,6 @@ public partial class ShowMapPage : ContentPage, IDisposable
                 if (parkedStreet.HasValue) {
                     var (parkedStreetName, segmentResponse) = parkedStreet.Value;
                     segmentToUse = segmentResponse;
-                    await DisplayAlert("debug", $"Parked street as chosen: {parkedStreetName}", "ok");
                     parkingAtResZone = await parkingAtResidentalZone(segmentResponse);
                 }
             }
@@ -514,20 +505,19 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
             try
             {
-                await DisplayAlert("debug", $"permitid: {activePermit}, segmentUsed: {segmentToUse}, carID: {pickedCarId}, min: {_session?.MinParkingTime ?? 120}", "ok");
                 startParkingResponse = await _parkingService.StartParkingAsync(
                     segmentToUse,
                     Guid.Parse(pickedCarId),
                     120); //_session?.MinParkingTime ?? 
                 if (startParkingResponse is not null)
                 {
-                    await DisplayAlert("debug", $"new parking session started at street {segmentToUse.NameEnglish}", "ok");
                     parkingSessionId = startParkingResponse.SessionId;
                 }
             }
             catch (HttpRequestException ex)
             {
-                await DisplayAlert("Error", $"Failed to start parking: {ex.Message}", "OK");
+                System.Diagnostics.Debug.WriteLine($"Failed to start parking: {ex.Message}");
+                await DisplayAlert("Error", "Unable to start parking. Please check your connection.", "OK");
                 return;
             }
 
@@ -543,23 +533,20 @@ public partial class ShowMapPage : ContentPage, IDisposable
             // End parking
             if (isResidentalPermit && parkingSessionId != Guid.Empty)
             {
-                // await DisplayAlert("Debug", "calling stopParkingAsync", "OK");
                 try
                 {
                     await _parkingService.StopParkingAsync(parkingSessionId, Guid.Parse(pickedCarId));
                     int? budget = await _parkingService.GetParkingBudgetRemainingAsync(Guid.Parse(pickedCarId));
-                    await DisplayAlert("Debug", $"you have: {budget} minutes of free parking left in budget.", "OK");
                 }
                 catch (HttpRequestException ex)
                 {
-                    await DisplayAlert("Error", $"Failed to stop parking: {ex.Message}", "OK");
+                    System.Diagnostics.Debug.WriteLine($"Failed to stop parking: {ex.Message}");
+                    await DisplayAlert("Error", "Unable to stop parking. Please check your connection.", "OK");
                     return;
                 }
             }
 
             UpdateParkHereButtonState(false); // update UI button
-            // await _localDataService.UpdateParkingStatusAsync(false); // update status in session
-            // await DisplayAlert("Parking Ended", "Your parking session has ended.", "OK");
         }
     }
 
@@ -626,7 +613,8 @@ public partial class ShowMapPage : ContentPage, IDisposable
         
         if (!result.Success && result.ErrorMessage != null)
         {
-            await DisplayAlert(result.ErrorMessage.Contains("not found") ? "Not Found" : "Search Error", result.ErrorMessage, "OK");
+            System.Diagnostics.Debug.WriteLine($"Address search failed: {result.ErrorMessage}");
+            await DisplayAlert("Search Error", "Unable to find address. Please try a different search.", "OK");
         }
     }
 
