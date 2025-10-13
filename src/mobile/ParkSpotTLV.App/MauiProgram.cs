@@ -63,11 +63,10 @@ namespace ParkSpotTLV.App {
 
             builder.Services.AddSingleton<ParkingService>(sp =>
             {
-                var log = sp.GetRequiredService<ILogger<ParkingService>>();
                 var http = sp.GetRequiredService<HttpClient>();
                 var auth = sp.GetRequiredService<AuthenticationService>();
                 var opts = sp.GetRequiredService<JsonSerializerOptions>();
-                return new ParkingService(log, http, auth, opts);
+                return new ParkingService(http, auth, opts);
             });
             
             builder.Services.AddSingleton<MapSegmentRenderer>();
