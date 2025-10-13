@@ -8,16 +8,15 @@
     <Grid>
         <ScrollView>
         <VerticalStackLayout
-        Padding="40"
-        Spacing="30"
-        VerticalOptions="Center">
+        Padding="40,220,40,40"
+        Spacing="10"
+        VerticalOptions="Start">
 
-        <Label
-                Text="ParkSpot-TLV"
-                FontSize="32"
-                FontAttributes="Bold"
+        <Image
+                Source="logo.jpg"
                 HorizontalOptions="Center"
-                TextColor="{StaticResource Primary}" />
+                Aspect="AspectFit"
+                Margin="0,0,0,30" />
 
             <VerticalStackLayout Spacing="20">
                 <Entry
