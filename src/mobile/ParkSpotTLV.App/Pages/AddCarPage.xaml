@@ -87,12 +87,13 @@
                         FontSize="16"
                         TextColor="{StaticResource PrimaryDarkText}"
                         BackgroundColor="{StaticResource InputFieldBackground}"
+                        IsReadOnly="True"
                         IsVisible="False" />
                     <Label  x:Name = "FreeMinutesLabel"
                             Text = "minutes left for free parking"
-                            FontSize = "16" 
+                            FontSize = "16"
                             VerticalOptions="Center"
-                            IsVisible="False" />        
+                            IsVisible="False" />
                 </HorizontalStackLayout>
                 <HorizontalStackLayout Spacing="10">
                     <CheckBox x:Name="DisabledPermitCheck"

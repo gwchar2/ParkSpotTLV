@@ -7,13 +7,15 @@ namespace ParkSpotTLV.App.Pages;
 public partial class EditCarPage : ContentPage, IQueryAttributable
 {
     private readonly CarService _carService;
+    private readonly ParkingService _parkingService;
     private string _carId = string.Empty;
     private Car? _currentCar;
 
-    public EditCarPage(CarService carService)
+    public EditCarPage(CarService carService,ParkingService parkingService)
     {
         InitializeComponent();
         _carService = carService;
+        _parkingService = parkingService;
     }
 
     // Lifecycle Methods
@@ -62,8 +64,6 @@ public partial class EditCarPage : ContentPage, IQueryAttributable
     private void OnResidentPermitChanged(object sender, CheckedChangedEventArgs e)
     {
         ZoneNumberEntry.IsVisible = e.Value;
-        FreeMinutesEntry.IsVisible = e.Value;
-        FreeMinutesLabel.IsVisible = e.Value;
     }
 
     private async void OnSaveCarClicked(object sender, EventArgs e)
