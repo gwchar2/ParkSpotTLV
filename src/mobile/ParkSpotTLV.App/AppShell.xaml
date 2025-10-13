@@ -39,13 +39,23 @@
     </Shell.TitleView>
 
     <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate pages:MainPage}"
-        Route="MainPage" />
+        Title="Loading"
+        ContentTemplate="{DataTemplate pages:LoadingPage}"
+        Route="LoadingPage" />
 
     <ShellContent
         Title="Sign Up"
         ContentTemplate="{DataTemplate pages:SignUpPage}"
         Route="SignUpPage" />
+
+    <ShellContent
+        Title="Login"
+        ContentTemplate="{DataTemplate pages:MainPage}"
+        Route="MainPage" />
+
+    <ShellContent
+        Title="Map"
+        ContentTemplate="{DataTemplate pages:ShowMapPage}"
+        Route="ShowMapPage" />
 
 </Shell>
