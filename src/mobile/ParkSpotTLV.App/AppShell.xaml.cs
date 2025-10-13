@@ -41,6 +41,13 @@ namespace ParkSpotTLV.App {
 
         private async void OnMenuButtonClicked(object sender, EventArgs e)
         {
+            // If menu is already open, close it
+            if (_currentMenuOverlay != null && _currentMenuOverlay.IsVisible)
+            {
+                RemoveMenuOverlay();
+                return;
+            }
+
             if (Current?.CurrentPage is ContentPage contentPage)
             {
                 // Remove existing menu overlay if any

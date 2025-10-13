@@ -38,6 +38,7 @@ public partial class MenuOverlay : Grid{
 
     private async void OnOverlayTapped(object sender, EventArgs e)
     {
+        bool isMenuOpen = IsVisible;
         await CloseMenu();
     }
 
