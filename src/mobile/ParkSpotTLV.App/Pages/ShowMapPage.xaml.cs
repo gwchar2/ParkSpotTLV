@@ -45,8 +45,8 @@ public partial class ShowMapPage : ContentPage, IDisposable
     private bool _isInitialized = false;
 
     // Car
-    // Name of the Currently selected car 
-    private string? __pickedCarName;
+    // Name of the Currently selected car
+    private string? _pickedCarName;
     // ID of the currently selected car
     private string? _pickedCarId;
     // Active parking permit ID for the selected car
