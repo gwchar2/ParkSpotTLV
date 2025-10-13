@@ -80,20 +80,8 @@
                     TextColor="{StaticResource PrimaryDarkText}"
                     BackgroundColor="{StaticResource InputFieldBackground}"
                     IsVisible="False" />
-                <HorizontalStackLayout Spacing="10">
-                    <Entry
-                        x:Name="FreeMinutesEntry"
-                        Placeholder="120"
-                        FontSize="16"
-                        TextColor="{StaticResource PrimaryDarkText}"
-                        BackgroundColor="{StaticResource InputFieldBackground}"
-                        IsVisible="False" />
-                    <Label  x:Name = "FreeMinutesLabel"
-                            Text = "minutes left for free parking"
-                            FontSize = "16" 
-                            VerticalOptions="Center"
-                            IsVisible="False" />        
-                </HorizontalStackLayout>
+                
+                
 
                 <HorizontalStackLayout Spacing="10">
                     <CheckBox x:Name="DisabledPermitCheck"

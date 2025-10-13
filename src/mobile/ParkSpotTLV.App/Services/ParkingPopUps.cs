@@ -9,13 +9,18 @@ public class ParkingPopUps
 {
     private readonly CarService _carService;
 
+    /*
+    * Initializes the popup service with car service dependency.
+    */
     public ParkingPopUps(CarService carService)
     {
         _carService = carService ?? throw new ArgumentNullException(nameof(carService));
     }
 
-    // When user has disabled permit - he is allowed to choose to not use in this parking session
-    // Shows permit selection dialog and returns the selected permit ID
+    /*
+    * Shows permit selection dialog when car has disabled permit.
+    * Returns selected permit ID and whether it's a residential permit.
+    */
     public async Task<(Guid? activePermitId, bool isResidential)> ShowPermitPopupAsync(string? pickedCarId, Func<string, string?, string?, string[], Task<string>> displayActionSheet)
     {
         // check if pop up required
@@ -65,9 +70,10 @@ public class ParkingPopUps
         }
     }
 
-    
-
-    // Shows parking confirmed alert
+    /*
+    * Shows parking confirmation alert with remaining free parking budget.
+    * Displayed after starting parking session outside residential zone.
+    */
     public async Task ShowParkingConfirmedPopupAsync(int budgetRemaining,INavigation navigation, Func<string, string, string, Task> displayAlert)
     {
         // Build message
@@ -80,8 +86,10 @@ public class ParkingPopUps
         await displayAlert("Parking Confirmed", message, "OK");
     }
 
-    // Shows a popup with list of streets for user to select where they're parking
-    // Returns tuple of (StreetName, SegmentId) or null if cancelled
+    /*
+    * Shows a popup with list of streets for user to select parking location.
+    * Returns tuple of street name and segment data, or null if cancelled.
+    */
     public async Task<(string StreetName, SegmentResponseDTO SegmentResponse)?> ShowStreetsListPopUpAsync(
         Dictionary<SegmentResponseDTO, string>? segmentToStreet,
         INavigation navigation)

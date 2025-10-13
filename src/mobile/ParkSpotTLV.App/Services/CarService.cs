@@ -7,6 +7,10 @@ using ParkSpotTLV.Contracts.Vehicles;
 
 namespace ParkSpotTLV.App.Services;
 
+/*
+* Manages car/vehicle operations including CRUD operations and permit management.
+* Handles API communication for vehicles and their associated permits.
+*/
 public class CarService
 {
     private readonly HttpClient _http;
@@ -14,6 +18,9 @@ public class CarService
     private readonly JsonSerializerOptions _options;
     private readonly Dictionary<string, List<Car>> _userCars = new();
 
+    /*
+    * Initializes the car service with HTTP client and authentication.
+    */
     public CarService(HttpClient http, AuthenticationService authService, JsonSerializerOptions? options = null)
     {
         _http = http;
@@ -21,6 +28,10 @@ public class CarService
         _options = options ?? new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
     }
 
+    /*
+    * Gets all cars owned by the current user.
+    * Returns list of cars, empty list on error.
+    */
     public async Task<List<Car>> GetUserCarsAsync()
     {
         try
@@ -40,6 +51,10 @@ public class CarService
         return new List<Car>();
     }
 
+    /*
+    * Gets a specific car by ID.
+    * Returns car details, null on error or if not found.
+    */
     public async Task<Car?> GetCarAsync(string carId)
     {
         try
@@ -59,6 +74,10 @@ public class CarService
         return null;
     }
 
+    /*
+    * Gets a specific permit ID for a car by permit type option.
+    * opt: 0=residential, 1=disability, 2=default. Returns permit ID or null.
+    */
     public async Task<Guid?> GetPermitAsync(string? carId, int opt)
     {
         if (string.IsNullOrEmpty(carId))
@@ -90,6 +109,10 @@ public class CarService
         return null;
     }
 
+    /*
+    * Adds a new car to user's account.
+    * Creates car and associated permits. Returns created car, null on error.
+    */
     public async Task<Car?> AddCarAsync(Car car)
     {
         try
@@ -128,6 +151,10 @@ public class CarService
         }
     }
 
+    /*
+    * Updates an existing car's details and permits.
+    * Handles permit additions, removals, and updates. Returns true on success.
+    */
     public async Task<bool> UpdateCarAsync(Car updatedCar)
     {
         try
@@ -221,6 +248,10 @@ public class CarService
         }
     }
 
+    /*
+    * Removes a car from user's account.
+    * Deletes car and associated permits. Returns true on success.
+    */
     public async Task<bool> RemoveCarAsync(string carId)
     {
         var me = await _authService.AuthMeAsync();
@@ -257,6 +288,9 @@ public class CarService
         return true;
     }
 
+    /*
+    * Adds a residential permit to a car.
+    */
     private async Task AddResidentPermitAsync(Car car)
     {
         var createPermitPayload = new PermitCreateRequest(
@@ -276,6 +310,9 @@ public class CarService
         }
     }
 
+    /*
+    * Updates a residential permit's zone code.
+    */
     private async Task UpdateResidentPermitAsync(Guid permitId, Car updatedCar)
     {
         // Get current permit to retrieve RowVersion
@@ -308,6 +345,9 @@ public class CarService
         }
     }
 
+    /*
+    * Removes a residential permit from a car.
+    */
     private async Task RemoveResidentPermitAsync(Guid permitId)
     {
         // Get current permit to retrieve RowVersion
@@ -337,6 +377,9 @@ public class CarService
         }
     }
 
+    /*
+    * Adds a disability permit to a car.
+    */
     private async Task AddDisabledPermitAsync(Car car)
     {
         var createPermitPayload = new PermitCreateRequest(
@@ -356,6 +399,9 @@ public class CarService
         }
     }
 
+    /*
+    * Removes a disability permit from a car.
+    */
     private async Task RemoveDisabledPermitAsync(Guid permitId)
     {
         // Get current permit to retrieve RowVersion
@@ -385,7 +431,10 @@ public class CarService
         }
     }
 
- private static Car MapVehicleResponseToCar(VehicleResponse vehicleResponse)
+    /*
+    * Maps API vehicle response to local Car model.
+    */
+    private static Car MapVehicleResponseToCar(VehicleResponse vehicleResponse)
     {
         // Parse the string Type to CarType enum
         var carType = vehicleResponse.Type.ToLower() == "truck" ? CarType.Truck : CarType.Private;

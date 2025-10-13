@@ -12,6 +12,7 @@ namespace ParkSpotTLV.App {
             InitializeComponent();
             _services = services;
 
+            Routing.RegisterRoute("MainPage", typeof(MainPage));
             Routing.RegisterRoute("SignUpPage", typeof(SignUpPage));
             Routing.RegisterRoute("ShowMapPage", typeof(ShowMapPage));
             Routing.RegisterRoute("AddCarPage", typeof(AddCarPage));
@@ -31,8 +32,9 @@ namespace ParkSpotTLV.App {
         {
             if (Current?.CurrentPage is ContentPage contentPage)
             {
-                // Hide menu button on login/signup pages
-                bool shouldHideMenu = contentPage.GetType() == typeof(MainPage) ||
+                // Hide menu button on login/signup/loading pages
+                bool shouldHideMenu = contentPage.GetType() == typeof(LoadingPage) ||
+                                     contentPage.GetType() == typeof(MainPage) ||
                                      contentPage.GetType() == typeof(SignUpPage);
 
                 MenuButton.IsVisible = !shouldHideMenu;
@@ -41,6 +43,13 @@ namespace ParkSpotTLV.App {
 
         private async void OnMenuButtonClicked(object sender, EventArgs e)
         {
+            // If menu is already open, close it
+            if (_currentMenuOverlay != null && _currentMenuOverlay.IsVisible)
+            {
+                RemoveMenuOverlay();
+                return;
+            }
+
             if (Current?.CurrentPage is ContentPage contentPage)
             {
                 // Remove existing menu overlay if any

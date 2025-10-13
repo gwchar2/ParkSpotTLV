@@ -20,19 +20,24 @@ public class ParkingService
     private readonly HttpClient _http;
     private readonly AuthenticationService _authService;
     private readonly JsonSerializerOptions _options;
-    private readonly ILogger<ParkingService> _log;
 
 
     private record BudgetRemainingResponse(int TimeRemaining);
 
-    public ParkingService(ILogger<ParkingService> log, HttpClient http, AuthenticationService authService, JsonSerializerOptions? options = null)
+    /*
+    * Initializes the parking service with logging, HTTP client and authentication.
+    */
+    public ParkingService(HttpClient http, AuthenticationService authService, JsonSerializerOptions? options = null)
     {
-        _log = log;
         _http = http;
         _authService = authService;
         _options = options ?? new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
     }
 
+    /*
+    * Starts a parking session for specified car at specified segment.
+    * Returns parking session details including session ID.
+    */
     public async Task<StartParkingResponse> StartParkingAsync(SegmentResponseDTO segResponse, Guid carId, int minParkingTime)
     {
         var startParkingPayload = new StartParkingRequest(
@@ -40,9 +45,6 @@ public class ParkingService
             VehicleId: carId,
             MinParkingTime: minParkingTime
         );
-
-        System.Diagnostics.Debug.WriteLine($"Segment {segResponse}\nCarID = {carId}\nminPArking: {minParkingTime}");
-        _log.LogInformation("!!!!!!{startParkingPayload}", startParkingPayload);
 
         var response = await _authService.ExecuteWithTokenRefreshAsync(() =>
             _http.PostAsJsonAsync("/parking/start", startParkingPayload, _options));
@@ -62,6 +64,10 @@ public class ParkingService
         return result;
     }
 
+    /*
+    * Gets current parking status for specified car.
+    * Returns status including whether car is currently parked and session details.
+    */
     public async Task<ParkingStatusResponse?> GetParkingStatusAsync(Guid carId)
     {
         try
@@ -83,6 +89,10 @@ public class ParkingService
         }
     }
 
+    /*
+    * Stops an active parking session.
+    * Ends parking for specified session and car.
+    */
     public async Task StopParkingAsync(Guid sessionId, Guid carId)
     {
         var stopParkingPayload = new
@@ -101,6 +111,10 @@ public class ParkingService
         }
     }
 
+    /*
+    * Gets remaining free parking budget in minutes for residential permit.
+    * Returns minutes remaining for the day, null on error.
+    */
     public async Task<int?> GetParkingBudgetRemainingAsync(Guid carId)
     {
         var response = await _authService.ExecuteWithTokenRefreshAsync(() =>
