@@ -108,6 +108,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
     public ShowMapPage(CarService carService, MapService mapService, MapSegmentRenderer mapSegmentRenderer, LocalDataService localDataService, MapInteractionService mapInteractionService, ParkingPopUps parkingPopUps, ParkingService parkingService)
     {
         InitializeComponent();
+        Shell.SetBackButtonBehavior(this, new BackButtonBehavior { IsVisible = false });
         _carService = carService;
         _mapService = mapService;
         _mapSegmentRenderer = mapSegmentRenderer;
@@ -123,11 +124,6 @@ public partial class ShowMapPage : ContentPage, IDisposable
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-
-        Shell.SetBackButtonBehavior(this, new BackButtonBehavior
-        {
-            IsVisible = false
-        });
 
         // Always re-subscribe to event handler when page appears
         _mapInteractionService.VisibleBoundsChanged -= OnVisibleBoundsChanged; // Remove old subscription if exists
@@ -355,7 +351,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
         if (selectedItem == "+ Add Car")
         {
-            await Shell.Current.GoToAsync("AddCarPage");
+            await Shell.Current.GoToAsync(nameof(AddCarPage));
             // Reset to previous selection after navigation
             _userCars = await _carService.GetUserCarsAsync();
             if (_userCars.Count > 0)

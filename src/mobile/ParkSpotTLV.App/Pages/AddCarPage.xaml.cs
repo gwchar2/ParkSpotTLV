@@ -22,13 +22,14 @@ public partial class AddCarPage : ContentPage
 
     }
 
+   
+
     /*
     * Handles resident permit checkbox change. Shows/hides zone number and free minutes fields.
     */
     private void OnResidentPermitChanged(object sender, CheckedChangedEventArgs e)
     {
         ZoneNumberEntry.IsVisible = e.Value;
-        FreeMinutesEntry.IsVisible = e.Value;
         FreeMinutesLabel.IsVisible = e.Value;
     }
 

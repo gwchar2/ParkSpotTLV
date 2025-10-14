@@ -88,10 +88,6 @@ namespace ParkSpotTLV.App {
             builder.Services.AddSingleton<AppShell>();
             builder.Services.AddTransient<MenuOverlay>();
 
-            // Routes
-            Routing.RegisterRoute("PreferencesPage", typeof(Pages.PreferencesPage));
-            // Routing.RegisterRoute("ShowMapPage", typeof(Pages.ShowMapPage)); // if needed
-
 
 #if DEBUG
             builder.Logging.AddDebug();

@@ -25,6 +25,7 @@ public partial class EditCarPage : ContentPage, IQueryAttributable
         _parkingService = parkingService;
     }
 
+
     /*
     * Applies query attributes from navigation. Extracts car ID and loads car data.
     */
