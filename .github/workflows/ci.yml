@@ -22,7 +22,7 @@ jobs:
     runs-on: windows-latest
     env:
       SOLUTION_PATH: ParkSpotTLV.sln
-      API_PROJECT: ParkSpotTLV.Api/ParkSpotTLV.Api.csproj
+      API_PROJECT: src/backend/ParkSpotTLV.Api/ParkSpotTLV.Api.csproj
       CONFIGURATION: Release
     steps:
       - name: Checkout
@@ -53,8 +53,8 @@ jobs:
     runs-on: windows-latest
     env:
       SOLUTION_PATH: ParkSpotTLV.sln
-      API_PROJECT: ParkSpotTLV.Api/ParkSpotTLV.Api.csproj
-      MAUI_PROJECT: ParkSpotTLV.App/ParkSpotTLV.App.csproj
+      API_PROJECT: src/backend/ParkSpotTLV.Api/ParkSpotTLV.Api.csproj
+      MAUI_PROJECT: src/mobile/ParkSpotTLV.App/ParkSpotTLV.App.csproj
       CONFIGURATION: Release
     steps:
       - name: Checkout
