@@ -3,12 +3,10 @@ using System.Diagnostics;
 using System.Security.Claims;
 
 namespace ParkSpotTLV.Api.Middleware.Http {
-    public sealed class TracingMiddleware {
+    public sealed class TracingMiddleware(RequestDelegate next) {
 
-        private static readonly ActivitySource ActivitySource = new("Backend.Api");
-        private readonly RequestDelegate _next;
-
-        public TracingMiddleware(RequestDelegate next) => _next = next;
+        //private static readonly ActivitySource ActivitySource = new("Backend.Api");
+        private readonly RequestDelegate _next = next;
 
         public async Task Invoke(HttpContext ctx) {
 

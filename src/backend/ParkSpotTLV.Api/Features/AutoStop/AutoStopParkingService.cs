@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ParkSpotTLV.Api.Features.Parking.Models;
 using ParkSpotTLV.Api.Features.Parking.Services;
 using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Contracts.Time;
 using ParkSpotTLV.Infrastructure;
 using ParkSpotTLV.Infrastructure.Entities;
-using System.Diagnostics;
 
 namespace ParkSpotTLV.Api.Features.AutoStop{
 
@@ -13,13 +13,13 @@ namespace ParkSpotTLV.Api.Features.AutoStop{
         private readonly ILogger<AutoStopParkingService> _log = log;
         private readonly IClock _clock = clock;
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken) {
-            await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
+        protected override async Task ExecuteAsync(CancellationToken ct) {
+            await Task.Delay(TimeSpan.FromSeconds(2), ct);
             var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
 
-            while (await timer.WaitForNextTickAsync(stoppingToken)) {
+            while (await timer.WaitForNextTickAsync(ct)) {
                 try {
-                    await StopDueSessionsOnce(stoppingToken);
+                    await StopDueSessionsOnce(ct);
                 }
                 catch (Exception) {
                     _log.LogError("Waiting for next tick.");
