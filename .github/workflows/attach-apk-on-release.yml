@@ -47,7 +47,7 @@ jobs:
 
       - name: Restore
         shell: pwsh
-        run: dotnet restore
+        run: dotnet restore $env:MAUI_PROJECT
 
       - name: Publish APK
         shell: pwsh
