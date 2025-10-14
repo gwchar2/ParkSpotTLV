@@ -15,10 +15,10 @@ public class ParkingStatusResponse
 }
 
 // Handles parking-related API operations
-public class ParkingService
+public class ParkingService : IParkingService
 {
     private readonly HttpClient _http;
-    private readonly AuthenticationService _authService;
+    private readonly IAuthenticationService _authService;
     private readonly JsonSerializerOptions _options;
 
 
@@ -27,7 +27,7 @@ public class ParkingService
     /*
     * Initializes the parking service with logging, HTTP client and authentication.
     */
-    public ParkingService(HttpClient http, AuthenticationService authService, JsonSerializerOptions? options = null)
+    public ParkingService(HttpClient http, IAuthenticationService authService, JsonSerializerOptions? options = null)
     {
         _http = http;
         _authService = authService;

@@ -10,16 +10,16 @@ namespace ParkSpotTLV.App.Services;
 * Handles user authentication operations including login, signup, token refresh, and validation.
 * Manages JWT tokens and authentication state for API requests.
 */
-public class AuthenticationService
+public class AuthenticationService : IAuthenticationService
 {
     private readonly HttpClient _http;
-    private readonly LocalDataService _localDataService;
+    private readonly ILocalDataService _localDataService;
     private readonly JsonSerializerOptions _options;
 
     /*
     * Initializes the authentication service with HTTP client and local data storage.
     */
-    public AuthenticationService(HttpClient http, LocalDataService localDataService, JsonSerializerOptions? options = null)
+    public AuthenticationService(HttpClient http, ILocalDataService localDataService, JsonSerializerOptions? options = null)
     {
         _http = http;
         _localDataService = localDataService;

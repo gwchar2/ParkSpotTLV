@@ -6,12 +6,12 @@ namespace ParkSpotTLV.App.Pages {
     * Entry point for returning users to log in.
     */
     public partial class MainPage : ContentPage {
-        private readonly AuthenticationService _authService ;
+        private readonly IAuthenticationService _authService ;
 
         /*
         * Initializes the MainPage with required services.
         */
-        public MainPage(AuthenticationService authService)
+        public MainPage(IAuthenticationService authService)
         {
             InitializeComponent();
             _authService = authService;

@@ -8,17 +8,17 @@ namespace ParkSpotTLV.App.Services;
 * Handles map-related API operations including fetching parking segments.
 * Communicates with backend API for map data with automatic token refresh.
 */
-public class MapService
+public class MapService : IMapService
 {
     private readonly HttpClient _http;
-    private readonly AuthenticationService _authService;
-    private readonly LocalDataService _localDataService;
+    private readonly IAuthenticationService _authService;
+    private readonly ILocalDataService _localDataService;
     private readonly JsonSerializerOptions _options;
 
     /*
     * Initializes the map service with HTTP client and authentication.
     */
-    public MapService(HttpClient http, AuthenticationService authService, LocalDataService localDataService, JsonSerializerOptions? options = null)
+    public MapService(HttpClient http, IAuthenticationService authService, ILocalDataService localDataService, JsonSerializerOptions? options = null)
     {
         _http = http;
         _authService = authService;

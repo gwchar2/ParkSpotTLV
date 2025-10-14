@@ -5,11 +5,11 @@ namespace ParkSpotTLV.App
     public partial class App : Application
     {
         private readonly AppShell _shell;
-        private readonly LocalDataService _localData;
-        private readonly AuthenticationService _authService;
+        private readonly ILocalDataService _localData;
+        private readonly IAuthenticationService _authService;
 
         // AppShell and LocalDataService come from DI
-        public App(AppShell shell, LocalDataService localData, AuthenticationService authService)
+        public App(AppShell shell, ILocalDataService localData, IAuthenticationService authService)
         {
             InitializeComponent();
             _shell = shell;

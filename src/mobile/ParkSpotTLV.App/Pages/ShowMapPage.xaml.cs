@@ -71,15 +71,15 @@ public partial class ShowMapPage : ContentPage, IDisposable
     private Session? _session;
 
 
-    // Services 
-    private readonly CarService _carService;
-    private readonly MapService _mapService;
-    private readonly ParkingService _parkingService;
+    // Services
+    private readonly ICarService _carService;
+    private readonly IMapService _mapService;
+    private readonly IParkingService _parkingService;
     private readonly MapSegmentRenderer _mapSegmentRenderer;
     private readonly ParkingPopUps _parkingPopUps;
-    private readonly LocalDataService _localDataService;
-    private readonly MapInteractionService _mapInteractionService;
-   
+    private readonly ILocalDataService _localDataService;
+    private readonly IMapInteractionService _mapInteractionService;
+
     // Segments
     // Maps parking segments to their popup detail strings
     private Dictionary<SegmentResponseDTO, string>? _segmentsInfo;
@@ -105,7 +105,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
     /*
     * Initializes the ShowMapPage with all required services.
     */
-    public ShowMapPage(CarService carService, MapService mapService, MapSegmentRenderer mapSegmentRenderer, LocalDataService localDataService, MapInteractionService mapInteractionService, ParkingPopUps parkingPopUps, ParkingService parkingService)
+    public ShowMapPage(ICarService carService, IMapService mapService, MapSegmentRenderer mapSegmentRenderer, ILocalDataService localDataService, IMapInteractionService mapInteractionService, ParkingPopUps parkingPopUps, IParkingService parkingService)
     {
         InitializeComponent();
         Shell.SetBackButtonBehavior(this, new BackButtonBehavior { IsVisible = false });

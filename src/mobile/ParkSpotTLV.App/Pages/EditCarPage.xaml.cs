@@ -10,15 +10,15 @@ namespace ParkSpotTLV.App.Pages;
 */
 public partial class EditCarPage : ContentPage, IQueryAttributable
 {
-    private readonly CarService _carService;
-    private readonly ParkingService _parkingService;
+    private readonly ICarService _carService;
+    private readonly IParkingService _parkingService;
     private string _carId = string.Empty;
     private Car? _currentCar;
 
     /*
     * Initializes the EditCarPage with required services.
     */
-    public EditCarPage(CarService carService,ParkingService parkingService)
+    public EditCarPage(ICarService carService, IParkingService parkingService)
     {
         InitializeComponent();
         _carService = carService;

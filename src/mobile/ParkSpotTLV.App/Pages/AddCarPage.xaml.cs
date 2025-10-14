@@ -10,12 +10,12 @@ namespace ParkSpotTLV.App.Pages;
 */
 public partial class AddCarPage : ContentPage
 {
-    private readonly CarService _carService;
+    private readonly ICarService _carService;
 
     /*
     * Initializes the AddCarPage with required services.
     */
-    public AddCarPage(CarService carService)
+    public AddCarPage(ICarService carService)
     {
         InitializeComponent();
         _carService = carService;

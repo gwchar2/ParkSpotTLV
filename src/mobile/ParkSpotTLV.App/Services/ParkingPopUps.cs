@@ -7,12 +7,12 @@ namespace ParkSpotTLV.App.Services;
 // Handles parking-related UI operations including popups and permits
 public class ParkingPopUps
 {
-    private readonly CarService _carService;
+    private readonly ICarService _carService;
 
     /*
     * Initializes the popup service with car service dependency.
     */
-    public ParkingPopUps(CarService carService)
+    public ParkingPopUps(ICarService carService)
     {
         _carService = carService ?? throw new ArgumentNullException(nameof(carService));
     }

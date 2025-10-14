@@ -8,12 +8,12 @@ namespace ParkSpotTLV.App.Pages;
 */
 public partial class PreferencesPage : ContentPage
 {
-    private readonly LocalDataService _localDataService;
+    private readonly ILocalDataService _localDataService;
 
     /*
     * Initializes the PreferencesPage with required services and loads preferences.
     */
-    public PreferencesPage(LocalDataService localDataService)
+    public PreferencesPage(ILocalDataService localDataService)
     {
         _localDataService = localDataService;
         InitializeComponent();
