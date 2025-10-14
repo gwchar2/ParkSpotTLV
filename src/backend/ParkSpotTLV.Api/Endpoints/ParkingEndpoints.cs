@@ -172,22 +172,9 @@ namespace ParkSpotTLV.Api.Endpoints {
                     var userId = ctx.GetUserId();
                     var nowLocal = clock.LocalNow;
 
-                    // Check ownership of vehicle
-                    var ownerId = await db.Vehicles
-                        .AsNoTracking()
-                        .Where(v => v.Id == body.VehicleId)
-                        .Select(v => v.OwnerId)
-                        .SingleOrDefaultAsync(ct);
+                    var activeSession = await db.ParkingSession.AsNoTracking().AnyAsync(s => s.VehicleId == body.VehicleId && s.StoppedUtc == null, ct);
 
-                    if (ownerId == Guid.Empty) return VehicleErrors.Forbidden(ctx);
-
-                    // Check if there is already an active session for this vehicle
-                    var activeSession = await db.ParkingSession
-                        .AsNoTracking()
-                        .AnyAsync(s => s.VehicleId == body.VehicleId && s.StoppedUtc == null, ct);
-
-                    if (activeSession)
-                        return SessionErrors.Exists(ctx);
+                    if (activeSession) return SessionErrors.Exists(ctx);
 
                     // Shouldn't happen... but lets check just in case if street is unavailable for parking?
                     var seg = body.Segment;
