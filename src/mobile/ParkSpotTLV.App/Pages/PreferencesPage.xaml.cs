@@ -31,12 +31,12 @@ public partial class PreferencesPage : ContentPage
 
             var parkingIndex = GetParkingPickerIndex(session?.MinParkingTime ?? 30);
             MinutesPickerParking.SelectedIndex = parkingIndex;
-            UpdateExplanationTexts();
+            UpdateParkingExplanation();
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Failed to load preferences: {ex.Message}");
-            UpdateExplanationTexts();
+            UpdateParkingExplanation();
         }
     }
 
@@ -67,13 +67,6 @@ public partial class PreferencesPage : ContentPage
         await Shell.Current.GoToAsync("//ShowMapPage");
     }
 
-    /*
-    * Updates all explanation texts based on current selections.
-    */
-    private void UpdateExplanationTexts()
-    {
-        UpdateParkingExplanation();
-    }
 
     /*
     * Updates parking explanation text based on selected minutes.

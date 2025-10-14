@@ -683,11 +683,8 @@ public partial class ShowMapPage : ContentPage, IDisposable
         }
         catch
         {
-            // Fallback to app store
-            if (DeviceInfo.Platform == DevicePlatform.iOS)
-                await Launcher.OpenAsync("https://itunes.apple.com/il/app/pngw/id434818173?mt=8");
-            else
-                await Launcher.OpenAsync("https://play.google.com/store/apps/details?id=com.unicell.pangoandroid");
+            // Fallback to google store
+            await Launcher.OpenAsync("https://play.google.com/store/apps/details?id=com.unicell.pangoandroid");
         }
     }
 
