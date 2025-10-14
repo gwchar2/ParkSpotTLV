@@ -16,7 +16,7 @@ jobs:
   build-and-upload-apk:
     runs-on: windows-latest
     env:
-      MAUI_PROJECT: ParkSpotTLV.App/ParkSpotTLV.App.csproj
+      MAUI_PROJECT: src/mobile/ParkSpotTLV.App/ParkSpotTLV.App.csproj
       CONFIGURATION: Release
       TAG_NAME: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
 
