@@ -64,7 +64,7 @@ public partial class PreferencesPage : ContentPage
     */
     private async void OnFindParkingClicked(object sender, EventArgs e)
     {
-        await Shell.Current.GoToAsync("ShowMapPage");
+        await Shell.Current.GoToAsync("//ShowMapPage");
     }
 
     /*
