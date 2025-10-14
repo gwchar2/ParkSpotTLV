@@ -8,12 +8,12 @@ namespace ParkSpotTLV.App.Pages;
 */
 public partial class PreferencesPage : ContentPage
 {
-    private readonly LocalDataService _localDataService;
+    private readonly ILocalDataService _localDataService;
 
     /*
     * Initializes the PreferencesPage with required services and loads preferences.
     */
-    public PreferencesPage(LocalDataService localDataService)
+    public PreferencesPage(ILocalDataService localDataService)
     {
         _localDataService = localDataService;
         InitializeComponent();
@@ -31,12 +31,12 @@ public partial class PreferencesPage : ContentPage
 
             var parkingIndex = GetParkingPickerIndex(session?.MinParkingTime ?? 30);
             MinutesPickerParking.SelectedIndex = parkingIndex;
-            UpdateExplanationTexts();
+            UpdateParkingExplanation();
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Failed to load preferences: {ex.Message}");
-            UpdateExplanationTexts();
+            UpdateParkingExplanation();
         }
     }
 
@@ -64,16 +64,9 @@ public partial class PreferencesPage : ContentPage
     */
     private async void OnFindParkingClicked(object sender, EventArgs e)
     {
-        await Shell.Current.GoToAsync("ShowMapPage");
+        await Shell.Current.GoToAsync("//ShowMapPage");
     }
 
-    /*
-    * Updates all explanation texts based on current selections.
-    */
-    private void UpdateExplanationTexts()
-    {
-        UpdateParkingExplanation();
-    }
 
     /*
     * Updates parking explanation text based on selected minutes.

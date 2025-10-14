@@ -5,7 +5,12 @@
              xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
              x:Class="ParkSpotTLV.App.Pages.ShowMapPage"
              Title="Map"
-             BackgroundColor="{StaticResource PageBackground}">
+             BackgroundColor="{StaticResource PageBackground}"
+             Shell.NavBarIsVisible="True">
+
+        <Shell.BackButtonBehavior>
+            <BackButtonBehavior IsVisible="False" />
+        </Shell.BackButtonBehavior>
 
     <Grid>
         <Grid.RowDefinitions>

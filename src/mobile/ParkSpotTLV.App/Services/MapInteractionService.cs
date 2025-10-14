@@ -20,7 +20,7 @@ namespace ParkSpotTLV.App.Services;
 * - Preventing memory leaks from event handlers and timers
 * The _disposed flag prevents multiple disposal attempts.
 */
-public class MapInteractionService : IDisposable
+public class MapInteractionService : IMapInteractionService
 {
     private bool _disposed = false;
     private const int MAP_DEBOUNCE_DELAY_MS = 500;

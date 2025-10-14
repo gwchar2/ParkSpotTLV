@@ -9,13 +9,13 @@ namespace ParkSpotTLV.App.Pages;
 */
 public partial class SignUpPage : ContentPage
 {
-    private readonly AuthenticationService _authService ;
-    private readonly CarService _carService;
+    private readonly IAuthenticationService _authService ;
+    private readonly ICarService _carService;
 
     /*
     * Initializes the SignUpPage with required services.
     */
-    public SignUpPage(CarService carService, AuthenticationService authService)
+    public SignUpPage(ICarService carService, IAuthenticationService authService)
     {
         InitializeComponent();
         _carService = carService;

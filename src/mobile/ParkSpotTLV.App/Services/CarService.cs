@@ -11,17 +11,17 @@ namespace ParkSpotTLV.App.Services;
 * Manages car/vehicle operations including CRUD operations and permit management.
 * Handles API communication for vehicles and their associated permits.
 */
-public class CarService
+public class CarService : ICarService
 {
     private readonly HttpClient _http;
-    private readonly AuthenticationService _authService;
+    private readonly IAuthenticationService _authService;
     private readonly JsonSerializerOptions _options;
     private readonly Dictionary<string, List<Car>> _userCars = new();
 
     /*
     * Initializes the car service with HTTP client and authentication.
     */
-    public CarService(HttpClient http, AuthenticationService authService, JsonSerializerOptions? options = null)
+    public CarService(HttpClient http, IAuthenticationService authService, JsonSerializerOptions? options = null)
     {
         _http = http;
         _authService = authService;

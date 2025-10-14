@@ -12,20 +12,27 @@ namespace ParkSpotTLV.App {
             InitializeComponent();
             _services = services;
 
-            Routing.RegisterRoute("MainPage", typeof(MainPage));
-            Routing.RegisterRoute("SignUpPage", typeof(SignUpPage));
-            Routing.RegisterRoute("ShowMapPage", typeof(ShowMapPage));
+            // Only register routes for pages NOT defined in AppShell.xaml
+            // MainPage, SignUpPage, and ShowMapPage are already defined in XAML
             Routing.RegisterRoute("AddCarPage", typeof(AddCarPage));
             Routing.RegisterRoute("EditCarPage", typeof(EditCarPage));
             Routing.RegisterRoute("AccountDetailsPage", typeof(AccountDetailsPage));
+            Routing.RegisterRoute("PreferencesPage", typeof(PreferencesPage));
 
             // Subscribe to navigation events to show/hide menu button
             Navigated += OnShellNavigated;
+            Navigating += OnShellNavigating;
         }
 
         private void OnShellNavigated(object? sender, ShellNavigatedEventArgs e)
         {
             UpdateMenuButtonVisibility();
+        }
+
+        private void OnShellNavigating(object? sender, ShellNavigatingEventArgs e)
+        {
+            if (_currentMenuOverlay?.IsVisible == true)
+                RemoveMenuOverlay();
         }
 
         private void UpdateMenuButtonVisibility()

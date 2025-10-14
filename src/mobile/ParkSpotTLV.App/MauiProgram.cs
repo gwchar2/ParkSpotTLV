@@ -37,40 +37,40 @@ namespace ParkSpotTLV.App {
                 return sp.GetRequiredService<IHttpClientFactory>().CreateClient("Api");
             });
 
-            builder.Services.AddSingleton<LocalDataService>();
+            builder.Services.AddSingleton<ILocalDataService, LocalDataService>();
 
-            builder.Services.AddSingleton<AuthenticationService>(sp => {
+            builder.Services.AddSingleton<IAuthenticationService, AuthenticationService>(sp => {
                 var http = sp.GetRequiredService<HttpClient>();
                 var opts = sp.GetRequiredService<JsonSerializerOptions>();
-                var db = sp.GetRequiredService<LocalDataService>();
+                var db = sp.GetRequiredService<ILocalDataService>();
                 return new AuthenticationService(http, db, opts);
             });
 
-            builder.Services.AddSingleton<CarService>(sp => {
+            builder.Services.AddSingleton<ICarService, CarService>(sp => {
                 var http = sp.GetRequiredService<HttpClient>();
-                var auth = sp.GetRequiredService<AuthenticationService>();
+                var auth = sp.GetRequiredService<IAuthenticationService>();
                 var opts = sp.GetRequiredService<JsonSerializerOptions>();
                 return new CarService(http, auth, opts);
             });
 
-            builder.Services.AddSingleton<MapService>(sp => {
+            builder.Services.AddSingleton<IMapService, MapService>(sp => {
                 var http = sp.GetRequiredService<HttpClient>();
-                var auth = sp.GetRequiredService<AuthenticationService>();
+                var auth = sp.GetRequiredService<IAuthenticationService>();
                 var opts = sp.GetRequiredService<JsonSerializerOptions>();
-                var db = sp.GetRequiredService<LocalDataService>();
+                var db = sp.GetRequiredService<ILocalDataService>();
                 return new MapService(http, auth, db, opts);
             });
 
-            builder.Services.AddSingleton<ParkingService>(sp =>
+            builder.Services.AddSingleton<IParkingService, ParkingService>(sp =>
             {
                 var http = sp.GetRequiredService<HttpClient>();
-                var auth = sp.GetRequiredService<AuthenticationService>();
+                var auth = sp.GetRequiredService<IAuthenticationService>();
                 var opts = sp.GetRequiredService<JsonSerializerOptions>();
                 return new ParkingService(http, auth, opts);
             });
-            
+
             builder.Services.AddSingleton<MapSegmentRenderer>();
-            builder.Services.AddSingleton<MapInteractionService>();
+            builder.Services.AddSingleton<IMapInteractionService, MapInteractionService>();
             builder.Services.AddSingleton<ParkingPopUps>();
 
             
@@ -87,10 +87,6 @@ namespace ParkSpotTLV.App {
             // (Optional) if you resolved MenuOverlay via DI
             builder.Services.AddSingleton<AppShell>();
             builder.Services.AddTransient<MenuOverlay>();
-
-            // Routes
-            Routing.RegisterRoute("PreferencesPage", typeof(Pages.PreferencesPage));
-            // Routing.RegisterRoute("ShowMapPage", typeof(Pages.ShowMapPage)); // if needed
 
 
 #if DEBUG

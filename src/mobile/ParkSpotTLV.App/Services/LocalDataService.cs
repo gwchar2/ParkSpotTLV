@@ -8,7 +8,7 @@ namespace ParkSpotTLV.App.Services;
 * Manages local SQLite database operations for user sessions and preferences.
 * Handles session storage, token updates, and user preference persistence.
 */
-public class LocalDataService
+public class LocalDataService : ILocalDataService
 {
     /*
     * Initializes the local database. Creates database and default session if needed.

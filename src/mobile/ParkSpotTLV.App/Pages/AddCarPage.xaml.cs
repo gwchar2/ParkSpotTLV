@@ -10,17 +10,19 @@ namespace ParkSpotTLV.App.Pages;
 */
 public partial class AddCarPage : ContentPage
 {
-    private readonly CarService _carService;
+    private readonly ICarService _carService;
 
     /*
     * Initializes the AddCarPage with required services.
     */
-    public AddCarPage(CarService carService)
+    public AddCarPage(ICarService carService)
     {
         InitializeComponent();
         _carService = carService;
 
     }
+
+   
 
     /*
     * Handles resident permit checkbox change. Shows/hides zone number and free minutes fields.
@@ -28,7 +30,6 @@ public partial class AddCarPage : ContentPage
     private void OnResidentPermitChanged(object sender, CheckedChangedEventArgs e)
     {
         ZoneNumberEntry.IsVisible = e.Value;
-        FreeMinutesEntry.IsVisible = e.Value;
         FreeMinutesLabel.IsVisible = e.Value;
     }
 

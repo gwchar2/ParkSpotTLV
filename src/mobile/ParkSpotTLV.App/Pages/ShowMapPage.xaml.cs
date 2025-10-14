@@ -71,15 +71,15 @@ public partial class ShowMapPage : ContentPage, IDisposable
     private Session? _session;
 
 
-    // Services 
-    private readonly CarService _carService;
-    private readonly MapService _mapService;
-    private readonly ParkingService _parkingService;
+    // Services
+    private readonly ICarService _carService;
+    private readonly IMapService _mapService;
+    private readonly IParkingService _parkingService;
     private readonly MapSegmentRenderer _mapSegmentRenderer;
     private readonly ParkingPopUps _parkingPopUps;
-    private readonly LocalDataService _localDataService;
-    private readonly MapInteractionService _mapInteractionService;
-   
+    private readonly ILocalDataService _localDataService;
+    private readonly IMapInteractionService _mapInteractionService;
+
     // Segments
     // Maps parking segments to their popup detail strings
     private Dictionary<SegmentResponseDTO, string>? _segmentsInfo;
@@ -105,9 +105,10 @@ public partial class ShowMapPage : ContentPage, IDisposable
     /*
     * Initializes the ShowMapPage with all required services.
     */
-    public ShowMapPage(CarService carService, MapService mapService, MapSegmentRenderer mapSegmentRenderer, LocalDataService localDataService, MapInteractionService mapInteractionService, ParkingPopUps parkingPopUps, ParkingService parkingService)
+    public ShowMapPage(ICarService carService, IMapService mapService, MapSegmentRenderer mapSegmentRenderer, ILocalDataService localDataService, IMapInteractionService mapInteractionService, ParkingPopUps parkingPopUps, IParkingService parkingService)
     {
         InitializeComponent();
+        Shell.SetBackButtonBehavior(this, new BackButtonBehavior { IsVisible = false });
         _carService = carService;
         _mapService = mapService;
         _mapSegmentRenderer = mapSegmentRenderer;
@@ -123,11 +124,6 @@ public partial class ShowMapPage : ContentPage, IDisposable
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-
-        Shell.SetBackButtonBehavior(this, new BackButtonBehavior
-        {
-            IsVisible = false
-        });
 
         // Always re-subscribe to event handler when page appears
         _mapInteractionService.VisibleBoundsChanged -= OnVisibleBoundsChanged; // Remove old subscription if exists
@@ -355,7 +351,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
         if (selectedItem == "+ Add Car")
         {
-            await Shell.Current.GoToAsync("AddCarPage");
+            await Shell.Current.GoToAsync(nameof(AddCarPage));
             // Reset to previous selection after navigation
             _userCars = await _carService.GetUserCarsAsync();
             if (_userCars.Count > 0)
@@ -687,11 +683,8 @@ public partial class ShowMapPage : ContentPage, IDisposable
         }
         catch
         {
-            // Fallback to app store
-            if (DeviceInfo.Platform == DevicePlatform.iOS)
-                await Launcher.OpenAsync("https://itunes.apple.com/il/app/pngw/id434818173?mt=8");
-            else
-                await Launcher.OpenAsync("https://play.google.com/store/apps/details?id=com.unicell.pangoandroid");
+            // Fallback to google store
+            await Launcher.OpenAsync("https://play.google.com/store/apps/details?id=com.unicell.pangoandroid");
         }
     }
 

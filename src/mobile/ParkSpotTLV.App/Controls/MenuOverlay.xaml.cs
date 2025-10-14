@@ -6,10 +6,10 @@ namespace ParkSpotTLV.App.Controls;
 public partial class MenuOverlay : Grid{
 
     public record VersionResponse(string Version);
-    private readonly AuthenticationService _authService;
-    private readonly LocalDataService _localDataService;
+    private readonly IAuthenticationService _authService;
+    private readonly ILocalDataService _localDataService;
     private readonly HttpClient _http;
-    public MenuOverlay(AuthenticationService authService, IHttpClientFactory httpFactory, LocalDataService localDataService)
+    public MenuOverlay(IAuthenticationService authService, IHttpClientFactory httpFactory, ILocalDataService localDataService)
     {
         InitializeComponent();
         _authService = authService;
