@@ -25,10 +25,6 @@ namespace ParkSpotTLV.Infrastructure.Config {
              .OnDelete(DeleteBehavior.SetNull);
 
             e.HasIndex(x => x.ZoneId);
-
-            /*e.Property(x => x.PrivilegedParking)
-                .HasColumnName("privileged_parking")
-                .HasDefaultValue(false);*/
         }
     }
 }

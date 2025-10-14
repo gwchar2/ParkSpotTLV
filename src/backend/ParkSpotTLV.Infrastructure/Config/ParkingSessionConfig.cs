@@ -21,7 +21,6 @@ namespace ParkSpotTLV.Infrastructure.Config {
             e.Property(x => x.PaidMinutes).HasDefaultValue(0).IsRequired();
             e.Property(x => x.Status).HasConversion<int>().IsRequired();
 
-            // For one active session only
             e.HasIndex(x => x.VehicleId)
              .HasDatabaseName("IX_parking_sessions_vehicle_active")
              .HasFilter("\"stopped_utc\" IS NULL")

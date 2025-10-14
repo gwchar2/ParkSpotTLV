@@ -10,7 +10,7 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
 
     public interface ILegalPolicyService {
 
-        bool IsLegalNow(ParkingType parkingType, int? segmentZoneCode, PermitSnapshot permitPov, bool ProviligedActiveNow);
+        bool IsLegalNow(ParkingType parkingType, int? segmentZoneCode, PermitSnapshotDto permitPov, bool ProviligedActiveNow);
 
     }
 }

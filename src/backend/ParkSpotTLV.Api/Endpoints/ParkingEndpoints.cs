@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ParkSpotTLV.Api.Endpoints.Support;
+using ParkSpotTLV.Api.Endpoints.Support.Errors;
+using ParkSpotTLV.Api.Endpoints.Support.EndpointFilters;
 using ParkSpotTLV.Api.Features.Parking.Services;
 using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Contracts.Parking;
@@ -76,7 +78,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         .Select(v => v.OwnerId)
                         .SingleOrDefaultAsync(ct);
 
-                    if (ownerId == Guid.Empty || ownerId != userId) return VehicleProblems.Forbidden(ctx);
+                    if (ownerId == Guid.Empty || ownerId != userId) return VehicleErrors.Forbidden(ctx);
 
                     // Check if there is already an active session for this vehicle
                     var activeSession = await db.ParkingSession
@@ -177,7 +179,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         .Select(v => v.OwnerId)
                         .SingleOrDefaultAsync(ct);
 
-                    if (ownerId == Guid.Empty || ownerId != userId) return VehicleProblems.Forbidden(ctx);
+                    if (ownerId == Guid.Empty) return VehicleErrors.Forbidden(ctx);
 
                     // Check if there is already an active session for this vehicle
                     var activeSession = await db.ParkingSession
@@ -185,13 +187,13 @@ namespace ParkSpotTLV.Api.Endpoints {
                         .AnyAsync(s => s.VehicleId == body.VehicleId && s.StoppedUtc == null, ct);
 
                     if (activeSession)
-                        return SessionProblems.Exists(ctx);
+                        return SessionErrors.Exists(ctx);
 
                     // Shouldn't happen... but lets check just in case if street is unavailable for parking?
                     var seg = body.Segment;
                     var group = seg.Group?.ToUpperInvariant();
                     if (group is "RESTRICTED")
-                        return SessionProblems.Unavailable(ctx);
+                        return SessionErrors.Unavailable(ctx);
 
                     // Get the current time and set it according to correct time zone for table
                     var anchor = budget.ToAnchor(nowLocal);
@@ -257,6 +259,8 @@ namespace ParkSpotTLV.Api.Endpoints {
                     });
                 })
                 .Accepts<StartParkingRequest>("application/json")
+                .EnforceJsonContent()
+                .RequireVehicleOwner()
                 .Produces<StartParkingResponse>(StatusCodes.Status201Created)
                 .ProducesProblem(StatusCodes.Status401Unauthorized)
                 .ProducesProblem(StatusCodes.Status403Forbidden)
@@ -284,10 +288,13 @@ namespace ParkSpotTLV.Api.Endpoints {
                         return Results.Forbid();
                     
                     // Check the session exists
-                    var session = await db.ParkingSession.SingleOrDefaultAsync(s => s.Id == body.SessionId && s.VehicleId == body.VehicleId && s.StoppedUtc == null, ct);
+                    var session = await db.ParkingSession.SingleOrDefaultAsync(s => s.Id == body.SessionId && s.VehicleId == body.VehicleId, ct);
 
                     if (session is null)
-                        return SessionProblems.NotFound(ctx);
+                        return SessionErrors.NotFound(ctx);
+
+                    if (session.StoppedUtc is not null)
+                        return SessionErrors.InvalidStop(ctx);
 
                     DateTimeOffset timeLocal = clock.LocalNow;
                     DateTimeOffset startedLocal = clock.ToLocal(session.StartedUtc);
@@ -337,6 +344,8 @@ namespace ParkSpotTLV.Api.Endpoints {
 
                 })
                 .Accepts<StopParkingRequest>("application/json")
+                .EnforceJsonContent()
+                .RequireVehicleOwner()
                 .Produces<StopParkingResponse>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status401Unauthorized)
                 .ProducesProblem(StatusCodes.Status403Forbidden)

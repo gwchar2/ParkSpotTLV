@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace ParkSpotTLV.Api.Endpoints.Support {
+namespace ParkSpotTLV.Api.Endpoints.Support.Errors {
 
-    public static class GlobalProblemManager {
+    public static class GlobalErrorManager {
 
         public static ProblemHttpResult BadRequest(string title, HttpContext? ctx = null) =>
             (ProblemHttpResult)Results.Problem(

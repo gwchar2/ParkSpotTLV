@@ -3,7 +3,7 @@ using ParkSpotTLV.Api.Features.Parking.Models;
 
 namespace ParkSpotTLV.Api.Features.Parking.Services {
     public interface IAvailabilityService {
-        Availability Compute(ParkingType parkingType, int? segmentZoneCode, Tariff tariff, DateTimeOffset now ,PermitSnapshot pov);
+        Availability Compute(ParkingType parkingType, int? segmentZoneCode, Tariff tariff, DateTimeOffset now ,PermitSnapshotDto pov);
 
     }
 

@@ -9,7 +9,7 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
     public interface IPaymentDecisionService {
 
         Task<PaymentDecision> DecideAsync(ParkingType parkingType, int? segmentZoneCode, Tariff tariff, DateTimeOffset now,
-            PermitSnapshot pov, bool paidActiveNow, CancellationToken ct );
+            PermitSnapshotDto pov, bool paidActiveNow, CancellationToken ct );
     }
     public enum PaymentNow { Free, Paid }
 

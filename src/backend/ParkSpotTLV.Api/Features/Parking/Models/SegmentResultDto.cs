@@ -6,7 +6,7 @@ namespace ParkSpotTLV.Api.Features.Parking.Models {
     /*
      * Final result emitted by IMapSegmentsEvaluator (Per segment)
      */
-    public sealed record SegmentResult (
+    public sealed record SegmentResultDto (
 
         Guid SegmentId,
         int? ZoneCode,
