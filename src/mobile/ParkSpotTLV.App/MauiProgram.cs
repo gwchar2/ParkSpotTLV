@@ -63,11 +63,10 @@ namespace ParkSpotTLV.App {
 
             builder.Services.AddSingleton<ParkingService>(sp =>
             {
-                var log = sp.GetRequiredService<ILogger<ParkingService>>();
                 var http = sp.GetRequiredService<HttpClient>();
                 var auth = sp.GetRequiredService<AuthenticationService>();
                 var opts = sp.GetRequiredService<JsonSerializerOptions>();
-                return new ParkingService(log, http, auth, opts);
+                return new ParkingService(http, auth, opts);
             });
             
             builder.Services.AddSingleton<MapSegmentRenderer>();
@@ -83,6 +82,7 @@ namespace ParkSpotTLV.App {
             builder.Services.AddTransient<Pages.AccountDetailsPage>();
             builder.Services.AddTransient<Pages.ShowMapPage>();
             builder.Services.AddTransient<Pages.AddCarPage>();
+            builder.Services.AddTransient<Pages.AccountDetailsPage>();
 
             // (Optional) if you resolved MenuOverlay via DI
             builder.Services.AddSingleton<AppShell>();

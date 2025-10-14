@@ -28,24 +28,45 @@ namespace ParkSpotTLV.App
         {
             try
             {
+                System.Diagnostics.Debug.WriteLine("Starting app initialization...");
+
                 // Step 1: Initialize database first
                 await _localData.InitializeAsync();
-
+                System.Diagnostics.Debug.WriteLine("Database initialized");
 
                 // Step 2: Try auto-login
                 bool success = await _authService.TryAutoLoginAsync();
+                System.Diagnostics.Debug.WriteLine($"Auto-login result: {success}");
+
+                // Add a small delay to ensure Shell is ready
+                await Task.Delay(500);
 
                 if (success)
                 {
                     // Auto-login succeeded, navigate to map page
-                    await Shell.Current.GoToAsync("ShowMapPage");
+                    System.Diagnostics.Debug.WriteLine("Navigating to ShowMapPage...");
+                    await Shell.Current.GoToAsync("//ShowMapPage");
                 }
-                // If auto-login fails, user stays on MainPage (login screen)
+                else
+                {
+                    // Auto-login failed, navigate to login page
+                    System.Diagnostics.Debug.WriteLine("Navigating to MainPage...");
+                    await Shell.Current.GoToAsync("//MainPage");
+                }
+
+                System.Diagnostics.Debug.WriteLine("Navigation completed");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"App initialization failed: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+
+                // Fallback to login page on error
+                try
+                {
+                    await Shell.Current.GoToAsync("//MainPage");
+                }
+                catch { }
             }
         }
     }

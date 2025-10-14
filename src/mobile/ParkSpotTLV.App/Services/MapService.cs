@@ -4,6 +4,10 @@ using ParkSpotTLV.Contracts.Map;
 
 namespace ParkSpotTLV.App.Services;
 
+/*
+* Handles map-related API operations including fetching parking segments.
+* Communicates with backend API for map data with automatic token refresh.
+*/
 public class MapService
 {
     private readonly HttpClient _http;
@@ -11,6 +15,9 @@ public class MapService
     private readonly LocalDataService _localDataService;
     private readonly JsonSerializerOptions _options;
 
+    /*
+    * Initializes the map service with HTTP client and authentication.
+    */
     public MapService(HttpClient http, AuthenticationService authService, LocalDataService localDataService, JsonSerializerOptions? options = null)
     {
         _http = http;
@@ -19,6 +26,10 @@ public class MapService
         _options = options ?? new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
     }
 
+    /*
+    * Fetches parking segments from API for specified map bounds and parameters.
+    * Returns segments response with parking availability data, null on error.
+    */
     public async Task<GetMapSegmentsResponse?> GetSegmentsAsync(Guid activePermit,
                                                                  double minLon,
                                                                  double minLat,

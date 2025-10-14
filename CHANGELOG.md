@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.14.3-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.14.2-beta.0...v0.14.3-beta.0) (2025-10-13)
+
+
+### Bug Fixes
+
+* **App:** app documentaion completed ([1240261](https://github.com/gwchar2/ParkSpotTLV/commit/1240261771fd8b9096474b586a62d4f7cb407698))
+* **App:** closed menu by tap ([76d67ad](https://github.com/gwchar2/ParkSpotTLV/commit/76d67adfdc1e66f4539a489fc59cd95568d9d681))
+* **App:** connect car details to budget remaining ([9ff08a4](https://github.com/gwchar2/ParkSpotTLV/commit/9ff08a4d9dd7b815cf33e656d09d262790f1df04))
+* **App:** fixing error messages to user. saving exceptions in diagnostics ([631d192](https://github.com/gwchar2/ParkSpotTLV/commit/631d19216e3a676174a373a78ea3d51ff555408e))
+* **App:** icon and logo ([ba35418](https://github.com/gwchar2/ParkSpotTLV/commit/ba35418775598417a23268add7db59ce802eef51))
+* **App:** loader before autologin ([00d4e7e](https://github.com/gwchar2/ParkSpotTLV/commit/00d4e7eb0b459d29f1c1eb9e463e5307ed445f16))
+* **App:** removed back arrow from map page ([c4801b6](https://github.com/gwchar2/ParkSpotTLV/commit/c4801b66347b530a5e0cdc2291b04594b3de1870))
+* **App:** setting budget in add car ([97d9be1](https://github.com/gwchar2/ParkSpotTLV/commit/97d9be182539f25107caafdced8404c428f2f9ba))
+
 ## [0.14.2-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.14.1-beta.0...v0.14.2-beta.0) (2025-10-12)
 
 

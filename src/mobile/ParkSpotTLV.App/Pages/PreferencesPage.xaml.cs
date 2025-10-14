@@ -2,10 +2,17 @@ using ParkSpotTLV.App.Services;
 
 namespace ParkSpotTLV.App.Pages;
 
+/*
+* Preferences page for configuring app settings.
+* Allows users to set minimum parking time preferences.
+*/
 public partial class PreferencesPage : ContentPage
 {
     private readonly LocalDataService _localDataService;
 
+    /*
+    * Initializes the PreferencesPage with required services and loads preferences.
+    */
     public PreferencesPage(LocalDataService localDataService)
     {
         _localDataService = localDataService;
@@ -13,7 +20,9 @@ public partial class PreferencesPage : ContentPage
         LoadPreferencesAsync();
     }
 
-    // Private Load Methods
+    /*
+    * Loads user preferences from local database and updates UI.
+    */
     private async void LoadPreferencesAsync()
     {
         try
@@ -31,7 +40,9 @@ public partial class PreferencesPage : ContentPage
         }
     }
 
-    // Event Handlers
+    /*
+    * Handles minutes picker change. Updates preferences and explanation text.
+    */
     private async void OnMinutesPickerChanged(object sender, EventArgs e)
     {
         UpdateParkingExplanation();
@@ -48,18 +59,25 @@ public partial class PreferencesPage : ContentPage
         }
     }
 
-
+    /*
+    * Handles find parking button click. Navigates to ShowMapPage.
+    */
     private async void OnFindParkingClicked(object sender, EventArgs e)
     {
         await Shell.Current.GoToAsync("ShowMapPage");
     }
 
-    // Helper Methods
+    /*
+    * Updates all explanation texts based on current selections.
+    */
     private void UpdateExplanationTexts()
     {
         UpdateParkingExplanation();
     }
 
+    /*
+    * Updates parking explanation text based on selected minutes.
+    */
     private void UpdateParkingExplanation()
     {
         var selectedItem = MinutesPickerParking.SelectedItem?.ToString();
@@ -70,6 +88,9 @@ public partial class PreferencesPage : ContentPage
         }
     }
 
+    /*
+    * Converts minutes value to picker index.
+    */
     private int GetParkingPickerIndex(int minutes)
     {
         return minutes switch
@@ -85,6 +106,9 @@ public partial class PreferencesPage : ContentPage
         };
     }
 
+    /*
+    * Converts picker text to minutes value.
+    */
     private int GetMinutesFromPicker(string pickerText)
     {
         if (string.IsNullOrEmpty(pickerText)) return 30;

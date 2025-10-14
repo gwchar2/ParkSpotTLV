@@ -4,10 +4,17 @@ using ParkSpotTLV.App.Data.Models;
 
 namespace ParkSpotTLV.App.Pages;
 
+/*
+* Page for adding a new car to the user's account.
+* Collects car details including name, type, and permits.
+*/
 public partial class AddCarPage : ContentPage
 {
-    private readonly CarService _carService; //  = CarService.Instance
+    private readonly CarService _carService;
 
+    /*
+    * Initializes the AddCarPage with required services.
+    */
     public AddCarPage(CarService carService)
     {
         InitializeComponent();
@@ -15,6 +22,9 @@ public partial class AddCarPage : ContentPage
 
     }
 
+    /*
+    * Handles resident permit checkbox change. Shows/hides zone number and free minutes fields.
+    */
     private void OnResidentPermitChanged(object sender, CheckedChangedEventArgs e)
     {
         ZoneNumberEntry.IsVisible = e.Value;
@@ -22,6 +32,9 @@ public partial class AddCarPage : ContentPage
         FreeMinutesLabel.IsVisible = e.Value;
     }
 
+    /*
+    * Handles save car button click. Validates input and saves new car.
+    */
     private async void OnSaveCarClicked(object sender, EventArgs e)
     {
         string carName = CarNameEntry.Text?.Trim() ?? "";
@@ -80,7 +93,8 @@ public partial class AddCarPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", ex.Message, "OK");
+            System.Diagnostics.Debug.WriteLine($"Failed to add car: {ex.Message}");
+            await DisplayAlert("Error", "Failed to add car. Please try again.", "OK");
         }
         
     }

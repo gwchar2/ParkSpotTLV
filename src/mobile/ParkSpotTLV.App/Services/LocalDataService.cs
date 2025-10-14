@@ -4,8 +4,16 @@ using ParkSpotTLV.App.Data.Models;
 
 namespace ParkSpotTLV.App.Services;
 
+/*
+* Manages local SQLite database operations for user sessions and preferences.
+* Handles session storage, token updates, and user preference persistence.
+*/
 public class LocalDataService
 {
+    /*
+    * Initializes the local database. Creates database and default session if needed.
+    * Recreates database from scratch if initialization fails.
+    */
     public async Task InitializeAsync()
     {
         using var context = new LocalDbContext();
@@ -38,6 +46,10 @@ public class LocalDataService
         }
     }
 
+    /*
+    * Retrieves the current user session from local database.
+    * Returns the session if it exists, null otherwise.
+    */
     public async Task<Session?> GetSessionAsync()
     {
         using var context = new LocalDbContext();
@@ -46,6 +58,10 @@ public class LocalDataService
         return existing;
     }
 
+    /*
+    * Adds or replaces the user session in local database.
+    * Removes existing session before adding new one.
+    */
     public async Task AddSessionAsync(Session session)
     {
         using var context = new LocalDbContext();
@@ -58,6 +74,10 @@ public class LocalDataService
         await context.SaveChangesAsync();
     }
 
+    /*
+    * Deletes the current user session from local database.
+    * Used during logout to clear stored authentication data.
+    */
     public async Task DeleteSessionAsync()
     {
         using var context = new LocalDbContext();
@@ -68,6 +88,10 @@ public class LocalDataService
         await context.SaveChangesAsync();
     }
 
+    /*
+    * Updates the refresh token and expiration time in the current session.
+    * Called after successful token refresh to store new credentials.
+    */
     public async Task UpdateTokenAsync(string token, DateTimeOffset expiresAt)
     {
         using var context = new LocalDbContext();
@@ -83,6 +107,10 @@ public class LocalDataService
         await context.SaveChangesAsync();
     }
 
+    /*
+    * Updates user preferences in the current session.
+    * Allows partial updates - only specified parameters are updated.
+    */
     public async Task UpdatePreferencesAsync(int? minParkingTime = null,
                                         bool? showFree = null,
                                         bool? showPaid = null,

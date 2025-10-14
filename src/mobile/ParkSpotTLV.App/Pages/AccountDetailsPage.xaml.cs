@@ -4,19 +4,30 @@ using Microsoft.Maui.Controls.Shapes;
 
 namespace ParkSpotTLV.App.Pages;
 
+/*
+* Account details page for managing user profile and cars.
+* Allows users to view/edit account info, manage cars, and change password.
+*/
 public partial class AccountDetailsPage : ContentPage
 {
-    private readonly AuthenticationService _authService ; // = AuthenticationService.Instance
-    private readonly CarService _carService ; // = CarService.Instance
+    private readonly AuthenticationService _authService ;
+    private readonly CarService _carService;
+    private readonly ParkingService _parkingService;
 
-    public AccountDetailsPage(CarService carService, AuthenticationService authService)
+    /*
+    * Initializes the AccountDetailsPage with required services.
+    */
+    public AccountDetailsPage(CarService carService, AuthenticationService authService,ParkingService parkingService)
     {
         InitializeComponent();
         _carService = carService;
         _authService = authService;
+        _parkingService = parkingService;
     }
 
-    // Lifecycle Methods
+    /*
+    * Called when page appears. Loads user data and cars list.
+    */
     protected override void OnAppearing()
     {
         base.OnAppearing();
@@ -24,7 +35,9 @@ public partial class AccountDetailsPage : ContentPage
         LoadUserCars();
     }
 
-    // Private Load Methods
+    /*
+    * Loads user data from authentication service and displays username.
+    */
     private async void LoadUserData()
     {
         try
@@ -38,6 +51,10 @@ public partial class AccountDetailsPage : ContentPage
         }
     }
 
+    /*
+    * Loads user's cars from service and displays them in the UI.
+    * Limits maximum cars to 5 and shows appropriate messages.
+    */
     private async void LoadUserCars()
     {
         var userCars = await _carService.GetUserCarsAsync();
@@ -47,7 +64,7 @@ public partial class AccountDetailsPage : ContentPage
 
         foreach (var car in userCars)
         {
-            CreateCarUI(car);
+            await CreateCarUIAsync(car);
         }
 
         // Show message if no cars
@@ -76,22 +93,33 @@ public partial class AccountDetailsPage : ContentPage
         }
     }
 
-    // Event Handlers
+    /*
+    * Handles add car button click. Navigates to AddCarPage.
+    */
     private async void OnAddCarClicked(object sender, EventArgs e)
     {
         await Shell.Current.GoToAsync("AddCarPage");
     }
 
+    /*
+    * Handles find parking button click. Navigates to ShowMapPage.
+    */
     private async void OnFindParkingClicked(object sender, EventArgs e)
     {
         await Shell.Current.GoToAsync("ShowMapPage");
     }
 
+    /*
+    * Handles car tap gesture. Navigates to EditCarPage with selected car ID.
+    */
     private async void OnCarTapped(string carId)
     {
         await Shell.Current.GoToAsync($"EditCarPage?carId={carId}");
     }
 
+    /*
+    * Handles remove car button click. Shows confirmation dialog and removes car if confirmed.
+    */
     private async void OnRemoveCarClicked(Car car)
     {
         bool confirm = await DisplayAlert("Remove Car",
@@ -100,20 +128,27 @@ public partial class AccountDetailsPage : ContentPage
 
         if (confirm)
         {
-            bool success = await _carService.RemoveCarAsync(car.Id);
+            try
+            {
+                bool success = await _carService.RemoveCarAsync(car.Id);
 
-            if (success)
-            {
-                await DisplayAlert("Success", $"Car {car.Name} has been removed.", "OK");
-                LoadUserCars();
+                if (success)
+                {
+                    await DisplayAlert("Success", $"Car {car.Name} has been removed.", "OK");
+                    LoadUserCars();
+                }
             }
-            else
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Error removing car: {ex.Message}");
                 await DisplayAlert("Error", "Failed to remove car. Please try again.", "OK");
             }
         }
     }
 
+    /*
+    * Handles change password button click. Shows password change form.
+    */
     private void OnChangePasswordClicked(object sender, EventArgs e)
     {
         PasswordChangeSection.IsVisible = true;
@@ -124,6 +159,9 @@ public partial class AccountDetailsPage : ContentPage
         ConfirmPasswordEntry.Text = "";
     }
 
+    /*
+    * Handles cancel password button click. Hides password change form and clears fields.
+    */
     private void OnCancelPasswordClicked(object sender, EventArgs e)
     {
         PasswordChangeSection.IsVisible = false;
@@ -134,6 +172,9 @@ public partial class AccountDetailsPage : ContentPage
         ConfirmPasswordEntry.Text = "";
     }
 
+    /*
+    * Handles save password button click. Validates and updates user password.
+    */
     private async void OnSavePasswordClicked(object sender, EventArgs e)
     {
         string oldPassword = OldPasswordEntry.Text?.Trim() ?? "";
@@ -190,8 +231,8 @@ public partial class AccountDetailsPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", "Failed to update password. Please try again later.", "OK");
             System.Diagnostics.Debug.WriteLine($"Error updating password: {ex.Message}");
+            await DisplayAlert("Error", "Failed to update password. Please try again later.", "OK");
         }
         finally
         {
@@ -201,8 +242,11 @@ public partial class AccountDetailsPage : ContentPage
         }
     }
 
-    // Helper Methods
-    private void CreateCarUI(Car car)
+    /*
+    * Creates and adds a car UI element to the cars container.
+    * Displays car details, permits, and free parking time remaining.
+    */
+    private async Task CreateCarUIAsync(Car car)
     {
         var carFrame = new Border
         {
@@ -267,7 +311,8 @@ public partial class AccountDetailsPage : ContentPage
         var FreeParkingText = new List<string>();
         if (car.HasResidentPermit)
         {
-            FreeParkingText.Add("Free parking time left: 120 minutes.");
+            int? budget = await _parkingService.GetParkingBudgetRemainingAsync(Guid.Parse(car.Id));
+            FreeParkingText.Add($"Free parking time left: {budget} minutes.");
             var FreeParkingLabel = new Label
             {
                 Text = string.Join(", ", FreeParkingText),

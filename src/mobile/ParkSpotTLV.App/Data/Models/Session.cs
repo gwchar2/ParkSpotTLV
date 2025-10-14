@@ -2,6 +2,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ParkSpotTLV.App.Data.Models;
 
+/*
+* Local object to represent a currnet session. 
+* Holds userw' authentication info and preferences.
+*/
 public class Session
 {
 
@@ -15,17 +19,12 @@ public class Session
     public bool ShowRestricted {get; set; } = true ;
     public bool ShowNoParking {get; set; } = true ;
 
-    public string? LastPickedCarId { get; set; }
+    public string? LastPickedCarId { get; set; } // used to track parking sessions
 
     // User Auth
     public string UserName { get; set; } = string.Empty;
-
     public string RefreshToken { get; set; } = string.Empty;
-
     public DateTimeOffset TokenExpiresAt { get; set; } = DateTimeOffset.UtcNow;
-
     public DateTimeOffset LastUpdated { get; set; } = DateTimeOffset.UtcNow;
-
-
 
 }

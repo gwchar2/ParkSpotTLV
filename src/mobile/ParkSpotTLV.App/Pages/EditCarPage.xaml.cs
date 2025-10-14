@@ -4,19 +4,30 @@ using ParkSpotTLV.App.Data.Models;
 
 namespace ParkSpotTLV.App.Pages;
 
+/*
+* Page for editing an existing car's details.
+* Allows updating car name, type, and permit information.
+*/
 public partial class EditCarPage : ContentPage, IQueryAttributable
 {
     private readonly CarService _carService;
+    private readonly ParkingService _parkingService;
     private string _carId = string.Empty;
     private Car? _currentCar;
 
-    public EditCarPage(CarService carService)
+    /*
+    * Initializes the EditCarPage with required services.
+    */
+    public EditCarPage(CarService carService,ParkingService parkingService)
     {
         InitializeComponent();
         _carService = carService;
+        _parkingService = parkingService;
     }
 
-    // Lifecycle Methods
+    /*
+    * Applies query attributes from navigation. Extracts car ID and loads car data.
+    */
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
         if (query.ContainsKey("carId"))
@@ -26,7 +37,9 @@ public partial class EditCarPage : ContentPage, IQueryAttributable
         }
     }
 
-    // Private Load Methods
+    /*
+    * Loads car data from service and populates form fields.
+    */
     private async void LoadCarData()
     {
         if (string.IsNullOrEmpty(_carId))
@@ -53,19 +66,23 @@ public partial class EditCarPage : ContentPage, IQueryAttributable
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", $"Failed to load car data: {ex.Message}", "OK");
+            System.Diagnostics.Debug.WriteLine($"Failed to load car data: {ex.Message}");
+            await DisplayAlert("Error", "Failed to load car data. Please try again.", "OK");
             await Shell.Current.GoToAsync("..");
         }
     }
 
-    // Event Handlers
+    /*
+    * Handles resident permit checkbox change. Shows/hides zone number field.
+    */
     private void OnResidentPermitChanged(object sender, CheckedChangedEventArgs e)
     {
         ZoneNumberEntry.IsVisible = e.Value;
-        FreeMinutesEntry.IsVisible = e.Value;
-        FreeMinutesLabel.IsVisible = e.Value;
     }
 
+    /*
+    * Handles save car button click. Validates input and updates car details.
+    */
     private async void OnSaveCarClicked(object sender, EventArgs e)
     {
         if (_currentCar == null)
@@ -127,7 +144,8 @@ public partial class EditCarPage : ContentPage, IQueryAttributable
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", ex.Message, "OK");
+            System.Diagnostics.Debug.WriteLine($"Failed to update car: {ex.Message}");
+            await DisplayAlert("Error", "Failed to update car. Please try again.", "OK");
         }
     }
 }

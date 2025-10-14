@@ -19,9 +19,11 @@ public class MapSegmentRenderer
     private const int MAX_SEGMENTS_TO_RENDER = 500;
     private const int SEGMENT_STROKE_WIDTH = 5;
 
-  
-    // Renders segments on the map with filtering based on session preferences
-    // Returns a dictionary mapping SegmentId -> StreetName for all rendered segments
+
+    /*
+    * Renders parking segments on the map with filtering based on session preferences.
+    * Returns a dictionary mapping SegmentId to StreetName for all rendered segments.
+    */
     public Dictionary<SegmentResponseDTO, string> RenderSegments(Microsoft.Maui.Controls.Maps.Map map, GetMapSegmentsResponse segmentsResponse, Session? session)
     {
         var segmentToStreet = new Dictionary<SegmentResponseDTO, string>();
@@ -83,8 +85,9 @@ public class MapSegmentRenderer
         return segmentToStreet;
     }
 
-   
-    // Clears all map elements and forces garbage collection
+    /*
+    * Clears all map elements and forces garbage collection to free memory.
+    */
     private void ClearMapElements(Microsoft.Maui.Controls.Maps.Map map)
     {
         try
@@ -102,7 +105,9 @@ public class MapSegmentRenderer
         }
     }
 
-    // Determines if a segment should be skipped based on session filters
+    /*
+    * Determines if a segment should be skipped based on session filter preferences.
+    */
     private bool ShouldSkipSegment(SegmentResponseDTO segment, Session? session)
     {
         if (session == null)
@@ -118,7 +123,10 @@ public class MapSegmentRenderer
         };
     }
 
-    // Creates a polyline from segment GeoJSON data
+    /*
+    * Creates a map polyline from segment GeoJSON geometry data.
+    * Parses GeoJSON coordinates and applies appropriate color.
+    */
     private Polyline? CreatePolylineFromSegment(SegmentResponseDTO segment)
     {
         var strokeColor = GetColorForSegment(segment.Group);
@@ -148,7 +156,9 @@ public class MapSegmentRenderer
         return line;
     }
 
-    // Gets the color for a parking segment group
+    /*
+    * Gets the color for a parking segment based on its group type.
+    */
     private Color GetColorForSegment(string group)
     {
         return group switch

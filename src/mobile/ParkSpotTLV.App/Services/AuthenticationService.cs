@@ -6,12 +6,19 @@ using ParkSpotTLV.Contracts.Auth;
 
 namespace ParkSpotTLV.App.Services;
 
+/*
+* Handles user authentication operations including login, signup, token refresh, and validation.
+* Manages JWT tokens and authentication state for API requests.
+*/
 public class AuthenticationService
 {
     private readonly HttpClient _http;
     private readonly LocalDataService _localDataService;
     private readonly JsonSerializerOptions _options;
 
+    /*
+    * Initializes the authentication service with HTTP client and local data storage.
+    */
     public AuthenticationService(HttpClient http, LocalDataService localDataService, JsonSerializerOptions? options = null)
     {
         _http = http;
@@ -19,6 +26,10 @@ public class AuthenticationService
         _options = options ?? new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
     }
 
+    /*
+    * Attempts to automatically log in user using stored refresh token.
+    * Returns true if auto-login succeeded, false otherwise.
+    */
     public async Task<bool> TryAutoLoginAsync()
     {
         var session = await _localDataService.GetSessionAsync();
@@ -38,6 +49,10 @@ public class AuthenticationService
         return await RefreshTokenAsync();
     }
 
+    /*
+    * Authenticates user with username and password.
+    * Creates local session and stores tokens on success.
+    */
     public async Task<TokenPairResponse?> LoginAsync(string username, string password)
     {
         var payload = new { username, password };
@@ -70,6 +85,10 @@ public class AuthenticationService
         return tokens;
     }
 
+    /*
+    * Registers a new user with username and password.
+    * Creates local session and stores tokens on success.
+    */
     public async Task<TokenPairResponse?> SignUpAsync(string username, string password)
     {
         var payload = new { username, password };
@@ -102,6 +121,10 @@ public class AuthenticationService
         return tokens;
     }
 
+    /*
+    * Fetches current authenticated user information from API.
+    * Automatically refreshes token if needed.
+    */
     public async Task<UserMeResponse> AuthMeAsync()
     {
         // Ensure we even have a token attached
@@ -128,12 +151,19 @@ public class AuthenticationService
         return me;
     }
 
+    /*
+    * Logs out current user by clearing tokens and local session.
+    */
     public async Task Logout()
     {
         _http.DefaultRequestHeaders.Authorization = null;
         await _localDataService.DeleteSessionAsync();
     }
 
+    /*
+    * Refreshes the access token using stored refresh token.
+    * Updates authorization header and local session with new tokens.
+    */
     public async Task<bool> RefreshTokenAsync()
     {
         var session = await _localDataService.GetSessionAsync();
@@ -175,6 +205,10 @@ public class AuthenticationService
         }
     }
 
+    /*
+    * Executes an API call with automatic token refresh on 401 Unauthorized.
+    * Retries the call with refreshed token if initial call fails due to auth.
+    */
     public async Task<HttpResponseMessage> ExecuteWithTokenRefreshAsync(Func<Task<HttpResponseMessage>> apiCall, int maxRetries = 1)
     {
         var response = await apiCall();
@@ -208,6 +242,10 @@ public class AuthenticationService
         return response;
     }
 
+    /*
+    * Executes an API call with automatic token refresh and deserializes response to type T.
+    * Generic version of ExecuteWithTokenRefreshAsync that returns typed result.
+    */
     public async Task<T?> ExecuteWithTokenRefreshAsync<T>(Func<Task<HttpResponseMessage>> apiCall, int maxRetries = 1)
     {
         var response = await ExecuteWithTokenRefreshAsync(apiCall, maxRetries);
@@ -220,6 +258,10 @@ public class AuthenticationService
         return default(T);
     }
 
+    /*
+    * Validates username format. Must be at least 3 characters, alphanumeric and underscore only.
+    * Returns true if username is valid, false otherwise.
+    */
     public bool ValidateUsername(string username)
     {
         // Username validation: at least 3 characters, alphanumeric + underscore only, must contain at least one alphanumeric
@@ -240,6 +282,10 @@ public class AuthenticationService
         return true;
     }
 
+    /*
+    * Validates password format. Must be at least 6 characters with no whitespace.
+    * Returns true if password is valid, false otherwise.
+    */
     public bool ValidatePassword(string password)
     {
         // Password validation: at least 6 characters, no whitespace characters
@@ -256,6 +302,10 @@ public class AuthenticationService
         return true;
     }
 
+    /*
+    * Updates user password. Validates new password and sends change request to API.
+    * Returns true if password update succeeded, false otherwise.
+    */
     public async Task<bool> UpdatePasswordAsync(string newPassword, string oldPassword)
     {
         // Validate the new password first
