@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.15.0-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.14.3-beta.0...v0.15.0-beta.0) (2025-10-14)
+
+
+### Features
+
+* **App:** implemented service's interfaces ([7cea81b](https://github.com/gwchar2/ParkSpotTLV/commit/7cea81be430336687e732bf0f1f2155269d839dd))
+
+
+### Bug Fixes
+
+* **App:** fix routing isuues ([1d7ab91](https://github.com/gwchar2/ParkSpotTLV/commit/1d7ab915e4f2ce4d90957f6b5a14d493eb46f7b1))
+* **App:** navigation to map fixed ([d4bdcdc](https://github.com/gwchar2/ParkSpotTLV/commit/d4bdcdc19f3603d68e9b396c089f3611432b2918))
+* **App:** updateText fixed. removing ios handling in pango ([3b02005](https://github.com/gwchar2/ParkSpotTLV/commit/3b0200523a644e3f63c65913b1101e742d70c1b1))
+
 ## [0.14.3-beta.0](https://github.com/gwchar2/ParkSpotTLV/compare/v0.14.2-beta.0...v0.14.3-beta.0) (2025-10-13)
 
 
