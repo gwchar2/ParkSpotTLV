@@ -12,7 +12,7 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
         private readonly IDailyBudgetService _budget = budget;
 
         public async Task<PaymentDecision> DecideAsync(ParkingType parkingType, int? segmentZoneCode, Tariff tariff, DateTimeOffset now,
-            PermitSnapshot pov, bool ActiveNow, CancellationToken ct) {
+            PermitSnapshotDto pov, bool ActiveNow, CancellationToken ct) {
 
             // Saturday & after hours are handled by ActiveNow
             if (!ActiveNow) return new PaymentDecision(PaymentNow.Free, "AfterHours");

@@ -9,7 +9,7 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
 
     public class LegalPolicyService : ILegalPolicyService {
 
-        public bool IsLegalNow(ParkingType parkingType, int? segmentZoneCode, PermitSnapshot pov, bool ActiveNow) {
+        public bool IsLegalNow(ParkingType parkingType, int? segmentZoneCode, PermitSnapshotDto pov, bool ActiveNow) {
 
             if (parkingType != ParkingType.Privileged)                              return true;            // If parking type is not privileged, continue
             if (!ActiveNow)                                                         return true;            // If parking spot is not active now, it is free for all

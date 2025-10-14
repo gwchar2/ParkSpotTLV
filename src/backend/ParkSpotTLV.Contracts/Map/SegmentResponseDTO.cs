@@ -1,6 +1,4 @@
 ﻿
-using System.ComponentModel.DataAnnotations;
-
 namespace ParkSpotTLV.Contracts.Map {
     // Same thing as segment result in API but with string enums 
     public sealed record SegmentResponseDTO (

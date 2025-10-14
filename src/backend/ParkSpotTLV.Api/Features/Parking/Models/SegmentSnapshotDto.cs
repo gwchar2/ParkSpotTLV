@@ -8,7 +8,7 @@ namespace ParkSpotTLV.Api.Features.Parking.Models {
      * Needed for evaluation per segment.
      * Produced by ISegmentQueryService (Query Object)
      */
-    public sealed record SegmentSnapshot (
+    public sealed record SegmentSnapshotDto (
         Guid SegmentId,
         int? ZoneCode,
         Tariff Tariff, 

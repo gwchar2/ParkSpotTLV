@@ -7,7 +7,7 @@
 
     public enum PermitSnapType { None, Zone, Disability }
 
-    public sealed class PermitSnapshot {
+    public sealed class PermitSnapshotDto {
 
         public PermitSnapType Type { get; init; }
         public int? ZoneCode { get; init; } = -1;

@@ -189,9 +189,9 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
                 freeMinutes = (int)Math.Ceiling((timeLocal - nextLocal).TotalMinutes);
             }
 
-            freeMinutes = isFreeGroup ? totalLegalMinutes :  freeMinutes;
-            var paidMinutes = isFreeGroup ? 0 : Math.Max(0, totalLegalMinutes - freeMinutesCharged - freeMinutes);
-
+            freeMinutes = isFreeGroup ? totalLegalMinutes : freeMinutes;
+            var paidMinutes = isFreeGroup ? 0 : Math.Max(0, totalLegalMinutes - freeMinutesCharged - freeMinutes); 
+            
             return new BudgetCalculationDTO(
                 TotalMinutes: totalLegalMinutes,
                 PaidMinutes: paidMinutes,

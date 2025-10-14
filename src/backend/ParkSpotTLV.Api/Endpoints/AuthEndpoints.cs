@@ -8,6 +8,8 @@ using ParkSpotTLV.Infrastructure.Auth.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using ParkSpotTLV.Api.Endpoints.Support;
+using ParkSpotTLV.Api.Endpoints.Support.Errors;
+using ParkSpotTLV.Api.Endpoints.Support.EndpointFilters;
 
 namespace ParkSpotTLV.Api.Endpoints {
     public static class AuthEndpoints {
@@ -26,13 +28,13 @@ namespace ParkSpotTLV.Api.Endpoints {
                 async ([FromBody] RegisterRequest body,HttpContext ctx, AppDbContext db,IPasswordHasher hasher,IJwtService jwt,IRefreshTokenService refresh, IClock clock,CancellationToken ct) => {
 
                     if (string.IsNullOrWhiteSpace(body.Username) || string.IsNullOrWhiteSpace(body.Password))
-                        return AuthProblems.MissingInfo(ctx);
+                        return AuthErrors.MissingInfo(ctx);
                     
                     var normalized = body.Username.Trim().ToLowerInvariant();
                     
                     var exists = await db.Users.AsNoTracking().AnyAsync(u => u.Username == normalized, ct);
                     
-                    if (exists) return AuthProblems.UsernameTaken(ctx);
+                    if (exists) return AuthErrors.UsernameTaken(ctx);
 
                     var pwdHash = hasher.Hash(body.Password);
                     
@@ -60,6 +62,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         ));
                 })     
                 .Accepts<RegisterRequest>("application/json")
+                .EnforceJsonContent()
                 .Produces<TokenPairResponse>(StatusCodes.Status201Created)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
                 .Produces<ProblemDetails>(StatusCodes.Status409Conflict)
@@ -78,17 +81,17 @@ namespace ParkSpotTLV.Api.Endpoints {
                 async ([FromBody] RegisterRequest body, HttpContext ctx, AppDbContext db,IPasswordHasher hasher,IJwtService jwt,IRefreshTokenService refresh, IClock clock, CancellationToken ct) => {
                            
                     if (string.IsNullOrWhiteSpace(body.Username) || string.IsNullOrWhiteSpace(body.Password))
-                        return AuthProblems.MissingInfo(ctx);
+                        return AuthErrors.MissingInfo(ctx);
 
                     var normalized = body.Username.Trim().ToLowerInvariant();
                     
                     var user = await db.Users.AsNoTracking().SingleOrDefaultAsync(us => us.Username == normalized, ct);
                     if (user is null)
-                        return AuthProblems.InvalidCreds(ctx);
+                        return AuthErrors.InvalidCreds(ctx);
 
                     var (isValid, needsRehash) = hasher.Verify(body.Password, user.PasswordHash);
                     
-                    if (!isValid) return AuthProblems.InvalidCreds(ctx);
+                    if (!isValid) return AuthErrors.InvalidCreds(ctx);
 
                     await db.SaveChangesAsync(ct);
                     
@@ -106,6 +109,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                     return Results.Ok(response);
                 })
                 .Accepts<LoginRequest>("application/json")
+                .EnforceJsonContent()
                 .Produces<TokenPairResponse>(StatusCodes.Status200OK)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized)
@@ -123,7 +127,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                 ([FromBody] RefreshRequest body,HttpContext ctx, AppDbContext db, IRefreshTokenService refreshService,IClock clock, CancellationToken ct) => {
 
                     if (body is null || string.IsNullOrWhiteSpace(body.RefreshToken))
-                        return GeneralProblems.MissingRefresh(ctx);
+                        return GeneralErrors.MissingRefresh(ctx);
 
                     try {
                         var result = refreshService.ValidateAndRotate(body.RefreshToken);
@@ -142,10 +146,11 @@ namespace ParkSpotTLV.Api.Endpoints {
                         return Results.Ok(response);
                     }
                     catch (UnauthorizedAccessException) {
-                        return GeneralProblems.ExpiredToken(ctx);
+                        return GeneralErrors.ExpiredToken(ctx);
                     }
                 })
                 .Accepts<RefreshRequest>("application/json")
+                .EnforceJsonContent()
                 .Produces<TokenPairResponse>(StatusCodes.Status200OK)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized)
@@ -164,7 +169,7 @@ namespace ParkSpotTLV.Api.Endpoints {
             auth.MapPost("/logout",
                 ([FromBody] LogoutRequest body,HttpContext ctx,IRefreshTokenService refreshService) => {
 
-                    if (body is null) return GeneralProblems.MissingBody(ctx);
+                    if (body is null) return GeneralErrors.MissingBody(ctx);
                     
                     /* To remove ALL devices, we require a valid JWT bearer */
                     if (body.AllDevices) {
@@ -172,31 +177,32 @@ namespace ParkSpotTLV.Api.Endpoints {
                                             ?? ctx.User.FindFirstValue("subscriptions");
 
                         if (string.IsNullOrWhiteSpace(subscriptions) || !Guid.TryParse(subscriptions, out var userId))
-                            return AuthProblems.AuthentRequired(ctx);
+                            return AuthErrors.AuthentRequired(ctx);
 
                         try {
                             refreshService.RevokeAllForUser(userId);
                             return Results.NoContent();
                         }
                         catch (Exception) {
-                            return GeneralProblems.Unexpected(ctx);
+                            return GeneralErrors.Unexpected(ctx);
                         }
                     }
                     /* single-session logout by refresh token (no auth required) */
-                    if (string.IsNullOrWhiteSpace(body.RefreshToken)) return AuthProblems.SingleSession(ctx); 
+                    if (string.IsNullOrWhiteSpace(body.RefreshToken)) return AuthErrors.SingleSession(ctx); 
 
                     try {
                         refreshService.RevokeByRawToken(body.RefreshToken);
                         return Results.NoContent();
                     }
                     catch (UnauthorizedAccessException) {
-                        return GeneralProblems.ExpiredToken(ctx);
+                        return GeneralErrors.ExpiredToken(ctx);
                     }
                     catch (Exception) {
-                        return GeneralProblems.Unexpected(ctx);
+                        return GeneralErrors.Unexpected(ctx);
                     }
                 })
                 .Accepts<LogoutRequest>("application/json")
+                .EnforceJsonContent()
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized)
@@ -216,7 +222,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         .Select(u => new { u.Id, u.Username })
                         .SingleOrDefaultAsync(ct);
 
-                    if (user is null) return GeneralProblems.NotFound(ctx);
+                    if (user is null) return GeneralErrors.NotFound(ctx);
 
                     // Count how many vehicles user owns
                     var vehiclesCount = await db.Vehicles
@@ -250,7 +256,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                     var userId = ctx.GetUserId();
 
                     if (string.IsNullOrWhiteSpace(body.OldPassword) || string.IsNullOrWhiteSpace(body.NewPassword))
-                        return AuthProblems.OldInfo(ctx);
+                        return AuthErrors.OldInfo(ctx);
 
                     var user = await db.Users.SingleOrDefaultAsync(u => u.Id == userId, ct);
                     
@@ -258,7 +264,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                     
                     var (isValid, needsRehash) = hasher.Verify(body.OldPassword, user.PasswordHash);
 
-                    if (!isValid) return AuthProblems.InvalidOldPass(ctx);
+                    if (!isValid) return AuthErrors.InvalidOldPass(ctx);
 
 
                     user.PasswordHash = hasher.Hash(body.NewPassword);

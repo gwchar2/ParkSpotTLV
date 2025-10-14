@@ -17,12 +17,12 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
         private readonly IClassificationService _classification = classification;
 
 
-        public async Task<IReadOnlyList<SegmentResult>> EvaluateAsync(MapSegmentsRequest request, CancellationToken ct) {
+        public async Task<IReadOnlyList<SegmentResultDto>> EvaluateAsync(MapSegmentsRequestDto request, CancellationToken ct) {
 
             var rows = await _query.GetViewportAsync(request.MinLon, request.MaxLon, request.MinLat, request.MaxLat, request.CenterLon ,request.CenterLat, ct);
             var now = request.Now;
 
-            var results = new List<SegmentResult>(rows.Count);
+            var results = new List<SegmentResultDto>(rows.Count);
 
             foreach (var row in rows) {
 
@@ -73,7 +73,7 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
                     adjustedNextChange = privStart;
 
                 // Build result
-                results.Add(new SegmentResult(
+                results.Add(new SegmentResultDto(
                     row.SegmentId, row.ZoneCode, row.Tariff,
                     row.NameHebrew,
                     row.NameEnglish,

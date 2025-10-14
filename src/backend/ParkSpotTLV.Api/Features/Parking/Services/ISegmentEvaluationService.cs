@@ -6,7 +6,7 @@
 
 namespace ParkSpotTLV.Api.Features.Parking.Services {
     public interface ISegmentEvaluationService {
-        Task<IReadOnlyList<SegmentResult>> EvaluateAsync(MapSegmentsRequest request, CancellationToken ct);
+        Task<IReadOnlyList<SegmentResultDto>> EvaluateAsync(MapSegmentsRequestDto request, CancellationToken ct);
 
     }
 }

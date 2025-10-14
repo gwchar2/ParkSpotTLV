@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ParkSpotTLV.Api.Endpoints.Support;
+using ParkSpotTLV.Api.Endpoints.Support.Errors;
+using ParkSpotTLV.Api.Endpoints.Support.EndpointFilters;
 using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Contracts.Vehicles;
 using ParkSpotTLV.Infrastructure;
@@ -45,7 +47,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                         })
                         .ToListAsync(ct);
 
-                    return vehicles is null ? VehicleProblems.Forbidden(ctx) : Results.Ok(vehicles);
+                    return vehicles is null ? VehicleErrors.Forbidden(ctx) : Results.Ok(vehicles);
 
                 })
                 .Produces<List<VehicleResponse>>(StatusCodes.Status200OK)
@@ -64,16 +66,6 @@ namespace ParkSpotTLV.Api.Endpoints {
             group.MapGet("/{id:guid}", async (
                 Guid id, HttpContext ctx, AppDbContext db, CancellationToken ct) => {
 
-                    var userId = ctx.GetUserId();
-                    
-                    var ownerId = await db.Vehicles
-                        .AsNoTracking()
-                        .Where(v => v.Id == id)
-                        .Select(v => v.OwnerId)
-                        .SingleOrDefaultAsync(ct);
-
-                    if (ownerId == Guid.Empty || ownerId != userId) return VehicleProblems.Forbidden(ctx);
-
                     var dto = await db.Vehicles
                         .AsNoTracking()
                         .Where(v => v.Id == id)
@@ -83,18 +75,18 @@ namespace ParkSpotTLV.Api.Endpoints {
                             Type = EnumMappings.MapVehicleType(v.Type),
                             Name = v.Name,
                             ResidencyPermitId = v.Permits.Where(p => p.Type == PermitType.ZoneResident).Select(p => p.Id).FirstOrDefault(),
-                            ResidentZoneCode = v.Permits
-                                .Where(p => p.Type == PermitType.ZoneResident)
-                                .Select(p => p.ZoneCode)
-                                .FirstOrDefault(),
+                            ResidentZoneCode = v.Permits.Where(p => p.Type == PermitType.ZoneResident).Select(p => p.ZoneCode).FirstOrDefault(),
                             DisabilityPermitId = v.Permits.Where(p => p.Type == PermitType.Disability).Select(p => p.Id).FirstOrDefault(),
                             DisabledPermit = v.Permits.Any(p => p.Type == PermitType.Disability),
                             DefaultPermitId = v.Permits.Where(p => p.Type == PermitType.Default).Select(p => p.Id).FirstOrDefault(),
                             RowVersion = Convert.ToBase64String(BitConverter.GetBytes(v.Xmin)) })
-                        .SingleAsync(ct);
+                        .SingleOrDefaultAsync(ct);
+
+                    if (dto is null) return VehicleErrors.Forbidden(ctx);
 
                     return Results.Ok(dto);
                 })
+                .RequireVehicleOwner()
                 .Produces<VehicleResponse>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status401Unauthorized)
                 .ProducesProblem(StatusCodes.Status403Forbidden)
@@ -115,7 +107,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                     var userId = ctx.GetUserId();
 
                     if (await db.Vehicles.AsNoTracking().AnyAsync(z => z.OwnerId == userId && z.Name == body.Name, ct))
-                        return VehicleProblems.NameExists(ctx);
+                        return VehicleErrors.NameExists(ctx);
 
                     var hasResidency = body.ResidentZoneCode.HasValue;
                     var hasDisability = body.HasDisabledPermit;
@@ -123,7 +115,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                     // If residency provided, validate that Zone.Code exists
                     if (hasResidency) {
                         var exists = await db.Zones.AsNoTracking().AnyAsync(z => z.Code == body.ResidentZoneCode!.Value, ct);
-                        if (!exists)  return GeneralProblems.InvalidZoneCode(ctx);
+                        if (!exists)  return GeneralErrors.InvalidZoneCode(ctx);
                     }
 
                     // Create a new vehicle with a default permit
@@ -175,6 +167,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                     return Results.Created($"/vehicles/{dto.Id}", dto);
                 })
                 .Accepts<VehicleCreateRequest>("application/json")
+                .EnforceJsonContent()
                 .Produces<VehicleResponse>(StatusCodes.Status201Created)
                 .ProducesProblem(StatusCodes.Status400BadRequest)
                 .ProducesProblem(StatusCodes.Status401Unauthorized)
@@ -195,19 +188,14 @@ namespace ParkSpotTLV.Api.Endpoints {
                 async (Guid id,[FromBody] VehicleUpdateRequest body, HttpContext ctx, AppDbContext db, CancellationToken ct) => {
 
                     var userId = ctx.GetUserId();
-
-                    // Check for concurrency
-                    if (string.IsNullOrWhiteSpace(body.RowVersion)) return GeneralProblems.MissingRowVersion(ctx);
-
-                    if (!Guards.TryBase64ToUInt32(body.RowVersion, out uint expectedXmin))
-                        return GeneralProblems.InvalidRowVersion(ctx);
+                    var expectedXmin = ctx.GetXmin();
 
                     // Get the vehicle from the DB & check ownership
                     var vehicle = await db.Vehicles.Include(v => v.Permits).SingleOrDefaultAsync(v => v.Id == id, ct);
 
-                    if (vehicle is null || vehicle.OwnerId != userId) return VehicleProblems.Forbidden(ctx);
+                    if (vehicle is null) return VehicleErrors.NotFound(ctx); 
 
-                    if (vehicle.Xmin != expectedXmin) return GeneralProblems.ConcurrencyError(ctx);
+                    if (vehicle.Xmin != expectedXmin) return GeneralErrors.ConcurrencyError(ctx);
 
                     if (body.Type.HasValue) vehicle.Type = body.Type.Value;
 
@@ -236,6 +224,9 @@ namespace ParkSpotTLV.Api.Endpoints {
 
                     return Results.Ok(dto);
                 })
+                .EnforceJsonContent()
+                .RequireRowVersion()
+                .RequireVehicleOwner()
                 .Produces<VehicleResponse>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status400BadRequest)
                 .ProducesProblem(StatusCodes.Status401Unauthorized)
@@ -259,23 +250,18 @@ namespace ParkSpotTLV.Api.Endpoints {
                 async (Guid id, [FromBody] VehicleDeleteRequest body, HttpContext ctx, AppDbContext db, CancellationToken ct) => {
 
                     var userId = ctx.GetUserId();
-
-                    // We make sure that RowVersion exists and is legal, so there are no race conditions
-                    if (string.IsNullOrWhiteSpace(body.RowVersion)) return GeneralProblems.MissingRowVersion(ctx);
-                    if (!Guards.TryBase64ToUInt32(body.RowVersion, out uint expectedXmin))
-                        return GeneralProblems.InvalidRowVersion(ctx);
+                    var expectedXmin = ctx.GetXmin();
 
                     // We need to make sure the permit belongs to specified user
-                    var vehicle = await db.Vehicles.AsNoTracking().Where(p => p.Id == id && p.OwnerId == userId).SingleOrDefaultAsync(ct);
+                    var vehicle = await db.Vehicles.SingleOrDefaultAsync(v => v.Id == id, ct);
 
-                    if (vehicle is null || vehicle.OwnerId != userId) return VehicleProblems.Forbidden(ctx);
+                    if (vehicle is null)    return VehicleErrors.Forbidden(ctx);
 
-                    if (vehicle.Xmin != expectedXmin) return GeneralProblems.ConcurrencyError(ctx);
+                    if (vehicle.Xmin != expectedXmin)   return GeneralErrors.ConcurrencyError(ctx);
 
-                    var userVehicles = await db.Vehicles.AsNoTracking().Where(p => p.OwnerId == userId).ToListAsync(ct);
+                    var userVehicleCount = await db.Vehicles.AsNoTracking().CountAsync(v => v.OwnerId == userId, ct);
 
-                    // Check if we leave the vehicle with 0 permits (NOT POSSIBLE)
-                    if (userVehicles is not null && userVehicles.Count <= 1) return VehicleProblems.CantRemove(ctx);
+                    if (userVehicleCount <= 1)  return VehicleErrors.CantRemove(ctx);
 
 
                     db.Vehicles.Remove(vehicle);
@@ -283,6 +269,10 @@ namespace ParkSpotTLV.Api.Endpoints {
 
                     return Results.NoContent();
                 })
+                .EnforceJsonContent()
+                .RequireRowVersion()
+                .RequireUser()
+                .RequireVehicleOwner()
                 .Produces(StatusCodes.Status204NoContent)
                 .ProducesProblem(StatusCodes.Status400BadRequest)
                 .ProducesProblem(StatusCodes.Status401Unauthorized)

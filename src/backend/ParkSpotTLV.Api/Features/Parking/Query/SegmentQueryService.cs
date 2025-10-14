@@ -17,7 +17,7 @@ namespace ParkSpotTLV.Api.Features.Parking.Query {
         private readonly GeometryFactory _gf = NetTopologySuite.NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
 
         const int MAX_SEGMENTS = 100;
-        public async Task<IReadOnlyList<SegmentSnapshot>> GetViewportAsync(
+        public async Task<IReadOnlyList<SegmentSnapshotDto>> GetViewportAsync(
             double minLon, double maxLon, double minLat, double maxLat, double centerLon, double centerLat, CancellationToken ct) {
 
             // We create an environment 'box', and a coordinate to reprsent the center of persons POV
@@ -31,7 +31,7 @@ namespace ParkSpotTLV.Api.Features.Parking.Query {
                 .Where(s => s.Geom.Intersects(env))
                 .OrderBy(s => s.Geom.Distance(center))
                 .Take(MAX_SEGMENTS)
-                .Select(s => new SegmentSnapshot(
+                .Select(s => new SegmentSnapshotDto(
                     s.Id,
                     s.Zone != null ? s.Zone.Code : -1,
                     s.Zone != null ? s.Zone.Taarif : Tariff.City_Center,

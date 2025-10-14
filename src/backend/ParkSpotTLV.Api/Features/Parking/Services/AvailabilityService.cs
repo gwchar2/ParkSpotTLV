@@ -11,7 +11,7 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
         private readonly ITariffCalendarService _calendar = calendar;
         private readonly ILegalPolicyService _privileged = privileged;
 
-        public Availability Compute(ParkingType parkingType, int? segmentZoneCode, Tariff tariff, DateTimeOffset now, PermitSnapshot pov) {
+        public Availability Compute(ParkingType parkingType, int? segmentZoneCode, Tariff tariff, DateTimeOffset now, PermitSnapshotDto pov) {
 
             // Get the legality of the parking spot
             var status = _calendar.GetStatus(tariff, now);                                                      // Gets the status of a parking spot at this time (Active/NotActive)

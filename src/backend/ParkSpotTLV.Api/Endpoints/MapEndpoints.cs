@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.IO;
 using ParkSpotTLV.Api.Endpoints.Support;
+using ParkSpotTLV.Api.Endpoints.Support.Errors;
+using ParkSpotTLV.Api.Endpoints.Support.EndpointFilters;
 using ParkSpotTLV.Contracts.Time;
 using ParkSpotTLV.Api.Features.Parking.Models;
 using ParkSpotTLV.Api.Features.Parking.Services;
@@ -35,10 +37,10 @@ namespace ParkSpotTLV.Api.Endpoints {
 
                     // Set the default time, LimitedThresholdMinutes, and MinDurationMinutes
                     var now = body.Now == default ? clock.LocalNow : body.Now;
-                    var minDuration = body.MinParkingTime <= 0 ? 60 : body.MinParkingTime;
+                    var minDuration = body.MinParkingTime <= 0 ? 120 : body.MinParkingTime;
 
                     // Create a permit snapshot
-                    var pov = new PermitSnapshot {
+                    var pov = new PermitSnapshotDto {
                         Type = PermitSnapType.None,
                         ZoneCode = null,
                         VehicleId = null
@@ -51,7 +53,7 @@ namespace ParkSpotTLV.Api.Endpoints {
 
                         if (permit is not null) {
                             if (permit.Type == PermitType.Disability) {
-                                pov = new PermitSnapshot {
+                                pov = new PermitSnapshotDto {
                                     Type = PermitSnapType.Disability,
                                     ZoneCode = null,
                                     VehicleId = permit.VehicleId
@@ -59,16 +61,16 @@ namespace ParkSpotTLV.Api.Endpoints {
 
                             } else if (permit.Type == PermitType.ZoneResident) {
 
-                                if (permit.Zone?.Code is null) return PermitProblems.MissingZoneCode(ctx);
+                                if (permit.Zone?.Code is null) return PermitErrors.MissingZoneCode(ctx);
 
-                                pov = new PermitSnapshot {
+                                pov = new PermitSnapshotDto {
                                     Type = PermitSnapType.Zone,
                                     ZoneCode = permit.Zone?.Code,
                                     VehicleId = permit.VehicleId
                                 };
                             } else {
                                 /* NEED TO TEST THIS */
-                                pov = new PermitSnapshot {
+                                pov = new PermitSnapshotDto {
                                     Type = PermitSnapType.None,
                                     ZoneCode = 0,
                                     VehicleId = permit.VehicleId
@@ -76,7 +78,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                             }
                         }else {
                             /* NEED TO TEST */
-                            pov = new PermitSnapshot {
+                            pov = new PermitSnapshotDto {
                                 Type = PermitSnapType.None,
                                 ZoneCode = 0,
                                 VehicleId = null
@@ -85,7 +87,7 @@ namespace ParkSpotTLV.Api.Endpoints {
                     }
 
                     // Create the internal request for the evaluator, and evaluate. Max MinDuration is 12 hours.
-                    var internalReq = new MapSegmentsRequest {
+                    var internalReq = new MapSegmentsRequestDto {
                         MinLon = body.MinLon,
                         MaxLon = body.MaxLon,
                         MinLat = body.MinLat,

@@ -2,7 +2,6 @@
 using ParkSpotTLV.Infrastructure;
 using ParkSpotTLV.Contracts.Time;
 
-
 namespace ParkSpotTLV.Api.Endpoints {
 
     public static class HealthEndpoints {
