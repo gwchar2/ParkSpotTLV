@@ -56,7 +56,6 @@ public partial class ShowMapPage : ContentPage, IDisposable
         Geometry: default
     );
 
-
     public ShowMapPage(CarService carService, MapService mapService, MapSegmentRenderer mapSegmentRenderer, LocalDataService localDataService, MapInteractionService mapInteractionService, ParkingPopUps parkingPopUps, ParkingService parkingService)
     {
         InitializeComponent();
@@ -602,9 +601,9 @@ public partial class ShowMapPage : ContentPage, IDisposable
         {
             // Fallback to app store
             if (DeviceInfo.Platform == DevicePlatform.iOS)
-                await Launcher.OpenAsync("https://apps.apple.com/app/pango");
+                await Launcher.OpenAsync("https://itunes.apple.com/il/app/pngw/id434818173?mt=8");
             else
-                await Launcher.OpenAsync("https://play.google.com/store/apps/details?id=com.pango.android");
+                await Launcher.OpenAsync("https://play.google.com/store/apps/details?id=com.unicell.pangoandroid");
         }
     }
 

@@ -96,11 +96,14 @@
 	</ItemGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
-  <AndroidManifestPlaceholders>mapsApiKey=$(MAPS_API_KEY_DEBUG)</AndroidManifestPlaceholders>
-</PropertyGroup>
-<PropertyGroup Condition="'$(Configuration)'=='Release'">
-  <AndroidManifestPlaceholders>mapsApiKey=$(MAPS_API_KEY_RELEASE)</AndroidManifestPlaceholders>
-</PropertyGroup>
+		<AndroidManifestPlaceholders>mapsApiKey=$(MAPS_API_KEY_DEBUG)</AndroidManifestPlaceholders>
+		<AndroidManifestPlaceholders>mapsApiKeyTommer=$(GOOGLE_MAPS_API_KEY)</AndroidManifestPlaceholders>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<AndroidManifestPlaceholders>mapsApiKey=$(MAPS_API_KEY_RELEASE)</AndroidManifestPlaceholders>
+		<AndroidManifestPlaceholders>mapsApiKeyTommer=$(GOOGLE_MAPS_API_KEY)</AndroidManifestPlaceholders>
+	</PropertyGroup>
+
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\backend\ParkSpotTLV.Contracts\ParkSpotTLV.Contracts.csproj" />
