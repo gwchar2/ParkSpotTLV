@@ -49,7 +49,7 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path keystore | Out-Null
-          [IO.File]::WriteAllBytes("key/parkspot-release.jks",
+          [IO.File]::WriteAllBytes("keys/parkspot-release.jks",
             [Convert]::FromBase64String("${{ secrets.ANDROID_KEYSTORE_BASE64 }}"))
 
       - name: Restore
