@@ -40,7 +40,7 @@ namespace ParkSpotTLV.App.Pages {
                 if (tokens is not null)
                 {
                     // token is already attached to HttpClient by the service
-                    await Shell.Current.GoToAsync("ShowMapPage");
+                    await Shell.Current.GoToAsync("///ShowMapPage");
                 }
             }
             catch (HttpRequestException ex) {
@@ -69,7 +69,8 @@ namespace ParkSpotTLV.App.Pages {
         * Handles sign up button click. Navigates to SignUpPage.
         */
         private async void OnSignUpClicked(object? sender, EventArgs e) {
-            await Shell.Current.GoToAsync("SignUpPage");
+            await Shell.Current.GoToAsync("..");
+            await Shell.Current.GoToAsync("///SignUpPage");
         }
     }
 }

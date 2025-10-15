@@ -42,7 +42,6 @@ services:
       Auth__RefreshTokenDays: 14
       Auth__ClockSkewMinutes: 1
       Auth__Signing__Type: HMAC
-      Auth__Signing__HmacSecret: ea05ceb1-fb8f-4f92-8ad6-7bfd90d0fa25 
 
     ports:
       - "8080:8080"

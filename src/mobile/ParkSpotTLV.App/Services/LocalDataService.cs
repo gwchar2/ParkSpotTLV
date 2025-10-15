@@ -65,10 +65,8 @@ public class LocalDataService : ILocalDataService
     public async Task AddSessionAsync(Session session)
     {
         using var context = new LocalDbContext();
-        var existing = await context.Session.FirstOrDefaultAsync();
-
-        if (existing is not null)
-            context.Session.Remove(existing);
+        //var existing = await context.Session.FirstOrDefaultAsync();
+        await context.Session.ExecuteDeleteAsync();
 
         await context.Session.AddAsync(session);
         await context.SaveChangesAsync();

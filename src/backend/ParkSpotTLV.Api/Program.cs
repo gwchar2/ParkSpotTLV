@@ -19,7 +19,11 @@ Log.Logger = new LoggerConfiguration()
  * keeping concerns local, testable, and easy to evolve.
  */
 try {
-    Log.Information("Starting Up");
+#if DEBUG
+    Log.Information("Starting Up App Build: DEBUG:");
+#else
+    Log.Information("Starting Up App Build: RELEASE:");
+#endif
 
     var builder = WebApplication.CreateBuilder(args); 
     builder.Services.AddSingleton<IClock, SystemClock>(); 

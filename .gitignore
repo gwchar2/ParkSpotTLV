@@ -8,4 +8,6 @@
 *.db
 *.db-wal
 *.db-shm
+keys/*.jks
+!keys/debug-shared.jks
 '@ | Out-File -Encoding utf8 .gitignore

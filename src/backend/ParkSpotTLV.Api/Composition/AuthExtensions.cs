@@ -1,10 +1,13 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using ParkSpotTLV.Infrastructure.Auth.Services;
 using ParkSpotTLV.Infrastructure.Auth.Models;
+using ParkSpotTLV.Infrastructure.Auth.Services;
 using ParkSpotTLV.Infrastructure.Security;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace ParkSpotTLV.Api.Composition {
 
@@ -14,11 +17,18 @@ namespace ParkSpotTLV.Api.Composition {
             /* ----------------------------------------------------------------------
              * AUTH OPTIONS (SINGLE SOURCE OF TRUTH)
              * ---------------------------------------------------------------------- */
-            services.AddOptions<AuthOptions>()
-                .Bind(config.GetSection("Auth"))
-                .ValidateDataAnnotations()
-                .Validate(o => o.Signing.Type != "HMAC" || !string.IsNullOrWhiteSpace(o.Signing.HmacSecret),
-                    "HMAC Selected but Auth:Signing:HmacSecret is missing!");
+            var authOpts = config.GetSection("Auth").Get<AuthOptions>() ?? new AuthOptions();
+
+            if (!string.Equals(authOpts.Signing.Type, "HMAC", StringComparison.OrdinalIgnoreCase))
+                throw new NotSupportedException("ONLY HMAC IS WIRED AT THE MOMENT - IMPLEMENT RSA LATER");
+
+            if (string.IsNullOrWhiteSpace(authOpts.Signing.HmacSecret)) {
+                var bytes = RandomNumberGenerator.GetBytes(32); 
+                authOpts.Signing.HmacSecret = WebEncoders.Base64UrlEncode(bytes);
+                Console.WriteLine("Auth: no HMAC provided. Generated dev HMAC; tokens will invalidate on restart.");
+            }
+            services.AddSingleton<IOptions<AuthOptions>>(Options.Create(authOpts));
+
 
             /* ----------------------------------------------------------------------
              * PASSWORD HASHING (Argon2id)
@@ -30,7 +40,7 @@ namespace ParkSpotTLV.Api.Composition {
             /* ----------------------------------------------------------------------
              * AUTHENTICATION (JWT Bearer) + AUTHORIZATION
              * ---------------------------------------------------------------------- */
-            var authOpts = config.GetSection("Auth").Get<AuthOptions>();
+            //var authOpts = config.GetSection("Auth").Get<AuthOptions>();
 
             if (authOpts!.Signing.Type.Equals("HMAC", StringComparison.OrdinalIgnoreCase)) {
                 var keyBytes = Encoding.UTF8.GetBytes(authOpts.Signing.HmacSecret!);
