@@ -74,7 +74,22 @@ jobs:
           /p:RunAOTCompilation=false
           /p:AndroidEnableProfiledAot=false
           /p:PublishAot=false
-
+          # Paths to Android build-tools
+          $bt = Get-ChildItem -Directory "$env:ANDROID_HOME\build-tools" | Sort-Object Name -Descending | Select-Object -First 1
+          $aapt = Join-Path $bt.FullName "aapt.exe"
+          $apksigner = Join-Path $bt.FullName "apksigner.bat"
+          
+          # Find the produced APK
+          $apk = Get-ChildItem -Recurse -Path "src/mobile/ParkSpotTLV.App/bin/Release/net9.0-android" -Filter *.apk | Select-Object -First 1
+          Write-Host "APK:" $apk.FullName
+          
+          # 1) Print package and check META-DATA for the Maps key placeholder resolution
+          & $aapt dump badging $apk.FullName | Select-String "package: name="
+          & $aapt dump xmltree $apk.FullName AndroidManifest.xml | Select-String -Context 2,2 "com.google.android.geo.API_KEY"
+          
+          # 2) Print signing cert SHA-1 (compare with Google key restriction)
+          & $apksigner verify --print-certs $apk.FullName
+          
       - name: Find APK path
         id: findapk
         shell: pwsh
