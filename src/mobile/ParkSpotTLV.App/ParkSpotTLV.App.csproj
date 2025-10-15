@@ -129,6 +129,7 @@
   		<AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
   		<PublishAot>false</PublishAot>
   		<AndroidManifestPlaceholders>mapsApiKeyForAll=$(MapsApiKey)</AndroidManifestPlaceholders>
+  		<AndroidPackageFileName>ParkSpotTLV.apk</AndroidPackageFileName>
 </PropertyGroup>
 	
 	
