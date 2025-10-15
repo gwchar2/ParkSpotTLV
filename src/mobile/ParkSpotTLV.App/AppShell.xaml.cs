@@ -12,8 +12,8 @@ namespace ParkSpotTLV.App {
             InitializeComponent();
             _services = services;
 
-            // Only register routes for pages NOT defined in AppShell.xaml
-            // MainPage, SignUpPage, and ShowMapPage are already defined in XAML
+            // Register routes for pages NOT defined in AppShell.xaml
+            Routing.RegisterRoute("SignUpPage", typeof(SignUpPage));
             Routing.RegisterRoute("AddCarPage", typeof(AddCarPage));
             Routing.RegisterRoute("EditCarPage", typeof(EditCarPage));
             Routing.RegisterRoute("AccountDetailsPage", typeof(AccountDetailsPage));

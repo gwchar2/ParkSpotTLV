@@ -82,7 +82,7 @@ public partial class SignUpPage : ContentPage
                 }
 
                 // navigate
-                await Shell.Current.GoToAsync("///ShowMapPage");
+                await Shell.Current.GoToAsync("//ShowMapPage");
             }
         }
         catch (HttpRequestException ex) // contains status + body from the service
