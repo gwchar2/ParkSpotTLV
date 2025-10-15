@@ -21,8 +21,8 @@ services:
 
   api:
     build:
-      context: .
-      dockerfile: src/backend/ParkSpotTLV.Api/Dockerfile
+      context: ./src/backend
+      dockerfile: ParkSpotTLV.Api/Dockerfile
     container_name: parkspot_api
     environment:
       ASPNETCORE_ENVIRONMENT: Development
