@@ -45,24 +45,40 @@ jobs:
           dotnet workload install maui-android android
           dotnet workload list
 
+      - name: Prepare release keystore
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path keystore | Out-Null
+          [IO.File]::WriteAllBytes("keystore/parkspot-release.jks",
+            [Convert]::FromBase64String("${{ secrets.ANDROID_KEYSTORE_BASE64 }}"))
+
       - name: Restore
         shell: pwsh
         run: dotnet restore $env:MAUI_PROJECT
 
       - name: Publish APK
         shell: pwsh
+        env:
+          KeystoreStorePass: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KeystoreAlias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KeystoreKeyPass: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          MapsApiKey: ${{ secrets.MAPS_API_KEY_RELEASE }}
         run: >
           dotnet publish $env:MAUI_PROJECT
           -c $env:CONFIGURATION
           -f net9.0-android
           /p:AndroidPackageFormat=apk
           /p:AndroidPackageFileName=ParkSpotTLV.apk
+          /p:MapsApiKey=$env:MapsApiKey
+          /p:KeystoreStorePass=$env:KeystoreStorePass
+          /p:KeystoreAlias=$env:KeystoreAlias
+          /p:KeystoreKeyPass=$env:KeystoreKeyPass
 
       - name: Find APK path
         id: findapk
         shell: pwsh
         run: |
-          $apk = Get-ChildItem -Recurse -Path . -Filter *.apk | Select-Object -First 1
+          $apk = Get-ChildItem -Recurse -Path "src/mobile/ParkSpotTLV.App/bin/Release/net9.0-android" -Filter *.apk | Select-Object -First 1
           if (-not $apk) { Write-Error "No APK found."; exit 1 }
           echo "apk=$($apk.FullName)" >> $env:GITHUB_OUTPUT
 

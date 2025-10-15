@@ -95,16 +95,41 @@
 		<PackageReference Include="System.Net.Http.Json" Version="9.0.8" />
 	</ItemGroup>
 
-	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+	<!--<PropertyGroup Condition="'$(Configuration)'=='Debug'">
 		<AndroidManifestPlaceholders>mapsApiKey=$(MAPS_API_KEY_DEBUG)</AndroidManifestPlaceholders>
-		<AndroidManifestPlaceholders>mapsApiKeyTommer=$(GOOGLE_MAPS_API_KEY)</AndroidManifestPlaceholders>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
 		<AndroidManifestPlaceholders>mapsApiKey=$(MAPS_API_KEY_RELEASE)</AndroidManifestPlaceholders>
-		<AndroidManifestPlaceholders>mapsApiKeyTommer=$(GOOGLE_MAPS_API_KEY)</AndroidManifestPlaceholders>
+	</PropertyGroup>-->
+
+
+
+	<!-- EXPLANATION TO SEE THE API KEYS AND SHA1 CODE IN ENVIRONMENT:
+		 From main directory, run in terminal:
+			keytool -list -v -keystore "keys/debug-shared.jks" -alias "debug" -storepass "devpass"
+			keytool -list -v -keystore "keys/parkspot-release.jks" -alias "parkspot" -storepass "devpass"
+	     Each one returns the respective code for either running via debug (visual studio) or release (apk install)	
+		-->
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<AndroidKeyStore>true</AndroidKeyStore>
+		<AndroidSigningKeyStore>..\..\..\keys\debug-shared.jks</AndroidSigningKeyStore>
+		<AndroidSigningStorePass>devpass</AndroidSigningStorePass>
+		<AndroidSigningKeyAlias>debug</AndroidSigningKeyAlias>
+		<AndroidSigningKeyPass>devpass</AndroidSigningKeyPass>
+		<AndroidManifestPlaceholders>mapsApiKeyForAll=$(MapsApiKeyDev)</AndroidManifestPlaceholders>
 	</PropertyGroup>
 
-
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<AndroidKeyStore>true</AndroidKeyStore>
+		<AndroidSigningKeyStore>..\..\..\keys\parkspot-release.jks</AndroidSigningKeyStore>
+		<AndroidSigningStorePass>$(KeystoreStorePass)</AndroidSigningStorePass>
+		<AndroidSigningKeyAlias>$(KeystoreAlias)</AndroidSigningKeyAlias>
+		<AndroidSigningKeyPass>$(KeystoreKeyPass)</AndroidSigningKeyPass>
+		<RunAOTCompilation>false</RunAOTCompilation>
+		<AndroidManifestPlaceholders>mapsApiKeyForAll=$(MapsApiKey)</AndroidManifestPlaceholders>
+	</PropertyGroup>
+	
+	
 	<ItemGroup>
 	  <ProjectReference Include="..\..\backend\ParkSpotTLV.Contracts\ParkSpotTLV.Contracts.csproj" />
 	</ItemGroup>
