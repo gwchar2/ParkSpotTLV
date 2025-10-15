@@ -11,6 +11,10 @@ using ParkSpotTLV.Api.Endpoints.Support;
 using ParkSpotTLV.Api.Endpoints.Support.Errors;
 using ParkSpotTLV.Api.Endpoints.Support.EndpointFilters;
 
+
+/*
+ * 
+ */
 namespace ParkSpotTLV.Api.Endpoints {
     public static class AuthEndpoints {
         public static IEndpointRouteBuilder MapAuth(this IEndpointRouteBuilder routes) {
