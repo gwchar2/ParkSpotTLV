@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.2](https://github.com/gwchar2/ParkSpotTLV/compare/v1.0.1...v1.0.2) (2025-10-15)
+
+
+### Bug Fixes
+
+* **App:** fixing navigation issue causing app crash ([c4db502](https://github.com/gwchar2/ParkSpotTLV/commit/c4db502ec46eb70515da8af6a0b86a103ae8421a))
+* **App:** fixing navigation issue causing app crash ([cbc9afc](https://github.com/gwchar2/ParkSpotTLV/commit/cbc9afc7968e1b20cd0cbaf4db041be6455c400c))
+
 ## [1.0.1](https://github.com/gwchar2/ParkSpotTLV/compare/v1.0.0...v1.0.1) (2025-10-15)
 
 
