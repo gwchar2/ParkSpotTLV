@@ -74,21 +74,31 @@ jobs:
           /p:RunAOTCompilation=false
           /p:AndroidEnableProfiledAot=false
           /p:PublishAot=false
-          # Paths to Android build-tools
+          
+      - name: Verify Maps key & signing inside APK
+        shell: pwsh
+        run: |
+          # Find the APK
+          $apk = Get-ChildItem -Recurse -Path "src/mobile/ParkSpotTLV.App/bin/Release/net9.0-android" -Filter *.apk | Select-Object -First 1
+          if (-not $apk) { throw "APK not found under bin/Release/net9.0-android" }
+          Write-Host "APK:" $apk.FullName
+      
+          # Build-tools (aapt/apksigner)
           $bt = Get-ChildItem -Directory "$env:ANDROID_HOME\build-tools" | Sort-Object Name -Descending | Select-Object -First 1
           $aapt = Join-Path $bt.FullName "aapt.exe"
           $apksigner = Join-Path $bt.FullName "apksigner.bat"
-          
-          # Find the produced APK
-          $apk = Get-ChildItem -Recurse -Path "src/mobile/ParkSpotTLV.App/bin/Release/net9.0-android" -Filter *.apk | Select-Object -First 1
-          Write-Host "APK:" $apk.FullName
-          
-          # 1) Print package and check META-DATA for the Maps key placeholder resolution
+      
+          Write-Host "=== Package name ==="
           & $aapt dump badging $apk.FullName | Select-String "package: name="
+      
+          Write-Host "`n=== Manifest META-DATA for Maps key ==="
           & $aapt dump xmltree $apk.FullName AndroidManifest.xml | Select-String -Context 2,2 "com.google.android.geo.API_KEY"
-          
-          # 2) Print signing cert SHA-1 (compare with Google key restriction)
+      
+          Write-Host "`n=== Signing certificate (SHA-1) ==="
           & $apksigner verify --print-certs $apk.FullName
+      
+          Write-Host "`n=== CI secret presence (masked) ==="
+          if ($env:MapsApiKey) { "MapsApiKey length: $($env:MapsApiKey.Length)" } else { "MapsApiKey is empty" }
           
       - name: Find APK path
         id: findapk
