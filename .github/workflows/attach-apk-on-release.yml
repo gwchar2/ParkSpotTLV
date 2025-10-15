@@ -64,15 +64,16 @@ jobs:
           KeystoreKeyPass: ${{ secrets.ANDROID_KEY_PASSWORD }}
           MapsApiKey: ${{ secrets.MAPS_API_KEY_RELEASE }}
         run: >
-          dotnet publish $env:MAUI_PROJECT
-          -c $env:CONFIGURATION
-          -f net9.0-android
+          dotnet publish $env:MAUI_PROJECT -c $env:CONFIGURATION -f net9.0-android
           /p:AndroidPackageFormat=apk
           /p:AndroidPackageFileName=ParkSpotTLV.apk
           /p:MapsApiKey=$env:MapsApiKey
           /p:KeystoreStorePass=$env:KeystoreStorePass
           /p:KeystoreAlias=$env:KeystoreAlias
           /p:KeystoreKeyPass=$env:KeystoreKeyPass
+          /p:RunAOTCompilation=false
+          /p:AndroidEnableProfiledAot=false
+          /p:PublishAot=false
 
       - name: Find APK path
         id: findapk
