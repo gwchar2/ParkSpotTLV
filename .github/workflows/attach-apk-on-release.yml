@@ -2,12 +2,12 @@ name: Attach APK to Release
 
 on:
   release:
-    types: [published, prereleased]             # run for both releases and pre-releases
-  workflow_dispatch:                            # manual fallback to attach to an existing tag
+    types: [published, prereleased]
+  workflow_dispatch:
     inputs:
       tag:
         description: "Tag to attach APK to (e.g., v0.2.0-beta.0)"
-        required: true
+        required: false
 
 permissions:
   contents: write
@@ -15,23 +15,32 @@ permissions:
 jobs:
   build-and-upload-apk:
     runs-on: windows-latest
+
     env:
       MAUI_PROJECT: src/mobile/ParkSpotTLV.App/ParkSpotTLV.App.csproj
       CONFIGURATION: Release
-      TAG_NAME: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
 
-      # export secrets as environment variables used by publish
-      MapsApiKey:            ${{ secrets.MAPS_API_KEY_RELEASE }}
-      KeystoreStorePass:     ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-      KeystoreAlias:         ${{ secrets.ANDROID_KEY_ALIAS }}
-      KeystoreKeyPass:       ${{ secrets.ANDROID_KEY_PASSWORD }}
+      # Tag logic: if workflow_dispatch has 'tag', use it; else if release event, use release tag; else empty
+      TAG_NAME: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || (github.event_name == 'release' && github.event.release.tag_name) || '' }}
+
+      # Secrets mapped to env vars used by MSBuild/publish
+      MapsApiKey:        ${{ secrets.MAPS_API_KEY_RELEASE }}
+      KeystoreStorePass: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      KeystoreAlias:     ${{ secrets.ANDROID_KEY_ALIAS }}
+      KeystoreKeyPass:   ${{ secrets.ANDROID_KEY_PASSWORD }}
 
     steps:
-      - name: Checkout tag
+      - name: Checkout (tag if provided, else current commit)
         uses: actions/checkout@v4
         with:
-          ref: ${{ env.TAG_NAME }}
           fetch-depth: 0
+          ref: ${{ env.TAG_NAME != '' && env.TAG_NAME || github.sha }}
+
+      - name: Show checked-out commit
+        shell: pwsh
+        run: |
+          git log -1 --oneline
+          git describe --tags --always
 
       - name: Setup .NET SDK 9.x
         uses: actions/setup-dotnet@v4
@@ -47,7 +56,6 @@ jobs:
       - name: Install MAUI/Android workloads
         shell: pwsh
         run: |
-          dotnet --info
           dotnet workload install maui-android android
           dotnet workload list
 
@@ -57,31 +65,28 @@ jobs:
           New-Item -ItemType Directory -Force -Path keys | Out-Null
           [IO.File]::WriteAllBytes("keys/parkspot-release.jks",
             [Convert]::FromBase64String("${{ secrets.ANDROID_KEYSTORE_BASE64 }}"))
-          Write-Host "KS exists? " (Test-Path "keys/parkspot-release.jks")
+          Write-Host "Keystore exists? " (Test-Path "keys/parkspot-release.jks")
 
       - name: Restore
         shell: pwsh
         run: dotnet restore $env:MAUI_PROJECT
 
-      - name: Publish APK
+      - name: Publish signed Release APK
         shell: pwsh
-        env:
-          KeystoreStorePass: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KeystoreAlias: ${{ secrets.ANDROID_KEY_ALIAS }}
-          KeystoreKeyPass: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          MapsApiKey: ${{ secrets.MAPS_API_KEY_RELEASE }}
         run: >
           dotnet publish $env:MAUI_PROJECT -c $env:CONFIGURATION -f net9.0-android
           /p:AndroidPackageFormat=apk
           /p:AndroidPackageFileName=ParkSpotTLV.apk
-          /p:MapsApiKey=$env:MapsApiKey
-          /p:KeystoreStorePass=$env:KeystoreStorePass
-          /p:KeystoreAlias=$env:KeystoreAlias
-          /p:KeystoreKeyPass=$env:KeystoreKeyPass
           /p:RunAOTCompilation=false
           /p:AndroidEnableProfiledAot=false
           /p:PublishAot=false
-          
+          /p:AndroidKeyStore=true
+          /p:AndroidSigningKeyStore=keys/parkspot-release.jks
+          /p:AndroidSigningStorePass=$env:KeystoreStorePass
+          /p:AndroidSigningKeyAlias=$env:KeystoreAlias
+          /p:AndroidSigningKeyPass=$env:KeystoreKeyPass
+          /p:AndroidManifestPlaceholders="mapsApiKeyForAll=$env:MapsApiKey"
+
       - name: Verify Maps key & signing inside APK
         shell: pwsh
         run: |
@@ -89,24 +94,24 @@ jobs:
           $apk = Get-ChildItem -Recurse -Path "src/mobile/ParkSpotTLV.App/bin/Release/net9.0-android" -Filter *.apk | Select-Object -First 1
           if (-not $apk) { throw "APK not found under bin/Release/net9.0-android" }
           Write-Host "APK:" $apk.FullName
-      
+
           # Build-tools (aapt/apksigner)
           $bt = Get-ChildItem -Directory "$env:ANDROID_HOME\build-tools" | Sort-Object Name -Descending | Select-Object -First 1
           $aapt = Join-Path $bt.FullName "aapt.exe"
           $apksigner = Join-Path $bt.FullName "apksigner.bat"
-      
+
           Write-Host "=== Package name ==="
           & $aapt dump badging $apk.FullName | Select-String "package: name="
-      
+
           Write-Host "`n=== Manifest META-DATA for Maps key ==="
           & $aapt dump xmltree $apk.FullName AndroidManifest.xml | Select-String -Context 2,2 "com.google.android.geo.API_KEY"
-      
+
           Write-Host "`n=== Signing certificate (SHA-1) ==="
           & $apksigner verify --print-certs $apk.FullName
-      
+
           Write-Host "`n=== CI secret presence (masked) ==="
-          if ($env:MapsApiKey) { "MapsApiKey length: $($env:MapsApiKey.Length)" } else { "MapsApiKey is empty" }
-          
+          if ($env:MapsApiKey) { "MapsApiKey length: $($env:MapsApiKey.Length)" } else { "MapsApiKey is EMPTY" }
+
       - name: Find APK path
         id: findapk
         shell: pwsh
@@ -119,6 +124,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ steps.findapk.outputs.apk }}
-          tag_name: ${{ env.TAG_NAME }}
+          tag_name: ${{ env.TAG_NAME != '' && env.TAG_NAME || github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
