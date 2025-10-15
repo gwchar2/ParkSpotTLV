@@ -20,6 +20,12 @@ jobs:
       CONFIGURATION: Release
       TAG_NAME: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
 
+      # export secrets as environment variables used by publish
+      MapsApiKey:            ${{ secrets.MAPS_API_KEY_RELEASE }}
+      KeystoreStorePass:     ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      KeystoreAlias:         ${{ secrets.ANDROID_KEY_ALIAS }}
+      KeystoreKeyPass:       ${{ secrets.ANDROID_KEY_PASSWORD }}
+
     steps:
       - name: Checkout tag
         uses: actions/checkout@v4
@@ -51,6 +57,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path keys | Out-Null
           [IO.File]::WriteAllBytes("keys/parkspot-release.jks",
             [Convert]::FromBase64String("${{ secrets.ANDROID_KEYSTORE_BASE64 }}"))
+          Write-Host "KS exists? " (Test-Path "keys/parkspot-release.jks")
 
       - name: Restore
         shell: pwsh
