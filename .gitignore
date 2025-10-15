@@ -11,3 +11,4 @@
 keys/*.jks
 !keys/debug-shared.jks
 '@ | Out-File -Encoding utf8 .gitignore
+/src/backend/ParkSpotTLV.Api/Features/Parking/Models/BudgetCalculationDto.cs
