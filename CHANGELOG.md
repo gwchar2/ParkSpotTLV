@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1](https://github.com/gwchar2/ParkSpotTLV/compare/v1.0.0...v1.0.1) (2025-10-15)
+
+
+### Bug Fixes
+
+* fixing release variables ([b66d625](https://github.com/gwchar2/ParkSpotTLV/commit/b66d6259d02ebaf67daaa6d5c50d5908a4ba4934))
+* fixing release variables ([d188d80](https://github.com/gwchar2/ParkSpotTLV/commit/d188d808e700800009a7e10e47dec323b13cef8a))
+
 ## [1.0.0](https://github.com/gwchar2/ParkSpotTLV/compare/v1.0.0...v1.0.0) (2025-10-14)
 
 
