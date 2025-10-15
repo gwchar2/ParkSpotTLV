@@ -44,11 +44,6 @@
         Route="LoadingPage" />
 
     <ShellContent
-        Title="Sign Up"
-        ContentTemplate="{DataTemplate pages:SignUpPage}"
-        Route="SignUpPage" />
-
-    <ShellContent
         Title="Login"
         ContentTemplate="{DataTemplate pages:MainPage}"
         Route="MainPage" />

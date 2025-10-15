@@ -40,7 +40,7 @@ namespace ParkSpotTLV.App.Pages {
                 if (tokens is not null)
                 {
                     // token is already attached to HttpClient by the service
-                    await Shell.Current.GoToAsync("ShowMapPage");
+                    await Shell.Current.GoToAsync("//ShowMapPage");
                 }
             }
             catch (HttpRequestException ex) {
