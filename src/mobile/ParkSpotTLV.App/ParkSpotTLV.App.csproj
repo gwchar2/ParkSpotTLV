@@ -120,14 +120,16 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
-		<AndroidKeyStore>true</AndroidKeyStore>
-		<AndroidSigningKeyStore>..\..\..\keys\parkspot-release.jks</AndroidSigningKeyStore>
-		<AndroidSigningStorePass>$(KeystoreStorePass)</AndroidSigningStorePass>
-		<AndroidSigningKeyAlias>$(KeystoreAlias)</AndroidSigningKeyAlias>
-		<AndroidSigningKeyPass>$(KeystoreKeyPass)</AndroidSigningKeyPass>
-		<RunAOTCompilation>false</RunAOTCompilation>
-		<AndroidManifestPlaceholders>mapsApiKeyForAll=$(MapsApiKey)</AndroidManifestPlaceholders>
-	</PropertyGroup>
+  		<AndroidKeyStore>true</AndroidKeyStore>
+  		<AndroidSigningKeyStore>..\..\..\keys\parkspot-release.jks</AndroidSigningKeyStore>
+  		<AndroidSigningStorePass>$(KeystoreStorePass)</AndroidSigningStorePass>
+  		<AndroidSigningKeyAlias>$(KeystoreAlias)</AndroidSigningKeyAlias>
+  		<AndroidSigningKeyPass>$(KeystoreKeyPass)</AndroidSigningKeyPass>
+  		<RunAOTCompilation>false</RunAOTCompilation>
+  		<AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+  		<PublishAot>false</PublishAot>
+  		<AndroidManifestPlaceholders>mapsApiKeyForAll=$(MapsApiKey)</AndroidManifestPlaceholders>
+</PropertyGroup>
 	
 	
 	<ItemGroup>
