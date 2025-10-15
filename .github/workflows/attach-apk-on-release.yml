@@ -81,7 +81,7 @@ jobs:
           /p:AndroidEnableProfiledAot=false
           /p:PublishAot=false
           /p:AndroidKeyStore=true
-          /p:AndroidSigningKeyStore=keys/parkspot-release.jks
+          /p:AndroidSigningKeyStore=..\..\..\keys\parkspot-release.jks
           /p:AndroidSigningStorePass=$env:KeystoreStorePass
           /p:AndroidSigningKeyAlias=$env:KeystoreAlias
           /p:AndroidSigningKeyPass=$env:KeystoreKeyPass
