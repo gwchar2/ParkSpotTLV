@@ -48,7 +48,7 @@ jobs:
       - name: Prepare release keystore
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force -Path keystore | Out-Null
+          New-Item -ItemType Directory -Force -Path keys | Out-Null
           [IO.File]::WriteAllBytes("keys/parkspot-release.jks",
             [Convert]::FromBase64String("${{ secrets.ANDROID_KEYSTORE_BASE64 }}"))
 
