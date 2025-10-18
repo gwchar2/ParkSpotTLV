@@ -26,7 +26,7 @@
 
 ---
 
-## 🗺️ Project Overview
+## Project Overview
 
 ParkSpot TLV is a **smart parking solution for Tel Aviv**, integrating geospatial data, zone-based parking policies, and mobile convenience. It combines a robust **ASP.NET Core Web API backend**, a **PostGIS-powered database**, and a **.NET MAUI Android app** for a seamless parking experience.
 
@@ -40,7 +40,7 @@ ParkSpot TLV is a **smart parking solution for Tel Aviv**, integrating geospatia
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 The ParkSpot TLV project is divided into three major components:
 1. **Backend API** – ASP.NET Core Web API with EF Core and PostGIS
 2. **Database** – PostgreSQL + PostGIS (for spatial data and zone management)
@@ -50,7 +50,7 @@ The ParkSpot TLV project is divided into three major components:
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Docker Desktop (Windows/macOS/Linux)
@@ -98,7 +98,7 @@ Access the backend at: `http://localhost:8080`
 
 ---
 
-## 📱 App Guide
+## App Guide
 
 ### Main Screens
 - **Login / Register** – Authenticate securely via the API.
@@ -111,7 +111,7 @@ Access the backend at: `http://localhost:8080`
 
 ---
 
-## 🔌 API Reference
+## API Reference
 All API routes are organized under `/api`.
 Authentication uses **JWT access tokens** and **refresh tokens** for renewal.
 
@@ -200,7 +200,7 @@ The system uses PostgreSQL with **PostGIS** for geospatial operations.
 
 ---
 
-## ⚙️ Services & Background Jobs
+## Services & Background Jobs
 - **AutoStopParkingService** – Monitors sessions and stops them automatically when exceeding time or rules.
 - **DailyBudgetService** – Resets and tracks remaining daily minutes.
 - **ClassificationService** – Evaluates the zone type and restrictions.
@@ -208,7 +208,7 @@ The system uses PostgreSQL with **PostGIS** for geospatial operations.
 
 ---
 
-## 🔒 Security
+## Security
 - Passwords are hashed with **Argon2ID**.
 - Access tokens are signed via **JWT (HMAC SHA-256)**.
 - Refresh tokens are stored securely in the database.
@@ -216,7 +216,7 @@ The system uses PostgreSQL with **PostGIS** for geospatial operations.
 
 ---
 
-## 📜 Licenses & Credits
+## Licenses & Credits
 This project makes use of the following external resources:
 - **OpenStreetMap** data © OpenStreetMap contributors ([https://www.openstreetmap.org/](https://www.openstreetmap.org/))
 - **Google Maps API** ([https://mapsplatform.google.com/](https://mapsplatform.google.com/))
@@ -228,7 +228,7 @@ License: MIT (or specify your chosen license)
 
 ---
 
-## 🧩 Contributing
+## Contributing
 Contributions are welcome!
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/my-feature`)
@@ -237,7 +237,7 @@ Contributions are welcome!
 
 ---
 
-## 🔮 Future Roadmap
+## Future Roadmap
 - Pinpoint parking accuracy & memory
 - Specific road segment information
 - Push notifications for parking session reminders
@@ -246,7 +246,7 @@ Contributions are welcome!
 
 ---
 
-## 📧 Contact
+## Contact
 For any inquiries, contact:
 - **Maintainer:** [Tommer Toledo]
 - **Email:** [gwchar2@hotmail.com]
