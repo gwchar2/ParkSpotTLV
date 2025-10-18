@@ -4,31 +4,10 @@
 [![Build](https://img.shields.io/github/actions/workflow/status/gwchar2/ParkSpotTLV/ci.yml?branch=main&label=Build)](https://github.com/gwchar2/ParkSpotTLV/actions/workflows/ci.yml)
 [![Latest release](https://img.shields.io/github/v/release/gwchar2/ParkSpotTLV?include_prereleases&sort=semver)](https://github.com/gwchar2/ParkSpotTLV/releases)
 [![Release date](https://img.shields.io/github/release-date-pre/gwchar2/ParkSpotTLV)](https://github.com/gwchar2/ParkSpotTLV/releases/latest)
+[![Changelog](https://img.shields.io/badge/changelog-8A2BE2)](./CHANGELOG.md)
 
 
-[Changelog](./CHANGELOG.md)
-Use special commit messages to properly decide the next version & store logs:
-```git
-feat: → minor feature
-fix: → patch fix
-feat! or BREAKING CHANGE: → major
-```
 
-Workflow Example:
-```git
-git commit -m "feat(db): "Added feature X"
-git push
-git commit -m "fix(db): "Fixed bug in feature Y"
-git push
-```
-
-Final output on CHANGELOG.MD after Pull Request:
-```git
-Features:
-db: Added feature X (link_to_commit)
-Bug Fixes
-db: Fixed bug in feature Y (link_to_commit)
-```
 
 ## 📑 Table of Contents
 
