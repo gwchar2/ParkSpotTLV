@@ -74,6 +74,8 @@ cd ParkSpotTLV
 ---
 
 ## Running the Project
+Before approaching the different options, make sure to run from the main folder:
+`dotnet build src/backend/ParkSpotTLV.Api/ParkSpotTLV.Api.csproj -c Debug`
 
 ### Option 1: Installing the Android APK
 1. Download the latest APK from the [**Releases**](https://github.com/gwchar2/ParkSpotTLV/releases/latest) section.
