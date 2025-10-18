@@ -83,9 +83,7 @@ cd ParkSpotTLV
 3. Option 2: Install via terminal 
 	1. `adb install -r <path to apk>`
 	2. Run the docker project via terminal or visual studio.
-<div align="left">
-  <img src="./assets/docker-compose.jpg" alt="dockercompose" />
-</div>
+<img src="./assets/docker-compose.jpg" alt="dockercompose" />
 
 ### Option 2: Running via Visual Studio
 1. Open the solution file `ParkSpotTLV.sln`.
@@ -93,8 +91,8 @@ cd ParkSpotTLV
 <img src="./assets/configure-startup-projects-1.jpg" alt="dockercompose" />
 3. Choose docker-compose and ParkSpotTLV.App projects as the only start options, then click `apply`.
 <img src="./assets/configure-startup-projects-2.jpg" alt="dockercompose" />
-5. Open Android Device Manager, and make sure your Android Emulator is fully loaded **before** continueing to the next step.
-6. Choose your new profile and run.
+4. Open Android Device Manager, and make sure your Android Emulator is fully loaded **before** continueing to the next step.
+5. Choose your new profile and run.
 <img src="./assets/configure-startup-projects-3.jpg" alt="dockercompose" />
 
 ### Option 3: Running from Terminal / Docker Compose
