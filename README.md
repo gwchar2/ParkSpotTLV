@@ -8,7 +8,7 @@
 
 ---
 
-## 📖 Table of Contents
+## Table of Contents
 
 1. [Project Overview](#project-overview)
 2. [System Architecture](#system-architecture)
@@ -68,7 +68,7 @@ cd ParkSpotTLV
 
 ---
 
-## 🧭 Running the Project
+## Running the Project
 
 ### Option 1: Installing the Android APK
 1. Download the latest APK from the [**Releases**](https://github.com/gwchar2/ParkSpotTLV/releases/latest) section.
