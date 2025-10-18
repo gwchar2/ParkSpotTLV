@@ -49,7 +49,9 @@ The ParkSpot TLV project is divided into three major components:
 2. **Database** – PostgreSQL + PostGIS (for spatial data and zone management)
 3. **Mobile App** – .NET MAUI Android client with Google Maps integration
 
-> **[PLACEHOLDER: Insert Architecture Diagram (Mermaid or Image)]**
+<div align="center">
+  <img src="./assets/databaserelations.jpg" alt="databaserelations" />
+</div>
 
 ---
 
@@ -81,17 +83,19 @@ cd ParkSpotTLV
 3. Option 2: Install via terminal 
 	1. `adb install -r <path to apk>`
 	2. Run the docker project via terminal or visual studio.
-
-> **[PLACEHOLDER: Insert Screenshot on running docker project]**
+<div align="left">
+  <img src="./assets/docker-compose" alt="dockercompose" />
+</div>
 
 ### Option 2: Running via Visual Studio
 1. Open the solution file `ParkSpotTLV.sln`.
 2. Right click on the solution and choose `Configure Startup Projects`.
-**[PLACEHOLDER: Insert Screenshot of configure startup projects]**
+<img src="./assets/configure-startup-projects-1" alt="dockercompose" />
 3. Choose docker-compose and ParkSpotTLV.App projects as the only start options, then click `apply`.
-4. Open Android Device Manager, and make sure your Android Emulator is fully loaded **before** continueing to the next step.
-5. Choose your new profile and run.
-**[PLACEHOLDER: Insert Screenshot of choosing new profile and run]**
+<img src="./assets/configure-startup-projects-2" alt="dockercompose" />
+5. Open Android Device Manager, and make sure your Android Emulator is fully loaded **before** continueing to the next step.
+6. Choose your new profile and run.
+<img src="./assets/configure-startup-projects-3" alt="dockercompose" />
 
 ### Option 3: Running from Terminal / Docker Compose
 From the main project folder:
