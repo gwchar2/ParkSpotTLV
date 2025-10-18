@@ -118,15 +118,9 @@ Authentication uses **JWT access tokens** and **refresh tokens** for renewal.
 | POST | `/auth/refresh` | Refresh access token |
 | POST | `/auth/register` | Register new account |
 
->### Parking Related Requests
-| Method | Route | Summary |
-| ------ | ----- | ------- |
-| GET | `/parking/status` | Active parking status |
-| POST | `/parking/start` | Start Parking |
-| PATCH | `/parking/{id}/end` | End Parking |
-| POST | `/parking/stop` | Stop Parking |
+<details>
+<summary><strong>Vehicle Requests</strong></summary>
 
-### Vehicle Requests
 | Method | Route | Summary |
 | ------ | ----- | ------- |
 | GET | `/vehicles` | List Vehicles |
@@ -135,7 +129,11 @@ Authentication uses **JWT access tokens** and **refresh tokens** for renewal.
 | GET | `/vehicles/{id}` | Get Vehicle |
 | PATCH | `/vehicles/{id}` | Update Vehicle |
 
-### Permit Requests
+</details>
+
+<details>
+<summary><strong>Permit Requests</strong></summary>
+
 | Method | Route | Summary |
 | ------ | ----- | ------- |
 | GET | `/permits` | List Permits |
@@ -144,13 +142,30 @@ Authentication uses **JWT access tokens** and **refresh tokens** for renewal.
 | GET | `/permits/{id}` | Get Permit |
 | PATCH | `/permits/{id}` | Update Permit |
 
-### Map Segment Requests
+</details>
+
+<details>
+<summary><strong>Map Segment Requests</strong></summary>
+
 | Method | Route | Summary |
 | ------ | ----- | ------- |
 | GET | `/map/segments` | Segments by BBox + time + vehicle |
 | GET | `/segments/{id}` | Get Segment |
 | GET | `/segments/{id}/rules` | Segment rules at given time |
 
+</details>
+
+<details>
+<summary><strong>Parking Related Requests</strong></summary>
+
+| Method | Route | Summary |
+| ------ | ----- | ------- |
+| GET | `/parking/status` | Active parking status |
+| POST | `/parking/start` | Start Parking |
+| PATCH | `/parking/{id}/end` | End Parking |
+| POST | `/parking/stop` | Stop Parking |
+
+</details>
 
 ---
 
