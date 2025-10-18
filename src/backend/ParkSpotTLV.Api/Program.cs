@@ -5,18 +5,14 @@ using ParkSpotTLV.Api.Composition;
 using ParkSpotTLV.Api.Endpoints;
 using ParkSpotTLV.Contracts.Time;
 
-/* --------------------------------------------------------------------------
+/* 
  * BOOTSTRAP LOGGING
- * -------------------------------------------------------------------------- */
+ */
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
 /*
- * Feature Extension Methods � Each feature exposes small IServiceCollection/IEndpointRouteBuilder extension methods 
- * (e.g., AddAuthFeature(), AddInfrastructure(), MapCustomOpenApi()). 
- * Program.cs becomes a short, readable script that composes features via one-liners. 
- * All detailed registrations, options binding, and endpoint wiring live inside their feature extensions, 
- * keeping concerns local, testable, and easy to evolve.
+ * Feature Extension Methods
  */
 try {
 #if DEBUG
@@ -65,9 +61,9 @@ finally {
     Log.CloseAndFlush();
 }
 
-/* --------------------------------------------------------------------------
+/* 
  * RUNTIME HEALTH
- * -------------------------------------------------------------------------- */
+ */
 public sealed class RuntimeHealth(IConfiguration cfg) {
     public DateTimeOffset StartedAtUtc { get; } = DateTimeOffset.UtcNow;
     public string Version { get; } = cfg["App:Version"]

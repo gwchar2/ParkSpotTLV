@@ -3,11 +3,13 @@ using ParkSpotTLV.Infrastructure;
 using Serilog;
 
 namespace ParkSpotTLV.Api.Composition {
-    /* ----------------------------------------------------------------------
-    * ---------------------------------------------------------------------- */
-
+    /* 
+     * Feature Extensions Methods for the map segments evaluation feature.
+     * Initiated by program.cs 
+     */
     public static class InfrastructureExtensions {
-        // Configure EF, Serilog host hook, hosted seed runner, helpers, endpoints explorer, OpenAPI scaffolding hook.
+
+        // Configure EF, Serilog hook, seed runner, helpers, endpoints explorer, OpenAPI.
         public static WebApplicationBuilder AddInfrastructure(this WebApplicationBuilder builder) {
             // Database (EF Core + Npgsql + PostGIS)
             var conn = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -21,7 +23,7 @@ namespace ParkSpotTLV.Api.Composition {
                 .UseSnakeCaseNamingConvention()
             );
 
-            // Serilog host hook
+            // Serilog
             builder.Host.UseSerilog((ctx, services, cfg) => {
                 cfg.ReadFrom.Configuration(ctx.Configuration)
                   .ReadFrom.Services(services)
@@ -41,7 +43,7 @@ namespace ParkSpotTLV.Api.Composition {
             builder.Services.AddSingleton<RuntimeHealth>();
             builder.Services.AddSingleton(TimeProvider.System);
 
-            // Minimal API metadata & OpenAPI doc scaffolding
+            // Minimal API metadata
             builder.Services.AddEndpointsApiExplorer();
 
             return builder;

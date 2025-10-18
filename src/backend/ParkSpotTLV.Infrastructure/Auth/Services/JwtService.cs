@@ -7,9 +7,9 @@ using Microsoft.IdentityModel.Tokens;
 using ParkSpotTLV.Infrastructure.Auth.Models;
 
 namespace ParkSpotTLV.Infrastructure.Auth.Services {
-    /* JwtService
+    
+    /* 
      * Builds short-lived access tokens (JWT) signed with HMAC-SHA256.
-     * Claims: sub (userId), name (username), iat, jti, exp, plus iss/aud.
      */
     public sealed class JwtService : IJwtService {
         private readonly AuthOptions _opts;

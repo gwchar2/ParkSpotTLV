@@ -5,6 +5,9 @@
         public static readonly object VehicleId = new();
         public static readonly object ExpectedXmin = new();
 
+        /*
+         * Retreive the pre determined variables store in user context
+         */
         public static Guid GetUserId(this HttpContext ctx)
             => ctx.Items.TryGetValue(UserIdKey, out var userId) && userId is Guid key
                 ? key

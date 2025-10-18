@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ParkSpotTLV.Api.Endpoints.Support.Errors {
+    /*
+     * Errors for auths specifically
+     */
     public static class AuthErrors {
         public static ProblemHttpResult MissingInfo(HttpContext ctx) =>
             GlobalErrorManager.BadRequest("Username and password are required.", ctx);

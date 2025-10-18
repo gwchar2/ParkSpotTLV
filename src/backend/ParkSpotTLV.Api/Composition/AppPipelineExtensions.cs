@@ -2,9 +2,11 @@
 using ParkSpotTLV.Api.Middleware.Http;
 
 namespace ParkSpotTLV.Api.Composition {
-    /* ----------------------------------------------------------------------
+
+
+    /* 
     * MIDDLEWARE PIPELINE
-    * ---------------------------------------------------------------------- */
+    */
     public static class AppPipelineExtensions {
         public static IApplicationBuilder UseAppPipeline(this IApplicationBuilder app) {
             app.UseAuthentication();

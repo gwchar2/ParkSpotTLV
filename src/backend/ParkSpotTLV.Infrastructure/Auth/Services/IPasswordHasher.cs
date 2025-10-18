@@ -1,10 +1,11 @@
 ﻿
 
 namespace ParkSpotTLV.Infrastructure.Auth.Services {
-    /* IPasswordHasher
+    
+    /* 
      * Contract for hashing and verifying user passwords.
-     * - Hash(password, salt) → stores hash+parameters in DB
-     * - Verify(password, storedHash) → constant-time success/failure
+     * - Hash(password, salt) -> stores hash+parameters in DB
+     * - Verify(password, storedHash) -> constant-time success/failure
      */
     public interface IPasswordHasher {
 

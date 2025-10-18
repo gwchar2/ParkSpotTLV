@@ -3,10 +3,10 @@ using ParkSpotTLV.Contracts.Budget;
 using ParkSpotTLV.Api.Features.Parking.Models;
 
 namespace ParkSpotTLV.Api.Features.Parking.Services {
+
     /*
      *  Determinse whther this segment costs money NOW for the snapshot.
      */
-
     public sealed class PaymentDecisionService(IDailyBudgetService budget) : IPaymentDecisionService {
 
         private readonly IDailyBudgetService _budget = budget;

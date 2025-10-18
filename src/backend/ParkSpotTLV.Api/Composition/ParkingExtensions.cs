@@ -4,11 +4,11 @@ using ParkSpotTLV.Api.Features.Parking.Services;
 using ParkSpotTLV.Api.Features.AutoStop;
 
 
+/* 
+ * Feature Extensions Methods for the map segments evaluation feature.
+ * Initiated by program.cs 
+ */
 namespace ParkSpotTLV.Api.Composition {
-    /* ----------------------------------------------------------------------
-     * Feature Extensions Methods for the map segments evaluation feature.
-     * Initiated by program.cs 
-     * ---------------------------------------------------------------------- */
 
     public static class ParkingExtensions {
         public static IServiceCollection AddParking(this IServiceCollection services) {

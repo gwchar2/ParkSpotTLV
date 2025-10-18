@@ -101,14 +101,15 @@ namespace ParkSpotTLV.Api.Endpoints {
                         .FirstOrDefaultAsync(ct) ?? 0;
 
                     // 4) Return payload
-                    return Results.Ok(new {
+                    return Results.Ok(new SessionStatusResponse {
                         Status = true,
                         SessionId = activeSession.Id,
-                        ParkingStarted = clock.ToLocal(activeSession.StartedUtc),
-                        ParkingUntil = clock.ToLocal(activeSession.PlannedEndUtc)
+                        Name = await db.StreetSegments.AsNoTracking().Where(s => s.Id == activeSession.SegmentId).Select(s => s.NameEnglish).FirstOrDefaultAsync(ct) ?? "",
+                        StartTime = clock.ToLocal(activeSession.StartedUtc),
+                        EndTime = clock.ToLocal(activeSession.PlannedEndUtc)
                     });
                 })
-                .Produces(StatusCodes.Status200OK)
+                .Produces<SessionStatusResponse>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status401Unauthorized)
                 .ProducesProblem(StatusCodes.Status403Forbidden)
                 .WithSummary("Parking Status")

@@ -17,6 +17,9 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
         private readonly IClassificationService _classification = classification;
 
 
+        /*
+         * Evaluation chain for segments will return a segment result Dto per segment.
+         */
         public async Task<IReadOnlyList<SegmentResultDto>> EvaluateAsync(MapSegmentsRequestDto request, CancellationToken ct) {
 
             var rows = await _query.GetViewportAsync(request.MinLon, request.MaxLon, request.MinLat, request.MaxLat, request.CenterLon ,request.CenterLat, ct);

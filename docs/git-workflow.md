@@ -50,19 +50,3 @@ git remote -v    # where “origin” points
 ```
 
 
-
-
-
-Argon2PasswordHasher: hashes and verifies passwords with Argon2id. Stores salt and params alongside the hash.
-
-JwtService: issues short-lived access JWT using HMAC secret from configuration.
-
-RefreshTokenService: generates a random refresh token, returns the raw and a DB-safe hash.
-
-Interfaces: abstractions for hasher/JWT/refresh and a clock.
-
-SystemClock: production clock.
-
-AuthController: /auth/register endpoint. Validates input, checks uniqueness, hashes password, creates user, issues tokens, persists the refresh token hash, returns 201.
-
-AuthServiceRegistration: registers the services in DI and binds options from configuration.

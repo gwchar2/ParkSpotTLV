@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ParkSpotTLV.Api.Endpoints.Support.Errors {
+    /*
+     * Errors for vehicles specifically
+     */
     public static class VehicleErrors {
         public static ProblemHttpResult NotFound(HttpContext ctx) =>
             GlobalErrorManager.NotFound("Vehicle not found", ctx);
