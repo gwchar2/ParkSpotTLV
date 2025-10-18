@@ -50,3 +50,54 @@ git remote -v    # where “origin” points
 ```
 
 
+
+- Completely new table
+```
+docker compose down
+If database tables change:
+Delete the contents of Migrations/ folder in ParkSpotTLV.Infrastructure
+docker compose down -v --remove-orphans
+dotnet ef migrations add InitialCreate -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
+F5 // docker compose up -d db
+dotnet ef database update -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
+Re-F5 // docker compose up -d api
+Verify
+```
+
+- New tables OR table changes
+```bash
+docker start parkspot_db or docker compose up -d db
+dotnet ef migrations add UpdateSeed_20250927(or some other name) -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
+dotnet ef database update --project .\ParkSpotTLV.Infrastructure --startup-project .\ParkSpotTLV.Api
+Restart DB+API
+Verify
+```
+dotnet ef migrations add AutoStop_20251010 -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
+
+- Updating information in the DB
+```bash
+docker start parkspot_db
+docker exec -it parkspot_db psql -U admin -d parkspot_dev  -c "TRUNCATE TABLE street_segments, zones RESTART IDENTITY CASCADE;"
+dotnet ef database update --project .\ParkSpotTLV.Infrastructure --startup-project .\ParkSpotTLV.Api
+Restart DB+API
+Verify
+```
+
+- Inspect the DB inside the container
+```bash
+docker exec -it parkspot_db psql -U admin -d parkspot_dev
+SELECT * FROM "__EFMigrationsHistory";
+SELECT COUNT(*) AS zones FROM zones;
+SELECT COUNT(*) AS segments FROM street_segments;
+SELECT id, code, name FROM zones ORDER BY code LIMIT 10;
+SELECT * FROM daily_budgets LIMIT 10;
+
+SELECT DISTINCT ON (z.code)
+       z.code        AS zone_code,
+       s.id          AS segment_id,
+       s.name_english
+FROM street_segments s
+JOIN zones z ON s.zone_id = z.id
+ORDER BY z.code, s.name_english NULLS LAST;
+
+```
