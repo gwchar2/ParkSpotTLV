@@ -573,10 +573,15 @@ public partial class ShowMapPage : ContentPage, IDisposable
             // let user choose street to park at in order to calculate free parking timer
             if (_isResidentalPermit){
                 var parkedStreet = await _parkingPopUps.ShowStreetsListPopUpAsync(_segmentsInfo, Navigation);
-                if (parkedStreet.HasValue) {
+                if (parkedStreet.HasValue)
+                {
                     var (parkedStreetName, segmentResponse) = parkedStreet.Value;
                     segmentToUse = segmentResponse;
                     parkingAtResZone = await parkingAtResidentalZone(segmentResponse);
+                }
+                else // clocked cancel
+                {
+                    return;
                 }
             }
             else {
