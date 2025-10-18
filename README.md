@@ -1,5 +1,5 @@
 
-![MasterHead](./assests/logo.jpg)
+![MasterHead](./assets/logo.jpg)
 <h1 align="center">ParkSpotTLV</h1>
 
 <!-- Status & releases -->
