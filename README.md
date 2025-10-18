@@ -26,6 +26,20 @@
 
 ---
 
+## 🗺️ Project Overview
+
+ParkSpot TLV is a **smart parking solution for Tel Aviv**, integrating geospatial data, zone-based parking policies, and mobile convenience. It combines a robust **ASP.NET Core Web API backend**, a **PostGIS-powered database**, and a **.NET MAUI Android app** for a seamless parking experience.
+
+### Key Features
+
+- Real-time zone classification and parking rules
+- Interactive map overlays with Google Maps or MapLibre
+- Daily parking budget tracking and auto-stop sessions
+- Secure authentication using Argon2ID, JWT, and HMAC
+- Cross-platform development and containerized deployment
+
+---
+
 ## 🏗️ System Architecture
 The ParkSpot TLV project is divided into three major components:
 1. **Backend API** – ASP.NET Core Web API with EF Core and PostGIS
