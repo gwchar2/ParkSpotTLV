@@ -1,13 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ParkSpotTLV.Api.Endpoints.Support.Errors {
+    /*
+     * General error cases
+     */
     public static class GeneralErrors {
         public static ProblemHttpResult InvalidZoneCode(HttpContext ctx) =>
             GlobalErrorManager.BadRequest("Invalid zone code", ctx);
-        public static ProblemHttpResult MissingRowVersion(HttpContext ctx) =>
-            GlobalErrorManager.BadRequest("Missing RowVersion", ctx);
-        public static ProblemHttpResult InvalidRowVersion(HttpContext ctx) =>
-            GlobalErrorManager.BadRequest("Invalid RowVersion format", ctx);
         public static ProblemHttpResult InvalidorMissingRowVersion(HttpContext ctx) =>
             GlobalErrorManager.BadRequest("Invalid or missing RowVersion format", ctx);
         public static ProblemHttpResult ConcurrencyError(HttpContext ctx) =>

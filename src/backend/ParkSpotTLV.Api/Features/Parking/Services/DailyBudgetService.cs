@@ -80,22 +80,27 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
             await AddMinutesAsync(vehicleId, endAnchor, secondLeg, ct);
         }
 
+        /*
+         * Adds minutes to total consumed budget minutes table
+         */
         private async Task AddMinutesAsync(Guid vehicleId, DateOnly anchorDate, int deltaMinutes, CancellationToken ct) {
             // Ensure the row exists
             await EnsureResetAsync(vehicleId, anchorDate, ct);
 
             // UPDATE the minimum between 120 minutes (default) and the amount of time used
             var now = clock.UtcNow;
-            var sql = """
-                        UPDATE "daily_budgets"
-                        SET "minutes_used" = LEAST(120, "minutes_used" + {2}),
-                        "updated_at_utc" = {3}
-                        WHERE "vehicle_id" = {0} AND "anchor_date" = {1};
-                        """;
-
-            await db.Database.ExecuteSqlRawAsync(sql, [vehicleId, anchorDate, deltaMinutes, now], ct);
+            await db.ParkingDailyBudget
+                    .Where(p => p.VehicleId == vehicleId && p.AnchorDate == anchorDate)
+                    .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(p => p.MinutesUsed, p => (p.MinutesUsed + deltaMinutes) >= 120
+                                    ? 120
+                                    : (p.MinutesUsed + deltaMinutes))
+                    .SetProperty(p => p.UpdatedAtUtc, _ => now), ct);
         }
 
+        /*
+         * Slices the day by boundaries so we can evaluate properly
+         */
         public IEnumerable<(DateTimeOffset Start, DateTimeOffset End)> SliceByAnchorBoundary(DateTimeOffset startLocal, DateTimeOffset endLocal) {
 
             var reset = new TimeSpan(8, 0, 0);
@@ -118,6 +123,9 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
             }
         }
 
+        /*
+         * Calculates the amount of budget / free time / paid time used & remaining values
+         */
         public async Task<BudgetCalculationDTO> CalculateAsync(ParkingSession session, CancellationToken ct) {
             DateTimeOffset timeLocal = clock.LocalNow;
             DateTimeOffset startedLocal = clock.ToLocal(session.StartedUtc);
@@ -202,6 +210,9 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
         }
 
 
+        /*
+         * Transfers to anchor date
+         */
         public DateOnly ToAnchor(DateTimeOffset t)
             => ParkingBudgetTimeHandler.AnchorDateFor(t);
     }

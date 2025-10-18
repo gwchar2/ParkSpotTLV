@@ -6,7 +6,9 @@ using System.Security.Cryptography;
 using System.Text;
 
 namespace ParkSpotTLV.Infrastructure.Auth.Services {
-    /* Argon2PasswordHasher
+
+    /* 
+     * Argon2PasswordHasher
      * Argon2id hashing with per-user salt. Calibrated at boot for ~TargetHashMs.
      * Verify returns in constant-time to avoid timing leaks.
      */
@@ -19,7 +21,9 @@ namespace ParkSpotTLV.Infrastructure.Auth.Services {
         private readonly int _mKiB; // memory in KiB
         private readonly int _p;    // Parallelism
 
-
+        /*
+         * Hashed password for database
+         */
         public Argon2PasswordHasher(IOptions<Argon2Options> options, ILogger<Argon2PasswordHasher> log) {
             _opts = options.Value;
             _log = log;
@@ -32,6 +36,9 @@ namespace ParkSpotTLV.Infrastructure.Auth.Services {
                 _mKiB / 1024, _t, _p);
         }
 
+        /*
+         * Returns a hashed string
+         */
         public string Hash(string password) {
             if (string.IsNullOrWhiteSpace(password))
                 throw new ArgumentException("Password must not be empty.", nameof(password));
@@ -43,6 +50,9 @@ namespace ParkSpotTLV.Infrastructure.Auth.Services {
             return phc;
         }
 
+        /*
+         * Verifies a string with its PHC
+         */
         public (bool isValid, bool needsRehash) Verify(string password, string storedPhc) {
             if (string.IsNullOrWhiteSpace(storedPhc))
                 return (false, false);
@@ -59,6 +69,9 @@ namespace ParkSpotTLV.Infrastructure.Auth.Services {
             return (true, needsRehash);
         }
 
+        /*
+         * Computes a hash
+         */
         private static byte[] ComputeHash(string password, byte[] salt, int t, int mKiB, int p, int outLen) {
             var argon = new Argon2id(Encoding.UTF8.GetBytes(password)) {
                 Salt = salt,
@@ -69,6 +82,9 @@ namespace ParkSpotTLV.Infrastructure.Auth.Services {
             return argon.GetBytes(outLen);
         }
 
+        /*
+         * Calibrates the required iterations
+         */
         private int CalibrateIterations(int targetMs, int minT, int maxT) {
             string probe = "Calibration-Probe-Only";
             for (int t = Math.Max(1, minT); t <= Math.Max(minT, maxT); t++) {
@@ -82,12 +98,18 @@ namespace ParkSpotTLV.Infrastructure.Auth.Services {
             return Math.Max(minT, maxT);
         }
 
+        /*
+         * Builds a phc
+         */
         private static string BuildPhc(byte[] salt, byte[] hash, int t, int mKiB, int p) {
             string saltB64 = Convert.ToBase64String(salt);
             string hashB64 = Convert.ToBase64String(hash);
             return $"$argon2id$v=19$m={mKiB},t={t},p={p}${saltB64}${hashB64}";
         }
 
+        /*
+         * Tries to parse a phc and get its variables
+         */
         private static bool TryParsePhc(string phc, out ParsedPhc parsed) {
             // Expected: $argon2id$v=19$m=<mKiB>,t=<t>,p=<p>$<salt_b64>$<hash_b64>
             parsed = null!;

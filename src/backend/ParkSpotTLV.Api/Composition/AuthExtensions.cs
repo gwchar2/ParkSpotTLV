@@ -14,9 +14,7 @@ namespace ParkSpotTLV.Api.Composition {
     public static class AuthExtensions {
         public static IServiceCollection AddAuthFeature(this IServiceCollection services, IConfiguration config) {
 
-            /* ----------------------------------------------------------------------
-             * AUTH OPTIONS (SINGLE SOURCE OF TRUTH)
-             * ---------------------------------------------------------------------- */
+            // AUTH OPTIONS (SINGLE SOURCE OF TRUTH)
             var authOpts = config.GetSection("Auth").Get<AuthOptions>() ?? new AuthOptions();
 
             if (!string.Equals(authOpts.Signing.Type, "HMAC", StringComparison.OrdinalIgnoreCase))
@@ -30,18 +28,11 @@ namespace ParkSpotTLV.Api.Composition {
             services.AddSingleton<IOptions<AuthOptions>>(Options.Create(authOpts));
 
 
-            /* ----------------------------------------------------------------------
-             * PASSWORD HASHING (Argon2id)
-             * ---------------------------------------------------------------------- */
-
+            // PASSWORD HASHING (Argon2id)
             services.Configure<Argon2Options>(config.GetSection("Auth:Argon2"));
             services.AddSingleton<IPasswordHasher, Argon2PasswordHasher>();
 
-            /* ----------------------------------------------------------------------
-             * AUTHENTICATION (JWT Bearer) + AUTHORIZATION
-             * ---------------------------------------------------------------------- */
-            //var authOpts = config.GetSection("Auth").Get<AuthOptions>();
-
+            // AUTHENTICATION (JWT Bearer) + AUTHORIZATION
             if (authOpts!.Signing.Type.Equals("HMAC", StringComparison.OrdinalIgnoreCase)) {
                 var keyBytes = Encoding.UTF8.GetBytes(authOpts.Signing.HmacSecret!);
                 var signingKey = new SymmetricSecurityKey(keyBytes);
@@ -59,17 +50,17 @@ namespace ParkSpotTLV.Api.Composition {
                                 RequireSignedTokens = true,
                                 ValidateLifetime = true,
                                 ClockSkew = TimeSpan.FromMinutes(authOpts.ClockSkewMinutes),
-                                NameClaimType = JwtRegisteredClaimNames.Sub  // "sub" claim inside the JWT is the string representation of the user’s Guid. This maps the JWT "sub" claim onto ClaimTypes.NameIdentifier
+                                // "sub" claim inside the JWT is the string representation of the user’s Guid. This maps the JWT "sub" claim onto ClaimTypes.NameIdentifier
+                                NameClaimType = JwtRegisteredClaimNames.Sub  
                             };
                         });
             } else {
-                throw new NotSupportedException("ONLY HMAC IS WIRED AT THE MOMENT - IMPLEMENT RSA LATER");
+                throw new NotSupportedException("ONLY HMAC IS WIRED AT THE MOMENT - WE IMPLEMENT RSA AT A LATER DATE");
             }
 
             services.AddAuthorization();
-            /* ----------------------------------------------------------------------
-             * TOKEN SERVICES (JWT + Refresh)
-             * ---------------------------------------------------------------------- */
+
+            // TOKEN SERVICES (JWT + Refresh)
             services.AddScoped<EfRefreshTokenStore>();
             services.AddSingleton<IJwtService, JwtService>();
             services.AddScoped<IRefreshTokenService, RefreshTokenService>();

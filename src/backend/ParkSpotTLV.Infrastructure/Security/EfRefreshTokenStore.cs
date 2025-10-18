@@ -5,6 +5,9 @@ using ParkSpotTLV.Infrastructure.Auth.Models;
 
 namespace ParkSpotTLV.Infrastructure.Security {
 
+    /*
+     * In charge of token creation, refreshing and validating
+     */
     public class EfRefreshTokenStore(AppDbContext db, IClock clock) {
 
         private readonly AppDbContext _db = db;
@@ -14,7 +17,9 @@ namespace ParkSpotTLV.Infrastructure.Security {
             RefreshToken? Token
         );
 
-        /* Creates a new refresh token */
+        /* 
+         * Creates a new refresh token 
+         */
         public async Task<(string rawToken, RefreshToken record)> CreateAsync(Guid userId, TimeSpan ttl, CancellationToken ct = default) {
             var now = _clock.UtcNow.UtcDateTime;
             var raw = TokenHashing.GenerateBase64UrlToken(32);
@@ -33,7 +38,9 @@ namespace ParkSpotTLV.Infrastructure.Security {
             
         }
 
-        /* Validates the status of the refresh token (Checks to see if it is expired / renued / active) */
+        /* 
+         * Validates the status of the refresh token (Checks to see if it is expired / renued / active) 
+         */
         public async Task<RefreshTokenValidationResult> ValidateAsync(string presentedRawToken, CancellationToken ct = default) {
 
             var hash = TokenHashing.Sha256Hex(presentedRawToken);
@@ -54,7 +61,9 @@ namespace ParkSpotTLV.Infrastructure.Security {
             return new(RefreshTokenStatus.Active, rec);
         }
 
-        /* Renews an old (not-yet-expired) token */
+        /* 
+         * Renews an old (not-yet-expired) token 
+         */
         public async Task<(string rawToken, RefreshToken newRecord)> RotateAsync(string PresentedRawToken, TimeSpan ttl, CancellationToken ct = default) {
             var now = _clock.UtcNow.UtcDateTime;
             var oldHash = TokenHashing.Sha256Hex(PresentedRawToken);
@@ -88,7 +97,9 @@ namespace ParkSpotTLV.Infrastructure.Security {
 
         }
 
-        /* Attempts to revoke (cancel) a refresh token */
+        /* 
+         * Attempts to revoke (cancel) a refresh token 
+         */
         public async Task<bool> TryRevokeAsync(string presentedRawToken, CancellationToken ct = default) {
             var hash = TokenHashing.Sha256Hex(presentedRawToken);
             var rec = await _db.RefreshTokens.FirstOrDefaultAsync(x => x.TokenHash == hash, ct);
@@ -103,7 +114,9 @@ namespace ParkSpotTLV.Infrastructure.Security {
             return true;
         }
 
-        /* Revokes (cancels) the entire chain of refresh tokens (When does this happen? => Malicious attempt with an unchained token) */
+        /* 
+         * Revokes the entire chain of refresh tokens
+         */
         public async Task<int> RevokeChainAsync (string startingRawToken, CancellationToken ct = default) {
             var count = 0;
             var hash = TokenHashing.Sha256Hex(startingRawToken);

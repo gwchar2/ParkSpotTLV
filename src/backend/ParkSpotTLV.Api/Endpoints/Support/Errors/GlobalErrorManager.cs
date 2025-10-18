@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ParkSpotTLV.Api.Endpoints.Support.Errors {
-
+    /*
+     * Main error callers. Receives exact input from other error managers, and calls / returns the main result.
+     */
     public static class GlobalErrorManager {
 
         public static ProblemHttpResult BadRequest(string title, HttpContext? ctx = null) =>
@@ -16,14 +18,12 @@ namespace ParkSpotTLV.Api.Endpoints.Support.Errors {
                 title: title,
                 statusCode: StatusCodes.Status401Unauthorized,
                 type: "https://httpstatuses.com/401");
-
         public static ProblemHttpResult Forbidden(string title, HttpContext? ctx = null) =>
            (ProblemHttpResult)Results.Problem(
                title: title,
                statusCode: StatusCodes.Status403Forbidden,
                type: "https://httpstatuses.com/403",
                instance: ctx?.Request.Path);
-
         public static ProblemHttpResult NotFound(string title, HttpContext? ctx = null) =>
             (ProblemHttpResult)Results.Problem(
                 title: title,

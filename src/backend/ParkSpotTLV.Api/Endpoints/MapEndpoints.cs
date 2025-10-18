@@ -20,7 +20,13 @@ namespace ParkSpotTLV.Api.Endpoints {
 
             var group = routes.MapGroup("/map").RequireAuthorization().WithTags("Map Segment Requests").RequireUser();
 
-
+            /* POST /segments Retreive segments
+             * Accepts: GetMapSegmentsRequest (Current location cordinates)
+             * Returns: 
+             *      204 GetMapSegmentsResponse 
+             *      401 Unauthorized - Ilegal Access Token
+             *      404 Not Found - ActivePermit ID was not found
+             */
             group.MapPost("/segments",
                 async ([FromBody] GetMapSegmentsRequest body, HttpContext ctx, AppDbContext db, IClock clock, ISegmentEvaluationService evaluator, CancellationToken ct) => {
 

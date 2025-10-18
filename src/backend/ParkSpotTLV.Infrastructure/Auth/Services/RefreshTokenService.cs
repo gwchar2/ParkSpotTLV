@@ -2,18 +2,21 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ParkSpotTLV.Infrastructure.Entities;
+using ParkSpotTLV.Infrastructure.Security;
 using ParkSpotTLV.Infrastructure.Auth.Models;
 using ParkSpotTLV.Contracts.Time;
 
 namespace ParkSpotTLV.Infrastructure.Auth.Services {
-    /* RefreshTokenService
-     * Orchestrates refresh token lifecycle:
-     *   Issue(userId) → new token (raw to client, hash to DB)
-     *   ValidateAndRotate(raw) → atomically revoke old, create new, issue new JWT
-     *   RevokeByRawToken(raw) → single-session logout
-     *   RevokeAllForUser(userId) → global logout for the user
+    
+    /* 
+     * RefreshTokenService
+     *   Refresh token lifecycle:
+     *   Issue(userId) -> new token (raw to client, hash to DB)
+     *   ValidateAndRotate(raw) -> atomically revoke old, create new, issue new JWT
+     *   RevokeByRawToken(raw) -> single-session logout
+     *   RevokeAllForUser(userId) -> global logout for the user
      *
-     * Reuse detection:
+     *  Reuse detection:
      *   If a rotated token is seen again (row.ReplacedByTokenHash != null), revoke all.
      */
 
@@ -35,11 +38,11 @@ namespace ParkSpotTLV.Infrastructure.Auth.Services {
             /* Ensure HMAC secret exists and is sufficiently strong */
             if (string.IsNullOrWhiteSpace(_opts.Signing?.HmacSecret) || _opts.Signing?.HmacSecret.Length < 32)
                 throw new InvalidOperationException("AuthOptions.HmacSecret are missing or to short");
-
-
         }
 
-        /* Issues a new refresh token for the given user */
+        /* 
+         * Issues a new refresh token for the given user 
+         */
         public RefreshIssueResult Issue(Guid userId) {
             var now = _clock.UtcNow;
             var expires = now.AddDays(_opts.RefreshTokenDays);
@@ -120,7 +123,9 @@ namespace ParkSpotTLV.Infrastructure.Auth.Services {
 
         }
 
-        /* Revokes a single refresh token by its raw value */
+        /* 
+         * Revokes a single refresh token by its raw value 
+         */
         public void RevokeByRawToken(string rawRefreshToken) {
             var now = _clock.UtcNow;
             var hash = TokenHashing.HashToHex(rawRefreshToken, _opts.Signing.HmacSecret);
@@ -136,7 +141,9 @@ namespace ParkSpotTLV.Infrastructure.Auth.Services {
 
         }
 
-        /* Revokes all active refresh tokens for a given user */
+        /* 
+         * Revokes all active refresh tokens for a given user 
+         */
         public void RevokeAllForUser(Guid userId) {
             var now = _clock.UtcNow;
             var active = _db.RefreshTokens.AsTracking()
@@ -150,7 +157,9 @@ namespace ParkSpotTLV.Infrastructure.Auth.Services {
             }
         }
 
-        /* Fetch username from DB for logging/JWT claims */
+        /* 
+         * Fetch username from DB for logging/JWT claims 
+         */
         private string GetUsername(Guid userId) {
             var username = _db.Users.Where(u => u.Id == userId).Select(u => u.Username).FirstOrDefault();
             return username ?? string.Empty;

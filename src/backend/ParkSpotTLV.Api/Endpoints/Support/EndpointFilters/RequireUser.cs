@@ -1,4 +1,11 @@
 ﻿namespace ParkSpotTLV.Api.Endpoints.Support.EndpointFilters {
+
+    /*
+     * .RequireUser() endpoint filter.
+     * Retreives the User ID from JWT
+     */
+
+
     public sealed class RequireUser : IEndpointFilter {
         public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next) {
             var http = context.HttpContext;

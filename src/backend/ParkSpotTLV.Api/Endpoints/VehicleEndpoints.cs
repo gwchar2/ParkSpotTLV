@@ -90,7 +90,6 @@ namespace ParkSpotTLV.Api.Endpoints {
                 .Produces<VehicleResponse>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status401Unauthorized)
                 .ProducesProblem(StatusCodes.Status403Forbidden)
-                .ProducesProblem(StatusCodes.Status404NotFound)
                 .WithSummary("Get Vehicle")
                 .WithDescription("Get a single vehicle owned by the caller.");
 
@@ -190,7 +189,6 @@ namespace ParkSpotTLV.Api.Endpoints {
                     var userId = ctx.GetUserId();
                     var expectedXmin = ctx.GetXmin();
 
-                    // Get the vehicle from the DB & check ownership
                     var vehicle = await db.Vehicles.Include(v => v.Permits).SingleOrDefaultAsync(v => v.Id == id, ct);
 
                     if (vehicle is null) return VehicleErrors.NotFound(ctx); 

@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ParkSpotTLV.Api.Endpoints.Support.Errors {
+    /*
+     * Errors for permits specifically
+     */
     public static class PermitErrors {
         public static ProblemHttpResult MaxHit(HttpContext ctx) =>
            GlobalErrorManager.BadRequest("Maximum of 2 permits per vehicle", ctx);
@@ -10,13 +13,13 @@ namespace ParkSpotTLV.Api.Endpoints.Support.Errors {
           GlobalErrorManager.BadRequest("Please add a zone code!", ctx);
         public static ProblemHttpResult ChooseType(HttpContext ctx) =>
           GlobalErrorManager.BadRequest("Please choose type of permit", ctx);
+        public static ProblemHttpResult BadZone(HttpContext ctx) =>
+          GlobalErrorManager.BadRequest("Zone does not exist", ctx);
         public static ProblemHttpResult Forbidden(HttpContext ctx) =>
            GlobalErrorManager.Forbidden("Permit not found or not owned by user.", ctx);
         public static ProblemHttpResult MissingZone(HttpContext ctx) =>
           GlobalErrorManager.BadRequest("Zone permit must include a zone.", ctx);
         public static ProblemHttpResult CantRemoveDef(HttpContext ctx) =>
           GlobalErrorManager.BadRequest("Can not remove default permit.", ctx);
-        public static ProblemHttpResult NotFound(HttpContext ctx) =>
-          GlobalErrorManager.NotFound("Permit not found.", ctx);
     }
 }

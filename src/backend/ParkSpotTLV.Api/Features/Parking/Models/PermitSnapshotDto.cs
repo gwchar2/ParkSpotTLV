@@ -4,7 +4,6 @@
     /*
      * Users POV for evaluation
      */
-
     public enum PermitSnapType { None, Zone, Disability }
 
     public sealed class PermitSnapshotDto {

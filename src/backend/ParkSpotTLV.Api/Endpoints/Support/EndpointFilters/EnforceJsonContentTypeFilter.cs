@@ -1,6 +1,10 @@
 ﻿namespace ParkSpotTLV.Api.Endpoints.Support.EndpointFilters {
 
     public sealed class EnforceJsonContentTypeFilter : IEndpointFilter {
+
+        /*
+         * Enforces that the supported request is in JSON format only.
+         */
         public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next) {
             var req = context.HttpContext.Request;
             if (req.Method is "POST" or "PATCH" or "PUT") {

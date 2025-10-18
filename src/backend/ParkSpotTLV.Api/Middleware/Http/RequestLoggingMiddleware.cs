@@ -8,9 +8,8 @@ namespace ParkSpotTLV.Api.Middleware.Http {
     /*
      * Logs every request’s metadata (start + completed) safely (no bodies, redacted headers).
     */
-    public sealed class RequestLoggingMiddleware {
-        private readonly RequestDelegate _next;                                         // Function pointer that requests the next middleware
-        public RequestLoggingMiddleware(RequestDelegate next) => _next = next;          // We store the next middleware function received in _next
+    public sealed class RequestLoggingMiddleware(RequestDelegate next) {
+        private readonly RequestDelegate _next = next;                                         // Function pointer that requests the next middleware
 
         /*
          * HttpContext ctx which represents everything about the current request and response.

@@ -50,14 +50,18 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
             return new TariffCalendarStatus(false, nextStart, nextEnd);
         }
 
-        // Combines the next start and next end
+        /*
+         * Combines the next start and next end
+         */
         private static DateTimeOffset Combine(DateTimeOffset anchor, TimeOnly t) {
             var d = anchor.Date;
             var dt = new DateTime(d.Year, d.Month, d.Day, t.Hour, t.Minute, t.Second, t.Millisecond, DateTimeKind.Unspecified);
             return new DateTimeOffset(dt, anchor.Offset);
         }
 
-        // Finds the next start
+        /* 
+         * Finds the next start
+         */
         private DateTimeOffset? NextStartForTariff(Tariff tariff, DateTimeOffset now) {
             for (int i = 0; i < WEEK_DAYS; i++) {
                 var day = now.AddDays(i);

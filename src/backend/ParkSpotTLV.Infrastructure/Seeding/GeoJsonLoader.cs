@@ -4,8 +4,12 @@ using NetTopologySuite.IO;
 using System.Text.Json.Nodes;
 
 namespace ParkSpotTLV.Infrastructure.Seeding {
-    // Loads simple FeatureCollections (Polygon/MultiPolygon; LineString) from GeoJSON files.
-    // Returns tuples of (Geometry, PropertiesJson) so the caller can map fields.
+
+
+    /*
+     * Loads simple Polygon/MultiPolygon/LineString) from GeoJSON files.
+     * Returns tuples of (Geometry, PropertiesJson).
+     */
     public static class GeoJsonLoader {
         private static readonly GeoJsonReader _reader = new GeoJsonReader();
 

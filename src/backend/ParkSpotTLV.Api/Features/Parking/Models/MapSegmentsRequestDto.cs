@@ -1,6 +1,6 @@
 ﻿namespace ParkSpotTLV.Api.Features.Parking.Models {
     /*
-     * API Level request used by our facade
+     * DTO from request to evaluation
      */
     public sealed class MapSegmentsRequestDto {
 

@@ -4,7 +4,7 @@ using ParkSpotTLV.Contracts.Enums;
 namespace ParkSpotTLV.Api.Features.Parking.Models {
 
     /*
-     * Final result emitted by IMapSegmentsEvaluator (Per segment)
+     * Final result by IMapSegmentsEvaluator (Per segment)
      */
     public sealed record SegmentResultDto (
 

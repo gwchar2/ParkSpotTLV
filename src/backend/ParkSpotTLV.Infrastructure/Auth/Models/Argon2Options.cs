@@ -4,7 +4,6 @@ namespace ParkSpotTLV.Infrastructure.Auth.Models{
     /* Argon2Options
      * Tuning for the Argon2id password hasher. The app calibrates on boot to target ~100–250ms.
      */
-
     public sealed class Argon2Options {
         public int TargetHashMs { get; set; } = 180;
         public int MinIterations { get; set; } = 2;

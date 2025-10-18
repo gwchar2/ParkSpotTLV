@@ -4,9 +4,9 @@ using Scalar.AspNetCore;
 
 namespace ParkSpotTLV.Api.Composition {
 
-    /* --------------------------------------------------------------------------
-     * OpenAPI Extensions
-     * -------------------------------------------------------------------------- */
+    /* 
+     * OpenAPI Extension
+     */
     public static class OpenApiExtensions {
         public static IServiceCollection AddCustomOpenApi(this IServiceCollection services) {
             services.AddOpenApi(options => {

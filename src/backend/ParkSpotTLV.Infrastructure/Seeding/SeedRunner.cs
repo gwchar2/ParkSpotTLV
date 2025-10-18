@@ -23,6 +23,9 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
         public string StreetSegments { get; set; } = "ParkSpotTLV.Infrastructure/db/Seed/street_segments.geojson";
     }
 
+    /*
+     * Seeds the database
+     */
     public sealed class SeedRunner(
         IServiceProvider sp,
         IHostEnvironment env,
@@ -61,8 +64,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
 
         public Task StopAsync(CancellationToken ct) => Task.CompletedTask;
 
-        // ---------------------- Zones ----------------------
-
+        /* ---------------------- Zones ---------------------- */
         private async Task SeedZonesAsync(AppDbContext db, CancellationToken ct) {
             if (await db.Zones.AsNoTracking().AnyAsync(ct)) {
                 _log.LogInformation("Zones already present. Skipping.");
@@ -86,7 +88,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             await db.SaveChangesAsync(ct);
         }
 
-        // ---------------------- Street Segments ----------------------
+        /* ---------------------- Street Segments ---------------------- */
         private async Task SeedStreetSegmentsAsync(AppDbContext db, CancellationToken ct) {
             if (await db.StreetSegments.AsNoTracking().AnyAsync(ct)) {
                 _log.LogInformation("StreetSegments already present. Skipping.");
@@ -196,8 +198,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             await db.SaveChangesAsync(ct);
         }
 
-        // ---------------------- Users / Vehicles / Permits ----------------------
-
+        /* ---------------------- Users / Vehicles / Permits ---------------------- */
         private async Task SeedUsersAsync(AppDbContext db, CancellationToken ct) {
             if (await db.Users.AsNoTracking().AnyAsync(ct)) {
                 _log.LogInformation("Users already present. Skipping.");
@@ -257,7 +258,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             await db.SaveChangesAsync(ct);
         }
 
-        // ---------------------- Daily Free Parking Budget ----------------------
+        /* ---------------------- Daily Free Parking Budget ---------------------- */
         private async Task SeedParkingDailyBudgetAsync(AppDbContext db,CancellationToken ct = default) {
             var anchor = ParkingBudgetTimeHandler.AnchorDateFor(_clock.LocalNow);
 
@@ -287,22 +288,22 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
 
             await db.SaveChangesAsync(ct);
         }
-        // ---------------------- Helpers ----------------------
-
-        private static NetTopologySuite.Geometries.MultiPolygon ToMultiPolygon(NetTopologySuite.Geometries.Geometry g)
-            => g switch {
-                NetTopologySuite.Geometries.MultiPolygon mp => mp,
-                NetTopologySuite.Geometries.Polygon p => new NetTopologySuite.Geometries.MultiPolygon([p]),
-                _ => throw new InvalidDataException($"Expected Polygon/MultiPolygon, got {g.GeometryType}.")
+       
+        /* ---------------------- Helpers ---------------------- */
+        private static NetTopologySuite.Geometries.MultiPolygon ToMultiPolygon(NetTopologySuite.Geometries.Geometry geo)
+            => geo switch {
+                NetTopologySuite.Geometries.MultiPolygon multipoly => multipoly,
+                NetTopologySuite.Geometries.Polygon poly => new NetTopologySuite.Geometries.MultiPolygon([poly]),
+                _ => throw new InvalidDataException($"Expected Polygon/MultiPolygon, got {geo.GeometryType}.")
             };
 
-        private static NetTopologySuite.Geometries.LineString ToLineString(NetTopologySuite.Geometries.Geometry g)
-            => g switch {
-                NetTopologySuite.Geometries.LineString ls => ls,
-                _ => throw new InvalidDataException($"Expected LineString, got {g.GeometryType}.")
+        private static NetTopologySuite.Geometries.LineString ToLineString(NetTopologySuite.Geometries.Geometry geo)
+            => geo switch {
+                NetTopologySuite.Geometries.LineString linestring => linestring,
+                _ => throw new InvalidDataException($"Expected LineString, got {geo.GeometryType}.")
             };
 
-        // Json helpers
+        /* Json helpers */
         private static string? GetString(JsonObject o, string key) => o[key]?.GetValue<string>();
         private static int? GetInt(JsonObject o, string key) => o[key] is null ? null : o[key]!.GetValue<int?>();
         private static Guid? ParseGuid(string? s) => Guid.TryParse(s, out var g) ? g : null;
@@ -315,6 +316,10 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             if (string.IsNullOrWhiteSpace(s)) return null;
             return int.TryParse(s, out var n) ? n : null;
         }
+
+        /*
+         * Parses the parking string
+         */
         private static (ParkingType type, SegmentSide side, int? explicitZoneCode) ParseParkingTags(JsonObject props) {
             string? T(string key) =>
                 props.TryGetPropertyValue(key, out var v) ? v?.ToString()?.Trim() : null;

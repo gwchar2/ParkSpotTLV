@@ -6,7 +6,6 @@ namespace ParkSpotTLV.Api.Features.Parking.Services {
     /*
      * Can a user park in this segment at this specific time?
      */
-
     public class LegalPolicyService : ILegalPolicyService {
 
         public bool IsLegalNow(ParkingType parkingType, int? segmentZoneCode, PermitSnapshotDto pov, bool ActiveNow) {

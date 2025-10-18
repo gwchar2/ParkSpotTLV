@@ -16,7 +16,6 @@ namespace ParkSpotTLV.Api.Endpoints {
         public static IEndpointRouteBuilder MapPermits(this IEndpointRouteBuilder routes) {
 
             var group = routes.MapGroup("/permits").RequireAuthorization().WithTags("Permit Requests").RequireUser();
-            /* GET PERMITS -> Use GET VEHICLES */
 
 
             /* Post /   Creates a Permit and attaches it to a specific vehicle
@@ -38,10 +37,7 @@ namespace ParkSpotTLV.Api.Endpoints {
 
                     // Check if there is a maximum amount of permits on the vehicle already
                     if (await db.Permits.CountAsync(p => p.VehicleId == vehicle.Id, ct) == 3)
-                        return Results.Problem(
-                            title: "Maximum of 2 permits per vehicle", 
-                            statusCode: StatusCodes.Status400BadRequest
-                            );
+                        return PermitErrors.MaxHit(ctx);
 
                     // Create the new permit
                     var permit = new Permit { };
@@ -180,8 +176,12 @@ namespace ParkSpotTLV.Api.Endpoints {
 
                     if (body.Type == PermitType.Disability && body.ZoneCode.HasValue)
                         permit.ZoneCode = null;
-                    else
+                    else if (body.ZoneCode is int code) {
+                        if (code == 0 || !await db.Zones.AsNoTracking().AnyAsync(z => z.Code == code, ct)) {
+                            return PermitErrors.BadZone(ctx);
+                        }
                         permit.ZoneCode = body.ZoneCode;
+                    }
 
 
                     permit.Type = body.Type;

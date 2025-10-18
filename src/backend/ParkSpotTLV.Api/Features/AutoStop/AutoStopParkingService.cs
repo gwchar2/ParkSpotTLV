@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ParkSpotTLV.Api.Features.Parking.Models;
 using ParkSpotTLV.Api.Features.Parking.Services;
 using ParkSpotTLV.Contracts.Enums;
 using ParkSpotTLV.Contracts.Time;
@@ -8,11 +7,17 @@ using ParkSpotTLV.Infrastructure.Entities;
 
 namespace ParkSpotTLV.Api.Features.AutoStop{
 
+    /*
+     * Autostop parking sessions service
+     */
     public sealed class AutoStopParkingService(IServiceProvider sp, ILogger<AutoStopParkingService> log, IClock clock) : BackgroundService {
         private readonly IServiceProvider _sp = sp;
         private readonly ILogger<AutoStopParkingService> _log = log;
         private readonly IClock _clock = clock;
 
+        /*
+         * Runs the autostop parking every 30 seconds
+         */
         protected override async Task ExecuteAsync(CancellationToken ct) {
             await Task.Delay(TimeSpan.FromSeconds(2), ct);
             var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
@@ -27,6 +32,9 @@ namespace ParkSpotTLV.Api.Features.AutoStop{
             }
         }
 
+        /*
+         * Stops a required session (if it exists)
+         */
         private async Task StopDueSessionsOnce(CancellationToken ct) {
 
             using var scope = _sp.CreateScope();

@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ParkSpotTLV.Api.Endpoints.Support.Errors {
+    /*
+     * Errors for sessions specifically
+     */
     public static class SessionErrors {
         public static ProblemHttpResult Exists(HttpContext ctx) =>
           GlobalErrorManager.Conflict("Active session exists for this vehicle.", ctx);
