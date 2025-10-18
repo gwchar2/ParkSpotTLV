@@ -130,8 +130,8 @@ public partial class ShowMapPage : ContentPage, IDisposable
         _mapInteractionService.VisibleBoundsChanged += OnVisibleBoundsChanged;
 
         // Only run full initialization once
-        if (_isInitialized)
-            return;
+        // if (_isInitialized)
+        //     return;
 
         try
         {
@@ -141,6 +141,11 @@ public partial class ShowMapPage : ContentPage, IDisposable
             await LoadUserCars();
             await LoadSessionPreferences();
             await LoadMapAsync(); // load map, current location
+            if (!_isInitialized)
+            {
+                // update to now
+                _selectedDate = GetSelectedDateTime();
+            }
 
             // Wait for map to render and have a valid VisibleRegion
             await Task.Delay(MAP_RENDER_DELAY_MS);
@@ -196,7 +201,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         }
 
         GetMapSegmentsResponse? segmentsResponse;
-
+        // await DisplayAlert("debug",$"{_selectedDate:yyyy-MM-dd HH:mm:ss}","ok");
         try
         {
             System.Diagnostics.Debug.WriteLine($"Fetching segments for bounds: MinLat={bounds.Value.MinLat}, MaxLat={bounds.Value.MaxLat}, MinLon={bounds.Value.MinLon}, MaxLon={bounds.Value.MaxLon}");
@@ -208,7 +213,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
                                                                    bounds.Value.MaxLat,
                                                                    bounds.Value.CenterLon,
                                                                    bounds.Value.CenterLat,
-                                                                   _selectedDate,
+                                                                   _selectedDate.LocalDateTime,
                                                                    _session?.MinParkingTime ?? DEFAULT_MIN_PARKING_TIME_MINUTES);
 
             if (segmentsResponse == null || segmentsResponse.Segments == null)
@@ -573,10 +578,15 @@ public partial class ShowMapPage : ContentPage, IDisposable
             // let user choose street to park at in order to calculate free parking timer
             if (_isResidentalPermit){
                 var parkedStreet = await _parkingPopUps.ShowStreetsListPopUpAsync(_segmentsInfo, Navigation);
-                if (parkedStreet.HasValue) {
+                if (parkedStreet.HasValue)
+                {
                     var (parkedStreetName, segmentResponse) = parkedStreet.Value;
                     segmentToUse = segmentResponse;
                     parkingAtResZone = await parkingAtResidentalZone(segmentResponse);
+                }
+                else // clocked cancel
+                {
+                    return;
                 }
             }
             else {
@@ -591,10 +601,11 @@ public partial class ShowMapPage : ContentPage, IDisposable
                 startParkingResponse = await _parkingService.StartParkingAsync(
                     segmentToUse,
                     Guid.Parse(_pickedCarId),
-                    120); //_session?.MinParkingTime ?? 
+                    120); 
                 if (startParkingResponse is not null)
                 {
                     _parkingSessionId = startParkingResponse.SessionId;
+
                 }
             }
             catch (HttpRequestException ex)
@@ -605,7 +616,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
             }
 
             // if has residential permit and parking out of zone - show free minutes left today
-            if (_isResidentalPermit && !parkingAtResZone) {
+            if (_isResidentalPermit && !parkingAtResZone && (_selectedDate.DayOfWeek != DayOfWeek.Saturday)) {
                 int? budget = await _parkingService.GetParkingBudgetRemainingAsync(Guid.Parse(_pickedCarId));
                 await _parkingPopUps.ShowParkingConfirmedPopupAsync(budget ?? 0, Navigation, DisplayAlert);
             }
@@ -614,20 +625,17 @@ public partial class ShowMapPage : ContentPage, IDisposable
         else // currently parking
         {
             // End parking
-            if (_isResidentalPermit && _parkingSessionId != Guid.Empty)
+            try
             {
-                try
-                {
-                    await _parkingService.StopParkingAsync(_parkingSessionId, Guid.Parse(_pickedCarId));
-                    int? budget = await _parkingService.GetParkingBudgetRemainingAsync(Guid.Parse(_pickedCarId));
-                }
-                catch (HttpRequestException ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Failed to stop parking: {ex.Message}");
-                    await DisplayAlert("Error", "Unable to stop parking. Please check your connection.", "OK");
-                    return;
-                }
+                await _parkingService.StopParkingAsync(_parkingSessionId, Guid.Parse(_pickedCarId));
             }
+            catch (HttpRequestException ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to stop parking: {ex.Message}");
+                await DisplayAlert("Error", "Unable to stop parking. Please check your connection.", "OK");
+                return;
+            }
+            
 
             UpdateParkHereButtonState(false); // update UI button
         }
