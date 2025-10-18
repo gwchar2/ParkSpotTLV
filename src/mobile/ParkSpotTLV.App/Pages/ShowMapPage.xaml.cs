@@ -616,7 +616,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
             }
 
             // if has residential permit and parking out of zone - show free minutes left today
-            if (_isResidentalPermit && !parkingAtResZone) {
+            if (_isResidentalPermit && !parkingAtResZone && (_selectedDate.DayOfWeek != DayOfWeek.Saturday)) {
                 int? budget = await _parkingService.GetParkingBudgetRemainingAsync(Guid.Parse(_pickedCarId));
                 await _parkingPopUps.ShowParkingConfirmedPopupAsync(budget ?? 0, Navigation, DisplayAlert);
             }
