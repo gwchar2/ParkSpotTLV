@@ -42,7 +42,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
     private const double DEFAULT_ZOOM = 300;
 
     // Tracks whether page has completed initial setup
-    private bool _isInitialized = false;
+    // private bool _isInitialized = false;
 
     // Car
     // Name of the Currently selected car
@@ -130,8 +130,8 @@ public partial class ShowMapPage : ContentPage, IDisposable
         _mapInteractionService.VisibleBoundsChanged += OnVisibleBoundsChanged;
 
         // Only run full initialization once
-        if (_isInitialized)
-            return;
+        // if (_isInitialized)
+        //     return;
 
         try
         {
@@ -155,7 +155,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
                 System.Diagnostics.Debug.WriteLine("OnAppearing: VisibleRegion not ready, skipping initial segment load");
             }
 
-            _isInitialized = true;
+            // _isInitialized = true;
 
         }
         catch (Exception ex)
