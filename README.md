@@ -4,25 +4,13 @@
 <h1 align="center">ParkSpotTLV</h1>
 
 <p align="center">
-  <a href="https://github.com/gwchar2/ParkSpotTLV/actions/workflows/ci.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/gwchar2/ParkSpotTLV/ci.yml?branch=main&label=Build" alt="Build" />
-  </a>&nbsp;
-  <a href="https://github.com/gwchar2/ParkSpotTLV/releases">
-    <img src="https://img.shields.io/github/v/release/gwchar2/ParkSpotTLV?include_prereleases&sort=semver" alt="Latest release" />
-  </a>&nbsp;
-  <a href="https://github.com/gwchar2/ParkSpotTLV/releases/latest">
-    <img src="https://img.shields.io/github/release-date-pre/gwchar2/ParkSpotTLV" alt="Release date" />
-  </a>&nbsp;
-  <a href="./CHANGELOG.md">
-    <img src="https://img.shields.io/badge/changelog-8A2BE2" alt="Changelog" />
-  </a>
-</p>
-
 <!-- Status & releases -->
 [![Build](https://img.shields.io/github/actions/workflow/status/gwchar2/ParkSpotTLV/ci.yml?branch=main&label=Build)](https://github.com/gwchar2/ParkSpotTLV/actions/workflows/ci.yml)
 [![Latest release](https://img.shields.io/github/v/release/gwchar2/ParkSpotTLV?include_prereleases&sort=semver)](https://github.com/gwchar2/ParkSpotTLV/releases)
 [![Release date](https://img.shields.io/github/release-date-pre/gwchar2/ParkSpotTLV)](https://github.com/gwchar2/ParkSpotTLV/releases/latest)
 [![Changelog](https://img.shields.io/badge/changelog-8A2BE2)](./CHANGELOG.md)
+</p>
+
 
 ## Table of Contents
 
