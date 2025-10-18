@@ -87,11 +87,15 @@ cd ParkSpotTLV
 
 ### Option 2: Running via Visual Studio
 1. Open the solution file `ParkSpotTLV.sln`.
+
 2. Right click on the solution and choose `Configure Startup Projects`.
 <img src="./assets/configure-startup-projects-1.jpg" alt="dockercompose" />
+
 3. Choose docker-compose and ParkSpotTLV.App projects as the only start options, then click `apply`.
 <img src="./assets/configure-startup-projects-2.jpg" alt="dockercompose" />
+
 4. Open Android Device Manager, and make sure your Android Emulator is fully loaded **before** continueing to the next step.
+
 5. Choose your new profile and run.
 <img src="./assets/configure-startup-projects-3.jpg" alt="dockercompose" />
 
