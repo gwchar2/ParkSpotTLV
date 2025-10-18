@@ -1,4 +1,6 @@
-﻿# ParkSpotTLV
+
+![MasterHead](./assests/logo.jpg)
+<h1 align="center">ParkSpotTLV</h1>
 
 <!-- Status & releases -->
 [![Build](https://img.shields.io/github/actions/workflow/status/gwchar2/ParkSpotTLV/ci.yml?branch=main&label=Build)](https://github.com/gwchar2/ParkSpotTLV/actions/workflows/ci.yml)
@@ -6,7 +8,6 @@
 [![Release date](https://img.shields.io/github/release-date-pre/gwchar2/ParkSpotTLV)](https://github.com/gwchar2/ParkSpotTLV/releases/latest)
 [![Changelog](https://img.shields.io/badge/changelog-8A2BE2)](./CHANGELOG.md)
 
----
 
 ## Table of Contents
 
@@ -94,6 +95,7 @@ cd ParkSpotTLV
 From the main project folder:
 1. Build the Database & API with: `docker compose up --build`
 2. Build the App with: `dotnet build src/mobile/ParkSpotTLV.App/ParkSpotTLV.App.csproj -f net9.0-android -c Debug`
+
 Access the backend at: `http://localhost:8080`
 
 ---
@@ -106,8 +108,6 @@ Access the backend at: `http://localhost:8080`
 - **Start Parking** – Begins a parking session with automatic rules and budget checks.
 - **History** – View past parking sessions and charges.
 - **Settings** – Manage vehicles, permits, and notifications.
-
-> **[PLACEHOLDER: Insert Screenshots (Map Screen, History, Settings)]**
 
 ---
 
