@@ -10,19 +10,19 @@
 
 ## 📖 Table of Contents
 
-1. [Project Overview](#-project-overview)
-2. [System Architecture](#-system-architecture)
-3. [Getting Started](#-getting-started)
-4. [Running the Project](#-running-the-project)
-5. [App Guide](#-app-guide)
-6. [API Reference](#-api-reference)
-7. [Database Schema](#-database-schema)
-8. [Services & Background Jobs](#-services--background-jobs)
-9. [Security](#-security)
-10. [Licenses & Credits](#-licenses--credits)
-11. [Contributing](#-contributing)
-12. [Future Roadmap](#-future-roadmap)
-13. [Contact](#-contact)
+1. [Project Overview](#project-overview)
+2. [System Architecture](#system-architecture)
+3. [Getting Started](#getting-started)
+4. [Running the Project](#running-the-project)
+5. [App Guide](#app-guide)
+6. [API Reference](#api-reference)
+7. [Database Schema](#database-schema)
+8. [Services & Background Jobs](#services--background-jobs)
+9. [Security](#security)
+10. [Licenses & Credits](#licenses--credits)
+11. [Contributing](#contributing)
+12. [Future Roadmap](#future-roadmap)
+13. [Contact](#contact)
 
 ---
 
@@ -180,7 +180,7 @@ The system uses PostgreSQL with **PostGIS** for geospatial operations.
 | `vehicles` | User-registered vehicles with permit details |
 | `parking_sessions` | Active and past parking sessions |
 | `daily_budgets` | Daily allowance and tracking table |
-| ... | ... |
+| ... | ParkSpotTLV.Infrastructure/entities for more |
 
 > **[PLACEHOLDER: Insert ER Diagram or Schema Image]**
 
