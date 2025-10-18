@@ -1,5 +1,4 @@
-
-![MasterHead](./assets/logo.jpg)
+<p align="center">![MasterHead](./assets/logo.jpg) </p>
 <h1 align="center">ParkSpotTLV</h1>
 
 <!-- Status & releases -->
