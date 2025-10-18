@@ -6,13 +6,13 @@
 <p align="center">
   <a href="https://github.com/gwchar2/ParkSpotTLV/actions/workflows/ci.yml">
     <img src="https://img.shields.io/github/actions/workflow/status/gwchar2/ParkSpotTLV/ci.yml?branch=main&label=Build" alt="Build" />
-  </a>
+  </a>&nbsp;
   <a href="https://github.com/gwchar2/ParkSpotTLV/releases">
     <img src="https://img.shields.io/github/v/release/gwchar2/ParkSpotTLV?include_prereleases&sort=semver" alt="Latest release" />
-  </a>
+  </a>&nbsp;
   <a href="https://github.com/gwchar2/ParkSpotTLV/releases/latest">
     <img src="https://img.shields.io/github/release-date-pre/gwchar2/ParkSpotTLV" alt="Release date" />
-  </a>
+  </a>&nbsp;
   <a href="./CHANGELOG.md">
     <img src="https://img.shields.io/badge/changelog-8A2BE2" alt="Changelog" />
   </a>
