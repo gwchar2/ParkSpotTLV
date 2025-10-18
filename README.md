@@ -50,7 +50,7 @@ The ParkSpot TLV project is divided into three major components:
 3. **Mobile App** – .NET MAUI Android client with Google Maps integration
 
 <div align="center">
-  <img src="./assets/databaserelations.png" alt="databaserelations" />
+  <img src="./assets/system-architecture.jpg" alt="system-architecture" />
 </div>
 
 ---
@@ -94,7 +94,8 @@ cd ParkSpotTLV
 3. Choose docker-compose and ParkSpotTLV.App projects as the only start options, then click `apply`.
 <img src="./assets/configure-startup-projects-2.jpg" alt="dockercompose" />
 
-4. Open Android Device Manager, and make sure your Android Emulator is fully loaded **before** continueing to the next step.
+4. Open Android Device Manager, and make sure your Android Emulator is fully loaded & selected as default startup **before** continueing to the next step.
+<img src="./assets/android-phone.jpg" alt="androidphone" />
 
 5. Choose your new profile and run.
 <img src="./assets/configure-startup-projects-3.jpg" alt="dockercompose" />
@@ -104,7 +105,7 @@ From the main project folder:
 1. Build the Database & API with: `docker compose up --build`
 2. Build the App with: `dotnet build src/mobile/ParkSpotTLV.App/ParkSpotTLV.App.csproj -f net9.0-android -c Debug`
 
-Access the backend at: `http://localhost:8080`
+Access the backend at: `http://localhost:8080/scalar`
 
 ---
 
@@ -204,7 +205,7 @@ The system uses PostgreSQL with **PostGIS** for geospatial operations.
 | `daily_budgets` | Daily allowance and tracking table |
 | ... | ParkSpotTLV.Infrastructure/entities for more |
 
-> **[PLACEHOLDER: Insert ER Diagram or Schema Image]**
+<img src="./assets/databaserelations.png" alt="databaserelations" />
 
 ---
 
