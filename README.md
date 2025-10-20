@@ -75,9 +75,10 @@ cd ParkSpotTLV
 ---
 
 ## Running the Project
-Before approaching the different options, make sure to run from the main folder:
+Before approaching the different options, make sure the folder `/src/backend/ParkSpotTLV.Infrastructure/Migrations` is NOT empty.
+If, for some reason, it is, run the following command:
 
-`dotnet build src/backend/ParkSpotTLV.Api/ParkSpotTLV.Api.csproj -c Debug`
+`dotnet ef migrations add InitialCreate -p ./src/backend/ParkSpotTLV.Infrastructure -s ./src/backend/ParkSpotTLV.Api`
 
 ### Option 1: Installing the Android APK
 1. Download the latest APK from the [**Releases**](https://github.com/gwchar2/ParkSpotTLV/releases/latest) section.
