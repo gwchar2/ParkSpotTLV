@@ -44,8 +44,8 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
 
             // If migrations haven’t been applied yet, skip (so you see a clear warning)
             if ((await db.Database.GetPendingMigrationsAsync(ct)).Any()) {
-                _log.LogWarning("Pending migrations detected. Apply migrations before seeding.");
-                return;
+                _log.LogWarning("Pending migrations detected. Applying migrations before seeding.");
+                await db.Database.MigrateAsync(ct);
             }
 
             await SeedZonesAsync(db, ct);
