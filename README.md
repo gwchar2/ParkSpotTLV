@@ -76,6 +76,7 @@ cd ParkSpotTLV
 
 ## Running the Project
 Before approaching the different options, make sure to run from the main folder:
+
 `dotnet build src/backend/ParkSpotTLV.Api/ParkSpotTLV.Api.csproj -c Debug`
 
 ### Option 1: Installing the Android APK
