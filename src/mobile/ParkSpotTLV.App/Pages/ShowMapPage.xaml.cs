@@ -3,6 +3,7 @@ using Microsoft.Maui.Maps;
 using ParkSpotTLV.Contracts.Map;
 using ParkSpotTLV.Contracts.Parking;
 using ParkSpotTLV.App.Data.Models;
+using ParkSpotTLV.Contracts.Time;
 
 namespace ParkSpotTLV.App.Pages;
 
@@ -67,6 +68,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
     // Sessions
     // Current active parking session ID
     private Guid _parkingSessionId;
+    private string _selectedStreetName = "";
     // Current user session with preferences and auth info
     private Session? _session;
 
@@ -79,6 +81,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
     private readonly ParkingPopUps _parkingPopUps;
     private readonly ILocalDataService _localDataService;
     private readonly IMapInteractionService _mapInteractionService;
+    private readonly IClock _clock;
 
     // Segments
     // Maps parking segments to their popup detail strings
@@ -105,7 +108,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
     /*
     * Initializes the ShowMapPage with all required services.
     */
-    public ShowMapPage(ICarService carService, IMapService mapService, MapSegmentRenderer mapSegmentRenderer, ILocalDataService localDataService, IMapInteractionService mapInteractionService, ParkingPopUps parkingPopUps, IParkingService parkingService)
+    public ShowMapPage(IClock clock,ICarService carService, IMapService mapService, MapSegmentRenderer mapSegmentRenderer, ILocalDataService localDataService, IMapInteractionService mapInteractionService, ParkingPopUps parkingPopUps, IParkingService parkingService)
     {
         InitializeComponent();
         Shell.SetBackButtonBehavior(this, new BackButtonBehavior { IsVisible = false });
@@ -116,6 +119,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         _mapInteractionService = mapInteractionService;
         _parkingService = parkingService;
         _parkingPopUps = parkingPopUps;
+        _clock = clock;
     }
 
     /*
@@ -451,7 +455,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
         UpdateParkHereButtonState(isParking);
 
         // present day menu according to today
-        DateTimeOffset now = DateTimeOffset.Now;
+        DateTimeOffset now = _clock.LocalNow;
         DatePicker.Items.Clear();
         // Add today through next 7 days
         for (int i = 0; i < 8; i++) {
@@ -475,7 +479,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
             string label = $"{i:D2}:00"; // D2 formats as 2-digit (00, 01, 02... 23)
             TimePicker.Items.Add(label);
         }
-        TimePicker.SelectedIndex = DateTimeOffset.Now.Hour; // Default to current hour
+        TimePicker.SelectedIndex = _clock.LocalNow.Hour; // Default to current hour
         _pickedTime = TimePicker.SelectedItem?.ToString();
     }
 
@@ -548,23 +552,20 @@ public partial class ShowMapPage : ContentPage, IDisposable
     * Handles park here button click. Starts or ends parking session based on current state.
     * Manages segment selection, residential permits, and parking confirmation.
     */
-    private async void OnParkHereClicked(object sender, EventArgs e)
-    {
+    private async void OnParkHereClicked(object sender, EventArgs e) {
         if (string.IsNullOrEmpty(_pickedCarId) || _session is null)
             return;
 
         // get current car session status    
         bool isParking = false;
         var response = await _parkingService.GetParkingStatusAsync(Guid.Parse(_pickedCarId));
-        if (response != null)
-        {
+        if (response != null) {
             isParking = response.Status;
-            if (isParking)
-            {
+            if (isParking) {
                 _parkingSessionId = response.SessionId;
             }
         }
-    
+
         bool parkingAtResZone = false;
         StartParkingResponse? startParkingResponse = null;
         SegmentResponseDTO segmentToUse = _defSegment;
@@ -573,70 +574,54 @@ public partial class ShowMapPage : ContentPage, IDisposable
         var bounds = _mapInteractionService.GetVisibleBounds();
         await FetchAndRenderSegments(bounds);
 
-        if (!isParking)
-        {
+        if (!isParking) {
             // let user choose street to park at in order to calculate free parking timer
-            if (_isResidentalPermit){
+            if (_isResidentalPermit) {
                 var parkedStreet = await _parkingPopUps.ShowStreetsListPopUpAsync(_segmentsInfo, Navigation);
-                if (parkedStreet.HasValue)
-                {
+                if (parkedStreet.HasValue) {
                     var (parkedStreetName, segmentResponse) = parkedStreet.Value;
                     segmentToUse = segmentResponse;
                     parkingAtResZone = await parkingAtResidentalZone(segmentResponse);
-                }
-                else // clocked cancel
-                {
+                } else // clocked cancel
+                  {
                     return;
                 }
-            }
-            else {
+            } else {
                 // For non-residential permits, use the first segment from the list
                 if (_segmentsInfo != null && _segmentsInfo.Count > 0) {
                     segmentToUse = _segmentsInfo.First().Key;
                 }
             }
 
-            try
-            {
-                startParkingResponse = await _parkingService.StartParkingAsync(
-                    segmentToUse,
-                    Guid.Parse(_pickedCarId),
-                    120); 
-                if (startParkingResponse is not null)
-                {
+            try {
+                startParkingResponse = await _parkingService.StartParkingAsync(segmentToUse,Guid.Parse(_pickedCarId), _session.MinParkingTime < 60 ? 60 : _session.MinParkingTime);
+                if (startParkingResponse is not null) {
                     _parkingSessionId = startParkingResponse.SessionId;
-
                 }
             }
-            catch (HttpRequestException ex)
-            {
+            catch (HttpRequestException ex) {
                 System.Diagnostics.Debug.WriteLine($"Failed to start parking: {ex.Message}");
                 await DisplayAlert("Error", "Unable to start parking. Please check your connection.", "OK");
                 return;
             }
 
             // if has residential permit and parking out of zone - show free minutes left today
-            if (_isResidentalPermit && !parkingAtResZone && (_selectedDate.DayOfWeek != DayOfWeek.Saturday)) {
-                int? budget = await _parkingService.GetParkingBudgetRemainingAsync(Guid.Parse(_pickedCarId));
-                await _parkingPopUps.ShowParkingConfirmedPopupAsync(budget ?? 0, Navigation, DisplayAlert);
-            }
+            int? budget = await _parkingService.GetParkingBudgetRemainingAsync(Guid.Parse(_pickedCarId));
+            await _parkingPopUps.ShowParkingConfirmedPopupAsync(budget ?? 0, Navigation, DisplayAlert, _isResidentalPermit);
             UpdateParkHereButtonState(true); // update UI button - this will also show the Pango button
         }
         else // currently parking
         {
             // End parking
-            try
-            {
-                await _parkingService.StopParkingAsync(_parkingSessionId, Guid.Parse(_pickedCarId));
+            try {
+                var resp = await _parkingService.StopParkingAsync(_parkingSessionId, Guid.Parse(_pickedCarId));
+                ShowEndSessionOverlay(_selectedStreetName, resp.StartedLocal, resp.StoppedLocal);
             }
-            catch (HttpRequestException ex)
-            {
+            catch (HttpRequestException ex) {
                 System.Diagnostics.Debug.WriteLine($"Failed to stop parking: {ex.Message}");
                 await DisplayAlert("Error", "Unable to stop parking. Please check your connection.", "OK");
                 return;
             }
-            
-
             UpdateParkHereButtonState(false); // update UI button
         }
     }
@@ -661,7 +646,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
     /*
     * Updates park here button text and color based on parking state.
     */
-    private void UpdateParkHereButtonState(bool isParking)
+    private async void UpdateParkHereButtonState(bool isParking)
     {
         if (isParking)
         {
@@ -669,6 +654,11 @@ public partial class ShowMapPage : ContentPage, IDisposable
             ParkHereBtn.BorderColor = Color.FromArgb("#FFF15151");
             ParkHereBtn.TextColor = Color.FromArgb("#FFF15151");
             PayWithPangoBtn.IsVisible = true; // Show Pango button when parking
+            var response = await _parkingService.GetParkingStatusAsync(Guid.Parse(_pickedCarId!));
+            if (response is not null) {
+                _selectedStreetName = response.Name;
+                ShowSessionSummary(response.Name, response.StartTime, response.EndTime);
+            }
         }
         else
         {
@@ -676,6 +666,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
             ParkHereBtn.BorderColor = Color.FromArgb("#FF2B3271");
             ParkHereBtn.TextColor = Color.FromArgb("#FF2B3271");
             PayWithPangoBtn.IsVisible = false; // Hide Pango button when not parking
+            HideSessionSummary();
         }
 
     }
@@ -723,7 +714,7 @@ public partial class ShowMapPage : ContentPage, IDisposable
     */
     private DateTimeOffset GetSelectedDateTime()
     {
-        DateTimeOffset _selectedDate = DateTimeOffset.Now.Date.AddDays(_pickedDayOffset);
+        DateTimeOffset _selectedDate = _clock.LocalNow.Date.AddDays(_pickedDayOffset);
 
         // Parse _pickedTime (format: "HH:00")
         if (!string.IsNullOrEmpty(_pickedTime) && _pickedTime.Contains(":"))
@@ -768,6 +759,49 @@ public partial class ShowMapPage : ContentPage, IDisposable
 
         _disposed = true;
     }
+
+    /*
+     * Shows a live session summary
+     */
+    public void ShowSessionSummary(string streetName,DateTimeOffset startedUtc, DateTimeOffset plannedEndUtc) {
+        var startLocal = _clock.ToLocal(startedUtc);
+        var endLocal = _clock.ToLocal(plannedEndUtc);
+
+        Sum_Street.Text = string.IsNullOrWhiteSpace(streetName) ? "-" : streetName;
+        Sum_Start.Text = $"{startLocal:ddd, HH:mm}";
+        Sum_End.Text = $"{endLocal:ddd, HH:mm}";
+
+        SessionSummaryCard.IsVisible = true;
+    }
+
+    /*
+     * Toggles the live session summary
+     */
+    public void HideSessionSummary() {
+        SessionSummaryCard.IsVisible = false;
+    }
+
+    /*
+     * Shows a summary of the current session once it is over
+     */
+    public void ShowEndSessionOverlay(string street, DateTimeOffset startedUtc, DateTimeOffset endedUtc) {
+        var startLocal = _clock.ToLocal(startedUtc);
+        var endLocal = _clock.ToLocal(endedUtc);
+        var minutes = (int)Math.Max(0, (endLocal - startLocal).TotalMinutes);
+
+        Summary_Street.Text = string.IsNullOrWhiteSpace(street) ? "-" : street;
+        Summary_Start.Text = $"{startLocal:ddd, dd MMM HH:mm}";
+        Summary_End.Text = $"{endLocal:ddd, dd MMM HH:mm}";
+        Summary_Duration.Text = $"{minutes} min";
+
+        EndSessionOverlay.IsVisible = true;
+    }
+
+    /*
+     * Both of these toggle the session summary (close it) when clicked out of bounds or on OK button
+     */
+    private void OnOverlayBackdropTapped(object? s, TappedEventArgs e) => EndSessionOverlay.IsVisible = false;
+    private void OnOverlayOkClicked(object? s, EventArgs e) => EndSessionOverlay.IsVisible = false;
 
 
 }

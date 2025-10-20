@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using ParkSpotTLV.Contracts.Time;
 using ParkSpotTLV.Infrastructure.Entities;
 using ParkSpotTLV.Infrastructure.Security;
 using ParkSpotTLV.Infrastructure.Auth.Models;
-using ParkSpotTLV.Contracts.Time;
 
 namespace ParkSpotTLV.Infrastructure.Auth.Services {
     

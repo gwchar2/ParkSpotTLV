@@ -31,6 +31,6 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         /*
          * Concurrency
          */
-        public DateTimeOffset LastUpdatedUtc { get; set; }
+        [Required] public DateTimeOffset LastUpdatedUtc { get; set; }
     }
 }

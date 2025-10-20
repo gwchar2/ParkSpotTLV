@@ -1,16 +1,23 @@
 ﻿using ParkSpotTLV.Contracts.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace ParkSpotTLV.Infrastructure.Entities {
     public class ParkingSession {
+        /*
+         * Ownership
+         */
         public Guid Id { get; set; } = Guid.NewGuid();
         public Guid VehicleId { get; set; }
         public Guid SegmentId { get; set; }
 
 
-        // basically everything from segment DTO goes here 
-        public string Group { get; set; } = default!;                              //"FREE" -> Free the entire duration /  "PAID" -> Paid some time during the duration / "LIMITED" -> Turns to restricted / "RESTRICTED" -> Always restricted                                      
+
+        /*
+         * Segment DTO
+         */
+        public string Group { get; set; } = default!;                               //"FREE" -> Free the entire duration /  "PAID" -> Paid some time during the duration / "LIMITED" -> Turns to restricted / "RESTRICTED" -> Always restricted                                      
         public string? Reason { get; set; }
-        public ParkingType ParkingType { get; set; }                         // "Free" / "Paid" / "Privileged"
+        public ParkingType ParkingType { get; set; }                                // "Free" / "Paid" / "Privileged"
         public int? ZoneCode { get; set; }
         public Tariff Tariff { get; set; }
 
@@ -27,8 +34,8 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         public int ParkingBudgetUsed { get; set; }
         public int PaidMinutes { get; set; }
         public ParkingSessionStatus Status { get; set; }
-        public DateTimeOffset CreatedAtUtc { get; set; }
-        public DateTimeOffset UpdatedAtUtc { get; set; }
+        [Required] public DateTimeOffset CreatedAtUtc { get; set; }
+        [Required] public DateTimeOffset UpdatedAtUtc { get; set; }
 
     }
 }

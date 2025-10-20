@@ -17,7 +17,6 @@ namespace ParkSpotTLV.Infrastructure.Config {
             e.HasAlternateKey(z => z.Code);
             e.HasIndex(z => z.Code).IsUnique();
 
-            // Geometry: MultiPolygon with SRID 4326
             e.Property(z => z.Geom)
              .IsRequired()
              .HasColumnType("geometry(MultiPolygon,4326)");

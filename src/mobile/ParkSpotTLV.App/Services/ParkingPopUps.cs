@@ -1,5 +1,5 @@
 using ParkSpotTLV.Contracts.Map;
-using ParkSpotTLV.Contracts.Parking;
+using ParkSpotTLV.Contracts.Time;
 using ParkSpotTLV.App.Data.Models;
 
 namespace ParkSpotTLV.App.Services;
@@ -8,13 +8,15 @@ namespace ParkSpotTLV.App.Services;
 public class ParkingPopUps
 {
     private readonly ICarService _carService;
+    private readonly IClock _clock;
 
     /*
     * Initializes the popup service with car service dependency.
     */
-    public ParkingPopUps(ICarService carService)
+    public ParkingPopUps(ICarService carService, IClock clock)
     {
         _carService = carService ?? throw new ArgumentNullException(nameof(carService));
+        _clock = clock;
     }
 
     /*
@@ -74,13 +76,13 @@ public class ParkingPopUps
     * Shows parking confirmation alert with remaining free parking budget.
     * Displayed after starting parking session outside residential zone.
     */
-    public async Task ShowParkingConfirmedPopupAsync(int budgetRemaining,INavigation navigation, Func<string, string, string, Task> displayAlert)
+    public async Task ShowParkingConfirmedPopupAsync(int budgetRemaining,INavigation navigation, Func<string, string, string, Task> displayAlert, bool zonePermit)
     {
         // Build message
         string message = "Parking started!";
         
-        message += "\nParking outside your zone.";
-        message += $"\nYou have {budgetRemaining} minutes of free parking.";
+        message += zonePermit? "\nParking outside your zone." : "";
+        message += ((int)_clock.LocalNow.DayOfWeek + 6) % 7 + 1 == 6 ? "" : $"\nYou have {budgetRemaining} minutes of free parking.";
 
         // Show simple alert
         await displayAlert("Parking Confirmed", message, "OK");

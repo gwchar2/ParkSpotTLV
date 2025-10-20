@@ -10,6 +10,9 @@ using ParkSpotTLV.Infrastructure.Entities;
 
 namespace ParkSpotTLV.Api.Features.Parking.Services {
 
+    /*
+     * This class is in charge of managing anything related to daily budget
+     */
     public sealed class DailyBudgetService(AppDbContext db, IClock clock, ITariffCalendarService calendar) : IDailyBudgetService {
         
         private readonly ITariffCalendarService _calendar = calendar;

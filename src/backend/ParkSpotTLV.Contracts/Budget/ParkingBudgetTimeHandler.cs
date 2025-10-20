@@ -8,10 +8,10 @@ namespace ParkSpotTLV.Contracts.Budget {
         /*
          * Given a local time, we return the anchor date of its 8-8 window
          */
-        public static DateOnly AnchorDateFor(DateTimeOffset localTime) {
+        public static DateOnly AnchorDateFor(DateTimeOffset currentTime) {
 
-            var today = new TimeOnly(localTime.Hour, localTime.Minute, localTime.Second);
-            var date = DateOnly.FromDateTime(localTime.Date);
+            var today = new TimeOnly(currentTime.Hour, currentTime.Minute, currentTime.Second);
+            var date = DateOnly.FromDateTime(currentTime.Date);
 
             return today >= ResetTime ? date : date.AddDays(-1);
         }

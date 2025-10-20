@@ -21,7 +21,7 @@ namespace ParkSpotTLV.Infrastructure.Auth.Services {
             _opts = opts.Value;
             _logger = logger;
 
-            // Validate secret
+            // Validates secret, at the moment we only have Hmac, when we implement / expect more users we will probably implement RSA
             var secret = _opts.Signing?.HmacSecret;
             if (string.IsNullOrWhiteSpace(secret) || secret.Length < 32)
                 throw new InvalidOperationException("Auth:Signing:HmacSecret is missing or too short (>= 32 chars required).");

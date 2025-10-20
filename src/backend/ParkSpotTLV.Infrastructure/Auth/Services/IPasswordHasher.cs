@@ -13,7 +13,8 @@ namespace ParkSpotTLV.Infrastructure.Auth.Services {
         string Hash(string password);
 
         /* Verifies a password against a hashed string
-           Returns (isValid, needsRehash) so callers can transparently upgrade parameters */
+         * Returns (isValid, needsRehash)
+         */
         (bool isValid, bool needsRehash) Verify (string password, string storedPhc);
 
     }

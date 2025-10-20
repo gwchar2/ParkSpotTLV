@@ -1,8 +1,11 @@
 ﻿
-// Client gets a 256-bit random refresh token (base64url).Server stores TokenHash = HMACSHA256(rawToken, AUTH_HMAC_SECRET) (preferred) or SHA-256 with
+
+using System.ComponentModel.DataAnnotations;
 
 namespace ParkSpotTLV.Infrastructure.Entities {
     /* RefreshToken
+     * Client gets a 256-bit random refresh token (base64url).
+     * Server stores TokenHash = HMACSHA256(rawToken, AUTH_HMAC_SECRET)
      * Database entity for refresh tokens:
      *  - Store *only* HMAC-SHA256 hex (TokenHash), never the raw token
      *  - ReplacedByTokenHash links rotation chain for reuse detection
@@ -19,8 +22,8 @@ namespace ParkSpotTLV.Infrastructure.Entities {
         /*
          * Concurrency 
          */
-        public required string TokenHash { get; set; }  
-        public DateTimeOffset CreatedAtUtc { get; set; }
+        public required string TokenHash { get; set; }
+        [Required] public DateTimeOffset CreatedAtUtc { get; set; }
         public DateTimeOffset ExpiresAtUtc { get; set; }
         public DateTimeOffset? RevokedAtUtc { get; set; }       // Set when user logs out or when token is changed.
         public string? ReplacedByTokenHash { get; set; }        // Replace history - improved security.

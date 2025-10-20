@@ -70,8 +70,7 @@ namespace ParkSpotTLV.Infrastructure.Security {
 
             await using var tx = await _db.Database.BeginTransactionAsync(ct);
 
-            var old = await _db.RefreshTokens.FirstOrDefaultAsync(x => x.TokenHash == oldHash, ct);
-            if (old is null) throw new InvalidOperationException("Refresh token not found");
+            var old = await _db.RefreshTokens.FirstOrDefaultAsync(x => x.TokenHash == oldHash, ct) ?? throw new InvalidOperationException("Refresh token not found");
             if (old.RevokedAtUtc is not null) throw new InvalidOperationException("Refresh token already revoked");
             if (old.ExpiresAtUtc <= now) throw new InvalidOperationException("Refresh token expired");
 

@@ -17,7 +17,7 @@ namespace ParkSpotTLV.Infrastructure.Config {
              .IsRequired()
              .HasColumnType("geometry(LineString,4326)");
 
-            e.HasIndex(x => x.Geom).HasMethod("GIST");
+            e.HasIndex(x => x.Geom).HasMethod("GIST");      // Adding general search tree for faster geom intersection calculation
 
             e.HasOne(x => x.Zone)
              .WithMany(z => z.Segments)
