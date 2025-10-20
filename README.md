@@ -77,7 +77,7 @@ cd ParkSpotTLV
 ## Running the Project
 Before approaching the different options, make sure the folder `/src/backend/ParkSpotTLV.Infrastructure/Migrations` is NOT empty.
 
-If, for some reason, it is, run the following command:
+If, for some reason, it is - run the following command:
 `dotnet ef migrations add InitialCreate -p ./src/backend/ParkSpotTLV.Infrastructure -s ./src/backend/ParkSpotTLV.Api`
 
 ### Option 1: Installing the Android APK
@@ -86,7 +86,7 @@ If, for some reason, it is, run the following command:
 	1. Enable *Install from Unknown Sources*.
 	2. Launch **ParkSpot TLV** and sign in.
 3. Option 2: Install via terminal 
-	1. `adb install -r <path to apk>`
+	1. Make sure your android emulator is running; `adb install -r <path to apk>`
 	2. Run the docker project via terminal or visual studio.
 <img src="./assets/docker-compose.jpg" alt="dockercompose" />
 
@@ -110,7 +110,9 @@ From the main project folder:
 1. Build the Database & API with: `docker compose up --build`
 2. Build the App with: `dotnet build src/mobile/ParkSpotTLV.App/ParkSpotTLV.App.csproj -f net9.0-android -c Debug`
 
-Access the backend at: `http://localhost:8080/scalar`
+
+After loading the api via one of the options above, you can access the OpenAPI Portal at
+`http://localhost:8080/scalar`
 
 ---
 
