@@ -78,6 +78,7 @@ cd ParkSpotTLV
 Before approaching the different options, make sure the folder `/src/backend/ParkSpotTLV.Infrastructure/Migrations` is NOT empty.
 
 If, for some reason, it is - run the following command:
+
 `dotnet ef migrations add InitialCreate -p ./src/backend/ParkSpotTLV.Infrastructure -s ./src/backend/ParkSpotTLV.Api`
 
 ### Option 1: Installing the Android APK
