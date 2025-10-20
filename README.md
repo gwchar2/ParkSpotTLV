@@ -63,6 +63,7 @@ The ParkSpot TLV project is divided into three major components:
 - Visual Studio 2022 or VS Code
 - Android SDK (for mobile app build)
 - A physical Android phone or emulator capable of installing and running APKs
+- To view errors / logs in Seq interface, you will need to have Seq installed
 
 ### Setup
 
