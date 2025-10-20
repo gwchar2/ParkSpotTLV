@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.3](https://github.com/gwchar2/ParkSpotTLV/compare/v1.0.2...v1.0.3) (2025-10-20)
+
+
+### Bug Fixes
+
+* **App:** fixed parking session for non-residents ([fbfbd0c](https://github.com/gwchar2/ParkSpotTLV/commit/fbfbd0c510336da968bc827d817a56e5e32015dc))
+* **App:** fixing cancel button reaction from street pop-up ([a0aa202](https://github.com/gwchar2/ParkSpotTLV/commit/a0aa202d61637bace51e7fd3422b3f3ecde59f3c))
+* **App:** no budget popuop on saturday ([252929b](https://github.com/gwchar2/ParkSpotTLV/commit/252929b80a6e804a55e0b2924a3039e3ddf2ae52))
+* **App:** onAppearing every time ([2654031](https://github.com/gwchar2/ParkSpotTLV/commit/26540318f2e7e9207d4bace6904af21a0b6bf52b))
+* Final upgrades ([0ff679d](https://github.com/gwchar2/ParkSpotTLV/commit/0ff679d9c341a059d920bae0828f633eae9372bc))
+* Final Upgrades ([e46a5df](https://github.com/gwchar2/ParkSpotTLV/commit/e46a5df88f98d705db9599d70351b3ded03db9f1))
+
 ## [1.0.2](https://github.com/gwchar2/ParkSpotTLV/compare/v1.0.1...v1.0.2) (2025-10-15)
 
 
