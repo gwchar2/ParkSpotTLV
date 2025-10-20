@@ -18,8 +18,10 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{03795D4A-6B35-4C67-9A7E-1C2B82090EC3}"
 	ProjectSection(SolutionItems) = preProject
-		docs\api-reference.md = docs\api-reference.md
 		docs\git-workflow.md = docs\git-workflow.md
+		docs\מדריך למשתמש - ParkSpotTLV.pdf = docs\מדריך למשתמש - ParkSpotTLV.pdf
+		docs\מסמך אפיון - ParkSpotTLV.pdf = docs\מסמך אפיון - ParkSpotTLV.pdf
+		docs\מסמך עיצוב - ParkSpotTLV.pdf = docs\מסמך עיצוב - ParkSpotTLV.pdf
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
