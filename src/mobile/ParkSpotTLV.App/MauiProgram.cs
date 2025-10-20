@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using ParkSpotTLV.App.Controls; // if you DI MenuOverlay or other controls
 using ParkSpotTLV.App.Services;
-
+using ParkSpotTLV.Contracts.Time;
 using System.Text.Json;
 
 namespace ParkSpotTLV.App {
@@ -88,6 +88,7 @@ namespace ParkSpotTLV.App {
             builder.Services.AddSingleton<AppShell>();
             builder.Services.AddTransient<MenuOverlay>();
 
+            builder.Services.AddSingleton<IClock, SystemClock>();
 
 #if DEBUG
             builder.Logging.AddDebug();

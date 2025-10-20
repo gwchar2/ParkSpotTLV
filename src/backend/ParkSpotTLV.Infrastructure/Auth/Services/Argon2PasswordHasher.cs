@@ -9,17 +9,17 @@ namespace ParkSpotTLV.Infrastructure.Auth.Services {
 
     /* 
      * Argon2PasswordHasher
-     * Argon2id hashing with per-user salt. Calibrated at boot for ~TargetHashMs.
+     * Argon2id hashing with per-user salt.
      * Verify returns in constant-time to avoid timing leaks.
      */
     public sealed class Argon2PasswordHasher : IPasswordHasher {
-        private sealed record ParsedPhc(byte[] Salt, byte[] Hash, int Iterations, int MemoryKiB, int Parallelism);
+        private sealed record ParsedPhc(byte[] Salt, byte[] Hash, int Iterations, int MemoryKiB, int Parallelism);          // Additional salt
         private readonly ILogger<Argon2PasswordHasher> _log;
         private readonly Argon2Options _opts;
 
-        private readonly int _t;             // Iterations
-        private readonly int _mKiB; // memory in KiB
-        private readonly int _p;    // Parallelism
+        private readonly int _t;                        // Iterations
+        private readonly int _mKiB;                     // memory in KiB
+        private readonly int _p;                        // Parallelism
 
         /*
          * Hashed password for database
@@ -37,7 +37,7 @@ namespace ParkSpotTLV.Infrastructure.Auth.Services {
         }
 
         /*
-         * Returns a hashed string
+         * Returns a hashed string with additional salt
          */
         public string Hash(string password) {
             if (string.IsNullOrWhiteSpace(password))

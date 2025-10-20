@@ -1,6 +1,6 @@
-﻿
+﻿using ParkSpotTLV.Infrastructure.Auth.Models;
+
 namespace ParkSpotTLV.Infrastructure.Auth.Services {
-    public readonly record struct JwtIssueResult(string AccessToken, DateTimeOffset ExpiresAtUtc);
 
     /* 
      * Issues *access tokens* (short-lived JWT) used for API authorization. HMAC-SHA256 for now.

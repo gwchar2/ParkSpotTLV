@@ -1,4 +1,5 @@
 ﻿using ParkSpotTLV.Contracts.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ParkSpotTLV.Infrastructure.Entities {
@@ -28,6 +29,6 @@ namespace ParkSpotTLV.Infrastructure.Entities {
          */
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)] 
         public uint Xmin { get; private set; }
-        public DateTimeOffset LastUpdatedUtc { get; set; } = DateTimeOffset.Now;                 // Last update on user
+        [Required] public DateTimeOffset LastUpdatedUtc { get; set; }                // Last update on user
     }
 }

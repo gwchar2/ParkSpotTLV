@@ -9,9 +9,9 @@ namespace ParkSpotTLV.Infrastructure.Config {
 
             e.ToTable("daily_budgets");
 
-            e.HasKey(k => new {
-                k.VehicleId,
-                k.AnchorDate
+            e.HasKey(p => new {
+                p.VehicleId,
+                p.AnchorDate
             });
 
             e.Property(p => p.VehicleId).IsRequired();

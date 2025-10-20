@@ -30,14 +30,14 @@ namespace ParkSpotTLV.Api.Middleware.Http {
             var host = req.Host.Value;
             var protocol = req.Protocol;
             var query = req.QueryString.HasValue ? req.QueryString.Value : "";
-            var ua = req.Headers.TryGetValue("User-Agent", out StringValues s) ? (string?)s.ToString() : null;
+            var ua = req.Headers.TryGetValue("User-Agent", out StringValues str) ? (string?)str.ToString() : null;
             var clientIp = ctx.Connection.RemoteIpAddress?.ToString();
 
             long? requestSize = req.ContentLength;
             long? responseSize = null;
 
             var requestHeaders = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase) {
-                ["Content-Type"] = req.Headers.TryGetValue("Content-Type", out var ct) ? ct.ToString() : null,
+                ["Content-Type"] = req.Headers.TryGetValue("Content-Type", out var ctype) ? ctype.ToString() : null,
                 ["Accept"] = req.Headers.TryGetValue("Accept", out var acc) ? acc.ToString() : null,
                 ["User-Agent"] = ua
             };

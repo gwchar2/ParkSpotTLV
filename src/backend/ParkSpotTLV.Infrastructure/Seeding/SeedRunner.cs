@@ -26,12 +26,7 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
     /*
      * Seeds the database
      */
-    public sealed class SeedRunner(
-        IServiceProvider sp,
-        IHostEnvironment env,
-        IOptions<SeedOptions> opts,
-        ILogger<SeedRunner> log,
-        IClock clock) : IHostedService {
+    public sealed class SeedRunner(IServiceProvider sp,IHostEnvironment env,IOptions<SeedOptions> opts,ILogger<SeedRunner> log,IClock clock) : IHostedService {
         private readonly IServiceProvider _sp = sp;
         private readonly IHostEnvironment _env = env;
         private readonly ILogger<SeedRunner> _log = log;
@@ -151,10 +146,10 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
 
         // ---------------------- Taarif Windows Async ----------------------
         /* 
-        * Seeds A/B tariff paid windows:
+        * Seeds tariff paid windows:
         *  - Group A: Sun–Thu 08:00–19:00; Fri 08:00–17:00; Sat none
         *  - Group B: Sun–Thu 08:00–21:00; Fri 08:00–17:00; Sat none
-        *  - Outside paid windows -> FREE by definition.
+        *  - Outside paid windows -> FREE
         */
         private async Task SeedTariffWindowsAsync(AppDbContext db, CancellationToken ct) {
             if (await db.TariffWindows.AnyAsync(ct))
@@ -163,11 +158,11 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
             var id = 1;
             var data = new List<TariffWindow>();
 
-            void AddRange(Tariff t, (DayOfWeek dow, string start, string end)[] items) {
+            void AddRange(Tariff tarr, (DayOfWeek dow, string start, string end)[] items) {
                 foreach (var (dow, start, end) in items) {
                     data.Add(new TariffWindow {
                         Id = id++,
-                        Tariff = t,
+                        Tariff = tarr,
                         DayOfWeek = dow,
                         StartLocal = TimeOnly.Parse(start),
                         EndLocal = TimeOnly.Parse(end)
@@ -225,24 +220,24 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                 };
 
                 // Vehicles + vehicle-scoped permits (no user-scoped permits in current model)
-                foreach (var v in u["vehicles"]?.AsArray() ?? []) {
-                    var vo = v!.AsObject();
+                foreach (var vehics in u["vehicles"]?.AsArray() ?? []) {
+                    var vos = vehics!.AsObject();
                     var vehicle = new Vehicle {
-                        Id = ParseGuid(GetString(vo, "id")) ?? Guid.NewGuid(),
+                        Id = ParseGuid(GetString(vos, "id")) ?? Guid.NewGuid(),
                         Owner = user,
-                        Name = GetString(vo, "name") ?? "Default Car Name",
-                        Type = ParseEnum<VehicleType>(GetString(vo, "type")) ?? VehicleType.Private
+                        Name = GetString(vos, "name") ?? "Default Car Name",
+                        Type = ParseEnum<VehicleType>(GetString(vos, "type")) ?? VehicleType.Private
                     };
 
-                    foreach (var p in vo["permits"]?.AsArray() ?? []) {
-                        var po = p!.AsObject();
+                    foreach (var permits in vos["permits"]?.AsArray() ?? []) {
+                        var pos = permits!.AsObject();
                         var permit = new Permit {
-                            Id = ParseGuid(GetString(po, "id")) ?? Guid.NewGuid(),
-                            Type = ParseEnum<PermitType>(GetString(po, "type")) ?? PermitType.Default,
+                            Id = ParseGuid(GetString(pos, "id")) ?? Guid.NewGuid(),
+                            Type = ParseEnum<PermitType>(GetString(pos, "type")) ?? PermitType.Default,
                             Vehicle = vehicle
                         };
 
-                        var zoneCode = GetInt(po, "zoneCode");
+                        var zoneCode = GetInt(pos, "zoneCode");
                         if (zoneCode is not null && zonesByCode.ContainsKey(zoneCode.Value)) 
                             permit.ZoneCode = zoneCode.Value;
 
@@ -348,13 +343,12 @@ namespace ParkSpotTLV.Infrastructure.Seeding {
                 } else if (paidLeft && paidRight) {
                     side = SegmentSide.Both;
                 }
-                // Pick a zone code deterministically: prefer specific side over "both"
                 int? zoneCode = zoneRight ?? zoneLeft ?? zoneBoth;
 
                 return (privileged ? ParkingType.Privileged : ParkingType.Paid, side, zoneCode);
             } 
 
-            // If nothing matched (shouldn’t happen after your prefilter), default to Free/Both without zone.
+            // If nothing matched - default to Free/Both without zone.
             return (privileged ? ParkingType.Privileged : ParkingType.Free, SegmentSide.Both, null);
         }
 

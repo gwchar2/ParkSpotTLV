@@ -72,7 +72,6 @@ dotnet ef database update --project .\ParkSpotTLV.Infrastructure --startup-proje
 Restart DB+API
 Verify
 ```
-dotnet ef migrations add AutoStop_20251010 -p ./ParkSpotTLV.Infrastructure -s ./ParkSpotTLV.Api
 
 - Updating information in the DB
 ```bash

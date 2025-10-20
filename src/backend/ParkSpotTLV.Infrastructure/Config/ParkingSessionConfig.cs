@@ -20,6 +20,15 @@ namespace ParkSpotTLV.Infrastructure.Config {
             e.Property(x => x.ParkingBudgetUsed).HasDefaultValue(0).IsRequired();
             e.Property(x => x.PaidMinutes).HasDefaultValue(0).IsRequired();
             e.Property(x => x.Status).HasConversion<int>().IsRequired();
+            e.HasIndex(x => x.StartedUtc);
+            e.HasIndex(x => new {
+                x.VehicleId,
+                x.Status
+            });
+
+            /*
+             * Additional filters for fast search
+             */
 
             e.HasIndex(x => x.VehicleId)
              .HasDatabaseName("IX_parking_sessions_vehicle_active")
@@ -30,12 +39,6 @@ namespace ParkSpotTLV.Infrastructure.Config {
              .HasDatabaseName("idx_ps_due")
              .HasFilter("\"stopped_utc\" IS NULL AND \"status\" = 1");
 
-
-            e.HasIndex(x => x.StartedUtc);
-            e.HasIndex(x => new {
-                x.VehicleId,
-                x.Status
-            });
 
             e.ToTable(t => t.HasCheckConstraint(
                 "ck_parking_sessions_parking_budget_used",

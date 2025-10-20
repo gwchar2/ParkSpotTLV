@@ -219,8 +219,6 @@
         </Grid>
         </Border>
 
-        
-
         <!-- Map with Floating Track Button and Park Here Button -->
         <Grid Grid.Row="2">
             <Border Padding="0"
@@ -275,6 +273,114 @@
                     </Grid>
                 </Border>
             </VerticalStackLayout>
+            
+            <!-- Ended Session Overlay Summary -->
+            <Grid x:Name="EndSessionOverlay"
+                  IsVisible="False"
+                  ZIndex="100"
+                  BackgroundColor="#80000000"
+                  HorizontalOptions="Fill"
+                  VerticalOptions="Fill">
+
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnOverlayBackdropTapped"/>
+                </Grid.GestureRecognizers>
+
+                <!-- Centered card -->
+                <Border HorizontalOptions="Center"
+                        VerticalOptions="Center"
+                        Padding="16"
+                        BackgroundColor="{StaticResource White}"
+                        Stroke="{StaticResource Secondary}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 14"
+                        WidthRequest="320"
+                        MaximumWidthRequest="360">
+                    
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Parking summary" FontAttributes="Bold" FontSize="16" TextColor="{StaticResource Secondary}"/>
+
+                        <Grid ColumnSpacing="8" RowSpacing="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Label Grid.Row="0" Grid.Column="0" Text="Street:" TextColor="{StaticResource Secondary}" FontSize="13"/>
+                            <Label Grid.Row="0" Grid.Column="1" x:Name="Summary_Street" FontSize="13" LineBreakMode="TailTruncation"/>
+
+                            <Label Grid.Row="1" Grid.Column="0" Text="Started:" TextColor="{StaticResource Secondary}" FontSize="13"/>
+                            <Label Grid.Row="1" Grid.Column="1" x:Name="Summary_Start" FontSize="13"/>
+
+                            <Label Grid.Row="2" Grid.Column="0" Text="Ended:" TextColor="{StaticResource Secondary}" FontSize="13"/>
+                            <Label Grid.Row="2" Grid.Column="1" x:Name="Summary_End" FontSize="13"/>
+
+                            <Label Grid.Row="3" Grid.Column="0" Text="Duration:" TextColor="{StaticResource Secondary}" FontSize="13"/>
+                            <Label Grid.Row="3" Grid.Column="1" x:Name="Summary_Duration" FontSize="13"/>
+                        </Grid>
+
+                        <Button Text="OK" Clicked="OnOverlayOkClicked" Margin="0,6,0,0"/>
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+            
+            <!-- Active Session Summary Card (hidden by default) -->
+            <Border x:Name="SessionSummaryCard"
+                    VerticalOptions="End"
+                    HorizontalOptions="Center"
+                    Margin="20,0,20,80"
+                    Padding="12"
+                    BackgroundColor="{StaticResource White}"
+                    Stroke="{StaticResource Secondary}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 12"
+                    IsVisible="False"
+                    Opacity="0.97"
+                    ZIndex="10">
+
+                <Grid ColumnSpacing="10" RowSpacing="6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <!-- title -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- street -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- start -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- end -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- budget -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- status -->
+                    </Grid.RowDefinitions>
+
+                    <!-- Title -->
+                    <Label Grid.Row="0" Grid.ColumnSpan="2"
+                           Text="Parking Session"
+                           FontAttributes="Bold"
+                           FontSize="14"
+                           TextColor="{StaticResource Secondary}"/> 
+
+                    <Label Grid.Row="1" Grid.Column="0" Text="Street:" FontSize="12" TextColor="{StaticResource Secondary}"/>
+                    <Label Grid.Row="1" Grid.Column="1" x:Name="Sum_Street" FontSize="12" TextColor="{StaticResource Black}"/>
+
+                    <Label Grid.Row="2" Grid.Column="0" Text="Start:" FontSize="12" TextColor="{StaticResource Secondary}"/>
+                    <Label Grid.Row="2" Grid.Column="1" x:Name="Sum_Start" FontSize="12" TextColor="{StaticResource Black}"/>
+
+                    <Label Grid.Row="3" Grid.Column="0" Text="End:" FontSize="12" TextColor="{StaticResource Secondary}"/>
+                    <Label Grid.Row="3" Grid.Column="1" x:Name="Sum_End" FontSize="12" TextColor="{StaticResource Black}"/>
+                </Grid>
+            </Border>
 
             <!-- Parking Buttons - Floating at Bottom -->
             <HorizontalStackLayout x:Name="ParkingButtonsContainer"

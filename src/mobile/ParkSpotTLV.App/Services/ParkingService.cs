@@ -1,6 +1,5 @@
 using System.Net.Http.Json;
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
 using ParkSpotTLV.Contracts.Map;
 using ParkSpotTLV.Contracts.Parking;
 
@@ -10,8 +9,9 @@ public class ParkingStatusResponse
 {
     public bool Status { get; set; }
     public Guid SessionId { get; set; }
-    public DateTime ParkingStarted { get; set; }
-    public DateTime ParkingUntil { get; set; }
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; }
+    public string Name { get; set; } = "";
 }
 
 // Handles parking-related API operations
@@ -93,7 +93,7 @@ public class ParkingService : IParkingService
     * Stops an active parking session.
     * Ends parking for specified session and car.
     */
-    public async Task StopParkingAsync(Guid sessionId, Guid carId)
+    public async Task<StopParkingResponse> StopParkingAsync(Guid sessionId, Guid carId)
     {
         var stopParkingPayload = new
         {
@@ -109,6 +109,9 @@ public class ParkingService : IParkingService
             var body = await response.Content.ReadAsStringAsync();
             throw new HttpRequestException($"Failed to stop parking: {(int)response.StatusCode} {body}");
         }
+
+        var dto = await response.Content.ReadFromJsonAsync<StopParkingResponse>(_options);
+        return dto is null ? throw new HttpRequestException("Failed to stop parking: empty response body.") : dto;
     }
 
     /*
