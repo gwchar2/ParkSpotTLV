@@ -273,4 +273,5 @@ For any inquiries, contact:
 
 > *This README is a living document — updated continuously as the project evolves.*
 
+<img src="./assets/parking-areas-map-tlv.jpeg" alt="parkingareas" />
 
